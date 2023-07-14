@@ -1,92 +1,264 @@
-# MEDFN-Challenge
+# NeurIPS 2023 - MedFM: Foundation Model Prompting for Medical Image Classification Challenge 2023
 
+A naive baseline and submission demo for the [Foundation Model Prompting for Medical Image Classification Challenge 2023 (MedFM)](https://medfm2023.grand-challenge.org/medfm2023/).
 
+## ✨ Notification
 
-## Getting started
+Please check out [master branch](https://github.com/openmedlab/MedFM/tree/master). Third party implementation of MedFMC baseline is supported! It is based on the [MMPreTrain](https://github.com/open-mmlab/mmpretrain), with backbone of **`ViT-cls`**, **`ViT-eva02`**, **`ViT-dinov2`**, **`Swin-cls`** and **`ViT-clip`**.
+More details could be found in its [document](https://mmpretrain.readthedocs.io/en/latest/index.html). Thanks [Ezra-Yu](https://github.com/Ezra-Yu) for this excellent work.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## 🛠️ Installation
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Install requirements by
 
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab2.informatik.uni-wuerzburg.de/ls6/medfn-challenge.git
-git branch -M main
-git push -uf origin main
+```bash
+$ conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=10.1 -c pytorch
+$ pip install mmcls==0.25.0 openmim scipy scikit-learn ftfy regex tqdm
+$ mim install mmcv-full==1.6.0
 ```
 
-## Integrate with your tools
+We suggest you install PyTorch successfully first, then install OpenMMLab packages and their dependencies.
 
-- [ ] [Set up project integrations](https://gitlab2.informatik.uni-wuerzburg.de/ls6/medfn-challenge/-/settings/integrations)
+Moreover, you can use other Computer Vision or other foundation models such as [EVA](https://github.com/baaivision/EVA) and [CLIP](https://github.com/openai/CLIP).
 
-## Collaborate with your team
+## 📊 Results
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+The results of ChestDR, ColonPath and Endo in MedFMC dataset and their corresponding configs on each task are shown as below.
 
-## Test and Deploy
+### Few-shot Learning Results
 
-Use the built-in continuous integration in GitLab.
+We utilize [Visual Prompt Tuning](https://github.com/KMnP/vpt) method as the few-shot learning baseline, whose backbone is Swin Transformer.
+The results are shown as below:
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+#### ChestDR
 
-***
+| N Shot | Crop Size | Epoch |  mAP  |  AUC  |                                      Config                                      |
+| :----: | :-------: | :---: | :---: | :---: | :------------------------------------------------------------------------------: |
+|   1    |  384x384  |  20   | 13.14 | 56.49 | [config](configs/swin-b_vpt/in21k-swin-b_vpt5_bs4_lr5e-2_1-shot_chest_adamw.py)  |
+|   5    |  384x384  |  20   | 17.05 | 64.86 | [config](configs/swin-b_vpt/in21k-swin-b_vpt5_bs4_lr5e-2_5-shot_chest_adamw.py)  |
+|   10   |  384x384  |  20   | 19.01 | 66.68 | [config](configs/swin-b_vpt/in21k-swin-b_vpt5_bs4_lr5e-2_10-shot_chest_adamw.py) |
 
-# Editing this README
+#### ColonPath
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+| N Shot | Crop Size | Epoch |  Acc  |  AUC  |                                      Config                                      |
+| :----: | :-------: | :---: | :---: | :---: | :------------------------------------------------------------------------------: |
+|   1    |  384x384  |  20   | 77.60 | 84.69 | [config](configs/swin-b_vpt/in21k-swin-b_vpt5_bs4_lr5e-2_1-shot_colon_adamw.py)  |
+|   5    |  384x384  |  20   | 89.29 | 96.07 | [config](configs/swin-b_vpt/in21k-swin-b_vpt5_bs4_lr5e-2_5-shot_colon_adamw.py)  |
+|   10   |  384x384  |  20   | 91.21 | 97.14 | [config](configs/swin-b_vpt/in21k-swin-b_vpt5_bs4_lr5e-2_10-shot_colon_adamw.py) |
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+#### Endo
 
-## Name
-Choose a self-explaining name for your project.
+| N Shot | Crop Size | Epoch |  mAP  |  AUC  |                                     Config                                      |
+| :----: | :-------: | :---: | :---: | :---: | :-----------------------------------------------------------------------------: |
+|   1    |  384x384  |  20   | 19.70 | 62.18 | [config](configs/swin-b_vpt/in21k-swin-b_vpt5_bs4_lr5e-2_1-shot_endo_adamw.py)  |
+|   5    |  384x384  |  20   | 23.88 | 67.48 | [config](configs/swin-b_vpt/in21k-swin-b_vpt5_bs4_lr5e-2_5-shot_endo_adamw.py)  |
+|   10   |  384x384  |  20   | 25.62 | 71.41 | [config](configs/swin-b_vpt/in21k-swin-b_vpt5_bs4_lr5e-2_10-shot_endo_adamw.py) |
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+### Transfer Learning on 20% (Fully Supervised Task)
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Noted that MedFMC mainly focuses on few-shot learning i.e., transfer learning task.
+Thus, fully supervised learning tasks below only use 20% training data to make corresponding comparisons.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+#### ChestDR
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+|    Backbone     | Crop Size | Epoch |  mAP  |  AUC  |                        Config                         |
+| :-------------: | :-------: | :---: | :---: | :---: | :---------------------------------------------------: |
+|   DenseNet121   |  384x384  |  20   | 24.48 | 75.25 |     [config](configs/densenet/dense121_chest.py)      |
+| EfficientNet-B5 |  384x384  |  20   | 29.08 | 77.21 |    [config](configs/efficientnet/eff-b5_chest.py)     |
+|     Swin-B      |  384x384  |  20   | 31.07 | 78.56 | [config](configs/swin_transformer/swin-base_chest.py) |
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+#### ColonPath
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+|    Backbone     | Crop Size | Epoch |  Acc  |  AUC  |                        Config                         |
+| :-------------: | :-------: | :---: | :---: | :---: | :---------------------------------------------------: |
+|   DenseNet121   |  384x384  |  20   | 92.73 | 98.27 |     [config](configs/densenet/dense121_colon.py)      |
+| EfficientNet-B5 |  384x384  |  20   | 94.04 | 98.58 |    [config](configs/efficientnet/eff-b5_colon.py)     |
+|     Swin-B      |  384x384  |  20   | 94.68 | 98.35 | [config](configs/swin_transformer/swin-base_colon.py) |
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+#### Endo
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+|    Backbone     | Crop Size | Epoch |  mAP  |  AUC  |                        Config                        |
+| :-------------: | :-------: | :---: | :---: | :---: | :--------------------------------------------------: |
+|   DenseNet121   |  384x384  |  20   | 41.13 | 80.19 |     [config](configs/densenet/dense121_endo.py)      |
+| EfficientNet-B5 |  384x384  |  20   | 36.95 | 78.23 |    [config](configs/efficientnet/eff-b5_endo.py)     |
+|     Swin-B      |  384x384  |  20   | 41.38 | 79.42 | [config](configs/swin_transformer/swin-base_endo.py) |
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+## 🎫 License
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+This project is released under the [Apache 2.0 license](LICENSE).
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## 🙌 Usage
 
-## License
-For open source projects, say how it is licensed.
+### Data preparation
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Prepare data following [MMClassification](https://github.com/open-mmlab/mmclassification). The data structure looks like below:
+
+```text
+data/
+├── MedFMC
+│   ├── chest
+│   │   ├── images
+│   │   ├── chest_X-shot_train_expY.txt
+│   │   ├── chest_X-shot_val_expY.txt
+│   │   ├── train_20.txt
+│   │   ├── val_20.txt
+│   │   ├── trainval.txt
+│   │   ├── test_WithLabel.txt
+│   ├── colon
+│   │   ├── images
+│   │   ├── colon_X-shot_train_expY.txt
+│   │   ├── colon_X-shot_val_expY.txt
+│   │   ├── train_20.txt
+│   │   ├── val_20.txt
+│   │   ├── trainval.txt
+│   │   ├── test_WithLabel.txt
+│   ├── endo
+│   │   ├── images
+│   │   ├── endo_X-shot_train_expY.txt
+│   │   ├── endo_X-shot_val_expY.txt
+│   │   ├── train_20.txt
+│   │   ├── val_20.txt
+│   │   ├── trainval.txt
+│   │   ├── test_WithLabel.txt
+```
+
+Noted that the `.txt` files includes data split information for fully supervised learning and few-shot learning tasks.
+The public dataset is splited to `trainval.txt` and `test_WithLabel.txt`, and `trainval.txt` is also splited to `train_20.txt` and `val_20.txt` where `20` means the training data makes up 20% of `trainval.txt`.
+And the `test_WithoutLabel.txt` of each dataset is validation set.
+
+Corresponding `.txt` files are stored at `./data_backup/` folder, the few-shot learning data split files `{dataset}_{N_shot}-shot_train/val_exp{N_exp}.txt` could also be generated as below:
+
+```shell
+python tools/generate_few-shot_file.py
+```
+
+Where `N_shot` is 1,5 and 10, respectively, the shot is of patient(i.e., 1-shot means images of certain one patient are all counted as one), not number of images.
+
+The `images` in each dataset folder contains its images, which could be achieved from original dataset.
+
+### Training and evaluation using OpenMMLab codebases.
+
+In this repository we provided many config files for fully supervised task (only uses 20% of original traning set, please check out the `.txt` files which split dataset)
+and few-shot learning task.
+
+The config files of fully supervised transfer learning task are stored at `./configs/densenet`, `./configs/efficientnet`, `./configs/vit-base` and
+`./configs/swin_transformer` folders, respectively. The config files of few-shot learning task are stored at `./configs/ablation_exp` and `./configs/vit-b16_vpt` folders.
+
+For the training and testing, you can directly use commands below to train and test the model:
+
+```bash
+# you need to export path in terminal so the `custom_imports` in config would work
+export PYTHONPATH=$PWD:$PYTHONPATH
+# Training
+# you can choose a config file like `configs/vit-b16_vpt/in21k-vitb16_vpt1_bs4_lr6e-4_1-shot_chest.py` to train its model
+python tools/train.py $CONFIG
+
+# Evaluation
+# Endo and ChestDR utilize mAP as metric
+python tools/test.py $CONFIG $CHECKPOINT --metrics mAP
+python tools/test.py $CONFIG $CHECKPOINT --metrics AUC_multilabel
+# Colon utilizes accuracy as metric
+python tools/test.py $CONFIG $CHECKPOINT --metrics accuracy --metric-options topk=1
+python tools/test.py $CONFIG $CHECKPOINT --metrics AUC_multiclass
+
+```
+
+The repository is built upon [MMClassification/MMPretrain](https://github.com/open-mmlab/mmpretrain/tree/master). More details could be found in its [document](https://mmpretrain.readthedocs.io/en/mmcls-0.x/).
+
+### Generating Submission results of Validation Phase
+
+Noted:
+
+- The order of filanames of all CSV files must follow the order of provided `colon_val.csv`, `chest_val.csv` and `endo_val.csv`! You can see files in `./data_backup/result_sample` for more details.
+- The name of CSV files in `result.zip` must be the same names `xxx_N-shot_submission.csv` below.
+
+Run
+
+```bash
+python tools/test_prediction.py $DATASETPATH/test_WithoutLabel.txt $DATASETPATH/images/ $CONFIG $CHECKPOINT --output-prediction $DATASET_N-shot_submission.csv
+```
+
+For example:
+
+```bash
+python tools/test_prediction.py data/MedFMC/endo/test_WithoutLabel.txt data/MedFMC/endo/images/ $CONFIG $CHECKPOINT --output-prediction endo_10-shot_submission.csv
+```
+
+You can generate all prediction results of `endo_N-shot_submission.csv`, `colon_N-shot_submission.csv` and `chest_N-shot_submission.csv` and zip them into `result.zip` file. Then upload it to Grand Challenge website.
+
+```
+result/
+├── endo_1-shot_submission.csv
+├── endo_5-shot_submission.csv
+├── endo_10-shot_submission.csv
+├── colon_1-shot_submission.csv
+├── colon_5-shot_submission.csv
+├── colon_10-shot_submission.csv
+├── chest_1-shot_submission.csv
+├── chest_5-shot_submission.csv
+├── chest_10-shot_submission.csv
+```
+
+Then using `zip` to make them as `.zip` file and upload it to submission site of [Grand Challenge MedFMC Validation Phase](https://medfm2023.grand-challenge.org/evaluation/challenge-validation-results-submission-only/submissions/create/).
+
+## 🏗️ Using MedFMC repo with Docker (TO BE DONE)
+
+More details of Docker could be found in this [tutorial](https://nbviewer.org/github/ericspod/ContainersForCollaboration/blob/master/ContainersForCollaboration.ipynb).
+
+### Preparation of Docker
+
+We provide a [Dockerfile](./docker/Dockerfile) to build an image. Ensure that your [docker version](https://docs.docker.com/engine/install/) >=19.03.
+
+```
+# build an image with PyTorch 1.11, CUDA 11.3
+# If you prefer other versions, just modified the Dockerfile
+docker build -t medfmc docker/
+```
+
+Run it with
+
+```
+docker run --gpus all --shm-size=8g -it -v {DATA_DIR}:/medfmc/data medfmc
+```
+
+### Build Docker and make sanity test
+
+The submitted docker will be evaluated by the following command:
+
+```bash
+docker container run --gpus all --shm-size=8g -m 28G -it --name teamname --rm -v $PWD:/medfmc_exp -v $PWD/data:/medfmc_exp/data teamname:latest /bin/bash -c "sh /medfmc_exp/run.sh"
+```
+
+- `--gpus`: specify the available GPU during inference
+- `-m`: spedify the maximum RAM
+- `--name`: container name during running
+- `--rm`: remove the container after running
+- `-v $PWD:/medfmc_exp`: map local codebase folder to Docker `medfmc_exp` folder.
+- `-v $PWD/data:/medfmc_exp/data`: map local codebase folder to Docker `medfmc_exp/data` folder.
+- `teamname:latest`: docker image name (should be `teamname`) and its version tag. **The version tag should be `latest`**. Please do not use `v0`, `v1`... as the version tag
+- `/bin/bash -c "sh run.sh"`: start the prediction command.
+
+Assuming the team name is `baseline`, the Docker build command is
+
+```shell
+docker build -t baseline .
+```
+
+> During the inference, please monitor the GPU memory consumption using `watch nvidia-smi`. The GPU memory consumption should be less than 10G. Otherwise, it will run into an OOM error on the official evaluation server.
+
+### 3) Save Docker
+
+```shell
+docker save baseline | gzip -c > baseline.tar.gz
+```
+
+## 🖊️ Citation
+
+```
+@article{wang2023medfmc,
+  title={MedFMC: A Real-world Dataset and Benchmark For Foundation Model Adaptation in Medical Image Classification},
+  author={Wang, Dequan and Wang, Xiaosong and Wang, Lilong and Li, Mengzhang and Da, Qian and Liu, Xiaoqiang and Gao, Xiangyu and Shen, Jun and He, Junjun and Shen, Tian and others},
+  journal={arXiv preprint arXiv:2306.09579},
+  year={2023}
+}
+```
