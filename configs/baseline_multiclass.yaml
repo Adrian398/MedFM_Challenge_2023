@@ -16,8 +16,8 @@ data_cfg:
     colon:
         N_way: 2
         images_dir: './data/MedFMC/colon/images'
-        train_list_txt: './data/MedFMC/colon/trainval.txt'
-        test_list_txt: './data/MedFMC/colon/test_WithLabel.txt'
+        train_list_txt: './data/MedFMC/colon/colon_train.csv'
+        test_list_txt: './data/MedFMC/colon/colon_val.csv'
 method_cfg:
     K_shot_set: [1, 5, 10]
     max_iters: 10
