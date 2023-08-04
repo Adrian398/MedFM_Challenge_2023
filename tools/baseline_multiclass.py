@@ -64,14 +64,12 @@ def load_annotations(ann_file):
     data_infos = []
     with open(ann_file) as f:
         samples = [x.strip() for x in f.readlines()]
-        for item in samples[1:]:
-            content = item.split(",")
-            filename = content[1]
-            imglabel = int(content[-1])
-            info = {
-                'filename': filename,
-                'gt_label': imglabel
-            }
+        for item in samples:
+            filename = item[:-2]
+            imglabel = int(item[-1:])
+            info = {}
+            info['filename'] = filename
+            info['gt_label'] = imglabel
             data_infos.append(info)
 
     return data_infos

@@ -19,12 +19,11 @@ def load_endo_annotations(ann_file):
     data_infos = []
     with open(ann_file) as f:
         samples = [x.strip() for x in f.readlines()]
-        for item in samples[1:]:
-            content = item.split(",")
-            filename = content[1]
-            imglabels = content[3:]
+        for item in samples:
+            filename = item[:-8]
+            imglabel = item[-7:]
             gt_label = np.asarray(
-                list(map(float, imglabels)), dtype=np.int8)
+                list(map(int, imglabel.split(' '))), dtype=np.int8)
             info = {}
             info['filename'] = filename
             info['gt_label'] = gt_label
@@ -39,15 +38,13 @@ def load_chest_annotations(ann_file):
     data_infos = []
     with open(ann_file) as f:
         samples = [x.strip() for x in f.readlines()]
-        for item in samples[1:]:
-            content = item.split(",")
-            filename = content[1]
-            imglabels = content[2:]
+        for item in samples:
+            filename, imglabel = item.split(' ')
             gt_label = np.asarray(
-                list(map(float, imglabels)), dtype=np.int8)
-            info = {
-                'filename': filename,
-                'gt_label': gt_label}
+                list(map(int, imglabel.split(','))), dtype=np.int8)
+            info = {}
+            info['filename'] = filename
+            info['gt_label'] = gt_label
             data_infos.append(info)
 
     return data_infos

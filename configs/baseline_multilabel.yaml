@@ -16,13 +16,13 @@ data_cfg:
     chest:
         N_way: 19
         images_dir: './data/MedFMC/chest/images'
-        train_list_txt: './data/MedFMC/chest/chest_train.csv'
-        test_list_txt: './data/MedFMC/chest/chest_val.csv'
+        train_list_txt: './data/MedFMC/chest/trainval.txt'
+        test_list_txt: './data/MedFMC/chest/test_WithLabel.txt'
     endo:
         N_way: 4
         images_dir: './data/MedFMC/endo/images'
-        train_list_txt: './data/MedFMC/endo/endo_train.csv'
-        test_list_txt: './data/MedFMC/endo/endo_val.csv'
+        train_list_txt: './data/MedFMC/endo/trainval.txt'
+        test_list_txt: './data/MedFMC/endo/test_WithLabel.txt'
 method_cfg:
     K_shot_set: [1, 5, 10]
     max_iters: 10
