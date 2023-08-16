@@ -81,14 +81,14 @@ visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBack
 
 train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=100)
 val_dataloader = dict(
-    batch_size=8,
+    batch_size=24,
     dataset=dict(
         ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt',
         pipeline=test_pipeline),
 )
 
 test_dataloader = dict(
-    batch_size=8,
+    batch_size=24,
     dataset=dict(
         ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt',
         pipeline=test_pipeline),
