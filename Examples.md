@@ -7,7 +7,7 @@ $env:PYTHONPATH = "$PWD;" + $env:PYTHONPATH
 
  Train example
 ```bash
-python .\tools\train.py .\configs\dinov2-b_vpt\1-shot_chest.py
+python .\tools\train.py .\configs\dinov2-b_vpt\1-shot_colon.py
 ```
 
  Inference example
@@ -24,4 +24,18 @@ python .\uitilty\check_submission.py
 Fix alignments if necessary using
 ```bash
 python .\uitilty\align_submission.py
+```
+
+## Visualize training using tensorboard
+Install required dependencies
+````bash
+pip install future tensorboard
+````
+Add the following line to the config 
+````python
+visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
+````
+Start tensorboard using
+```bash
+tensorboard --logdir .\work_dirs\
 ```
