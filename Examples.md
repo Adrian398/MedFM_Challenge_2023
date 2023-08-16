@@ -1,6 +1,17 @@
+# Install
+- Use Python 3.8
+- Install pytorch with the newest version
+- Install the following packages:
+```bash
+pip install openmim scipy scikit-learn ftfy regex tqdm tensorboard future
+```
+```bash
+mim install mmpretrain
+```
+
 # Examples
 
- Python path setup, Windows Powershell
+ Python path setup, Windows Powershell (copy & paste into console if it does not work)
 ```bash
 $env:PYTHONPATH = "$PWD;" + $env:PYTHONPATH
 ```
