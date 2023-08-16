@@ -15,6 +15,10 @@ mim install mmpretrain
 ```bash
 $env:PYTHONPATH = "$PWD;" + $env:PYTHONPATH
 ```
+MacOS and Linux:
+```bash
+export PYTHONPATH="$PWD:$PYTHONPATH"
+```
 
  Train example
 ```bash
