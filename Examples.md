@@ -9,6 +9,10 @@ $env:PYTHONPATH = "$PWD;" + $env:PYTHONPATH
 ```bash
 python .\tools\train.py .\configs\dinov2-b_vpt\1-shot_colon.py
 ```
+To adjust parameters like validation interval, max_epochs etc, add the following to the config:
+````python
+train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=100)
+````
 
  Inference example
 ```bash
@@ -39,3 +43,4 @@ Start tensorboard using
 ```bash
 tensorboard --logdir .\work_dirs\
 ```
+Sidenote: If plots appear to be cut off, uncheck `Ignore outliers in chart scaling` under scalar settings
