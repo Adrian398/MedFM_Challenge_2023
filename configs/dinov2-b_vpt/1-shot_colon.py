@@ -35,7 +35,7 @@ model = dict(
             checkpoint=
             'https://download.openmmlab.com/mmpretrain/v1.0/dinov2/vit-base-p14_dinov2-pre_3rdparty_20230426-ba246503.pth',
             prefix='backbone'),
-        ),
+    ),
     neck=None,
     head=dict(
         type='LinearClsHead',
@@ -63,21 +63,22 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=1, 
+    batch_size=1,
     dataset=dict(
         ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
         pipeline=train_pipeline),
 )
+visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
 val_dataloader = dict(
-    batch_size=2,  
+    batch_size=2,
     dataset=dict(
         ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt',
         pipeline=test_pipeline),
 )
 
 test_dataloader = dict(
-    batch_size=2,  
+    batch_size=2,
     dataset=dict(
         ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt',
         pipeline=test_pipeline),
@@ -85,9 +86,8 @@ test_dataloader = dict(
 optim_wrapper = dict(optimizer=dict(lr=lr))
 
 default_hooks = dict(
-    checkpoint = dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
+    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
     logger=dict(interval=50),
 )
 
 work_dir = f'work_dirs/dinov2-b/exp{exp_num}/{run_name}'
-
