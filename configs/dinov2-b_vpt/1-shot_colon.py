@@ -70,6 +70,7 @@ train_dataloader = dict(
 )
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
+train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=100)
 val_dataloader = dict(
     batch_size=2,
     dataset=dict(
@@ -86,7 +87,7 @@ test_dataloader = dict(
 optim_wrapper = dict(optimizer=dict(lr=lr))
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
+    checkpoint=dict(type='CheckpointHook', interval=50, max_keep_ckpts=1, save_best="auto"),
     logger=dict(interval=50),
 )
 
