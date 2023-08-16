@@ -1,5 +1,6 @@
-import pandas as pd
 import os
+
+import pandas as pd
 
 """
 Checks if all necessary files for submission are in the specified results_dir, checks if they are named correctly,
@@ -29,17 +30,15 @@ for file in required_file_names:
         print(f"Missing file: {file}")
         file_names_correct = False
 
-
 file_orders_correct = True
 file_lengths_correct = True
 for file in csv_files:
-    submission_csv_path = results_dir+file
+    submission_csv_path = results_dir + file
 
     # Read colon_val.csv/endo_val.csv/chest_val.csv and remove rows without image ids
     task = file.split("_")[0]
     df_val_order = pd.read_csv(f"{val_dir}{task}/{task}_val.csv").dropna(subset="img_id")
-    print(len(df_val_order))
-    print(len(df_val_order['img_id']))
+
     # Read generated submission csv (as one column, since infer generates white-space separation)
     df_submission = pd.read_csv(submission_csv_path, header=None)
 
