@@ -45,6 +45,15 @@ model = dict(
     )
 )
 
+val_evaluator = [
+    dict(type='AveragePrecision'),
+    dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
+    dict(type='MultiLabelMetric', average='micro'),  # overall mean
+    dict(type='Accuracy', topk=(1,)),
+    dict(type='AUC')
+]
+test_evaluator = val_evaluator
+
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
@@ -63,7 +72,7 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=1,
+    batch_size=8,
     dataset=dict(
         ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
         pipeline=train_pipeline),
@@ -72,14 +81,14 @@ visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBack
 
 train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=100)
 val_dataloader = dict(
-    batch_size=2,
+    batch_size=8,
     dataset=dict(
         ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt',
         pipeline=test_pipeline),
 )
 
 test_dataloader = dict(
-    batch_size=2,
+    batch_size=8,
     dataset=dict(
         ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt',
         pipeline=test_pipeline),
