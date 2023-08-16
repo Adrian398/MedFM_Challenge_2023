@@ -38,7 +38,8 @@ for file in csv_files:
     # Read colon_val.csv/endo_val.csv/chest_val.csv and remove rows without image ids
     task = file.split("_")[0]
     df_val_order = pd.read_csv(f"{val_dir}{task}/{task}_val.csv").dropna(subset="img_id")
-
+    print(len(df_val_order))
+    print(len(df_val_order['img_id']))
     # Read generated submission csv (as one column, since infer generates white-space separation)
     df_submission = pd.read_csv(submission_csv_path, header=None)
 
@@ -50,8 +51,9 @@ for file in csv_files:
 
     if len(df_val_order["img_id"]) != len(df_submission["img_id"]):
         file_lengths_correct = False
-        print(f"Incorrect number of entries in {file}, was {len(df_val_order['img_id'])}, "
-              f"expected {len(df_submission['img_id'])}")
+        print(f"Incorrect number of entries in {file}, was {len(df_submission['img_id'])}, "
+              f"expected {len(df_val_order['img_id'])}")
+        print("You might have done the inference on the wrong image folder (e.g. on train instead of val)")
     # Check if final result is correct
     wrong_order_in_file = False
     for i in range(len(df_val_order)):
