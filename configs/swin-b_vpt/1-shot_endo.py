@@ -34,27 +34,37 @@ model = dict(
         in_channels=1024,
     ))
 
+val_evaluator = [
+    dict(type='AveragePrecision'),
+    dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
+    dict(type='MultiLabelMetric', average='micro'),  # overall mean
+    dict(type='Accuracy', topk=(1,)),
+    dict(type='AUC')
+]
+test_evaluator = val_evaluator
+
 train_dataloader = dict(
-    batch_size=4, 
+    batch_size=8,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
+train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=100)
 
 val_dataloader = dict(
-    batch_size=8,  
+    batch_size=16,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
 )
 
 test_dataloader = dict(
-    batch_size=4,  
+    batch_size=8,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
 )
 
 optim_wrapper = dict(optimizer=dict(lr=lr))
 
 default_hooks = dict(
-    checkpoint = dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
+    checkpoint = dict(type='CheckpointHook', interval=50, max_keep_ckpts=3, save_best="auto"),
     logger=dict(interval=50),
 )
 
-work_dir = f'work_dirs/exp{exp_num}/{run_name}'
-
+work_dir = f'work_dirs/swin-b/exp{exp_num}/{run_name}'
+visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
