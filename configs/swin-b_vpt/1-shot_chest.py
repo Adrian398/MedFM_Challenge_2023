@@ -57,3 +57,5 @@ default_hooks = dict(
 
 work_dir = f'work_dirs/exp{exp_num}/{run_name}'
 
+from configs.chest_config import *
+
