@@ -57,5 +57,6 @@ default_hooks = dict(
     logger=dict(interval=50),
 )
 
-work_dir = f'work_dirs/exp{exp_num}/{run_name}'
+work_dir = f'work_dirs/swin-b/exp{exp_num}/{run_name}'
 
+from configs.endo_config import *
