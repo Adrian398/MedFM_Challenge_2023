@@ -35,20 +35,38 @@ model = dict(
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
     ))
 
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='RandomResizedCrop',
+        scale=384,
+        backend='pillow',
+        interpolation='bicubic'),
+    dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(type='PackInputs'),
+]
+
+
 train_dataloader = dict(
-    batch_size=4, 
+    batch_size=8,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
 
 val_dataloader = dict(
-    batch_size=8,  
+    batch_size=16,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
 )
 
 test_dataloader = dict(
-    batch_size=4,  
+    batch_size=8,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
 )
+
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='Resize', scale=384, backend='pillow', interpolation='bicubic'),
+    dict(type='PackInputs'),
+]
 
 optim_wrapper = dict(optimizer=dict(lr=lr))
 
@@ -57,5 +75,7 @@ default_hooks = dict(
     logger=dict(interval=50),
 )
 
-work_dir = f'work_dirs/exp{exp_num}/{run_name}'
+work_dir = f'work_dirs/swin-b/exp{exp_num}/{run_name}'
+
+from configs.colon_config import *
 
