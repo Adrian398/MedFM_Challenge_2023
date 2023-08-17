@@ -30,6 +30,7 @@ train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=100)
 ````
 
  Inference example
+ (infer, config, checkpoint, images, out)
 ```bash
 python .\tools\infer.py .\configs\dinov2-b_vpt\1-shot_chest.py .\work_dirs\dinov2-b\exp1\dinov2-b_1-shot_ptokens-1_chest\best_multi-label_mAP_epoch_1.pth .\data\MedFMC_
 val\chest\images --out .\results\chest_1-shot_submission.csv
