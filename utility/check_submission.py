@@ -42,13 +42,7 @@ for file in csv_files:
     # Read generated submission csv (as one column, since infer generates white-space separation)
     df_submission = pd.read_csv(submission_csv_path, header=None)
 
-    # Split the last two numbers off to generate proper columns
-    classes = 2 if task == "colon" else 19 if task == "chest" else 4
-
-    # Extract ID, which is everything to the left of the last two numbers
-    df_submission['img_id'] = df_submission[0].str.rsplit(' ', n=classes).str[0]
-
-    if len(df_val_order["img_id"]) != len(df_submission["img_id"]):
+    if len(df_val_order) != len(df_submission):
         file_lengths_correct = False
         print(f"Incorrect number of entries in {file}, was {len(df_submission['img_id'])}, "
               f"expected {len(df_val_order['img_id'])}")
@@ -56,9 +50,9 @@ for file in csv_files:
     # Check if final result is correct
     wrong_order_in_file = False
     for i in range(len(df_val_order)):
-        if df_submission["img_id"][i] != df_val_order["img_id"][i]:
+        if df_submission[0][i] != df_val_order["img_id"][i]:
             wrong_order_in_file = True
-            all_files_correct = False
+            file_orders_correct = False
 
     if wrong_order_in_file:
         print(f"Wrong order in file {file}, use align_submission.py to fix this.")

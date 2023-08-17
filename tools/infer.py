@@ -48,7 +48,7 @@ def main():
             print(os.path.basename(image), res['pred_label'])
             f_out.write(os.path.basename(image))
             for j in range(len(res['pred_scores'])):
-                f_out.write(' ' + str(np.around(res['pred_scores'][j], 8)))
+                f_out.write(',' + str(np.around(res['pred_scores'][j], 8)))
             f_out.write('\n')
 
 
