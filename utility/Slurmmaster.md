@@ -29,3 +29,14 @@ Export python path
 ````commandline
 export PYTHONPATH="$PWD:$PYTHONPATH"
 ````
+### Tensorboard
+When on Slurmmaster (not on compute node):
+````commandline
+tensorboard --logdir work_dirs/ --port 6006
+````
+Locally set up port forwarding (Only active while console is open, this command will not print anything):
+
+````commandline
+ssh -N -L 6006:localhost:6006 slurmmaster-ls6
+````
+Then connect to Tensorboard by going to [localhost:6006]()
