@@ -59,4 +59,4 @@ Start tensorboard using
 ```bash
 tensorboard --logdir .\work_dirs\
 ```
-Sidenote: If plots appear to be cut off, uncheck `Ignore outliers in chart scaling` under scalar settings
+Sidenote: If plots appear to be cut off, uncheck `Ignore outliers in chart scaling` under scalar settings and set smoothing to 0.
