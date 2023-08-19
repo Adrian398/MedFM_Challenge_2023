@@ -1,7 +1,9 @@
---extra-index-url https://download.pytorch.org/whl/cu118
+--extra-index-url https://download.pytorch.org/whl/cu117
 torch
 torchvision
 torchaudio
+future
+tensorboard
 scipy
 scikit-learn
 ftfy
