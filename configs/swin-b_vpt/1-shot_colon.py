@@ -135,14 +135,18 @@ param_scheduler = [
         end=50
     ),
     dict(
-         type='CosineAnnealingLR',
-         eta_min=cos_end_lr,
-         by_epoch=False,
-         begin=50)
+        type='CosineAnnealingLR',
+        eta_min=cos_end_lr,
+        by_epoch=False,
+        begin=50)
 ]
 
 param_scheduler = [
-    dict(type='MultiStepLR', by_epoch=True, verbose=True, gamma=0.01)
+    dict(type='MultiStepLR',
+         milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
+         by_epoch=True,
+         verbose=True,
+         gamma=0.5)
 ]
 
 train_cfg = dict(by_epoch=True, val_interval=100, max_epochs=1000)
