@@ -6,13 +6,13 @@ _base_ = [
     '../custom_imports.py'
 ]
 
-lr = 5e-2
+lr = ''
 train_bs = 8
 dataset = 'colon'
 model_name = 'swinv2'
 exp_num = 1
 nshot = 1
-#
+
 run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
 work_dir = f'work_dirs/colon/{nshot}-shot/{run_name}'
 
@@ -43,7 +43,7 @@ train_dataloader = dict(
 )
 
 val_dataloader = dict(
-    batch_size=128,
+    batch_size=32,
     num_workers=1,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
 )
