@@ -42,9 +42,9 @@ model = dict(
     #)
     head=dict(
         type='LinearClsHead',
-        num_classes=1,  # Only one class for binary classification when using BCEWithLogitsLoss
-        in_channels=1024,  # This might change based on the backbone you use
-        loss=dict(type='BCEWithLogitsLoss', loss_weight=1.0),
+        num_classes=2,
+        in_channels=1024,
+        loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
     )
 )
 
