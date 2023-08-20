@@ -6,10 +6,6 @@
 
 - When using cosine annealing (default in swin schedule), the learning rate decrease will orient itself on ``max_epochs``, i.e. larger max_epoch => slower decrease of LR
 
-
-- Final Inference on Validation set very slow on cluster (tested on gpu1c), probably due to bottleneck when reading data from drive (15 min on cluster with RTX 4090 vs 5 min at home on GTX1080)
-
-
 ## For Swin + Colon 1-shot:
 
 - Adding the following Augmentation did not improve results 
