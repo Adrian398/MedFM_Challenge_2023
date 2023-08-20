@@ -132,16 +132,13 @@ optim_wrapper = dict(
         }),
 )
 
-# learning policy
 param_scheduler = [
-    # warm up learning rate scheduler
     dict(
         type='LinearLR',
         start_factor=0.001,
         by_epoch=False,
         end=50
     ),
-    # main learning rate scheduler
     dict(
          type='CosineAnnealingLR',
          eta_min=cos_end_lr,
@@ -152,8 +149,6 @@ param_scheduler = [
 param_scheduler = [
     dict(type='MultiStepLR', by_epoch=True, milestones=[1, 2])
 ]
-
-randomness = dict(seed=0, deterministic=True)
 
 train_cfg = dict(by_epoch=True, val_interval=100, max_epochs=1000)
 auto_scale_lr = dict(base_batch_size=1024, enable=False)
