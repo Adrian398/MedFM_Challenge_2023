@@ -26,6 +26,7 @@ model = dict(
         drop_rate=0.1,
         arch='base',
         img_size=384,
+        #frozen_stages=4,
         init_cfg=dict(
             type='Pretrained',
             checkpoint=
@@ -41,18 +42,39 @@ model = dict(
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
     ))
 
+bgr_mean = [103.53, 116.28, 123.675]
+bgr_std = [57.375, 57.12, 58.395]
+
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
+        type='RandomErasing',
+        erase_prob=0.25,
+        mode='rand',
+        min_area_ratio=0.02,
+        max_area_ratio=1 / 3,
+        fill_color=bgr_mean,
+        fill_std=bgr_std),
+    dict(
+        type='RandAugment',
+        policies='timm_increasing',
+        num_policies=2,
+        total_level=10,
+        magnitude_level=9,
+        magnitude_std=0.5,
+        hparams=dict(pad_val=[round(x) for x in bgr_mean], interpolation='bicubic')
+    ),
+    dict(
         type='RandomResizedCrop',
-        scale=384,
+        scale=255,
         backend='pillow',
         interpolation='bicubic'),
+    dict(type='RandomPatchWithLabels'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(type='RandomGrayscale', prob=0.5, keep_channels=True),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
 ]
-
 
 train_dataloader = dict(
     batch_size=train_bs,
@@ -79,9 +101,9 @@ test_pipeline = [
 
 val_evaluator = [
     dict(type='AveragePrecision'),
-    dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
-    dict(type='MultiLabelMetric', average='micro'),  # overall mean
-    dict(type='Accuracy', topk=(1,)),
+    #dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
+    #dict(type='MultiLabelMetric', average='micro'),  # overall mean
+    #dict(type='Accuracy', topk=(1,)),
     dict(type='AUC')
 ]
 test_evaluator = val_evaluator
@@ -126,6 +148,12 @@ param_scheduler = [
          by_epoch=False,
          begin=50)
 ]
+
+param_scheduler = [
+    dict(type='MultiStepLR', by_epoch=True, milestones=[1, 2])
+]
+
+randomness = dict(seed=0, deterministic=True)
 
 train_cfg = dict(by_epoch=True, val_interval=100, max_epochs=1000)
 auto_scale_lr = dict(base_batch_size=1024, enable=False)
