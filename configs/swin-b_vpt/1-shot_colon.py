@@ -142,15 +142,15 @@ optim_wrapper = dict(
         momentum=0.9,  # Commonly used value
         weight_decay=0.01,  # You might adjust this based on earlier discussion
     ),
-    clip_grad=dict(max_norm=5.0),
-    paramwise_cfg=dict(
-        norm_decay_mult=0.0,
-        bias_decay_mult=0.0,
-        flat_decay_mult=0.0,
-        custom_keys={
-            '.absolute_pos_embed': dict(decay_mult=0.0),
-            '.relative_position_bias_table': dict(decay_mult=0.0)
-        }),
+    #clip_grad=dict(max_norm=5.0),
+    #paramwise_cfg=dict(
+    #    norm_decay_mult=0.0,
+    #    bias_decay_mult=0.0,
+    #    flat_decay_mult=0.0,
+    #    custom_keys={
+    #        '.absolute_pos_embed': dict(decay_mult=0.0),
+    #        '.relative_position_bias_table': dict(decay_mult=0.0)
+    #    }),
 )
 
 param_scheduler = [
@@ -167,12 +167,12 @@ param_scheduler = [
     #    begin=50)
 ]
 
-param_scheduler = [
-    dict(type='MultiStepLR',
-         milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
-         by_epoch=True,
-         gamma=0.5)
-]
+# param_scheduler = [
+#     dict(type='MultiStepLR',
+#          milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
+#          by_epoch=True,
+#          gamma=0.5)
+# ]
 
 param_scheduler = [
     dict(
