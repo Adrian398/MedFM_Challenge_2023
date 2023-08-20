@@ -1,4 +1,8 @@
 # Slurmmaster
+```bash
+ssh slurmmaster-ls6
+```
+
 Documentation:
 [doku-ls6.informatik.uni-wuerzburg.de/docs/venv.html]()
 
