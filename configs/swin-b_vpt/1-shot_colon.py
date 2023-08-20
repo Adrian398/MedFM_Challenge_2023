@@ -146,7 +146,7 @@ param_scheduler = [
          milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
          by_epoch=True,
          verbose=True,
-         gamma=0.5)
+         gamma=0.1)
 ]
 
 train_cfg = dict(by_epoch=True, val_interval=100, max_epochs=1000)
