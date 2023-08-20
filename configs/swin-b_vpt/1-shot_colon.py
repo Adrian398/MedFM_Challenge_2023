@@ -7,7 +7,7 @@ _base_ = [
 
 lr = 5e-2
 n = 1
-vpl = 50
+vpl = 5
 dataset = 'colon'
 exp_num = 1
 nshot = 1
