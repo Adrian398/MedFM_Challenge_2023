@@ -4,3 +4,6 @@
 - try different adam optimizer parameters
 - try different learning rates
 - try different optimizers
+- find out diff between lr and base_lr
+- improve data augmentation
+- try out impact of different experiment files
