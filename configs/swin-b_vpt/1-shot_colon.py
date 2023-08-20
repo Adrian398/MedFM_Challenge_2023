@@ -117,22 +117,23 @@ default_hooks = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-optim_wrapper = dict(
-    optimizer=dict(
-        type='AdamW',
-        lr=lr,
-        weight_decay=0.01,
-        eps=1e-8,
-        betas=(0.9, 0.999)),
-    paramwise_cfg=dict(
-        norm_decay_mult=0.0,
-        bias_decay_mult=0.0,
-        flat_decay_mult=0.0,
-        custom_keys={
-            '.absolute_pos_embed': dict(decay_mult=0.0),
-            '.relative_position_bias_table': dict(decay_mult=0.0)
-        }),
-)
+
+# optim_wrapper = dict(
+#     optimizer=dict(
+#         type='AdamW',
+#         lr=lr,
+#         weight_decay=0.01,
+#         eps=1e-8,
+#         betas=(0.9, 0.999)),
+#     paramwise_cfg=dict(
+#         norm_decay_mult=0.0,
+#         bias_decay_mult=0.0,
+#         flat_decay_mult=0.0,
+#         custom_keys={
+#             '.absolute_pos_embed': dict(decay_mult=0.0),
+#             '.relative_position_bias_table': dict(decay_mult=0.0)
+#         }),
+# )
 
 optim_wrapper = dict(
     optimizer=dict(
