@@ -23,6 +23,7 @@ model = dict(
     backbone=dict(
         type='PromptedSwinTransformer',
         prompt_length=vpl,
+        drop_rate=0.1,
         arch='base',
         img_size=384,
         init_cfg=dict(
@@ -92,13 +93,11 @@ default_hooks = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-# for batch in each gpu is 128, 8 gpu
-# lr = 5e-4 * 128 * 8 / 512 = 0.001
 optim_wrapper = dict(
     optimizer=dict(
         type='AdamW',
         lr=lr,
-        weight_decay=0.05,
+        weight_decay=0.005,
         eps=1e-8,
         betas=(0.9, 0.999)),
     paramwise_cfg=dict(
@@ -116,17 +115,16 @@ param_scheduler = [
     # warm up learning rate scheduler
     dict(
         type='LinearLR',
-        start_factor=0.01,
-        by_epoch=True,
-        end=20,
-        # update by iter
-        convert_to_iter_based=False),
+        start_factor=0.001,
+        by_epoch=False,
+        end=50
+    ),
     # main learning rate scheduler
     dict(
          type='CosineAnnealingLR',
          eta_min=cos_end_lr,
-         by_epoch=True,
-         begin=20)
+         by_epoch=False,
+         begin=50)
 ]
 
 train_cfg = dict(by_epoch=True, val_interval=100, max_epochs=1000)
