@@ -5,7 +5,9 @@ _base_ = [
     '../custom_imports.py',
 ]
 
+warmup_lr = 1e-3
 lr = 5e-2
+cos_end_lr = 1e-5
 train_bs = 8
 vpl = 5
 dataset = 'colon'
@@ -90,5 +92,41 @@ default_hooks = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=50, max_epochs=300)
+# for batch in each gpu is 128, 8 gpu
+# lr = 5e-4 * 128 * 8 / 512 = 0.001
+optim_wrapper = dict(
+    optimizer=dict(
+        type='AdamW',
+        lr=lr,
+        weight_decay=0.05,
+        eps=1e-8,
+        betas=(0.9, 0.999)),
+    paramwise_cfg=dict(
+        norm_decay_mult=0.0,
+        bias_decay_mult=0.0,
+        flat_decay_mult=0.0,
+        custom_keys={
+            '.absolute_pos_embed': dict(decay_mult=0.0),
+            '.relative_position_bias_table': dict(decay_mult=0.0)
+        }),
+)
 
+# learning policy
+param_scheduler = [
+    # warm up learning rate scheduler
+    dict(
+        type='LinearLR',
+        start_factor=0.01,
+        by_epoch=True,
+        end=20,
+        # update by iter
+        convert_to_iter_based=True),
+    # main learning rate scheduler
+    dict(optim_wrapper=optim_wrapper,
+         type='CosineAnnealingLR',
+         eta_min=cos_end_lr,
+         by_epoch=True,
+         begin=20)
+]
+
+train_cfg = dict(by_epoch=True, val_interval=100, max_epochs=1000)
