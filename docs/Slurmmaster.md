@@ -1,4 +1,8 @@
 # Slurmmaster
+```bash
+ssh slurmmaster-ls6
+```
+
 Documentation:
 [doku-ls6.informatik.uni-wuerzburg.de/docs/venv.html]()
 
@@ -34,7 +38,12 @@ When on Slurmmaster (not on compute node) in directory medfm-challenge and venv 
 ````commandline
 tensorboard --logdir work_dirs/ --port 6006
 ````
+Optionally add the following line to ~/.bashrc to automate this process by typing ``tb``
+````commandline
+alias tb="cd /scratch/medfm/medfm-challenge && source venv/bin/activate && tensorboard --logdir work_dirs/ --port 6006"
+````
 Locally set up port forwarding (Only active while console is open, this command will not print anything):
+
 
 ````bash
 ssh -N -L 6006:localhost:6006 slurmmaster-ls6
