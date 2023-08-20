@@ -30,13 +30,43 @@ Export python path
 export PYTHONPATH="$PWD:$PYTHONPATH"
 ````
 ### Tensorboard
-When on Slurmmaster (not on compute node):
+When on Slurmmaster (not on compute node) in directory medfm-challenge and venv is active:
 ````commandline
 tensorboard --logdir work_dirs/ --port 6006
 ````
 Locally set up port forwarding (Only active while console is open, this command will not print anything):
 
-````commandline
+````bash
 ssh -N -L 6006:localhost:6006 slurmmaster-ls6
 ````
 Then connect to Tensorboard by going to [localhost:6006]()
+
+Copy the following into the search field inside tensorboard to display relevant metrics (or manually select and pin them)
+````commandline
+loss|auc|base_lr|map|accuracy
+````
+When the plots seem to be cut off, uncheck ``ignore outliers`` and set ``smoothing`` to 0.
+## Set up git via SSH
+Create ssh key on server (Confirm filename, password etc. with enter => default values)
+````commandline
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+````
+Copy SSH key and add it to gitlab
+````commandline
+cat ~/.ssh/id_rsa.pub
+````
+## Basic Linux commands
+Remove file
+````commandline
+rm filename
+````
+
+Remove directory and contents
+````commandline
+rm -r directory
+````
+
+Show only files currently staged to be committed:
+````commandline
+git diff --cached --name-only
+````
