@@ -46,6 +46,9 @@ Copy the following into the search field inside tensorboard to display relevant 
 loss|auc|base_lr|map|accuracy
 ````
 When the plots seem to be cut off, uncheck ``ignore outliers`` and set ``smoothing`` to 0.
+
+Sometimes tensorboard crashes but keeps blocking the port, in this case use ``lsof -i :6006`` to check which process is blocking the
+port then use ``kill -9 <PID>``
 ## Set up git via SSH
 Create ssh key on server (Confirm filename, password etc. with enter => default values)
 ````commandline
