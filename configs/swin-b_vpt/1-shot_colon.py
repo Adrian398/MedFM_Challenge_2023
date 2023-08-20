@@ -22,7 +22,7 @@ model = dict(
         type='PromptedSwinTransformer',
         prompt_length=vpl,
         arch='base',
-        img_size=384,
+        img_size=480,
         init_cfg=dict(
             type='Pretrained',
             checkpoint=
@@ -42,7 +42,7 @@ train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='RandomResizedCrop',
-        scale=384,
+        scale=480,
         backend='pillow',
         interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
@@ -90,5 +90,5 @@ default_hooks = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=125, max_epochs=1500)
+train_cfg = dict(by_epoch=True, val_interval=50, max_epochs=300)
 
