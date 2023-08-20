@@ -72,11 +72,6 @@ test_pipeline = [
     dict(type='PackInputs'),
 ]
 
-default_hooks = dict(
-    checkpoint = dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
-    logger=dict(interval=50),
-)
-
 # optim_wrapper = dict(optimizer=dict(lr=lr))
 
 val_evaluator = [
