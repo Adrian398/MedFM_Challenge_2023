@@ -26,7 +26,6 @@ model = dict(
         drop_rate=0.1,
         arch='base',
         img_size=384,
-        #frozen_stages=4,
         init_cfg=dict(
             type='Pretrained',
             checkpoint=
@@ -78,6 +77,7 @@ train_pipeline = [
 
 train_dataloader = dict(
     batch_size=train_bs,
+    num_workers=4,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
 
@@ -97,13 +97,8 @@ test_pipeline = [
     dict(type='PackInputs'),
 ]
 
-# optim_wrapper = dict(optimizer=dict(lr=lr))
-
 val_evaluator = [
     dict(type='AveragePrecision'),
-    #dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
-    #dict(type='MultiLabelMetric', average='micro'),  # overall mean
-    #dict(type='Accuracy', topk=(1,)),
     dict(type='AUC')
 ]
 test_evaluator = val_evaluator
@@ -147,7 +142,7 @@ param_scheduler = [
 ]
 
 param_scheduler = [
-    dict(type='MultiStepLR', by_epoch=True, milestones=[1, 2])
+    dict(type='MultiStepLR', by_epoch=True, verbose=True, gamma=0.01)
 ]
 
 train_cfg = dict(by_epoch=True, val_interval=100, max_epochs=1000)
