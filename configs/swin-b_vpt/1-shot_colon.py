@@ -6,9 +6,9 @@ _base_ = [
 ]
 
 warmup_lr = 1e-3
-lr = 0.005
+lr = 0.0005
 cos_end_lr = 1e-5
-train_bs = 16
+train_bs = 4
 vpl = 5
 dataset = 'colon'
 model_name = 'swin'
@@ -24,22 +24,29 @@ model = dict(
         type='PromptedSwinTransformer',
         prompt_length=vpl,
         drop_rate=0.1,
-        arch='base',
+        arch='small',
         img_size=384,
         init_cfg=dict(
             type='Pretrained',
-            checkpoint=
-            'https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
+            #checkpoint='https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
+            checkpoint='https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_small_224_b16x64_300e_imagenet_20210615_110219-7f9d988b.pth',
             prefix='backbone',
         ),
         stage_cfgs=dict(block_cfgs=dict(window_size=12))),
     neck=None,
+    #head=dict(
+    #    type='LinearClsHead',
+    #    num_classes=2,
+    #    in_channels=1024,
+    #    loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
+    #)
     head=dict(
         type='LinearClsHead',
-        num_classes=2,
-        in_channels=1024,
-        loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
-    ))
+        num_classes=1,  # Only one class for binary classification when using BCEWithLogitsLoss
+        in_channels=1024,  # This might change based on the backbone you use
+        loss=dict(type='BCEWithLogitsLoss', loss_weight=1.0),
+    )
+)
 
 bgr_mean = [103.53, 116.28, 123.675]
 bgr_std = [57.375, 57.12, 58.395]
@@ -57,10 +64,10 @@ train_pipeline = [
     dict(
         type='RandAugment',
         policies='timm_increasing',
-        num_policies=2,
+        num_policies=4,
         total_level=10,
-        magnitude_level=9,
-        magnitude_std=0.5,
+        magnitude_level=10,
+        magnitude_std=0.7,
         hparams=dict(pad_val=[round(x) for x in bgr_mean], interpolation='bicubic')
     ),
     dict(
@@ -114,9 +121,27 @@ optim_wrapper = dict(
     optimizer=dict(
         type='AdamW',
         lr=lr,
-        weight_decay=0.005,
+        weight_decay=0.01,
         eps=1e-8,
         betas=(0.9, 0.999)),
+    paramwise_cfg=dict(
+        norm_decay_mult=0.0,
+        bias_decay_mult=0.0,
+        flat_decay_mult=0.0,
+        custom_keys={
+            '.absolute_pos_embed': dict(decay_mult=0.0),
+            '.relative_position_bias_table': dict(decay_mult=0.0)
+        }),
+)
+
+optim_wrapper = dict(
+    optimizer=dict(
+        type='SGD',
+        lr=lr,
+        momentum=0.9,  # Commonly used value
+        weight_decay=0.01,  # You might adjust this based on earlier discussion
+    ),
+    clip_grad=dict(max_norm=5.0),
     paramwise_cfg=dict(
         norm_decay_mult=0.0,
         bias_decay_mult=0.0,
@@ -134,11 +159,6 @@ param_scheduler = [
         by_epoch=True,
         end=10
     ),
-    dict(type='MultiStepLR',
-         milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
-         by_epoch=True,
-         gamma=0.1,
-         begin=10),
     #dict(
     #    type='CosineAnnealingLR',
     #    eta_min=cos_end_lr,
@@ -150,7 +170,16 @@ param_scheduler = [
     dict(type='MultiStepLR',
          milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
          by_epoch=True,
-         gamma=0.1)
+         gamma=0.5)
+]
+
+param_scheduler = [
+    dict(
+        type='CosineAnnealingWarmRestarts',
+        T_0=10,    # Number of epochs for the first run before the restart
+        T_mult=2,  # Multiplier for increasing T_0 after each restart
+        eta_min=cos_end_lr,  # Minimum learning rate. You can use your cos_end_lr here.
+    )
 ]
 
 train_cfg = dict(by_epoch=True, val_interval=100, max_epochs=1000)
