@@ -6,9 +6,9 @@ _base_ = [
 ]
 
 warmup_lr = 1e-3
-lr = 5e-2
+lr = 5e-3
 cos_end_lr = 1e-5
-train_bs = 8
+train_bs = 32
 vpl = 5
 dataset = 'colon'
 model_name = 'swin'
@@ -120,7 +120,7 @@ param_scheduler = [
         by_epoch=True,
         end=20,
         # update by iter
-        convert_to_iter_based=True),
+        convert_to_iter_based=False),
     # main learning rate scheduler
     dict(
          type='CosineAnnealingLR',
@@ -130,3 +130,4 @@ param_scheduler = [
 ]
 
 train_cfg = dict(by_epoch=True, val_interval=100, max_epochs=1000)
+auto_scale_lr = dict(base_batch_size=1024, enable=False)
