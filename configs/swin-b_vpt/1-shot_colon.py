@@ -44,7 +44,7 @@ train_pipeline = [
         interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
-    dict(type='ColorJitter', hue=0.1, brightness=0.2, contrast=0.2, saturation=0.2),
+    dict(type='ColorJitter', hue=0.3, brightness=0.4, contrast=0.4, saturation=0.4),
     dict(type='PackInputs'),
 ]
 
