@@ -1,3 +1,5 @@
+from datetime import datetime
+
 _base_ = [
     '../datasets/colon.py',
     '../swin_schedule.py',
@@ -6,12 +8,16 @@ _base_ = [
 ]
 
 lr = 5e-2
-n = 1
+train_bs = 8
 vpl = 5
 dataset = 'colon'
+model_name = 'swin'
+timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
 exp_num = 1
 nshot = 1
-run_name = f'in21k-swin-b_vpt-{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}'
+
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_{timestamp}'
+work_dir = f'work_dirs/colon/{nshot}/{run_name}'
 
 model = dict(
     type='ImageClassifier',
@@ -49,7 +55,7 @@ train_pipeline = [
 
 
 train_dataloader = dict(
-    batch_size=8,
+    batch_size=train_bs,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
 
@@ -69,14 +75,12 @@ test_pipeline = [
     dict(type='PackInputs'),
 ]
 
-# optim_wrapper = dict(optimizer=dict(lr=lr))
-
 default_hooks = dict(
     checkpoint = dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
     logger=dict(interval=50),
 )
 
-work_dir = f'work_dirs/swin-b/exp{exp_num}/{run_name}'
+# optim_wrapper = dict(optimizer=dict(lr=lr))
 
 from configs.colon_config import *
 
