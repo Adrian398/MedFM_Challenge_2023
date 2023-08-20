@@ -6,7 +6,7 @@ _base_ = [
 ]
 
 warmup_lr = 1e-3
-lr = 5e-3
+lr = 0.005
 cos_end_lr = 1e-5
 train_bs = 16
 vpl = 5
@@ -131,21 +131,25 @@ param_scheduler = [
     dict(
         type='LinearLR',
         start_factor=0.001,
-        by_epoch=False,
-        end=50
+        by_epoch=True,
+        end=10
     ),
-    dict(
-        type='CosineAnnealingLR',
-        eta_min=cos_end_lr,
-        by_epoch=False,
-        begin=50)
+    dict(type='MultiStepLR',
+         milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
+         by_epoch=True,
+         gamma=0.1,
+         begin=10),
+    #dict(
+    #    type='CosineAnnealingLR',
+    #    eta_min=cos_end_lr,
+    #    by_epoch=False,
+    #    begin=50)
 ]
 
 param_scheduler = [
     dict(type='MultiStepLR',
          milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
          by_epoch=True,
-         verbose=True,
          gamma=0.1)
 ]
 
