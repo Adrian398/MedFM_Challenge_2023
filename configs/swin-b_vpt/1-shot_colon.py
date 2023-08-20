@@ -24,7 +24,7 @@ model = dict(
         type='PromptedSwinTransformer',
         prompt_length=vpl,
         arch='base',
-        img_size=480,
+        img_size=384,
         init_cfg=dict(
             type='Pretrained',
             checkpoint=
@@ -44,7 +44,7 @@ train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='RandomResizedCrop',
-        scale=480,
+        scale=384,
         backend='pillow',
         interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
