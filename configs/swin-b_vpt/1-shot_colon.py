@@ -26,7 +26,7 @@ model = dict(
             'https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
             prefix='backbone',
         ),
-        stage_cfgs=dict(block_cfgs=dict(window_size=12))),
+        stage_cfgs=dict(block_cfgs=dict(window_size=24))),
     neck=None,
     head=dict(
         type='LinearClsHead',
@@ -44,7 +44,6 @@ train_pipeline = [
         interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
-    dict(type='ColorJitter', hue=0.3, brightness=0.4, contrast=0.4, saturation=0.4),
     dict(type='PackInputs'),
 ]
 
@@ -55,7 +54,7 @@ train_dataloader = dict(
 )
 
 val_dataloader = dict(
-    batch_size=128,
+    batch_size=256,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
 )
 
