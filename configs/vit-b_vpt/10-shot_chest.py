@@ -5,11 +5,10 @@ _base_ = [
     '../custom_imports.py',
 ]
 
-
 lr = 5e-3
 vpl = 1  
 dataset = 'chest'
-exp_num = 1
+exp_num = 2
 nshot = 10
 run_name = f'vit-b_{nshot}-shot_ptokens-{vpl}_{dataset}'
 
@@ -61,7 +60,8 @@ train_pipeline = [
 
 train_dataloader = dict(
     batch_size=4, 
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
+                 pipeline=train_pipeline),
 )
 
 val_dataloader = dict(
@@ -82,3 +82,5 @@ default_hooks = dict(
 )
 
 work_dir = f'work_dirs/vit-b/exp{exp_num}/{run_name}'
+
+from configs.chest_config import *

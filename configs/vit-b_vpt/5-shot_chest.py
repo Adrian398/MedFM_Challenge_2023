@@ -8,7 +8,7 @@ _base_ = [
 lr = 5e-3
 vpl = 1
 dataset = 'chest'
-exp_num = 1
+exp_num = 2
 nshot = 5
 run_name = f'vit-b_{nshot}-shot_ptokens-{vpl}_{dataset}'
 
@@ -83,3 +83,4 @@ default_hooks = dict(
 
 work_dir = f'work_dirs/vit-b/exp{exp_num}/{run_name}'
 
+from configs.chest_config import *

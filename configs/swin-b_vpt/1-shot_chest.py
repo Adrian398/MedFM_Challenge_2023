@@ -9,7 +9,7 @@ lr = 5e-3
 n = 1
 vpl = 5
 dataset = 'chest'
-exp_num = 1
+exp_num = 2
 nshot = 1
 run_name = f'in21k-swin-b_vpt-{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}'
 
