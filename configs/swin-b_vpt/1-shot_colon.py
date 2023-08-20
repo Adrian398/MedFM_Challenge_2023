@@ -43,6 +43,8 @@ train_pipeline = [
         backend='pillow',
         interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(type='RandomFlip', prob=0.5, direction='vertical'),
+    dict(type='ColorJitter', hue=0.1, brightness=0.2, contrast=0.2, saturation=0.2),
     dict(type='PackInputs'),
 ]
 
