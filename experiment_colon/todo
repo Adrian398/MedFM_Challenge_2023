@@ -1,0 +1,6 @@
+- figure out a good checkpoint resume workflow with the same lr/etc.
+- analyze all images of positive tumor patient
+- try different learning rate strategies
+- try different adam optimizer parameters
+- try different learning rates
+- try different optimizers
