@@ -3,6 +3,7 @@ import argparse
 import os
 import os.path as osp
 from copy import deepcopy
+from datetime import datetime
 
 from mmengine.config import Config, ConfigDict, DictAction
 from mmengine.runner import Runner
@@ -147,6 +148,10 @@ def main():
 
     # merge cli arguments to config
     cfg = merge_args(cfg, args)
+
+    # append timestamp to workdir
+    timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
+    cfg.work_dir = cfg.work_dir + timestamp
 
     # build the runner from config
     runner = Runner.from_cfg(cfg)

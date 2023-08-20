@@ -1,5 +1,3 @@
-from datetime import datetime
-
 _base_ = [
     '../datasets/colon.py',
     '../swin_schedule.py',
@@ -12,11 +10,10 @@ train_bs = 8
 vpl = 5
 dataset = 'colon'
 model_name = 'swin'
-timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
 exp_num = 1
 nshot = 1
 
-run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_{timestamp}'
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
 work_dir = f'work_dirs/colon/{nshot}-shot/{run_name}'
 
 model = dict(

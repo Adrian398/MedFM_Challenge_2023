@@ -5,14 +5,16 @@ _base_ = [
     '../custom_imports.py',
 ]
 
-
 lr = 5e-2
-n = 1
+train_bs = 8
 vpl = 5
 dataset = 'colon'
+model_name = 'swin'
 exp_num = 1
 nshot = 10
-run_name = f'in21k-swin-b_vpt-{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}'
+
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
+work_dir = f'work_dirs/colon/{nshot}-shot/{run_name}'
 
 model = dict(
     type='ImageClassifier',
@@ -50,7 +52,7 @@ train_pipeline = [
 
 
 train_dataloader = dict(
-    batch_size=8,
+    batch_size=train_bs,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
 
@@ -64,14 +66,18 @@ test_dataloader = dict(
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
 )
 
-# optim_wrapper = dict(optimizer=dict(lr=lr))
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='Resize', scale=384, backend='pillow', interpolation='bicubic'),
+    dict(type='PackInputs'),
+]
 
 default_hooks = dict(
     checkpoint = dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
     logger=dict(interval=50),
 )
 
-work_dir = f'work_dirs/swin-b/exp{exp_num}/{run_name}'
+# optim_wrapper = dict(optimizer=dict(lr=lr))
 
 from configs.colon_config import *
 
