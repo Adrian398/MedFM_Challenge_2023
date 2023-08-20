@@ -8,7 +8,7 @@ _base_ = [
 lr = 5e-3
 vpl = 1
 dataset = 'chest'
-exp_num = 1
+exp_num = 2
 nshot = 1
 run_name = f'vit-b_{nshot}-shot_ptokens-{vpl}_{dataset}'
 

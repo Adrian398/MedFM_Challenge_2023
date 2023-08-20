@@ -5,7 +5,7 @@ _base_ = [
     '../custom_imports.py',
 ]
 
-lr = 5e-2
+lr = 5e-3
 n = 1
 vpl = 5
 dataset = 'chest'
