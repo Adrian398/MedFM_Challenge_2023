@@ -7,7 +7,7 @@ _base_ = [
 
 lr = 5e-2
 n = 1
-vpl = 5
+vpl = 50
 dataset = 'colon'
 exp_num = 1
 nshot = 1
@@ -26,7 +26,7 @@ model = dict(
             'https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
             prefix='backbone',
         ),
-        stage_cfgs=dict(block_cfgs=dict(window_size=24))),
+        stage_cfgs=dict(block_cfgs=dict(window_size=12))),
     neck=None,
     head=dict(
         type='LinearClsHead',
