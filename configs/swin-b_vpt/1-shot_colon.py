@@ -122,7 +122,7 @@ param_scheduler = [
         # update by iter
         convert_to_iter_based=True),
     # main learning rate scheduler
-    dict(optim_wrapper=optim_wrapper,
+    dict(
          type='CosineAnnealingLR',
          eta_min=cos_end_lr,
          by_epoch=True,
