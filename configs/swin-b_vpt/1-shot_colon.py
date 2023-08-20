@@ -48,12 +48,12 @@ train_pipeline = [
 
 
 train_dataloader = dict(
-    batch_size=1,
+    batch_size=8,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
 
 val_dataloader = dict(
-    batch_size=32,
+    batch_size=128,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
 )
 
@@ -68,7 +68,7 @@ test_pipeline = [
     dict(type='PackInputs'),
 ]
 
-optim_wrapper = dict(optimizer=dict(lr=lr))
+# optim_wrapper = dict(optimizer=dict(lr=lr))
 
 default_hooks = dict(
     checkpoint = dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
