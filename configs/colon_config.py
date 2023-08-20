@@ -9,9 +9,9 @@ test_evaluator = val_evaluator
 
 default_hooks = dict(
     checkpoint=dict(type='CheckpointHook', interval=50, max_keep_ckpts=2, save_best="auto"),
-    logger=dict(interval=50),
+    logger=dict(interval=5),
 )
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=50, max_epochs=250)
+train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
