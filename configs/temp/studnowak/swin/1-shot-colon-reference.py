@@ -40,6 +40,7 @@ train_pipeline = [
 
 train_dataloader = dict(
     batch_size=train_bs,
+    num_workers=2,
     dataset=dict(ann_file=f'data_anns/MedFMC/{task}/{task}_{n_shot}-shot_train_exp{exp_num}.txt',
                  data_prefix=data_prefix,
                  type=dataset_type,
