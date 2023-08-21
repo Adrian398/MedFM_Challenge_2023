@@ -53,7 +53,7 @@ train_pipeline = [
         fill_std=bgr_std),
     dict(
         type='Resize',
-        size=(384, 384),
+        scale=(0.8, 1.0),
         backend='pillow',
         interpolation='bicubic'
     ),
