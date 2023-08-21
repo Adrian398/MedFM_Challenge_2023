@@ -6,7 +6,7 @@ _base_ = [
 ]
 
 warmup_lr = 1e-3
-lr = 1e-3
+lr = 5e-4
 cos_end_lr = 1e-5
 train_bs = 4
 vpl = 5
@@ -57,9 +57,9 @@ train_pipeline = [
     dict(
         type='RandAugment',
         policies='timm_increasing',
-        num_policies=4,
+        num_policies=2,
         total_level=10,
-        magnitude_level=10,
+        magnitude_level=8,
         magnitude_std=0.7,
         hparams=dict(pad_val=[round(x) for x in bgr_mean], interpolation='bicubic')
     ),
@@ -161,12 +161,12 @@ optim_wrapper = dict(
 #        begin=1)
 # ]
 
-param_scheduler = [
-    dict(type='MultiStepLR',
-         milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
-         by_epoch=True,
-         gamma=0.5)
-]
+# param_scheduler = [
+#     dict(type='MultiStepLR',
+#          milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
+#          by_epoch=True,
+#          gamma=0.5)
+# ]
 
 train_cfg = dict(by_epoch=True, val_interval=100, max_epochs=1000)
 auto_scale_lr = dict(base_batch_size=1024, enable=False)
