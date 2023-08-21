@@ -118,41 +118,41 @@ default_hooks = dict(
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
 
-# optim_wrapper = dict(
-#     optimizer=dict(
-#         type='AdamW',
-#         lr=lr,
-#         weight_decay=0.01,
-#         eps=1e-8,
-#         betas=(0.9, 0.999)),
-#     paramwise_cfg=dict(
-#         norm_decay_mult=0.0,
-#         bias_decay_mult=0.0,
-#         flat_decay_mult=0.0,
-#         custom_keys={
-#             '.absolute_pos_embed': dict(decay_mult=0.0),
-#             '.relative_position_bias_table': dict(decay_mult=0.0)
-#         }),
-# )
-
 optim_wrapper = dict(
-    type='OptimWrapper',
     optimizer=dict(
-        type='SGD',
+        type='AdamW',
         lr=lr,
-        momentum=0.9,  # Commonly used value
-        weight_decay=0.01,  # You might adjust this based on earlier discussion
-    ),
-    #clip_grad=dict(max_norm=5.0),
-    #paramwise_cfg=dict(
-    #    norm_decay_mult=0.0,
-    #    bias_decay_mult=0.0,
-    #    flat_decay_mult=0.0,
-    #    custom_keys={
-    #        '.absolute_pos_embed': dict(decay_mult=0.0),
-    #        '.relative_position_bias_table': dict(decay_mult=0.0)
-    #    }),
+        weight_decay=0.01,
+        eps=1e-8,
+        betas=(0.9, 0.999)),
+    paramwise_cfg=dict(
+        norm_decay_mult=0.0,
+        bias_decay_mult=0.0,
+        flat_decay_mult=0.0,
+        custom_keys={
+            '.absolute_pos_embed': dict(decay_mult=0.0),
+            '.relative_position_bias_table': dict(decay_mult=0.0)
+        }),
 )
+
+# optim_wrapper = dict(
+#     type='OptimWrapper',
+#     optimizer=dict(
+#         type='SGD',
+#         lr=lr,
+#         momentum=0.9,  # Commonly used value
+#         weight_decay=0.01,  # You might adjust this based on earlier discussion
+#     ),
+#     #clip_grad=dict(max_norm=5.0),
+#     #paramwise_cfg=dict(
+#     #    norm_decay_mult=0.0,
+#     #    bias_decay_mult=0.0,
+#     #    flat_decay_mult=0.0,
+#     #    custom_keys={
+#     #        '.absolute_pos_embed': dict(decay_mult=0.0),
+#     #        '.relative_position_bias_table': dict(decay_mult=0.0)
+#     #    }),
+# )
 
 param_scheduler = [
     dict(
