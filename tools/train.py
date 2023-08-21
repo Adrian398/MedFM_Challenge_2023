@@ -64,6 +64,15 @@ def parse_args():
     # will pass the `--local-rank` parameter to `tools/train.py` instead
     # of `--local_rank`.
     parser.add_argument('--local_rank', '--local-rank', type=int, default=0)
+
+    ########################################################################################
+    # CUSTOM ARGUMENTS GO HERE
+    parser.add_argument('--dir_prefix', type=str,
+                        default='/scratch/medfm/', help='Prefix for work_dir and data')
+    parser.add_argument('--remove_timestamp',
+                        action='store_false', help='Remove timestamp from work_dir')
+    ########################################################################################
+
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
@@ -140,6 +149,27 @@ def merge_args(cfg, args):
     return cfg
 
 
+def merge_custom_args(cfg, args):
+    """ Merge our custom CLI arguments to config - seperated for readability"""
+
+    # append timestamp to workdir
+    if not args.remove_timestamp:
+        timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
+        cfg.work_dir = cfg.work_dir + timestamp
+
+    # add prefix to workdir and dataset
+    if args.dir_prefix is not None:
+        cfg.work_dir = os.path.join(args.dir_prefix, cfg.work_dir)
+        cfg.train_dataloader.dataset.data_prefix = os.path.join(args.dir_prefix,
+                                                                cfg.train_dataloader.dataset.data_prefix)
+        cfg.val_dataloader.dataset.data_prefix = os.path.join(args.dir_prefix,
+                                                              cfg.val_dataloader.dataset.data_prefix)
+        cfg.test_dataloader.dataset.data_prefix = os.path.join(args.dir_prefix,
+                                                               cfg.test_dataloader.dataset.data_prefix)
+
+    return cfg
+
+
 def main():
     args = parse_args()
 
@@ -149,9 +179,8 @@ def main():
     # merge cli arguments to config
     cfg = merge_args(cfg, args)
 
-    # append timestamp to workdir
-    timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
-    cfg.work_dir = cfg.work_dir + timestamp
+    # merge our custom cli arguments to config
+    cfg = merge_custom_args(cfg, args)
 
     # build the runner from config
     runner = Runner.from_cfg(cfg)
