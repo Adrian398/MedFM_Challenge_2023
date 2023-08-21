@@ -1,7 +1,7 @@
 _base_ = [
     'mmpretrain::_base_/models/swin_transformer_v2/base_384.py',
     '../datasets/colon.py',
-    '../swin_schedule.py',
+    'mmpretrain::_base_/schedules/imagenet_bs1024_adamw_swin.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py'
 ]
@@ -22,7 +22,15 @@ model = dict(
         img_size=384,
         window_size=[24, 24, 24, 12],
         drop_path_rate=0.2,
-        pretrained_window_sizes=[12, 12, 12, 6]))
+        pretrained_window_sizes=[12, 12, 12, 6]),
+    neck=None,
+    head=dict(
+        type='LinearClsHead',
+        num_classes=2,
+        in_channels=1024,
+        loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
+    )
+)
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
