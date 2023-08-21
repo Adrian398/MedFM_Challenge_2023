@@ -161,11 +161,11 @@ param_scheduler = [
         by_epoch=True,
         end=10
     ),
-    #dict(
-    #    type='CosineAnnealingLR',
-    #    eta_min=cos_end_lr,
-    #    by_epoch=False,
-    #    begin=50)
+    dict(
+       type='CosineAnnealingLR',
+       eta_min=cos_end_lr,
+       by_epoch=True,
+       begin=10)
 ]
 
 # param_scheduler = [
@@ -174,15 +174,6 @@ param_scheduler = [
 #          by_epoch=True,
 #          gamma=0.5)
 # ]
-
-param_scheduler = [
-    dict(
-        type='CosineAnnealingWarmRestarts',
-        T_0=10,    # Number of epochs for the first run before the restart
-        T_mult=2,  # Multiplier for increasing T_0 after each restart
-        eta_min=cos_end_lr,  # Minimum learning rate. You can use your cos_end_lr here.
-    )
-]
 
 train_cfg = dict(by_epoch=True, val_interval=100, max_epochs=1000)
 auto_scale_lr = dict(base_batch_size=1024, enable=False)
