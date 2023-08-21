@@ -7,7 +7,7 @@ _base_ = [
     '../custom_imports.py'
 ]
 
-lr = ''
+lr = 0.05
 train_bs = 8
 dataset = 'colon'
 model_name = 'swinv2'
@@ -50,7 +50,6 @@ train_pipeline = [
         backend='pillow',
         interpolation='bicubic'
     ),
-    #dict(type='RandomGrayscale', prob=0.2, keep_channels=True),
     dict(type='PackInputs'),
 ]
 
@@ -92,3 +91,25 @@ default_hooks = dict(
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
 train_cfg = dict(by_epoch=True, val_interval=50, max_epochs=1000)
+
+optimizer = dict(
+        type='AdamW',
+        lr=lr,
+        weight_decay=0.01,
+        eps=1e-8,
+        betas=(0.9, 0.999)
+)
+
+param_scheduler = [
+    dict(
+        type='LinearLR',
+        start_factor=1e-3,
+        by_epoch=True,
+        end=1
+    ),
+    dict(
+       type='CosineAnnealingLR',
+       eta_min=1e-5,
+       by_epoch=True,
+       begin=1)
+]
