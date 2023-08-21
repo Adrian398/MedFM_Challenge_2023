@@ -196,6 +196,8 @@ def main():
     # merge our custom cli arguments to config
     cfg = merge_custom_args(cfg, args)
 
+    print(cfg['model']['head']['loss'])
+
     # build the runner from config
     runner = Runner.from_cfg(cfg)
 
