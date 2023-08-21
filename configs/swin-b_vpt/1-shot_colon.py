@@ -69,7 +69,6 @@ train_pipeline = [
         scale=224,
         backend='pillow',
         interpolation='bicubic'),
-    dict(type='RandomPatchWithLabels'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomGrayscale', prob=0.5, keep_channels=True),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
