@@ -1,6 +1,7 @@
 _base_ = [
     '../datasets/colon.py',
     '../swin_schedule.py',
+    '../_base_/models/swin_transformer_v2/base_384.py',
     #'mmpretrain::_base_/schedules/imagenet_bs1024_adamw_swin.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py'
@@ -19,7 +20,7 @@ work_dir = f'work_dirs/colon/{nshot}-shot/{run_name}'
 model = dict(
     type='ImageClassifier',
     backbone=dict(
-        type='PromptedSwinTransformer',
+        #type='PromptedSwinTransformer',
         prompt_length=5,
         img_size=384,
         init_cfg=dict(
@@ -29,7 +30,8 @@ model = dict(
             prefix='backbone',
         ),
         window_size=[24, 24, 24, 12],
-        drop_path_rate=0.2),
+        drop_path_rate=0.2,
+        pretrained_window_sizes=[12, 12, 12, 6]),
     neck=None,
     head=dict(
         type='LinearClsHead',
