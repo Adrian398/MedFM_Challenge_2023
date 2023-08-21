@@ -27,7 +27,7 @@ model = dict(
             'https://download.openmmlab.com/mmclassification/v0/swin-v2/swinv2-base-w24_in21k-pre_3rdparty_in1k-384px_20220803-44eb70f8.pth',
             prefix='backbone',
         ),
-        window_size=[24, 24, 24, 12],
+        window_size=[24, 24, 24, 8],
         drop_path_rate=0.2,
         pretrained_window_sizes=[12, 12, 12, 6]),
     neck=None,
