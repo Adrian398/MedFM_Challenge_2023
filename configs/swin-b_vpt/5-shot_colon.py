@@ -29,7 +29,7 @@ model = dict(
             'https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
             prefix='backbone',
         ),
-        stage_cfgs=dict(block_cfgs=dict(window_size=7))),
+        stage_cfgs=dict(block_cfgs=dict(window_size=12))),
     neck=None,
     head=dict(
         type='LinearClsHead',
