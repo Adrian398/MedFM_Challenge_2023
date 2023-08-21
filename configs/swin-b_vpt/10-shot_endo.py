@@ -41,8 +41,9 @@ model = dict(
         in_channels=1024,
     ))
 
-bgr_mean = [103.53, 116.28, 123.675]
-bgr_std = [57.375, 57.12, 58.395]
+#add endo std diviation
+bgr_mean = [123.675, 116.28, 103.53]
+bgr_std = [58.395, 57.12, 57.375]
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
