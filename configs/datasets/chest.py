@@ -61,5 +61,14 @@ test_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
 
-val_evaluator =  [dict(type='AveragePrecision'), dict(type='AUC', multilabel=True)]
+val_evaluator = [
+    dict(type='AveragePrecision'),
+    dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
+    dict(type='MultiLabelMetric', average='micro'),  # overall mean
+    dict(type='AUC', multilabel=True)]
 test_evaluator = val_evaluator
+
+visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
+
+train_cfg = dict(by_epoch=True, val_interval=1, max_epochs=500)
+
