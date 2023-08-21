@@ -43,7 +43,7 @@ model = dict(
     head=dict(
         type='LinearClsHead',
         num_classes=2,
-        in_channels=1024,
+        in_channels=768,
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
     )
 )
