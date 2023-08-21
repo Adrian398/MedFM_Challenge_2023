@@ -60,13 +60,13 @@ train_pipeline = [
 
 train_dataloader = dict(
     batch_size=train_bs,
-    num_workers=16,
+    num_workers=1,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
                  pipeline=train_pipeline),
 )
 
 val_dataloader = dict(
-    batch_size=32,
+    batch_size=8,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
 )
 
