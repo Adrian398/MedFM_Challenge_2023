@@ -7,7 +7,7 @@ _base_ = [
 ]
 
 lr = ''
-train_bs = 2
+train_bs = 16
 dataset = 'colon'
 model_name = 'swinv2'
 exp_num = 1
@@ -19,8 +19,7 @@ work_dir = f'work_dirs/colon/{nshot}-shot/{run_name}'
 model = dict(
     type='ImageClassifier',
     backbone=dict(
-        #type='PromptedSwinTransformer',
-        img_size=1024,
+        img_size=384,
         init_cfg=dict(
             type='Pretrained',
             checkpoint=
@@ -39,14 +38,35 @@ model = dict(
     )
 )
 
+bgr_mean = [103.53, 116.28, 123.675]
+bgr_std = [57.375, 57.12, 58.395]
+
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
+        type='RandomErasing',
+        erase_prob=0.25,
+        mode='rand',
+        min_area_ratio=0.02,
+        max_area_ratio=1 / 3,
+        fill_color=bgr_mean,
+        fill_std=bgr_std),
+    dict(
         type='Resize',
-        size=(1024, 1024),
+        size=(384, 384),
         backend='pillow',
         interpolation='bicubic'
     ),
+    dict(
+        type='RandAugment',
+        policies='timm_increasing',
+        num_policies=2,
+        total_level=10,
+        magnitude_level=8,
+        magnitude_std=0.7,
+        hparams=dict(pad_val=[round(x) for x in bgr_mean], interpolation='bicubic')
+    ),
+    dict(type='RandomGrayscale', prob=0.5, keep_channels=True),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
@@ -55,7 +75,10 @@ train_pipeline = [
 train_dataloader = dict(
     batch_size=train_bs,
     num_workers=4,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
+    dataset=dict(
+        ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
+        pipeline=train_pipeline
+    )
 )
 
 val_dataloader = dict(
@@ -66,9 +89,6 @@ val_dataloader = dict(
 
 val_evaluator = [
     dict(type='AveragePrecision'),
-    dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
-    dict(type='MultiLabelMetric', average='micro'),  # overall mean
-    dict(type='Accuracy', topk=(1,)),
     dict(type='AUC')
 ]
 test_evaluator = val_evaluator
