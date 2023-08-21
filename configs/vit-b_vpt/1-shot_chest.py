@@ -1,6 +1,6 @@
 _base_ = [
     '../datasets/chest.py',
-    '../swin_schedule.py',
+    '../schedules/chest.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
 ]
@@ -12,7 +12,7 @@ exp_num = 2
 nshot = 1
 
 run_name = f'vit-b_{nshot}-shot_ptokens-{vpl}_{dataset}'
-work_dir = f'/scratch/medfm/work_dirs/chest/{nshot}-shot/{run_name}'
+work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'
 
 model = dict(
     type='ImageClassifier',
@@ -58,3 +58,5 @@ default_hooks = dict(
     checkpoint = dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
     logger=dict(interval=50),
 )
+
+visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])

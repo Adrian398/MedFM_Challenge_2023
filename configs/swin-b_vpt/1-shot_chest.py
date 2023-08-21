@@ -1,5 +1,6 @@
 _base_ = [
     '../datasets/chest.py',
+    '../schedules/chest.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
 ]
@@ -58,5 +59,4 @@ default_hooks = dict(
     logger=dict(interval=50),
 )
 
-# visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
-
+visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
