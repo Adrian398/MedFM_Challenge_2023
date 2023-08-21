@@ -25,7 +25,7 @@ model = dict(
         prompt_length=vpl,
         drop_rate=0.1,
         arch='small',
-        img_size=384,
+        img_size=224,
         init_cfg=dict(
             type='Pretrained',
             #checkpoint='https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
@@ -72,7 +72,7 @@ train_pipeline = [
     ),
     dict(
         type='RandomResizedCrop',
-        scale=255,
+        scale=224,
         backend='pillow',
         interpolation='bicubic'),
     dict(type='RandomPatchWithLabels'),
