@@ -75,7 +75,7 @@ def parse_args():
     parser.add_argument('--dir_prefix', type=str,
                         default='/scratch/medfm/medfm-challenge/', help='Prefix for work_dir and data')
     parser.add_argument('--remove_timestamp',
-                        action='store_false', help='Remove timestamp from work_dir')
+                        action='store_true', help='Remove timestamp from work_dir')
     ########################################################################################
 
     args = parser.parse_args()
