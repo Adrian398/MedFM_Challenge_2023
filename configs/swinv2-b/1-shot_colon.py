@@ -113,3 +113,6 @@ param_scheduler = [
        by_epoch=True,
        begin=1)
 ]
+
+auto_scale_lr = dict(base_batch_size=1024, enable=False)
+
