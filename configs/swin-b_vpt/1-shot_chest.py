@@ -11,7 +11,10 @@ vpl = 5
 dataset = 'chest'
 exp_num = 2
 nshot = 1
+
 run_name = f'in21k-swin-b_vpt-{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}'
+work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'
+
 
 model = dict(
     type='ImageClassifier',

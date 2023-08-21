@@ -10,7 +10,9 @@ vpl = 1
 dataset = 'chest'
 exp_num = 2
 nshot = 1
+
 run_name = f'vit-b_{nshot}-shot_ptokens-{vpl}_{dataset}'
+work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'
 
 # dataset setting
 data_preprocessor = dict(
