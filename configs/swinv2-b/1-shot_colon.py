@@ -27,24 +27,25 @@ model = dict(
             'https://download.openmmlab.com/mmclassification/v0/swin-v2/swinv2-base-w24_in21k-pre_3rdparty_in1k-384px_20220803-44eb70f8.pth',
             prefix='backbone',
         ),
-        window_size=[24, 24, 24, 8],
+        window_size=[24, 24, 24, 12],
         drop_path_rate=0.2,
         pretrained_window_sizes=[12, 12, 12, 6]),
     neck=None,
     head=dict(
         type='LinearClsHead',
         num_classes=2,
-        in_channels=1024,
+        in_channels=12,
     )
 )
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
-        type='RandomResizedCrop',
-        scale=384,
+        type='Resize',
+        size=(384, 384),
         backend='pillow',
-        interpolation='bicubic'),
+        interpolation='bicubic'
+    ),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
