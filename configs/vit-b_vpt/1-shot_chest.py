@@ -12,15 +12,7 @@ exp_num = 2
 nshot = 1
 
 run_name = f'vit-b_{nshot}-shot_ptokens-{vpl}_{dataset}'
-work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'
-
-# dataset setting
-data_preprocessor = dict(
-    mean=[127.5, 127.5, 127.5],
-    std=[127.5, 127.5, 127.5],
-    # convert image from BGR to RGB
-    to_rgb=True,
-)
+work_dir = f'/scratch/medfm/work_dirs/chest/{nshot}-shot/{run_name}'
 
 model = dict(
     type='ImageClassifier',
@@ -66,5 +58,3 @@ default_hooks = dict(
     checkpoint = dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
     logger=dict(interval=50),
 )
-
-from configs.chest_config import *

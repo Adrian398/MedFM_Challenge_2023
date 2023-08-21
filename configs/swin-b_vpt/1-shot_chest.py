@@ -13,8 +13,7 @@ exp_num = 2
 nshot = 1
 
 run_name = f'in21k-swin-b_vpt-{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}'
-work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'
-
+work_dir = f'/scratch/medfm/work_dirs/chest/{nshot}-shot/{run_name}'
 
 model = dict(
     type='ImageClassifier',
@@ -59,6 +58,4 @@ default_hooks = dict(
     checkpoint = dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
     logger=dict(interval=50),
 )
-
-from configs.chest_config import *
 
