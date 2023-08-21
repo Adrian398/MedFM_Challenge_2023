@@ -1,7 +1,7 @@
 _base_ = [
     '../datasets/colon.py',
     '../swin_schedule.py',
-    '../_base_/models/swin_transformer_v2/base_384.py',
+    'mmpretrain::_base_/models/swin_transformer_v2/base_384.py',
     #'mmpretrain::_base_/schedules/imagenet_bs1024_adamw_swin.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py'
