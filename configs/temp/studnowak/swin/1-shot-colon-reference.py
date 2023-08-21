@@ -54,6 +54,7 @@ test_pipeline = [
 
 val_dataloader = dict(
     batch_size=64,
+    num_workers=2,
     dataset=dict(pipeline=test_pipeline,
                  data_prefix=data_prefix,
                  type=dataset_type,
@@ -62,6 +63,7 @@ val_dataloader = dict(
 
 test_dataloader = dict(
     batch_size=4,
+    num_workers=2,
     dataset=dict(
         data_prefix=data_prefix,
         type=dataset_type,
