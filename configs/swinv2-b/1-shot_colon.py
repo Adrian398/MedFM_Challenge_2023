@@ -29,8 +29,7 @@ model = dict(
             prefix='backbone',
         ),
         window_size=[24, 24, 24, 12],
-        drop_path_rate=0.2,
-        pretrained_window_sizes=[12, 12, 12, 6]),
+        drop_path_rate=0.2),
     neck=None,
     head=dict(
         type='LinearClsHead',
