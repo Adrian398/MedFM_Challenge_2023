@@ -59,6 +59,7 @@ When the plots seem to be cut off, uncheck ``ignore outliers`` and set ``smoothi
 Sometimes tensorboard crashes but keeps blocking the port, in this case use ``lsof -i :6006`` to check which process is blocking the
 port then use ``kill -9 <PID>``
 ## Set up git via SSH
+
 Create ssh key on server (Confirm filename, password etc. with enter => default values)
 ````commandline
 ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
@@ -67,6 +68,17 @@ Copy SSH key and add it to gitlab
 ````commandline
 cat ~/.ssh/id_rsa.pub
 ````
+### Before working in the dir, make sure to type
+````commandline
+umask 000
+````
+or add this line to your ./bash_profile
+### Fix files without write permission for others:
+From the root directory execute
+````commandline
+find . -user YOUR_USERNAME -exec chmod 777 {} \;
+````
+This will set full permissions for all files you own in the current directory and its subdirectories.
 ## Basic Linux commands
 Remove file
 ````commandline
