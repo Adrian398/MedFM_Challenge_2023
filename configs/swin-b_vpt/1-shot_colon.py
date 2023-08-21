@@ -31,7 +31,7 @@ model = dict(
             'https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
             prefix='backbone',
         ),
-        stage_cfgs=dict(block_cfgs=dict(window_size=12))),
+        stage_cfgs=dict(block_cfgs=dict(window_size=16))),
     neck=None,
     head=dict(
         type='LinearClsHead',
@@ -111,13 +111,16 @@ default_hooks = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-optim_wrapper = dict(
-    optimizer=dict(
+optimizer = dict(
         type='AdamW',
         lr=lr,
         weight_decay=0.05,
         eps=1e-8,
-        betas=(0.9, 0.999)),
+        betas=(0.9, 0.999)
+)
+
+optim_wrapper = dict(
+    optimizer=optimizer,
     paramwise_cfg=dict(
         norm_decay_mult=0.0,
         bias_decay_mult=0.0,
