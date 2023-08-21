@@ -116,15 +116,28 @@ optim_wrapper = dict(
             '.relative_position_bias_table': dict(decay_mult=0.0)
         }),
 )
-param_scheduler = [
-    dict(
-        policy='CosineAnnealing',  # Cosine Annealing scheduler
-        warmup='linear',  # Linear warmup helps stabilize training in the initial epochs
-        warmup_iters=1000,  # Number of iterations for warmup. You can adjust this value.
-        warmup_ratio=0.001,  # Ratio of the initial learning rate used for warmup
-        min_lr_ratio=1e-5  # Minimum learning rate value, as a ratio of the initial learning rate.
-    )
-]
+# param_scheduler = [
+#     dict(
+#         policy='CosineAnnealing',  # Cosine Annealing scheduler
+#         warmup='linear',  # Linear warmup helps stabilize training in the initial epochs
+#         warmup_iters=1000,  # Number of iterations for warmup. You can adjust this value.
+#         warmup_ratio=0.001,  # Ratio of the initial learning rate used for warmup
+#         min_lr_ratio=1e-5  # Minimum learning rate value, as a ratio of the initial learning rate.
+#     )
+#     dict(
+#        type='CosineAnnealingLR',
+#        eta_min=1e-5,
+#        by_epoch=True,
+#        begin=1)
+# ]
+
+lr_config = dict(
+    policy='CosineAnnealing',  # Cosine Annealing scheduler
+    warmup='linear',  # Linear warmup helps stabilize training in the initial epochs
+    warmup_iters=1000,  # Number of iterations for warmup. You can adjust this value.
+    warmup_ratio=0.001,  # Ratio of the initial learning rate used for warmup
+    min_lr_ratio=1e-5  # Minimum learning rate value, as a ratio of the initial learning rate.
+)
 
 train_cfg = dict(by_epoch=True, val_interval=50, max_epochs=1000)
 auto_scale_lr = dict(base_batch_size=1024, enable=False)
