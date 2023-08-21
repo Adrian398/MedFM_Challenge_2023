@@ -83,6 +83,4 @@ default_hooks = dict(
     logger=dict(interval=50),
 )
 
-work_dir = f'work_dirs/vit-b/exp{exp_num}/{run_name}'
-
 from configs.chest_config import *
