@@ -4,7 +4,7 @@ ssh slurmmaster-ls6
 ```
 
 Documentation:
-[doku-ls6.informatik.uni-wuerzburg.de/docs/venv.html]()
+[https://doku-ls6.informatik.uni-wuerzburg.de/docs/venv.html](https://doku-ls6.informatik.uni-wuerzburg.de/docs/venv.html)
 
 Project directory: ```cd /scratch/medfm/medfm-challenge``` <br>
 
