@@ -2,6 +2,7 @@
 import argparse
 import os
 import os.path as osp
+import re
 from copy import deepcopy
 from datetime import datetime
 
@@ -115,7 +116,9 @@ def merge_args(cfg, args):
         cfg.auto_scale_lr.enable = True
 
     if args.lr is not None:
-        cfg.lr = args.lr
+        cfg.optim_wrapper.optimizer.lr = args.lr
+        #cfg.lr = args.lr
+        cfg.run_name = re.sub(r'lr[0-9.]+', f'lr{args.lr}', cfg.run_name)
 
     # set dataloader args
     default_dataloader_cfg = ConfigDict(
