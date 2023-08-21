@@ -23,13 +23,12 @@ model = dict(
     backbone=dict(
         type='PromptedSwinTransformer',
         prompt_length=vpl,
-        #drop_rate=0.1,
         arch='base',
         img_size=384,
         init_cfg=dict(
             type='Pretrained',
-            checkpoint='https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
-            #checkpoint='https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_small_224_b16x64_300e_imagenet_20210615_110219-7f9d988b.pth',
+            checkpoint=
+            'https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
             prefix='backbone',
         ),
         stage_cfgs=dict(block_cfgs=dict(window_size=12))),
@@ -66,7 +65,7 @@ train_pipeline = [
     ),
     dict(
         type='RandomResizedCrop',
-        scale=224,
+        scale=384,
         backend='pillow',
         interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
@@ -74,6 +73,7 @@ train_pipeline = [
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
 ]
+
 
 train_dataloader = dict(
     batch_size=train_bs,
