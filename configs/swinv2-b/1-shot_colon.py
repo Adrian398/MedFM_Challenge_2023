@@ -21,7 +21,6 @@ model = dict(
     type='ImageClassifier',
     backbone=dict(
         #type='PromptedSwinTransformer',
-        prompt_length=5,
         img_size=384,
         init_cfg=dict(
             type='Pretrained',
