@@ -115,7 +115,7 @@ def merge_args(cfg, args):
         cfg.auto_scale_lr.enable = True
 
     if args.lr is not None:
-        cfg.optimizer.lr = args.lr
+        cfg.lr = args.lr
 
     # set dataloader args
     default_dataloader_cfg = ConfigDict(
