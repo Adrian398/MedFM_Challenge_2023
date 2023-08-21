@@ -110,7 +110,7 @@ param_scheduler = [
          gamma=0.5)
 ]
 
-train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=160)
+train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=200)
 
 
 
