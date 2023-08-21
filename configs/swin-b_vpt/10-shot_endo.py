@@ -26,7 +26,7 @@ model = dict(
         type='PromptedSwinTransformer',
         prompt_length=vpl,
         arch='base',
-        img_size=1028,
+        img_size=384,
         init_cfg=dict(
             type='Pretrained',
             checkpoint=
@@ -79,7 +79,7 @@ val_evaluator = [
 test_evaluator = val_evaluator
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="auto"),
+    checkpoint=dict(type='CheckpointHook', interval=100, max_keep_ckpts=1, save_best="auto"),
     logger=dict(interval=10),
 )
 
@@ -105,15 +105,15 @@ optim_wrapper = dict(
 
 param_scheduler = [
     dict(type='MultiStepLR',
-         milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
+         milestones=[50, 70, 85, 100, 110, 120, 125, 130, 135, 140, 145, 150, 155],
          by_epoch=True,
          gamma=0.5)
 ]
 
-train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=200)
+train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=160)
 
 
 
 
 
-auto_scale_lr = dict(base_batch_size=1024, enable=False)
+#auto_scale_lr = dict(base_batch_size=1024, enable=False)
