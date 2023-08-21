@@ -12,11 +12,12 @@ custom_imports = dict(
 
 # general
 task = 'colon'
+dataset_type = 'Colon'
 model_name = 'swin'
 exp_num = 1
 n_shot = 1
 train_bs = 4
-data_prefix = '/scratch/medfm/data/MedFMC_train/colon/images',
+data_prefix = '/scratch/medfm/data/MedFMC_train/colon/images'
 
 # data loading and preprocessing
 data_preprocessor = dict(
@@ -39,8 +40,10 @@ train_pipeline = [
 
 train_dataloader = dict(
     batch_size=train_bs,
+    num_workers=2,
     dataset=dict(ann_file=f'data_anns/MedFMC/{task}/{task}_{n_shot}-shot_train_exp{exp_num}.txt',
                  data_prefix=data_prefix,
+                 type=dataset_type,
                  pipeline=train_pipeline),
 )
 
@@ -52,15 +55,20 @@ test_pipeline = [
 
 val_dataloader = dict(
     batch_size=64,
+    num_workers=2,
     dataset=dict(pipeline=test_pipeline,
                  data_prefix=data_prefix,
+                 type=dataset_type,
                  ann_file=f'data_anns/MedFMC/{task}/{task}_{n_shot}-shot_val_exp{exp_num}.txt'),
 )
 
 test_dataloader = dict(
     batch_size=4,
-    data_prefix=data_prefix,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{task}/test_WithLabel.txt'),
+    num_workers=2,
+    dataset=dict(
+        data_prefix=data_prefix,
+        type=dataset_type,
+        ann_file=f'data_anns/MedFMC/{task}/test_WithLabel.txt'),
 )
 
 # metrics
@@ -90,10 +98,6 @@ model = dict(
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
     ))
 
-default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
-    logger=dict(interval=50),
-)
 
 # optimizer
 lr = 5e-2
@@ -127,6 +131,11 @@ param_scheduler = [
     # main learning rate scheduler
     dict(type='CosineAnnealingLR', eta_min=1e-5, by_epoch=True, begin=1)
 ]
+
+default_hooks = dict(
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="auto"),
+    logger=dict(interval=50),
+)
 
 # train, val, test setting
 train_cfg = dict(by_epoch=True, max_epochs=1500, val_interval=250)
