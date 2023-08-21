@@ -37,6 +37,10 @@ def parse_args():
         help='whether to auto scale the learning rate according to the '
         'actual batch size and the original batch size.')
     parser.add_argument(
+        '--lr', default=None, type=float,
+        help='override the learning rate from the config file.'
+    )
+    parser.add_argument(
         '--no-pin-memory',
         action='store_true',
         help='whether to disable the pin_memory option in dataloaders.')
@@ -109,6 +113,9 @@ def merge_args(cfg, args):
     # enable auto scale learning rate
     if args.auto_scale_lr:
         cfg.auto_scale_lr.enable = True
+
+    if args.lr is not None:
+        cfg.optimizer.lr = args.lr
 
     # set dataloader args
     default_dataloader_cfg = ConfigDict(
