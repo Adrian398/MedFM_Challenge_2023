@@ -34,12 +34,6 @@ model = dict(
         ),
         stage_cfgs=dict(block_cfgs=dict(window_size=12))),
     neck=None,
-    #head=dict(
-    #    type='LinearClsHead',
-    #    num_classes=2,
-    #    in_channels=1024,
-    #    loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
-    #)
     head=dict(
         type='LinearClsHead',
         num_classes=2,
