@@ -8,7 +8,9 @@ _base_ = [
     '../custom_imports.py',
 ]
 
-lr = 5e-2
+warmup_lr = 1e-3
+lr = 5e-4
+cos_end_lr = 1e-6
 train_bs = 8
 vpl = 5
 dataset = 'endo'
@@ -28,7 +30,7 @@ model = dict(
         init_cfg=dict(
             type='Pretrained',
             checkpoint=
-            'https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
+            'https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k>
             prefix='backbone',
         ),
         stage_cfgs=dict(block_cfgs=dict(window_size=12))),
@@ -40,7 +42,8 @@ model = dict(
     ))
 
 train_dataloader = dict(
-    batch_size=4, 
+    batch_size=train_bs,
+    num_workers=16, 
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
 
@@ -56,7 +59,7 @@ test_dataloader = dict(
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='Resize', scale=384, backend='pillow', interpolation='bicubic'),
+    dict(type='Resize', scale=1028, backend='pillow', interpolation='bicubic'),
     dict(type='PackInputs'),
 ]
 
@@ -82,3 +85,33 @@ default_hooks = dict(
 
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
+
+optim_wrapper = dict(
+    optimizer=dict(
+        type='AdamW',
+        lr=lr,
+        weight_decay=0.05,
+        eps=1e-8,
+        betas=(0.9, 0.999)),
+    paramwise_cfg=dict(
+        norm_decay_mult=0.0,
+        bias_decay_mult=0.0,
+        flat_decay_mult=0.0,
+        custom_keys={
+            '.absolute_pos_embed': dict(decay_mult=0.0),
+            '.relative_position_bias_table': dict(decay_mult=0.0)
+        }),
+)
+
+param_scheduler = [
+    dict(type='MultiStepLR',
+         milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
+         by_epoch=True,
+         gamma=0.5)
+]
+
+train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=100)
+auto_scale_lr = dict(base_batch_size=1024, enable=False)
+
+
+
