@@ -16,7 +16,7 @@ model_name = 'swin'
 exp_num = 1
 n_shot = 1
 train_bs = 4
-data_prefix = '/scratch/medfm/data/MedFMC_train/colon/images',
+data_prefix = '/scratch/medfm/data/MedFMC_train/colon/images'
 
 # data loading and preprocessing
 data_preprocessor = dict(
