@@ -7,7 +7,7 @@ _base_ = [
 ]
 
 lr = ''
-train_bs = 8
+train_bs = 2
 dataset = 'colon'
 model_name = 'swinv2'
 exp_num = 1
@@ -20,7 +20,7 @@ model = dict(
     type='ImageClassifier',
     backbone=dict(
         #type='PromptedSwinTransformer',
-        img_size=384,
+        img_size=1024,
         init_cfg=dict(
             type='Pretrained',
             checkpoint=
@@ -43,7 +43,7 @@ train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='Resize',
-        size=(384, 384),
+        size=(1024, 1024),
         backend='pillow',
         interpolation='bicubic'
     ),
@@ -54,7 +54,7 @@ train_pipeline = [
 
 train_dataloader = dict(
     batch_size=train_bs,
-    num_workers=1,
+    num_workers=4,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
 
