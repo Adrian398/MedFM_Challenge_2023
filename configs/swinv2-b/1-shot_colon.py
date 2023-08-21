@@ -7,7 +7,7 @@ _base_ = [
 ]
 
 lr = ''
-train_bs = 16
+train_bs = 8
 dataset = 'colon'
 model_name = 'swinv2'
 exp_num = 1
