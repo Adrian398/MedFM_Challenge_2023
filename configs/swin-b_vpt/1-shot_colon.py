@@ -80,7 +80,7 @@ train_dataloader = dict(
     batch_size=train_bs,
     num_workers=4,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
-                 train_pipeline=train_pipeline),
+                 pipeline=train_pipeline),
 )
 
 val_dataloader = dict(
