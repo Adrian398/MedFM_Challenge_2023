@@ -59,8 +59,9 @@ val_dataloader = dict(
 
 test_dataloader = dict(
     batch_size=4,
-    data_prefix=data_prefix,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{task}/test_WithLabel.txt'),
+    dataset=dict(
+        data_prefix=data_prefix,
+        ann_file=f'data_anns/MedFMC/{task}/test_WithLabel.txt'),
 )
 
 # metrics
