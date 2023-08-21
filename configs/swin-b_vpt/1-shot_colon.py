@@ -77,7 +77,7 @@ train_pipeline = [
 
 train_dataloader = dict(
     batch_size=train_bs,
-    num_workers=4,
+    num_workers=16,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
                  pipeline=train_pipeline),
 )
@@ -147,26 +147,26 @@ optim_wrapper = dict(
 #     #    }),
 # )
 
-param_scheduler = [
-    dict(
-        type='LinearLR',
-        start_factor=1e-3,
-        by_epoch=True,
-        end=1
-    ),
-    dict(
-       type='CosineAnnealingLR',
-       eta_min=1e-5,
-       by_epoch=True,
-       begin=1)
-]
-
 # param_scheduler = [
-#     dict(type='MultiStepLR',
-#          milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
-#          by_epoch=True,
-#          gamma=0.5)
+#     dict(
+#         type='LinearLR',
+#         start_factor=1e-3,
+#         by_epoch=True,
+#         end=1
+#     ),
+#     dict(
+#        type='CosineAnnealingLR',
+#        eta_min=1e-5,
+#        by_epoch=True,
+#        begin=1)
 # ]
+
+param_scheduler = [
+    dict(type='MultiStepLR',
+         milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
+         by_epoch=True,
+         gamma=0.5)
+]
 
 train_cfg = dict(by_epoch=True, val_interval=100, max_epochs=1000)
 auto_scale_lr = dict(base_batch_size=1024, enable=False)
