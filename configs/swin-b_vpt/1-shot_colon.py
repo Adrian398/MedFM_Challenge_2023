@@ -136,6 +136,7 @@ visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBack
 # )
 
 optim_wrapper = dict(
+    type='OptimWrapper',
     optimizer=dict(
         type='SGD',
         lr=lr,
