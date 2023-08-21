@@ -62,5 +62,10 @@ test_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
 
-val_evaluator = [dict(type='AveragePrecision'), dict(type='AUC', multilabel=True)]
+val_evaluator = [
+    dict(type='AveragePrecision'),
+    dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
+    dict(type='MultiLabelMetric', average='micro'),  # overall mean
+    dict(type='AUC')
+]
 test_evaluator = val_evaluator
