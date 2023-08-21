@@ -1,3 +1,6 @@
+
+
+
 _base_ = [
     '../datasets/endoscopy.py',
     '../swin_schedule.py',
@@ -5,14 +8,15 @@ _base_ = [
     '../custom_imports.py',
 ]
 
-
 lr = 5e-2
-n = 1
+train_bs = 8
 vpl = 5
 dataset = 'endo'
+model_name = 'swin'
 exp_num = 1
 nshot = 10
-run_name = f'in21k-swin-b_vpt-{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}'
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
+work_dir = f'work_dirs/endo/{nshot}-shot/{run_name}'
 
 model = dict(
     type='ImageClassifier',
@@ -20,7 +24,7 @@ model = dict(
         type='PromptedSwinTransformer',
         prompt_length=vpl,
         arch='base',
-        img_size=384,
+        img_size=1028,
         init_cfg=dict(
             type='Pretrained',
             checkpoint=
@@ -50,13 +54,31 @@ test_dataloader = dict(
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
 )
 
-optim_wrapper = dict(optimizer=dict(lr=lr))
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='Resize', scale=384, backend='pillow', interpolation='bicubic'),
+    dict(type='PackInputs'),
+]
 
 default_hooks = dict(
     checkpoint = dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
     logger=dict(interval=50),
 )
 
-work_dir = f'work_dirs/swin-b/exp{exp_num}/{run_name}'
+# optim_wrapper = dict(optimizer=dict(lr=lr))
 
-from configs.endo_config import *
+val_evaluator = [
+    dict(type='AveragePrecision'),
+    dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
+    dict(type='MultiLabelMetric', average='micro'),  # overall mean
+    dict(type='AUC')
+]
+test_evaluator = val_evaluator
+
+default_hooks = dict(
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="auto"),
+    logger=dict(interval=10),
+)
+
+
+visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
