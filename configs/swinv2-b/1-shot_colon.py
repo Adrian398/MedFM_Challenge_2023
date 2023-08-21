@@ -1,8 +1,9 @@
 _base_ = [
-    'mmpretrain::_base_/schedules/imagenet_bs1024_adamw_swin.py',
+    '../datasets/colon.py',
+    '../swin_schedule.py',
+    #'mmpretrain::_base_/schedules/imagenet_bs1024_adamw_swin.py',
     'mmpretrain::_base_/models/swin_transformer_v2/base_384.py',
     'mmpretrain::_base_/default_runtime.py',
-    '../datasets/colon.py',
     '../custom_imports.py'
 ]
 
@@ -44,31 +45,18 @@ bgr_std = [57.375, 57.12, 58.395]
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
-        type='RandomErasing',
-        erase_prob=0.25,
-        mode='rand',
-        min_area_ratio=0.02,
-        max_area_ratio=1 / 3,
-        fill_color=bgr_mean,
-        fill_std=bgr_std),
-    dict(
         type='Resize',
         scale=384,
         backend='pillow',
         interpolation='bicubic'
     ),
-    dict(
-        type='RandAugment',
-        policies='timm_increasing',
-        num_policies=2,
-        total_level=10,
-        magnitude_level=8,
-        magnitude_std=0.7,
-        hparams=dict(pad_val=[round(x) for x in bgr_mean], interpolation='bicubic')
-    ),
-    dict(type='RandomGrayscale', prob=0.5, keep_channels=True),
-    dict(type='RandomFlip', prob=0.5, direction='horizontal'),
-    dict(type='RandomFlip', prob=0.5, direction='vertical'),
+    #dict(type='RandomGrayscale', prob=0.2, keep_channels=True),
+    dict(type='PackInputs'),
+]
+
+val_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='Resize', scale=384, backend='pillow', interpolation='bicubic'),
     dict(type='PackInputs'),
 ]
 
@@ -84,7 +72,10 @@ train_dataloader = dict(
 val_dataloader = dict(
     batch_size=32,
     num_workers=1,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
+    dataset=dict(
+        ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt',
+        pipeline=val_pipeline
+    )
 )
 
 val_evaluator = [
