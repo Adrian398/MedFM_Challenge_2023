@@ -16,6 +16,7 @@ model_name = 'swin'
 exp_num = 1
 n_shot = 1
 train_bs = 4
+data_prefix = '/scratch/medfm/data/MedFMC_train/colon/images',
 
 # data loading and preprocessing
 data_preprocessor = dict(
@@ -39,6 +40,7 @@ train_pipeline = [
 train_dataloader = dict(
     batch_size=train_bs,
     dataset=dict(ann_file=f'data_anns/MedFMC/{task}/{task}_{n_shot}-shot_train_exp{exp_num}.txt',
+                 data_prefix=data_prefix,
                  pipeline=train_pipeline),
 )
 
@@ -51,11 +53,13 @@ test_pipeline = [
 val_dataloader = dict(
     batch_size=64,
     dataset=dict(pipeline=test_pipeline,
+                 data_prefix=data_prefix,
                  ann_file=f'data_anns/MedFMC/{task}/{task}_{n_shot}-shot_val_exp{exp_num}.txt'),
 )
 
 test_dataloader = dict(
     batch_size=4,
+    data_prefix=data_prefix,
     dataset=dict(ann_file=f'data_anns/MedFMC/{task}/test_WithLabel.txt'),
 )
 
