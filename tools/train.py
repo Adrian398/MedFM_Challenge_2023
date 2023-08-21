@@ -124,10 +124,6 @@ def merge_args(cfg, args):
     if args.auto_scale_lr:
         cfg.auto_scale_lr.enable = True
 
-    if 'label_smooth_val' in cfg['model']['head']['loss']:
-        print("label_smooth_val enabled")
-        del cfg['model']['head']['loss']['label_smooth_val']
-
     if args.lr is not None:
         cfg.optim_wrapper.optimizer.lr = args.lr
         #cfg.lr = args.lr
@@ -195,8 +191,6 @@ def main():
 
     # merge our custom cli arguments to config
     cfg = merge_custom_args(cfg, args)
-
-    print(cfg['model']['head']['loss'])
 
     # build the runner from config
     runner = Runner.from_cfg(cfg)
