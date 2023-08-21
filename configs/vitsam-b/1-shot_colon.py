@@ -32,7 +32,7 @@ model = dict(
     head=dict(
         type='LinearClsHead',
         num_classes=2,  # For binary classification: tumor or no tumor.
-        in_channels=256,  # Matches the out_channels of the backbone.
+        in_channels=64,  # Matches the out_channels of the backbone.
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
     )
 )
