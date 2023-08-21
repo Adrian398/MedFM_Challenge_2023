@@ -3,7 +3,7 @@
 optim_wrapper = dict(
     optimizer=dict(
         type='AdamW',
-        lr=5e-4 * 1024 / 512,
+        lr=5e-3,
         weight_decay=0.05,
         eps=1e-8,
         betas=(0.9, 0.999)),
@@ -32,7 +32,7 @@ param_scheduler = [
 ]
 
 # train, val, test setting
-train_cfg = dict(by_epoch=True, max_epochs=20, val_interval=1)
+train_cfg = dict(by_epoch=True, val_interval=1, max_epochs=500)
 val_cfg = dict()
 test_cfg = dict()
 

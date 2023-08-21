@@ -12,9 +12,13 @@ data_preprocessor = dict(
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
+    dict(type='NumpyToPIL', to_rgb=True),
+    dict(type='torchvision/RandomAffine', degrees=(-15, 15), translate=(0.05, 0.05), fill=128),
+    dict(type='PILToNumpy', to_bgr=True),
     dict(
         type='RandomResizedCrop',
         scale=384,
+        crop_ratio_range=(0.9, 1.0),
         backend='pillow',
         interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
@@ -49,17 +53,20 @@ val_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
 
-
 test_dataloader = dict(
     batch_size=4,
     num_workers=2,
     dataset=dict(
         type=dataset_type,
         data_prefix='data/MedFMC_train/chest/images',
-        ann_file='data_anns/MedFMC/chest/test_WithLabel.txt',
+        ann_file='/scratch/medfm/data_anns/MedFMC/chest/test_WithLabel.txt',
         pipeline=test_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
 
-val_evaluator =  [dict(type='AveragePrecision'), dict(type='AUC', multilabel=True)]
+val_evaluator = [
+    dict(type='AveragePrecision'),
+    dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
+    dict(type='MultiLabelMetric', average='micro'),  # overall mean
+    dict(type='AUC', multilabel=True)]
 test_evaluator = val_evaluator

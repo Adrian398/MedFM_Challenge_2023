@@ -1,10 +1,9 @@
 _base_ = [
     '../datasets/chest.py',
-    '../swin_schedule.py',
+    '../schedules/chest.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
 ]
-
 
 lr = 5e-3
 n = 1
@@ -37,26 +36,10 @@ model = dict(
         in_channels=1024,
     ))
 
-train_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(type='NumpyToPIL', to_rgb=True),
-    dict(type='torchvision/RandomAffine', degrees=(-15, 15), translate=(0.05, 0.05), fill=128),
-    dict(type='PILToNumpy', to_bgr=True),
-    dict(
-        type='RandomResizedCrop',
-        scale=384,
-        crop_ratio_range=(0.9, 1.0),
-        backend='pillow',
-        interpolation='bicubic'),
-    dict(type='RandomFlip', prob=0.5, direction='horizontal'),
-    dict(type='PackInputs'),
-]
-
 train_dataloader = dict(
     batch_size=4, 
     dataset=dict(
-        ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
-        pipeline=train_pipeline),
+        ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
 
 val_dataloader = dict(
@@ -76,4 +59,4 @@ default_hooks = dict(
     logger=dict(interval=50),
 )
 
-from configs.chest_config import *
+visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
