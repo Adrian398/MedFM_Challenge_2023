@@ -6,7 +6,7 @@ _base_ = [
 ]
 
 lr = 5e-4
-train_bs = 4
+train_bs = 2
 dataset = 'colon'
 exp_num = 1
 nshot = 1
