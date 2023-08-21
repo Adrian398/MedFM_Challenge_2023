@@ -24,12 +24,12 @@ model = dict(
         drop_path_rate=0.2,
         pretrained_window_sizes=[12, 12, 12, 6]),
     neck=None,
-    head=dict(
-        type='LinearClsHead',
-        num_classes=2,
-        in_channels=1024,
-        loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
-    )
+    # head=dict(
+    #     type='LinearClsHead',
+    #     num_classes=2,
+    #     in_channels=1024,
+    #     loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
+    # )
 )
 
 train_pipeline = [
