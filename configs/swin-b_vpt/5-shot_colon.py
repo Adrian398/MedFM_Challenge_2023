@@ -5,7 +5,8 @@ _base_ = [
     '../custom_imports.py',
 ]
 
-lr = 5e-2
+warmup_lr = 1e-3
+lr = 5e-4
 train_bs = 8
 vpl = 5
 dataset = 'colon'

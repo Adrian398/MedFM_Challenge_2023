@@ -5,13 +5,17 @@ _base_ = [
     '../custom_imports.py',
 ]
 
-lr = 5e-2
-n = 1
+warmup_lr = 1e-3
+lr = 5e-4
+cos_end_lr = 1e-6
+train_bs = 8
 vpl = 5
 dataset = 'endo'
+model_name = 'swin'
 exp_num = 1
 nshot = 5
-run_name = f'in21k-swin-b_vpt-{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}'
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
+work_dir = f'work_dirs/endo/{nshot}-shot/{run_name}'
 
 model = dict(
     type='ImageClassifier',
@@ -35,7 +39,7 @@ model = dict(
     ))
 
 train_dataloader = dict(
-    batch_size=4, 
+    batch_size=train_bs, 
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
 
@@ -49,13 +53,47 @@ test_dataloader = dict(
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
 )
 
-optim_wrapper = dict(optimizer=dict(lr=lr))
+# optim_wrapper = dict(optimizer=dict(lr=lr))
+
+val_evaluator = [
+    dict(type='AveragePrecision'),
+    dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
+    dict(type='MultiLabelMetric', average='micro'),  # overall mean
+    dict(type='AUC')
+]
+test_evaluator = val_evaluator
 
 default_hooks = dict(
-    checkpoint = dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
-    logger=dict(interval=50),
+    checkpoint = dict(type='CheckpointHook', interval=50, max_keep_ckpts=1, save_best="auto"),
+    logger=dict(interval=10),
 )
 
-work_dir = f'work_dirs/exp{exp_num}/{run_name}'
+visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-from configs.endo_config import *
+
+optim_wrapper = dict(
+    optimizer=dict(
+        type='AdamW',
+        lr=lr,
+        weight_decay=0.05,
+        eps=1e-8,
+        betas=(0.9, 0.999)),
+    paramwise_cfg=dict(
+        norm_decay_mult=0.0,
+        bias_decay_mult=0.0,
+        flat_decay_mult=0.0,
+        custom_keys={
+            '.absolute_pos_embed': dict(decay_mult=0.0),
+            '.relative_position_bias_table': dict(decay_mult=0.0)
+        }),
+)
+
+param_scheduler = [
+    dict(type='MultiStepLR',
+         milestones=[100, 200, 300],
+         by_epoch=True,
+         gamma=0.5)
+]
+
+
+train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=200)
