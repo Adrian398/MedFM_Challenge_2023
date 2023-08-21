@@ -42,7 +42,7 @@ train_dataloader = dict(
     batch_size=train_bs,
     dataset=dict(ann_file=f'data_anns/MedFMC/{task}/{task}_{n_shot}-shot_train_exp{exp_num}.txt',
                  data_prefix=data_prefix,
-                 dataset_type=dataset_type,
+                 type=dataset_type,
                  pipeline=train_pipeline),
 )
 
@@ -56,7 +56,7 @@ val_dataloader = dict(
     batch_size=64,
     dataset=dict(pipeline=test_pipeline,
                  data_prefix=data_prefix,
-                 dataset_type=dataset_type,
+                 type=dataset_type,
                  ann_file=f'data_anns/MedFMC/{task}/{task}_{n_shot}-shot_val_exp{exp_num}.txt'),
 )
 
@@ -64,7 +64,7 @@ test_dataloader = dict(
     batch_size=4,
     dataset=dict(
         data_prefix=data_prefix,
-        dataset_type=dataset_type,
+        type=dataset_type,
         ann_file=f'data_anns/MedFMC/{task}/test_WithLabel.txt'),
 )
 
