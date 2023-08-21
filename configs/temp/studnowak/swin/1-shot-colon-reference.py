@@ -98,10 +98,6 @@ model = dict(
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
     ))
 
-default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
-    logger=dict(interval=50),
-)
 
 # optimizer
 lr = 5e-2
@@ -135,6 +131,11 @@ param_scheduler = [
     # main learning rate scheduler
     dict(type='CosineAnnealingLR', eta_min=1e-5, by_epoch=True, begin=1)
 ]
+
+default_hooks = dict(
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="auto"),
+    logger=dict(interval=50),
+)
 
 # train, val, test setting
 train_cfg = dict(by_epoch=True, max_epochs=1500, val_interval=250)
