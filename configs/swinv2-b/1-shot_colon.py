@@ -1,6 +1,7 @@
 _base_ = [
     '../datasets/colon.py',
     '../swin_schedule.py',
+    'mmpretrain::_base_/models/swin_transformer_v2/base_384.py',
     #'mmpretrain::_base_/schedules/imagenet_bs1024_adamw_swin.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py'
@@ -19,8 +20,7 @@ work_dir = f'work_dirs/colon/{nshot}-shot/{run_name}'
 model = dict(
     type='ImageClassifier',
     backbone=dict(
-        type='PromptedSwinTransformer',
-        prompt_length=5,
+        #type='PromptedSwinTransformer',
         img_size=384,
         init_cfg=dict(
             type='Pretrained',
