@@ -50,6 +50,7 @@ train_pipeline = [
         backend='pillow',
         interpolation='bicubic'
     ),
+    #dict(type='RandomGrayscale', prob=0.2, keep_channels=True),
     dict(type='PackInputs'),
 ]
 
