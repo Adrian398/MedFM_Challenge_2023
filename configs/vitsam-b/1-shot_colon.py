@@ -50,7 +50,7 @@ data_preprocessor = dict(
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='RandomResizedCrop', size=1024, backend='pillow', interpolation='bicubic'),
+    dict(type='RandomResizedCrop', scale=1024, backend='pillow', interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomGrayscale', prob=0.5, keep_channels=True),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
