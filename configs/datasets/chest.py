@@ -32,7 +32,7 @@ train_dataloader = dict(
     num_workers=2,
     dataset=dict(
         type=dataset_type,
-        data_prefix='data/MedFMC_train/chest/images',
+        data_prefix='/scratch/medfm/data/MedFMC_train/chest/images',
         ann_file='data_anns/MedFMC/chest/train_20.txt',
         pipeline=train_pipeline,),
     sampler=dict(type='DefaultSampler', shuffle=True),
@@ -43,7 +43,7 @@ val_dataloader = dict(
     num_workers=2,
     dataset=dict(
         type=dataset_type,
-        data_prefix='data/MedFMC_train/chest/images',
+        data_prefix='/scratch/medfm/data/MedFMC_train/chest/images',
         ann_file='data_anns/MedFMC/chest/val_20.txt',
         pipeline=test_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=False),
@@ -55,8 +55,8 @@ test_dataloader = dict(
     num_workers=2,
     dataset=dict(
         type=dataset_type,
-        data_prefix='data/MedFMC_train/chest/images',
-        ann_file='data_anns/MedFMC/chest/test_WithLabel.txt',
+        data_prefix='/scratch/medfm/data/MedFMC_train/chest/images',
+        ann_file='/scratch/medfm/data_anns/MedFMC/chest/test_WithLabel.txt',
         pipeline=test_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
