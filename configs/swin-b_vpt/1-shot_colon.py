@@ -6,7 +6,7 @@ _base_ = [
 ]
 
 warmup_lr = 1e-3
-lr = 0.0005
+lr = 1e-3
 cos_end_lr = 1e-5
 train_bs = 4
 vpl = 5
@@ -23,13 +23,13 @@ model = dict(
     backbone=dict(
         type='PromptedSwinTransformer',
         prompt_length=vpl,
-        drop_rate=0.1,
-        arch='small',
-        img_size=224,
+        #drop_rate=0.1,
+        arch='base',
+        img_size=384,
         init_cfg=dict(
             type='Pretrained',
-            #checkpoint='https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
-            checkpoint='https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_small_224_b16x64_300e_imagenet_20210615_110219-7f9d988b.pth',
+            checkpoint='https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
+            #checkpoint='https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_small_224_b16x64_300e_imagenet_20210615_110219-7f9d988b.pth',
             prefix='backbone',
         ),
         stage_cfgs=dict(block_cfgs=dict(window_size=12))),
@@ -37,7 +37,7 @@ model = dict(
     head=dict(
         type='LinearClsHead',
         num_classes=2,
-        in_channels=768,
+        in_channels=1024,
         loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
     )
 )
@@ -79,7 +79,8 @@ train_pipeline = [
 train_dataloader = dict(
     batch_size=train_bs,
     num_workers=4,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
+                 train_pipeline=train_pipeline),
 )
 
 val_dataloader = dict(
@@ -111,12 +112,11 @@ default_hooks = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-
 optim_wrapper = dict(
     optimizer=dict(
         type='AdamW',
         lr=lr,
-        weight_decay=0.01,
+        weight_decay=0.05,
         eps=1e-8,
         betas=(0.9, 0.999)),
     paramwise_cfg=dict(
@@ -151,15 +151,15 @@ optim_wrapper = dict(
 param_scheduler = [
     dict(
         type='LinearLR',
-        start_factor=0.001,
+        start_factor=1e-3,
         by_epoch=True,
-        end=10
+        end=1
     ),
     dict(
        type='CosineAnnealingLR',
-       eta_min=cos_end_lr,
+       eta_min=1e-5,
        by_epoch=True,
-       begin=10)
+       begin=1)
 ]
 
 # param_scheduler = [
