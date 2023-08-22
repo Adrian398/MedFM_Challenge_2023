@@ -37,7 +37,7 @@ configs_v2=(
 )
 
 for config in "${configs[@]}"; do
-  sbatch -p ls6 --gres=gpu:rtx2090:1 --wrap="python tools/train.py $config --exp_num=$exp_num --remove_timestamp --exp_suffix=$exp_suffix" -o $log_output
+  sbatch -p ls6 --gres=gpu:1 --nodelist=gpu8a --wrap="python tools/train.py $config --exp_num=$exp_num --remove_timestamp --exp_suffix=$exp_suffix" -o $log_output
 done
 
 # for config_v2 in "${configs_v2[@]}"; do
