@@ -102,7 +102,7 @@ resume = False
 run_name = 'swinv2_bs8_lr0.05_exp1_'
 test_cfg = dict()
 test_dataloader = dict(
-    batch_size=4,
+    batch_size=2,
     collate_fn=dict(type='default_collate'),
     dataset=dict(
         ann_file='data_anns/MedFMC/endo/test_WithLabel.txt',
@@ -130,10 +130,10 @@ test_pipeline = [
     dict(backend='pillow', interpolation='bicubic', scale=384, type='Resize'),
     dict(type='PackInputs'),
 ]
-train_bs = 8
+train_bs = 2
 train_cfg = dict(by_epoch=True, max_epochs=1000, val_interval=25)
 train_dataloader = dict(
-    batch_size=8,
+    batch_size=train_bs,
     collate_fn=dict(type='default_collate'),
     dataset=dict(
         ann_file='data_anns/MedFMC/endo/endo_1-shot_train_exp1.txt',
