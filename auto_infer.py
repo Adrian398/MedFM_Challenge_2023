@@ -39,10 +39,8 @@ if not any(s.startswith(date_pattern) for s in os.listdir(submission_path)):
 else:
     print(f"Directory with pattern {date_pattern} already exists.")
 
-print(f"Copying config from {config_path} to {configs_dir}")
-print(f"Starting infer with {config_path} {checkpoint_path} {images_path} {out_path}")
 # copy config into directory
+print(f"Copying config from {config_path} to {configs_dir}")
 shutil.copy(config_path, configs_dir)
-process = subprocess.Popen(["python", "tools/infer.py", config_path, checkpoint_path, images_path, "--out", out_path], stdout=subprocess.PIPE)
-for line in iter(process.stdout.readline, b''):
-    print(line.decode('utf-8', errors='ignore').strip())
+print("------------Copy infer command below --------------")
+command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}"
