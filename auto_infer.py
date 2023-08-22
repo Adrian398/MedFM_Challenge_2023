@@ -10,6 +10,11 @@ given_run_path = os.path.join("work_dirs", given_run_path)
 task = os.path.split(given_run_path)[0]
 shot = os.path.split(given_run_path)[1]
 path_components = os.path.split(given_run_path)
+print(path_components)
+print(path_components[:4])
+x = path_components[:4]
+print(os.path.join(*x))
+print("end test")
 run_dir = os.path.join(*path_components[:4])
 print(f"Run dir {run_dir}")
 
