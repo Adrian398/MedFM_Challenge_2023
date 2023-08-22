@@ -38,10 +38,6 @@ def parse_args():
         help='whether to auto scale the learning rate according to the '
         'actual batch size and the original batch size.')
     parser.add_argument(
-        '--lr', default=None, type=float,
-        help='override the learning rate from the config file.'
-    )
-    parser.add_argument(
         '--no-pin-memory',
         action='store_true',
         help='whether to disable the pin_memory option in dataloaders.')
@@ -76,6 +72,12 @@ def parse_args():
                         default='/scratch/medfm/medfm-challenge/', help='Prefix for work_dir and data')
     parser.add_argument('--remove_timestamp',
                         action='store_true', help='Remove timestamp from work_dir')
+    parser.add_argument('--exp_suffix', type=str,
+                        default='', help='Suffix for experiment name')
+    parser.add_argument(
+        '--lr', default=None, type=float,
+        help='override the learning rate from the config file.'
+    )
     ########################################################################################
 
     args = parser.parse_args()
@@ -124,11 +126,6 @@ def merge_args(cfg, args):
     if args.auto_scale_lr:
         cfg.auto_scale_lr.enable = True
 
-    if args.lr is not None:
-        cfg.optim_wrapper.optimizer.lr = args.lr
-        #cfg.lr = args.lr
-        cfg.run_name = re.sub(r'lr[0-9.]+', f'lr{args.lr}', cfg.run_name)
-
     # set dataloader args
     default_dataloader_cfg = ConfigDict(
         pin_memory=True,
@@ -162,10 +159,10 @@ def merge_args(cfg, args):
 def merge_custom_args(cfg, args):
     """ Merge our custom CLI arguments to config - seperated for readability"""
 
-    # append timestamp to workdir
-    if not args.remove_timestamp:
-        timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
-        cfg.work_dir = cfg.work_dir + timestamp
+    if args.lr is not None:
+        cfg.optim_wrapper.optimizer.lr = args.lr
+        # cfg.lr = args.lr
+        cfg.run_name = re.sub(r'lr[0-9.]+', f'lr{args.lr}', cfg.run_name)
 
     # add prefix to workdir and dataset
     if args.dir_prefix is not None:
@@ -176,6 +173,15 @@ def merge_custom_args(cfg, args):
                                                               cfg.val_dataloader.dataset.data_prefix)
         cfg.test_dataloader.dataset.data_prefix = os.path.join(args.dir_prefix,
                                                                cfg.test_dataloader.dataset.data_prefix)
+
+    # add suffix to run_name
+    if args.exp_suffix is not None:
+        cfg.run_name = cfg.run_name + "_" + args.exp_suffix
+
+    # append timestamp to workdir
+    if not args.remove_timestamp:
+        timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
+        cfg.work_dir = cfg.work_dir + timestamp
 
     return cfg
 
