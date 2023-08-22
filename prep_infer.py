@@ -100,9 +100,9 @@ for task in tasks:
     for shot in shots:
         best_run, best_score = get_best_run_dir(task, shot, metric)
         if best_run is None:
-            report.append(f"{shot}-shot_{task}: No run found")
+            report.append(f"{shot}-shot_{task}\t No run found")
         else:
-            report.append(f"{shot}-shot_{task} - {metric}: {best_score} - {best_run}")
+            report.append(f"{shot}-shot_{task}\t{metric}: {best_score}\t{best_run}")
             best_runs.append(os.path.join(task, f"{shot}-shot", best_run))
 
 print("")
@@ -142,8 +142,7 @@ for given_run_path in best_runs:
 
     config_path = os.path.join(run_dir, config_filename)
     checkpoint_path = os.path.join(run_dir, checkpoint_filename)
-    # todo reset images path
-    images_path = os.path.join(scratch_repo_path, "data", "MedFMC_val", task, "images_mini")
+    images_path = os.path.join(scratch_repo_path, "data", "MedFMC_val", task, "images")
     csv_name = f"{task}_{shot}_submission.csv"
     out_path = os.path.join(predictions_dir, csv_name)
 
