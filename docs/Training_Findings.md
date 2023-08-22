@@ -34,3 +34,40 @@ which work well for colon for certain batch sizes (more data in higher n-shot =>
 - 1-shot, BS 8, val 250 or 125
 - 5-shot, BS 8, val 50 or 25
     
+
+# Chest Findings
+
+## First Experiment Runs
+
+### Setup
+
+- all parameters kept the same for 1-shot, 5-shot, 10-shot
+- epoch number to 2000 with cosine scaling learning rate
+- kept all other default parameters
+- used experiment 2
+- used Swin and ViT
+- used some standard approaches for data augmentation:
+
+````python
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='NumpyToPIL', to_rgb=True),
+    dict(type='torchvision/RandomAffine', degrees=(-15, 15), translate=(0.05, 0.05), fill=128),
+    dict(type='PILToNumpy', to_bgr=True),
+    dict(
+        type='RandomResizedCrop',
+        scale=384,
+        crop_ratio_range=(0.9, 1.0),
+        backend='pillow',
+        interpolation='bicubic'),
+    dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(type='PackInputs'),
+]
+````
+
+### Results
+
+- ViT performs a lot better for 1-shot and 10-shot than Swin
+- on 5-shot performance is similar
+- best epochs vary a lot, but the higher the n-shot, the higher the best epoch --> longer training necessary
+- mAP went continuously up towards the end despite not being best epoch anymore --> keep training?
