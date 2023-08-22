@@ -78,6 +78,8 @@ def parse_args():
         '--lr', default=None, type=float,
         help='override the learning rate from the config file.'
     )
+    parser.add_argument('--exp_num', type=int, default=None,
+                        help='Experiment number for data_anns')
     ########################################################################################
 
     args = parser.parse_args()
@@ -158,6 +160,11 @@ def merge_args(cfg, args):
 
 def merge_custom_args(cfg, args):
     """ Merge our custom CLI arguments to config - seperated for readability"""
+
+    if args.exp_num is not None:
+        cfg.train_dataloader.dataset.ann_file = re.sub(r'exp[0-9]+', f'exp{args.exp_num}', cfg.train_dataloader.dataset.ann_file)
+        cfg.val_dataloader.dataset.ann_file = re.sub(r'exp[0-9]+', f'exp{args.exp_num}', cfg.val_dataloader.dataset.ann_file)
+        cfg.work_dir = re.sub(r'exp[0-9]+', f'exp{args.exp_num}', cfg.work_dir)
 
     if args.lr is not None:
         cfg.optim_wrapper.optimizer.lr = args.lr
