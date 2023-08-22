@@ -12,7 +12,7 @@ exp_num = 2
 nshot = 10
 
 run_name = f'vit-b_{nshot}-shot_ptokens-{vpl}_{dataset}'
-work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'
+work_dir = f'work_dirs/chest/{nshot}-shot/exp_{exp_num}/{run_name}'
 
 model = dict(
     type='ImageClassifier',

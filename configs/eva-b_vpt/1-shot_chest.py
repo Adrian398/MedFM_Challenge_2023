@@ -8,7 +8,7 @@ _base_ = [
 lr = 1e-3
 vpl = 1
 dataset = 'chest'
-exp_num = 1
+exp_num = 2
 nshot = 1
 
 run_name = f'eva02-b_{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}'
@@ -87,7 +87,7 @@ test_dataloader = dict(
 optim_wrapper = dict(optimizer=dict(lr=lr))
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=10, max_keep_ckpts=1, save_best="auto"),
+    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
     logger=dict(interval=50),
 )
 
