@@ -1,6 +1,8 @@
 import os
 import sys
 from datetime import datetime
+import shutil
+import subprocess
 
 scratch_repo_path = os.path.join("/scratch", "medfm", "medfm-challenge")
 
@@ -30,12 +32,12 @@ configs_dir = os.path.join(submission_dir, "configs")
 if not any(s.startswith(date_pattern) for s in os.listdir(submission_path)):
     os.makedirs(submission_dir)
     print(f"Directory {submission_dir} created.")
-    # os.makedirs(configs_dir)
+    os.makedirs(configs_dir)
 else:
     print(f"Directory with pattern {date_pattern} already exists.")
 
 print(f"Copying config from {config_path} to {configs_dir}")
 print(f"Starting infer with {config_path} {checkpoint_path} {images_path} {out_path}")
 # copy config into directory
-# shutil.copy(config_path, configs_dir)
-# subprocess.run(["python", "tools/infer.py", config_path, checkpoint_path, images_path, "--out", out_path])
+shutil.copy(config_path, configs_dir)
+subprocess.run(["python", "tools/infer.py", config_path, checkpoint_path, images_path, "--out", out_path])
