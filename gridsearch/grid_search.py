@@ -18,7 +18,7 @@ BASE_PARAMS_CONFIG = {
 }
 
 
-def run_training(params, dry_run=False):
+def run_training(params, dry_run=False, exp_suffix=''):
     cfg_path = generate_config_path(params['model'], params['shot'], params['dataset'])
     command = ["python", "tools/train.py", cfg_path]
 
@@ -26,6 +26,7 @@ def run_training(params, dry_run=False):
         # only add params as command arg if required
         if key not in ['model', 'shot', 'dataset']:
             command.extend([f"--{key}", str(value)])
+            command.extend(["--exp_suffix", str(exp_suffix)])
 
     logging.info(f"Generated command: {' '.join(command)}")
 
@@ -39,9 +40,9 @@ def generate_config_path(model, shot, dataset):
     return f"configs/{model}/{shot}-shot_{dataset}.py"
 
 
-def generate_combinations(params_config, combination={}, index=0, dry_run=False):
+def generate_combinations(params_config, combination={}, index=0, dry_run=False, exp_suffix=''):
     if index == len(params_config):
-        run_training(combination, dry_run)
+        run_training(combination, dry_run, exp_suffix)
         return
 
     param_name, values = list(params_config.items())[index]
@@ -81,10 +82,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Run grid search for training.")
     parser.add_argument("--config", type=str, default=gridsearch_config_path, help="Path to the configuration file.")
-    parser.add_argument('--exp_suffix', type=str, default='', help='Suffix for experiment name')
     args = parser.parse_args()
 
-    exp_suffix = args.exp_suffix
     config_path = args.config
     spec = importlib.util.spec_from_file_location("config", config_path)
     config = importlib.util.module_from_spec(spec)
@@ -92,12 +91,12 @@ if __name__ == "__main__":
 
     # Extract overrides
     USER_OVERRIDE = config.OVERRIDE
+
+    # Extract additional settings
+    exp_suffix = config.SETTINGS['exp_suffix']
     dry_run = config.SETTINGS['dry_run']
     log_level = config.SETTINGS['log_level']
 
     logging.getLogger().setLevel(log_level)
-
     effective_config = merge_configs(BASE_PARAMS_CONFIG, USER_OVERRIDE)
-    effective_config['exp_suffix'] = exp_suffix
-
-    generate_combinations(effective_config, dry_run=dry_run)
+    generate_combinations(effective_config, dry_run=dry_run, exp_suffix=exp_suffix)
