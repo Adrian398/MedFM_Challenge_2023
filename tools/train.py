@@ -182,6 +182,9 @@ def merge_custom_args(cfg, args):
                                                               cfg.val_dataloader.dataset.data_prefix)
         cfg.test_dataloader.dataset.data_prefix = os.path.join(args.dir_prefix,
                                                                cfg.test_dataloader.dataset.data_prefix)
+        print("test2", cfg.work_dir)
+        print("test3", cfg.train_dataloader.dataset.data_prefix)
+        exit()
 
     # add suffix to run_name and work_dir
     if args.exp_suffix is not None:
@@ -209,7 +212,7 @@ def main():
     cfg = merge_custom_args(cfg, args)
 
     print("test", cfg.work_dir)
-    exit
+    exit()
 
     # build the runner from config
     runner = Runner.from_cfg(cfg)
