@@ -1,11 +1,16 @@
 import os
-import sys
 import shutil
 from datetime import datetime
-
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
+import argparse
+from termcolor import colored
 
-metric = "map"  # map, agg
+parser = argparse.ArgumentParser(description='Choose by which metric the best runs should be picked: map / auc / agg)')
+parser.add_argument('--metric', type=str, default='map', help='Metric type, default is map')
+args = parser.parse_args()
+metric = args.metric
+print(metric)
+print(type(metric))
 
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
 metric_tags = {"auc": "AUC/AUC_multiclass",
@@ -18,9 +23,8 @@ tasks = ["colon", "endo", "chest"]
 shots = ["1", "5", "10"]
 
 # DEBUG
-tasks = ["colon"]
-shots = ["1"]
-
+# tasks = ["colon"]
+# shots = ["1"]
 
 def get_max_metric_from_event_file(file_path, metric):
     event_acc = EventAccumulator(file_path)
@@ -104,8 +108,10 @@ for task in tasks:
 print("")
 print("---------Best runs for each setting:--------")
 for line in report:
-    print(line)
-print(best_runs)
+    if line.__contains__("No run found"):
+        print(colored(line, 'red'))
+    else:
+        print(line)
 
 # create dir for submission and config
 date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
@@ -117,6 +123,7 @@ os.makedirs(submission_dir)
 os.makedirs(configs_dir)
 os.makedirs(predictions_dir)
 
+bash_script = "#!/bin/bash\n"
 for given_run_path in best_runs:
     scratch_repo_path = os.path.join("/scratch", "medfm", "medfm-challenge")
 
@@ -135,14 +142,20 @@ for given_run_path in best_runs:
 
     config_path = os.path.join(run_dir, config_filename)
     checkpoint_path = os.path.join(run_dir, checkpoint_filename)
-    images_path = os.path.join(scratch_repo_path, "data", "MedFMC_val", task, "images")
+    # todo reset images path
+    images_path = os.path.join(scratch_repo_path, "data", "MedFMC_val", task, "images_mini")
     csv_name = f"{task}_{shot}_submission.csv"
     out_path = os.path.join(predictions_dir, csv_name)
 
-
-    # copy config into directory
-    print(f"Copying config from {config_path} to {configs_dir}")
+    # copy config into submission directory
     shutil.copy(config_path, configs_dir)
-    print("------------Copy infer command below --------------")
-    command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}"
-    print(command)
+    command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}\n"
+    bash_script += command
+
+print("--------------------------------------------")
+print(f"Saved respective configs to {configs_dir}")
+print("Created infer.sh")
+print(f"Run ./infer.sh to create prediction files in {predictions_dir}")
+with open("infer.sh", "w") as file:
+    file.write(bash_script)
+os.chmod("infer.sh", 0o755)
