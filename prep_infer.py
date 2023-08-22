@@ -142,8 +142,7 @@ for given_run_path in best_runs:
 
     config_path = os.path.join(run_dir, config_filename)
     checkpoint_path = os.path.join(run_dir, checkpoint_filename)
-    # todo reset images path
-    images_path = os.path.join(scratch_repo_path, "data", "MedFMC_val", task, "images_mini")
+    images_path = os.path.join(scratch_repo_path, "data", "MedFMC_val", task, "images")
     csv_name = f"{task}_{shot}_submission.csv"
     out_path = os.path.join(predictions_dir, csv_name)
 
