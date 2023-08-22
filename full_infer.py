@@ -1,9 +1,14 @@
 import os
 import shutil
+import sys
 from datetime import datetime
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
+import argparse
 
-metric = "map"  # map, agg
+parser = argparse.ArgumentParser(description='Choose by which metric the best runs should be picked: map / auc / agg)')
+parser.add_argument('--metric', type=str, default='map', help='Metric type, default is map')
+args = parser.parse_args()
+metric = args.metric
 
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
 metric_tags = {"auc": "AUC/AUC_multiclass",
