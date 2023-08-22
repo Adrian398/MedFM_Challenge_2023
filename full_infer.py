@@ -53,14 +53,11 @@ def get_event_file_from_run_dir(run_dir):
 
 def get_best_run_dir(task, shot, metric):
     setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
-    print(f"looking in {setting_directory}")
     # a setting is a combination of task and shot, e.g. 1-shot colon
     try:
         setting_run_dirs = os.listdir(setting_directory)
     except Exception:
         return None, -1
-
-    print(f"found {setting_run_dirs}")
 
     best_score = 0
     best_run = None
@@ -103,4 +100,4 @@ for task in tasks:
 print("")
 print("---------Best runs for each setting:--------")
 for line in report:
-    print(report)
+    print(line)
