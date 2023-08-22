@@ -1,8 +1,6 @@
 import os
-import sys
 import shutil
 from datetime import datetime
-
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
 metric = "map"  # map, agg
@@ -117,6 +115,7 @@ os.makedirs(submission_dir)
 os.makedirs(configs_dir)
 os.makedirs(predictions_dir)
 
+bash_script = "#!/bin/bash\n"
 for given_run_path in best_runs:
     scratch_repo_path = os.path.join("/scratch", "medfm", "medfm-challenge")
 
@@ -135,7 +134,8 @@ for given_run_path in best_runs:
 
     config_path = os.path.join(run_dir, config_filename)
     checkpoint_path = os.path.join(run_dir, checkpoint_filename)
-    images_path = os.path.join(scratch_repo_path, "data", "MedFMC_val", task, "images")
+    # todo reset images path
+    images_path = os.path.join(scratch_repo_path, "data", "MedFMC_val", task, "images_mini")
     csv_name = f"{task}_{shot}_submission.csv"
     out_path = os.path.join(predictions_dir, csv_name)
 
@@ -144,5 +144,9 @@ for given_run_path in best_runs:
     print(f"Copying config from {config_path} to {configs_dir}")
     shutil.copy(config_path, configs_dir)
     print("------------Copy infer command below --------------")
-    command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}"
-    print(command)
+    command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}\n"
+    bash_script += command
+
+with open("infer.sh", "w") as file:
+    file.write(bash_script)
+os.chmod("infer.sh", 0o755)
