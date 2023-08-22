@@ -193,8 +193,6 @@ def merge_custom_args(cfg, args):
         timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
         cfg.work_dir = cfg.work_dir + timestamp
 
-    print("test", cfg.work_dir)
-    exit()
     return cfg
 
 
@@ -209,6 +207,9 @@ def main():
 
     # merge our custom cli arguments to config
     cfg = merge_custom_args(cfg, args)
+
+    print("test", cfg.work_dir)
+    exit
 
     # build the runner from config
     runner = Runner.from_cfg(cfg)
