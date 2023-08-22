@@ -2,7 +2,7 @@ import os
 import sys
 from datetime import datetime
 
-scratch_repo_path = os.path.join("scratch", "medfm", "medfm-challenge")
+scratch_repo_path = os.path.join("/scratch", "medfm", "medfm-challenge")
 
 given_run_path = sys.argv[1]
 given_run_path = os.path.join("work_dirs", given_run_path)
