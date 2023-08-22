@@ -1,5 +1,5 @@
 OVERRIDE = {
-    'model': ["swinv2-b", "swin-b_vpt"],
+    'model': ["swinv2-b"],
     'dataset': "colon",
     'shot': 1,
     'exp_num': [1,2,3,4,5],

@@ -26,9 +26,8 @@ def run_training(params, exp_suffix, dry_run=False):
         # only add params as command arg if required
         if key not in ['model', 'shot', 'dataset']:
             command.extend([f"--{key}", str(value)])
-    print(exp_suffix)
+
     if exp_suffix:
-        print(exp_suffix)
         command.extend(["--exp_suffix", str(exp_suffix)])
 
     logging.info(f"Generated command: {' '.join(command)}")

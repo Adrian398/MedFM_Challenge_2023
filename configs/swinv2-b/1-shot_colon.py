@@ -1,7 +1,6 @@
 _base_ = [
     '../datasets/colon.py',
     '../swin_schedule.py',
-    #'mmpretrain::_base_/schedules/imagenet_bs1024_adamw_swin.py',
     'mmpretrain::_base_/models/swin_transformer_v2/base_384.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py'
@@ -96,7 +95,7 @@ default_hooks = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=50, max_epochs=1000)
+train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=1000)
 
 optimizer = dict(
         type='AdamW',
