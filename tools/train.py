@@ -165,6 +165,7 @@ def merge_custom_args(cfg, args):
         cfg.train_dataloader.dataset.ann_file = re.sub(r'exp[0-9]+', f'exp{args.exp_num}', cfg.train_dataloader.dataset.ann_file)
         cfg.val_dataloader.dataset.ann_file = re.sub(r'exp[0-9]+', f'exp{args.exp_num}', cfg.val_dataloader.dataset.ann_file)
         cfg.work_dir = re.sub(r'exp[0-9]+', f'exp{args.exp_num}', cfg.work_dir)
+        print(cfg.work_dir)
 
     if args.lr is not None:
         cfg.optim_wrapper.optimizer.lr = args.lr
@@ -192,6 +193,8 @@ def merge_custom_args(cfg, args):
         timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
         cfg.work_dir = cfg.work_dir + timestamp
 
+    print("test", cfg.work_dir)
+    exit()
     return cfg
 
 
