@@ -2,15 +2,16 @@ import os
 import sys
 from datetime import datetime
 
-scratch_repo_path = os.path.join("scratch", "medfm", "medfm-challenge")
+scratch_repo_path = os.path.join("/scratch", "medfm", "medfm-challenge")
 
 given_run_path = sys.argv[1]
-delimiter = "/"
-given_run_path = os.given_run_path.join("work_dirs", given_run_path)
+given_run_path = os.path.join("work_dirs", given_run_path)
 
 task = os.path.split(given_run_path)[0]
-shot = os.path.split(delimiter)[1]
-run_dir = delimiter.join(os.path.split(given_run_path)[:4])
+shot = os.path.split(given_run_path)[1]
+path_components = given_run_path.split(os.sep)
+run_dir = os.path.join(*path_components[:4])
+run_dir = os.path.join(scratch_repo_path, run_dir)
 
 config_filename = [file for file in os.listdir(run_dir) if file.endswith(".py")][0]
 checkpoint_filename = [file for file in os.listdir(run_dir) if file.endswith(".pth") and file.__contains__("best")][0]
