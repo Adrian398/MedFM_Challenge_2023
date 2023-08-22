@@ -163,6 +163,7 @@ def merge_custom_args(cfg, args):
         cfg.optim_wrapper.optimizer.lr = args.lr
         # cfg.lr = args.lr
         cfg.run_name = re.sub(r'lr[0-9.]+', f'lr{args.lr}', cfg.run_name)
+        cfg.work_dir = re.sub(r'lr[0-9.]+', f'lr{args.lr}', cfg.work_dir)
 
     # add prefix to workdir and dataset
     if args.dir_prefix is not None:
@@ -174,9 +175,10 @@ def merge_custom_args(cfg, args):
         cfg.test_dataloader.dataset.data_prefix = os.path.join(args.dir_prefix,
                                                                cfg.test_dataloader.dataset.data_prefix)
 
-    # add suffix to run_name
+    # add suffix to run_name and work_dir
     if args.exp_suffix is not None:
         cfg.run_name = cfg.run_name + "_" + args.exp_suffix
+        cfg.work_dir = cfg.work_dir + "_" + args.exp_suffix
 
     # append timestamp to workdir
     if not args.remove_timestamp:
