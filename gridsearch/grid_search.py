@@ -26,7 +26,7 @@ def run_training(params, exp_suffix, dry_run=False):
         # only add params as command arg if required
         if key not in ['model', 'shot', 'dataset']:
             command.extend([f"--{key}", str(value)])
-
+    print(exp_suffix)
     if exp_suffix:
         print(exp_suffix)
         command.extend(["--exp_suffix", str(exp_suffix)])
@@ -99,6 +99,8 @@ if __name__ == "__main__":
     exp_suffix = config.SETTINGS['exp_suffix']
     dry_run = config.SETTINGS['dry_run']
     log_level = config.SETTINGS['log_level']
+
+    print(exp_suffix)
 
     logging.getLogger().setLevel(log_level)
     effective_config = merge_configs(BASE_PARAMS_CONFIG, USER_OVERRIDE)
