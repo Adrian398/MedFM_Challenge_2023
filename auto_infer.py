@@ -44,3 +44,4 @@ print(f"Copying config from {config_path} to {configs_dir}")
 shutil.copy(config_path, configs_dir)
 print("------------Copy infer command below --------------")
 command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}"
+print(command)
