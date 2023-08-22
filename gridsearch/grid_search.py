@@ -45,7 +45,7 @@ def generate_config_path(model, shot, dataset):
 
 def generate_combinations(params_config, exp_suffix, combination={}, index=0, dry_run=False):
     if index == len(params_config):
-        run_training(combination, dry_run, exp_suffix)
+        run_training(params=combination, exp_suffix=exp_suffix, dry_run=dry_run)
         return
 
     param_name, values = list(params_config.items())[index]
@@ -56,7 +56,11 @@ def generate_combinations(params_config, exp_suffix, combination={}, index=0, dr
 
     for value in values:
         combination[param_name] = value
-        generate_combinations(params_config, exp_suffix, combination, index + 1, dry_run)
+        generate_combinations(params_config=params_config,
+                              exp_suffix=exp_suffix,
+                              combination=combination,
+                              index=index + 1,
+                              dry_run=dry_run)
 
 
 def merge_configs(base, override):
@@ -104,4 +108,4 @@ if __name__ == "__main__":
 
     logging.getLogger().setLevel(log_level)
     effective_config = merge_configs(BASE_PARAMS_CONFIG, USER_OVERRIDE)
-    generate_combinations(effective_config, dry_run=dry_run, exp_suffix=exp_suffix)
+    generate_combinations(params_config=effective_config, dry_run=dry_run, exp_suffix=exp_suffix)
