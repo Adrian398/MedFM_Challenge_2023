@@ -2,7 +2,7 @@ import os
 
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
-metric = "agg"  # map, agg
+metric = "map"  # map, agg
 
 work_dir_path = "work_dirs"
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
@@ -53,28 +53,35 @@ def get_event_file_from_run_dir(run_dir):
 
 def get_best_run_dir(task, shot, metric):
     setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
+    print(f"looking in {setting_directory}")
     # a setting is a combination of task and shot, e.g. 1-shot colon
     setting_run_dirs = os.listdir(setting_directory)
+    print(f"found {setting_run_dirs}")
 
     best_score = 0
     best_run = None
 
     for run_dir in setting_run_dirs:
+        print(f"checking {run_dir}")
         run_dir_path = os.path.join(setting_directory, run_dir)
+        print(f"of path {run_dir_path}")
 
         # skip if no checkpoint
         ckpt_file = get_ckpt_file_from_run_dir(run_dir_path)
         if ckpt_file is None:
+            print("checkpiont skip")
             continue
 
         # skip if no event file
         event_file = get_event_file_from_run_dir(run_dir_path)
         if event_file is None:
+            print("event file skip")
             continue
 
         # skip if metric not in event file
         score = get_max_metric_from_event_file(event_file, metric)
         if score == -1:
+            print("score skip")
             continue
 
         if score > best_score:
