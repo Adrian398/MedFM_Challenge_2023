@@ -110,7 +110,6 @@ print("")
 print("---------Best runs for each setting:--------")
 for line in report:
     print(line)
-print(best_runs)
 
 # create dir for submission and config
 date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
@@ -146,14 +145,15 @@ for given_run_path in best_runs:
     csv_name = f"{task}_{shot}_submission.csv"
     out_path = os.path.join(predictions_dir, csv_name)
 
-
-    # copy config into directory
-    print(f"Copying config from {config_path} to {configs_dir}")
+    # copy config into submission directory
     shutil.copy(config_path, configs_dir)
-    print("------------Copy infer command below --------------")
     command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}\n"
     bash_script += command
 
+print("--------------------------------------------")
+print(f"Saved respective configs to {configs_dir}")
+print("Created infer.sh")
+print(f"Run ./infer.sh to create prediction files in {predictions_dir}")
 with open("infer.sh", "w") as file:
     file.write(bash_script)
 os.chmod("infer.sh", 0o755)
