@@ -1,9 +1,9 @@
 import os
 import shutil
-import sys
 from datetime import datetime
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 import argparse
+from termcolor import colored
 
 parser = argparse.ArgumentParser(description='Choose by which metric the best runs should be picked: map / auc / agg)')
 parser.add_argument('--metric', type=str, default='map', help='Metric type, default is map')
@@ -108,7 +108,10 @@ for task in tasks:
 print("")
 print("---------Best runs for each setting:--------")
 for line in report:
-    print(line)
+    if line.__contains__("No run found"):
+        print(colored(line, 'red'))
+    else:
+        print(line)
 
 # create dir for submission and config
 date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
