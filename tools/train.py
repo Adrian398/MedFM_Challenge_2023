@@ -165,7 +165,6 @@ def merge_custom_args(cfg, args):
         cfg.train_dataloader.dataset.ann_file = re.sub(r'exp[0-9]+', f'exp{args.exp_num}', cfg.train_dataloader.dataset.ann_file)
         cfg.val_dataloader.dataset.ann_file = re.sub(r'exp[0-9]+', f'exp{args.exp_num}', cfg.val_dataloader.dataset.ann_file)
         cfg.work_dir = re.sub(r'exp[0-9]+', f'exp{args.exp_num}', cfg.work_dir)
-        print(cfg.work_dir)
 
     if args.lr is not None:
         cfg.optim_wrapper.optimizer.lr = args.lr
@@ -182,9 +181,6 @@ def merge_custom_args(cfg, args):
                                                               cfg.val_dataloader.dataset.data_prefix)
         cfg.test_dataloader.dataset.data_prefix = os.path.join(args.dir_prefix,
                                                                cfg.test_dataloader.dataset.data_prefix)
-        print("test2", cfg.work_dir)
-        print("test3", cfg.train_dataloader.dataset.data_prefix)
-        exit()
 
     # add suffix to run_name and work_dir
     if args.exp_suffix is not None:
@@ -210,9 +206,6 @@ def main():
 
     # merge our custom cli arguments to config
     cfg = merge_custom_args(cfg, args)
-
-    print("test", cfg.work_dir)
-    exit()
 
     # build the runner from config
     runner = Runner.from_cfg(cfg)
