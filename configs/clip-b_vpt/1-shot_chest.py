@@ -1,6 +1,6 @@
 _base_ = [
     '../datasets/chest.py',
-    '../swin_schedule.py',
+    '../schedules/chest.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
 ]
