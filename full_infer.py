@@ -16,8 +16,8 @@ tasks = ["colon", "endo", "chest"]
 shots = ["1", "5", "10"]
 
 # DEBUG
-tasks = ["colon"]
-shots = ["1"]
+# tasks = ["colon"]
+# shots = ["1"]
 
 
 def get_max_metric_from_event_file(file_path, metric):
