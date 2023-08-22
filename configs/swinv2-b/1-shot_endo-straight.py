@@ -150,6 +150,27 @@ train_dataloader = dict(
                 interpolation='bicubic',
                 scale=384,
                 type='Resize'),
+            dict(
+                type='RandomResizedCrop',
+                scale=384,
+                backend='pillow',
+                interpolation='bicubic'),
+            dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+            dict(type='RandomFlip', prob=0.5, direction='vertical'),
+            dict(
+                type='ColorJitter',
+                brightness=0.2,
+                contrast=(0.8, 1.2),
+                saturation=0.3,
+                hue=(-0.1, 0.1),
+                backend='pillow'
+            ),
+            dict(
+                type='Cutout',
+                shape=(64, 64),
+                pad_val=128,
+                prob=0.5
+            ),
             dict(type='PackInputs'),
         ],
         type='Endoscopy'),
