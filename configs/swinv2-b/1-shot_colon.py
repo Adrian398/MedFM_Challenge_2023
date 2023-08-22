@@ -78,13 +78,19 @@ val_dataloader = dict(
 )
 
 val_evaluator = [
+    dict(type='Aggregate'),
     dict(type='AveragePrecision'),
     dict(type='AUC')
 ]
 test_evaluator = val_evaluator
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="auto"),
+    checkpoint=dict(
+        type='CheckpointHook',
+        interval=250,
+        max_keep_ckpts=1,
+        save_best="Aggregate", rule="greater"
+    ),
     logger=dict(interval=10),
 )
 
