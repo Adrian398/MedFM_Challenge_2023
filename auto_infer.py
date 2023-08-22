@@ -23,7 +23,7 @@ checkpoint_filename = [file for file in os.listdir(run_dir) if file.endswith(".p
 
 config_path = os.path.join(run_dir, config_filename)
 checkpoint_path = os.path.join(run_dir, checkpoint_filename)
-images_path = f"data/MedFMC_val/{task}/images"
+images_path = os.path.join(scratch_repo_path, "data", "MedFMC_val", task, "images")
 csv_name = f"{task}_{shot}_submission.csv"
 out_path = os.path.join("results", csv_name)
 
