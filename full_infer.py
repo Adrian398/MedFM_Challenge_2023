@@ -5,6 +5,7 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 metric = "agg"  # map, agg
 
 work_dir_path = "work_dirs"
+work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
 metric_tags = {"auc": "AUC/AUC_multiclass",
                "map": "multi-label/mAP",
                "agg": "Aggregate"}
@@ -15,8 +16,8 @@ tasks = ["colon", "endo", "chest"]
 shots = ["1", "5", "10"]
 
 # DEBUG
-# tasks = ["colon"]
-# shots = ["1"]
+tasks = ["colon"]
+shots = ["1"]
 
 
 def get_max_metric_from_event_file(file_path, metric):
