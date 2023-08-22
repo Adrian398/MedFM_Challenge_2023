@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from datetime import datetime
 
 
 """
@@ -7,13 +8,19 @@ Aligns all .csv files in the results folder, such that the image IDs are in the 
 chest_val.csv / colon_val.csv / endo_val.csv
 """
 
-results_dir = "../results/"
 val_dir = "../data/MedFMC_val/"
 
+path = os.path.join('..', 'submissions')
+directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
+format = "%d-%m_%H-%M-%S"
+
+newest_directory = max(directories, key=lambda d: datetime.strptime(d, format))
+print(f"Aligning newest submission {newest_directory}")
+results_dir = os.path.join(path, newest_directory, "predictions")
 csv_files = [file for file in os.listdir(results_dir) if file.endswith('.csv')]
 
 for file in csv_files:
-    submission_csv_path = results_dir+file
+    submission_csv_path = os.path.join(results_dir, file)
 
     # Read colon_val.csv/endo_val.csv/chest_val.csv and remove rows without image ids
     task = file.split("_")[0]
