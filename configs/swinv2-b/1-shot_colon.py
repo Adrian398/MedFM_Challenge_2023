@@ -14,7 +14,7 @@ model_name = 'swinv2'
 exp_num = 1
 nshot = 1
 
-run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}'
 work_dir = f'work_dirs/colon/{nshot}-shot/{run_name}'
 
 model = dict(
