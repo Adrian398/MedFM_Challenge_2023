@@ -192,6 +192,8 @@ def merge_custom_args(cfg, args):
         timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
         cfg.work_dir = cfg.work_dir + timestamp
 
+    print("test", cfg.work_dir)
+    exit()
     return cfg
 
 
