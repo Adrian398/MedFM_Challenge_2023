@@ -4,7 +4,6 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 
 metric = "map"  # map, agg
 
-work_dir_path = "work_dirs"
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
 metric_tags = {"auc": "AUC/AUC_multiclass",
                "map": "multi-label/mAP",
@@ -88,6 +87,7 @@ def get_best_run_dir(task, shot, metric):
 
 
 report = []
+best_runs = []
 
 for task in tasks:
     for shot in shots:
@@ -96,8 +96,10 @@ for task in tasks:
             report.append(f"{shot}-shot_{task}: No run found")
         else:
             report.append(f"{shot}-shot_{task} - {metric}: {best_score} - {best_run}")
+            best_runs.append(os.path.join(task, f"{shot}-shot", best_run))
 
 print("")
 print("---------Best runs for each setting:--------")
 for line in report:
     print(line)
+print(best_runs)
