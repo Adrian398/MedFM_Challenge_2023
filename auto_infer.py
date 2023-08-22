@@ -2,15 +2,6 @@ import os
 import sys
 from datetime import datetime
 
-
-def find_repo(root_dir, target):
-    for root, dirs, _ in os.walk(root_dir):
-        if target in dirs:
-            return os.path.join(root, target)
-    return None
-
-
-home_repo_path = find_repo(os.path.expanduser("~"), "medfm-challenge")
 scratch_repo_path = os.path.join("scratch", "medfm", "medfm-challenge")
 
 given_run_path = sys.argv[1]
@@ -28,10 +19,10 @@ config_path = os.path.join(run_dir, config_filename)
 checkpoint_path = os.path.join(run_dir, checkpoint_filename)
 images_path = f"data/MedFMC_val/{task}/images"
 csv_name = f"{task}_{shot}_submission.csv"
-out_path = os.path.join(home_repo_path, "results", csv_name)
+out_path = os.path.join("results", csv_name)
 
 # create dir for submission and config
-submission_path = os.path.join(home_repo_path, "submissions")
+submission_path = os.path.join("submissions")
 date_pattern = datetime.now().strftime("%d-%m")
 submission_dir = os.path.join(submission_path, date_pattern)
 configs_dir = os.path.join(submission_dir, "configs")
