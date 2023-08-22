@@ -13,7 +13,7 @@ BASE_PARAMS_CONFIG = {
     'model': ["clip-b_vpt", "dinov2-b_vpt", "eva-b_vpt", "swin-b_vpt", "swinv2-b", "vit-b_vpt"],
     'dataset': ["chest", "colon", "endo"],
     'shot': [1, 5, 10],
-    'exp_suffix': [1, 2, 3, 4, 5],
+    'exp_num': [1, 2, 3, 4, 5],
     'lr': [1e-4, 1e-5, 1e-6],
 }
 
