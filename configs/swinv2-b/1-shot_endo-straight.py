@@ -171,6 +171,10 @@ train_dataloader = dict(
                 pad_val=128,
                 prob=0.5
             ),
+            dict(
+                type='Rotate',
+                angle=10
+            ),
             dict(type='PackInputs'),
         ],
         type='Endoscopy'),
