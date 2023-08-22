@@ -13,7 +13,7 @@ model_name = 'swinv2'
 exp_num = 2
 nshot = 1
 
-run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}'
 work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'
 
 model = dict(
@@ -37,14 +37,6 @@ model = dict(
         loss=dict(type='LabelSmoothLoss', loss_weight=1.0),
     )
 )
-
-train_pipeline = [
-    dict(type='RandomResizedCrop',
-         scale=1024,
-         crop_ratio_range=(0.9, 1.0),
-         backend='pillow',
-         interpolation='bicubic'),
-    ]
 
 train_dataloader = dict(
     batch_size=4, 
