@@ -107,7 +107,7 @@ for task in tasks:
 
 print("")
 print("---------------------------------------------------------------------------------------------------------------")
-print("\t\t\tBest runs for each setting:")
+print("|\t\t\tBest runs for each setting:")
 print("---------------------------------------------------------------------------------------------------------------")
 for line in report:
     if line.__contains__("No run found"):
