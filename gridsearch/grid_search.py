@@ -81,8 +81,10 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Run grid search for training.")
     parser.add_argument("--config", type=str, default=gridsearch_config_path, help="Path to the configuration file.")
+    parser.add_argument('--exp_suffix', type=str, default='', help='Suffix for experiment name')
     args = parser.parse_args()
 
+    exp_suffix = args.exp_suffix
     config_path = args.config
     spec = importlib.util.spec_from_file_location("config", config_path)
     config = importlib.util.module_from_spec(spec)
@@ -96,4 +98,6 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(log_level)
 
     effective_config = merge_configs(BASE_PARAMS_CONFIG, USER_OVERRIDE)
+    effective_config['exp_suffix'] = exp_suffix
+
     generate_combinations(effective_config, dry_run=dry_run)
