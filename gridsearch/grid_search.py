@@ -18,7 +18,7 @@ BASE_PARAMS_CONFIG = {
 }
 
 
-def run_training(params, dry_run=False, exp_suffix=''):
+def run_training(params, exp_suffix, dry_run=False):
     cfg_path = generate_config_path(params['model'], params['shot'], params['dataset'])
     command = ["python", "tools/train.py", cfg_path]
 
@@ -26,7 +26,10 @@ def run_training(params, dry_run=False, exp_suffix=''):
         # only add params as command arg if required
         if key not in ['model', 'shot', 'dataset']:
             command.extend([f"--{key}", str(value)])
-            command.extend(["--exp_suffix", str(exp_suffix)])
+
+    if exp_suffix:
+        print(exp_suffix)
+        command.extend(["--exp_suffix", str(exp_suffix)])
 
     logging.info(f"Generated command: {' '.join(command)}")
 
