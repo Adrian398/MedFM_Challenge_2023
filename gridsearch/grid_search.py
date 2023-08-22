@@ -43,7 +43,7 @@ def generate_config_path(model, shot, dataset):
     return f"configs/{model}/{shot}-shot_{dataset}.py"
 
 
-def generate_combinations(params_config, combination={}, index=0, dry_run=False, exp_suffix=''):
+def generate_combinations(params_config, exp_suffix, combination={}, index=0, dry_run=False):
     if index == len(params_config):
         run_training(combination, dry_run, exp_suffix)
         return
@@ -56,7 +56,7 @@ def generate_combinations(params_config, combination={}, index=0, dry_run=False,
 
     for value in values:
         combination[param_name] = value
-        generate_combinations(params_config, combination, index + 1, dry_run)
+        generate_combinations(params_config, exp_suffix, combination, index + 1, dry_run)
 
 
 def merge_configs(base, override):
