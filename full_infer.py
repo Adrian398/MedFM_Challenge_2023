@@ -1,4 +1,7 @@
 import os
+import sys
+import shutil
+from datetime import datetime
 
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
@@ -15,8 +18,8 @@ tasks = ["colon", "endo", "chest"]
 shots = ["1", "5", "10"]
 
 # DEBUG
-# tasks = ["colon"]
-# shots = ["1"]
+tasks = ["colon"]
+shots = ["1"]
 
 
 def get_max_metric_from_event_file(file_path, metric):
@@ -103,3 +106,43 @@ print("---------Best runs for each setting:--------")
 for line in report:
     print(line)
 print(best_runs)
+
+# create dir for submission and config
+date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
+submission_dir = os.path.join("submissions", date_pattern)
+configs_dir = os.path.join(submission_dir, "configs")
+predictions_dir = os.path.join(submission_dir, "predictions")
+
+os.makedirs(submission_dir)
+os.makedirs(configs_dir)
+os.makedirs(predictions_dir)
+
+for given_run_path in best_runs:
+    scratch_repo_path = os.path.join("/scratch", "medfm", "medfm-challenge")
+
+    task = given_run_path.split(os.sep)[0]
+    if task.__contains__("-"):
+        task = task.split("-")[0]
+    shot = given_run_path.split(os.sep)[1]
+
+    given_run_path = os.path.join("work_dirs", given_run_path)
+    path_components = given_run_path.split(os.sep)
+    run_dir = os.path.join(*path_components[:4])
+    run_dir = os.path.join(scratch_repo_path, run_dir)
+
+    config_filename = [file for file in os.listdir(run_dir) if file.endswith(".py")][0]
+    checkpoint_filename = [file for file in os.listdir(run_dir) if file.endswith(".pth") and file.__contains__("best")][0]
+
+    config_path = os.path.join(run_dir, config_filename)
+    checkpoint_path = os.path.join(run_dir, checkpoint_filename)
+    images_path = os.path.join(scratch_repo_path, "data", "MedFMC_val", task, "images")
+    csv_name = f"{task}_{shot}_submission.csv"
+    out_path = os.path.join(predictions_dir, csv_name)
+
+
+    # copy config into directory
+    print(f"Copying config from {config_path} to {configs_dir}")
+    shutil.copy(config_path, configs_dir)
+    print("------------Copy infer command below --------------")
+    command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}"
+    print(command)
