@@ -7,6 +7,6 @@ OVERRIDE = {
 }
 
 SETTINGS = {
-    'dry_run': False,
+    'dry_run': True,
     'log_level': "INFO"
 }
