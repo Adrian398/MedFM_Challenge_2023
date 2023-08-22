@@ -100,22 +100,22 @@ for task in tasks:
     for shot in shots:
         best_run, best_score = get_best_run_dir(task, shot, metric)
         if best_run is None:
-            report.append(f"| {shot}-shot_{task}\t No run found\t\t|")
+            report.append(f"| {shot}-shot_{task}\t No run found")
         else:
-            report.append(f"| {shot}-shot_{task}\t{metric}: {best_score}\t{best_run}\t|")
+            report.append(f"| {shot}-shot_{task}\t{metric}: {best_score}\t{best_run}")
             best_runs.append(os.path.join(task, f"{shot}-shot", best_run))
 
 print("")
-print("---------------------------------------------------------------------------")
-print("\t\tBest runs for each setting:")
-print("---------------------------------------------------------------------------")
+print("---------------------------------------------------------------------------------------------------------------")
+print("\t\t\tBest runs for each setting:")
+print("---------------------------------------------------------------------------------------------------------------")
 for line in report:
     if line.__contains__("No run found"):
         print(colored(line, 'red'))
     else:
         print(line)
+print("---------------------------------------------------------------------------------------------------------------")
 
-print("---------------------------------------------------------------------------")
 # create dir for submission and config
 date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
 submission_dir = os.path.join("submissions", date_pattern)
