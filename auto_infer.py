@@ -9,7 +9,7 @@ scratch_repo_path = os.path.join("/scratch", "medfm", "medfm-challenge")
 given_run_path = sys.argv[1]
 
 task = given_run_path.split(os.sep)[0]
-if task.contains("-"):
+if task.__contains__("-"):
     task = task.split("-")[0]
 shot = given_run_path.split(os.sep)[1]
 
