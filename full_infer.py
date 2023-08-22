@@ -55,14 +55,18 @@ def get_best_run_dir(task, shot, metric):
     setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
     print(f"looking in {setting_directory}")
     # a setting is a combination of task and shot, e.g. 1-shot colon
-    setting_run_dirs = os.listdir(setting_directory)
+    try:
+        setting_run_dirs = os.listdir(setting_directory)
+    except Exception:
+        return None, -1
+
     print(f"found {setting_run_dirs}")
 
     best_score = 0
     best_run = None
 
     for run_dir in setting_run_dirs:
-        print(f"checking {run_dir}")
+        print(f"checking {task}/{shot}-shot/{run_dir}")
         run_dir_path = os.path.join(setting_directory, run_dir)
 
         # skip if no checkpoint
