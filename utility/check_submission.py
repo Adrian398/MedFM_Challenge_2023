@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import pandas as pd
 
@@ -10,8 +11,15 @@ if they have the right amount of entries, and if the order of image IDs correspo
 
 tasks = ["endo", "colon", "chest"]
 n_shots = ["1", "5", "10"]
-results_dir = "../results/"
 val_dir = "../data/MedFMC_val/"
+
+path = os.path.join('..', 'submissions')
+directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
+format = "%d-%m_%H-%M-%S"
+
+newest_directory = max(directories, key=lambda d: datetime.strptime(d, format))
+print(f"Checking newest submission {newest_directory}")
+results_dir = os.path.join(path, newest_directory, "predictions")
 
 required_file_names = []
 for task in tasks:
@@ -33,7 +41,7 @@ for file in required_file_names:
 file_orders_correct = True
 file_lengths_correct = True
 for file in csv_files:
-    submission_csv_path = results_dir + file
+    submission_csv_path = os.path.join(results_dir, file)
 
     # Read colon_val.csv/endo_val.csv/chest_val.csv and remove rows without image ids
     task = file.split("_")[0]
