@@ -6,7 +6,7 @@ scratch_repo_path = os.path.join("scratch", "medfm", "medfm-challenge")
 
 given_run_path = sys.argv[1]
 delimiter = "/"
-given_run_path = os.given_run_path.join("work_dirs", given_run_path)
+given_run_path = os.path.join("work_dirs", given_run_path)
 
 task = os.path.split(given_run_path)[0]
 shot = os.path.split(delimiter)[1]
