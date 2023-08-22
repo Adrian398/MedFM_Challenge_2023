@@ -7,10 +7,11 @@ import subprocess
 scratch_repo_path = os.path.join("/scratch", "medfm", "medfm-challenge")
 
 given_run_path = sys.argv[1]
-given_run_path = os.path.join("work_dirs", given_run_path)
 
 task = given_run_path.split(os.sep)[0]
 shot = given_run_path.split(os.sep)[1]
+
+given_run_path = os.path.join("work_dirs", given_run_path)
 path_components = given_run_path.split(os.sep)
 run_dir = os.path.join(*path_components[:4])
 run_dir = os.path.join(scratch_repo_path, run_dir)
