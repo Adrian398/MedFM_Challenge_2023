@@ -36,8 +36,6 @@ def get_ckpt_file_from_run_dir(run_dir):
     for entry in os.listdir(run_dir):
         if entry.__contains__(f"best_{metric.replace('/', '_')}"):
             return entry
-        else:
-            print(f"found entries {entry} which does not contain best_{metric.replace('/', '_')}")
     return None
 
 
@@ -66,24 +64,20 @@ def get_best_run_dir(task, shot, metric):
     for run_dir in setting_run_dirs:
         print(f"checking {run_dir}")
         run_dir_path = os.path.join(setting_directory, run_dir)
-        print(f"of path {run_dir_path}")
 
         # skip if no checkpoint
         ckpt_file = get_ckpt_file_from_run_dir(run_dir_path)
         if ckpt_file is None:
-            print("checkpiont skip")
             continue
 
         # skip if no event file
         event_file = get_event_file_from_run_dir(run_dir_path)
         if event_file is None:
-            print("event file skip")
             continue
 
         # skip if metric not in event file
         score = get_max_metric_from_event_file(event_file, metric)
         if score == -1:
-            print("score skip")
             continue
 
         if score > best_score:
@@ -92,11 +86,17 @@ def get_best_run_dir(task, shot, metric):
     return best_run, best_score
 
 
-print("Best runs for each setting:")
+report = []
+
 for task in tasks:
     for shot in shots:
         best_run, best_score = get_best_run_dir(task, shot, metric)
         if best_run is None:
-            print(f"{shot}-shot_{task}: No run found")
+            report.append(f"{shot}-shot_{task}: No run found")
         else:
-            print(f"{shot}-shot_{task} - {metric}: {best_score} - {best_run}")
+            report.append(f"{shot}-shot_{task} - {metric}: {best_score} - {best_run}")
+
+print("")
+print("---------Best runs for each setting:--------")
+for line in report:
+    print(report)
