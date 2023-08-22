@@ -38,4 +38,4 @@ print(f"Copying config from {config_path} to {configs_dir}")
 print(f"Starting infer with {config_path} {checkpoint_path} {images_path} {out_path}")
 # copy config into directory
 # shutil.copy(config_path, configs_dir)
-# subprocess.run(["python", "tools/infer.py", config_path, checkpoint_path, images_path, out_path])
+# subprocess.run(["python", "tools/infer.py", config_path, checkpoint_path, images_path, "--out", out_path])
