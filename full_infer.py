@@ -37,7 +37,7 @@ def get_ckpt_file_from_run_dir(run_dir):
         if entry.__contains__(f"best_{metric.replace('/', '_')}"):
             return entry
         else:
-            print(f"found entries {entry} which does not contain best_{metric}")
+            print(f"found entries {entry} which does not contain best_{metric.replace('/', '_')}")
     return None
 
 
