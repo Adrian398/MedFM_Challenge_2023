@@ -35,7 +35,7 @@ model = dict(
         type='MultiLabelLinearClsHead',
         num_classes=4,
         in_channels=1024,
-        #loss=dict(type='LabelSmoothLoss', loss_weight=1.0),
+        loss=dict(type='LabelSmoothLoss', loss_weight=1.0),
     )
 )
 
