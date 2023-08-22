@@ -1,5 +1,0 @@
-Exp_num 2: Testing Basic Data Augmentations
-Exp_num 3: Modyfying Data Prepocessor
-Exp_num 4: Modyfying Batch Size
-Exp_num 5: Modyfying Prompt Length
-Exp_num 6: Modyfying Learning Rate
