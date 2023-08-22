@@ -9,6 +9,8 @@ parser = argparse.ArgumentParser(description='Choose by which metric the best ru
 parser.add_argument('--metric', type=str, default='map', help='Metric type, default is map')
 args = parser.parse_args()
 metric = args.metric
+print(metric)
+print(type(metric))
 
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
 metric_tags = {"auc": "AUC/AUC_multiclass",
