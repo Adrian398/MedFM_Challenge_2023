@@ -89,6 +89,11 @@ def get_best_run_dir(task, shot, metric):
         if score == -1:
             continue
 
+        if run_dir == "swinv2_bs8_lr0.0001_exp5_exp-test_20230823-002433":
+            print("Metric", metric)
+            print("Score", score)
+            print("Best_Score", best_score)
+
         if score > best_score:
             best_score = score
             best_run = run_dir
