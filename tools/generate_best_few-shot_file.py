@@ -1,127 +1,184 @@
 import os
 import random
-import yaml
-from baseline_multiclass import gen_support_set_twoclass, load_annotations
-from baseline_multilabel import (gen_support_set, gen_support_set_endo,
-                                 load_chest_annotations, load_endo_annotations)
+
+import pandas as pd
 
 K_shot_lst = [1, 5, 10]
-# make total validation number not larger than 3000
-val_num = 3000
 dataset_type_lst = ['endo', 'colon', 'chest']
-exp_num_total = 1
+exp_num = 7
 
-for exp_num in range(1, 1 + exp_num_total):
+annotations = {
+    'endo': 'data/MedFMC_train/endo/endo_train.csv',
+    'colon': 'data/MedFMC_train/colon/colon_train.csv',
+    'chest': 'data/MedFMC_train/chest/chest_train.csv'
+}
+
+destinations = {
+    'endo': 'data_anns/MedFMC/endo_new',
+    'colon': 'data_anns/MedFMC/colon_new',
+    'chest': 'data_anns/MedFMC/chest_new'
+}
+
+
+def gen_support_set_chest(df: pd.DataFrame, k_shot: int, strategy: str = "random"):
+    """
+    generate support set for chest dataset with k_shot images per class while making sure there are no duplicates
+    df: dataframe of chest dataset
+    k_shot: number of images per class
+    strategy: 'random', 'max_label' or 'min_label':
+    if 'random, randomly sample k_shot images per class;
+    if 'max_label', sample k_shot images which have the most labels;
+    if 'min_label', sample k_shot images where the image optimally has only one label, otherwise as little as possible
+    return: support set of chest dataset
+    """
+    support_set = []
+    labels = df.columns[2:]
+    for label in labels:
+        sample = []
+        # filter out images where current label is 1
+        df_cur = df[df[label] == 1]
+        # get all img_ids of the filtered dataframe
+        img_ids = df_cur['img_id'].unique().tolist()
+
+        if strategy == 'random':
+            # randomly sample k_shot images from the filtered dataframe
+            sample = df_cur.sample(n=k_shot)
+        elif strategy == 'min_label':
+            # TODO
+        elif strategy == 'max_label':
+            # TODO
+        else:
+            raise ValueError(f'Invalid strategy {strategy}.')
+
+        # add the sampled images to the support set
+        support_set += sample.tolist()
+
+        # remove the sampled images from the dataframe to avoid duplicates
+        df = df[~df['filename'].isin(sample['filename'])]
+
+    return support_set
+
+def gen_support_set_endo(df: pd.DataFrame, k_shot: int, strategy: str ='random'):
+    """
+    generate support set for endo dataset with k_shot images per class while making sure there are no duplicates
+    df: dataframe of endo dataset
+    k_shot: number of images per class
+    strategy: 'random' or 'max':
+    if 'random, randomly sample k_shot images per class;
+    if 'max', sample k_shot patients which have the most images;
+    return: support set of endo dataset
+    """
+    support_set = []
+    labels = df.columns[2:]
+    for label in labels:
+        # filter out images where current label is 1
+        df_cur = df[df[label] == 1]
+        # get all study_ids of the filtered dataframe
+        study_ids = df_cur['study_id'].unique().tolist()
+
+        if strategy == 'random':
+            # randomly sample k_shot study_ids from the filtered dataframe
+            sample = random.sample(study_ids, k_shot)
+
+        elif strategy == 'max':
+            # order the study_ids by the number of images they have
+            study_ids_ordered = df_cur.groupby('study_id').count().sort_values(by='img_id', ascending=False).index.tolist()
+            # take the first k_shot study_ids from the ordered list
+            sample = study_ids_ordered[:k_shot]
+        else:
+            raise ValueError(f'Invalid strategy {strategy}.')
+
+        # filter out images where study_id is in the sampled study_ids
+        df_cur = df_cur[df_cur['study_id'].isin(sample)]
+        # add the img_ids and labels of the sampled study_ids to the support set
+        support_set.append(df_cur[['img_id', label]].values.tolist())
+        # remove the sampled study_ids from the dataframe to avoid duplicates
+        df = df[~df['study_id'].isin(sample)]
+
+    return support_set
+
+
+def gen_support_set_colon(df: pd.DataFrame, k_shot: int, strategy: str ='random'):
+    """
+    generate support set for colon dataset with k_shot images per class while making sure there are no duplicates
+    df: dataframe of colon dataset
+    k_shot: number of images per class
+    strategy: 'random' or 'max':
+    if 'random, randomly sample k_shot images per class;
+    if 'max', sample k_shot patients which have the most images;
+    return: support set of colon dataset
+    """
+    support_set = []
+    labels = [0, 1]
+
+    for label in labels:
+        # filter out images with current label
+        df_cur = df[df[label] == 1]
+        # get all study_ids of the filtered dataframe
+        study_ids = df_cur['study_id'].unique().tolist()
+
+        if strategy == 'random':
+            # randomly sample k_shot study_ids from the filtered dataframe
+            sample = random.sample(study_ids, k_shot)
+
+        elif strategy == 'max':
+            # order the study_ids by the number of images they have
+            study_ids_ordered = df_cur.groupby('study_id').count().sort_values(by='img_id',
+                                                                               ascending=False).index.tolist()
+            # take the first k_shot study_ids from the ordered list
+            sample = study_ids_ordered[:k_shot]
+        else:
+            raise ValueError(f'Invalid strategy {strategy}.')
+
+        # filter out images where study_id is in the sampled study_ids
+        df_cur = df_cur[df_cur['study_id'].isin(sample)]
+        # add the img_ids and labels of the sampled study_ids to the support set
+        support_set.append(df_cur[['img_id', label]].values.tolist())
+        # remove the sampled study_ids from the dataframe to avoid duplicates
+        df = df[~df['study_id'].isin(sample)]
+
+    return support_set
+
+
+    return support_set
+
+# randomly sample k_shot images 5 times for each dataset
+for exp_num in range(1, 6):
     for dataset_type in dataset_type_lst:
         for K_shot in K_shot_lst:
-            # load config file of Colon
-            if dataset_type == 'colon':
-                filepath = os.path.join(os.getcwd(),
-                                        './configs/baseline_multiclass.yaml')
-            elif dataset_type == 'chest' or dataset_type == 'endo':
-                filepath = os.path.join(os.getcwd(),
-                                        './configs/baseline_multilabel.yaml')
+            # read csv file as dataframe
+            df = pd.read_csv(annotations[dataset_type])
 
-            with open(filepath, 'r') as f:
-                cfg = yaml.load(f, Loader=yaml.FullLoader)
-            train_list_txt = cfg['data_cfg'][dataset_type]['train_list_txt']
-
-            if dataset_type == 'colon':
-                train_img_infos = load_annotations(train_list_txt)
-            elif dataset_type == 'endo':
-                train_img_infos = load_endo_annotations(train_list_txt)
+            # generate support set
+            if dataset_type == 'endo':
+                support_set = gen_support_set_endo(df, K_shot, strategy='random')
+            elif dataset_type == 'colon':
+                support_set = gen_support_set_colon(df, K_shot, strategy='random')
             elif dataset_type == 'chest':
-                train_img_infos = load_chest_annotations(train_list_txt)
+                support_set = gen_support_set_chest(df, K_shot, strategy='random')
             else:
                 raise ValueError(f'Invalid dataset type {dataset_type}.')
 
-            if dataset_type == 'colon':
-                support_set = gen_support_set_twoclass(train_img_infos, K_shot,
-                                                       'colon')
-                few_shot_lst = []
-                with open(f'colon_{K_shot}-shot_train_exp{exp_num}.txt',
-                          'w') as f:
+            # validation set is simply the rest of the dataset
+            val_set = df[~df['filename'].isin(support_set)]
+
+            # write support set to txt file, where labels for chest are separated by commas, but for the others by space
+            if dataset_type == 'chest':
+                with open(os.path.join(destinations[dataset_type], f'{dataset_type}_{K_shot}-shot_train_exp{exp_num}.txt'), 'w') as f:
+                    for i, i_class in enumerate(support_set):
+                        f.write(','.join(i_class) + ' ' + str(i) + '\n')
+                with open(os.path.join(destinations[dataset_type], f'{dataset_type}_{K_shot}-shot_val_exp{exp_num}.txt'), 'w') as f:
+                    for i, i_class in enumerate(val_set):
+                        f.write(','.join(i_class) + ' ' + str(i) + '\n')
+            else:
+                with open(os.path.join(destinations[dataset_type], f'{dataset_type}_{K_shot}-shot_train_exp{exp_num}.txt'), 'w') as f:
                     for i, i_class in enumerate(support_set):
                         for j_id in support_set[i]:
                             f.write(j_id + ' ' + str(i) + '\n')
-                            few_shot_lst.append(j_id)
-                # generate validation set txt file
-                few_shot_val_lst = []
-                with open(f'colon_{K_shot}-shot_val_exp{exp_num}.txt',
-                          'w') as f:
-                    val_cur = 0
-                    while val_cur < val_num:
-                        num = random.randint(0, len(train_img_infos) - 1)
-                        filename = train_img_infos[num]['filename']
-                        gt_label = train_img_infos[num]['gt_label']
-                        if (filename not in few_shot_lst) and (
-                                filename not in few_shot_val_lst):
-                            few_shot_val_lst.append(filename)
-                            f.write(filename + ' ' + str(gt_label) + '\n')
-                            val_cur += 1
-                        if len(few_shot_val_lst) + len(few_shot_lst) == len(
-                                train_img_infos):
-                            print('The validation set are not enough...')
-                            print(
-                                len(train_img_infos), len(few_shot_lst),
-                                len(few_shot_val_lst))
-                            break
+                with open(os.path.join(destinations[dataset_type], f'{dataset_type}_{K_shot}-shot_val_exp{exp_num}.txt'), 'w') as f:
+                    for i, i_class in enumerate(val_set):
+                        for j_id in val_set[i]:
+                            f.write(j_id + ' ' + str(i) + '\n')
 
-            if dataset_type == 'endo':
-                # total class number of dataset
-                N_way = cfg['data_cfg'][dataset_type]['N_way']
-                support_set = gen_support_set_endo(train_img_infos, N_way,
-                                                   K_shot)
-                # used in generating .txt file
-            elif dataset_type == 'chest':
-                N_way = cfg['data_cfg'][dataset_type]['N_way']
-                support_set = gen_support_set(train_img_infos, N_way, K_shot)
-            if dataset_type == 'endo' or dataset_type == 'chest':
-                few_shot_lst = []
-                with open(
-                        f'{dataset_type}_{K_shot}-shot_train_exp{exp_num}.txt',
-                        'w') as f:
-                    for i, i_class in enumerate(support_set):
-                        for j_id in support_set[i]:
-                            j_pid, j_label = j_id
-                            k_line = j_pid
-                            few_shot_lst.append(j_id)
-                            for k, k_label in enumerate(j_label.tolist()):
-                                if dataset_type == 'endo':
-                                    sep_str = ' '
-                                elif dataset_type == 'chest' and k == 0:
-                                    sep_str = ' '
-                                elif dataset_type == 'chest' and k != 0:
-                                    sep_str = ','
-                                k_line += sep_str + str(k_label)
-                            f.write(k_line + '\n')
 
-                few_shot_val_lst = []
-                with open(f'{dataset_type}_{K_shot}-shot_val_exp{exp_num}.txt',
-                          'w') as f:
-                    val_cur = 0
-                    while val_cur < val_num:
-                        num = random.randint(0, len(train_img_infos) - 1)
-                        filename = train_img_infos[num]['filename']
-                        gt_label = train_img_infos[num]['gt_label']
-                        if (filename not in few_shot_lst) and (
-                                filename not in few_shot_val_lst):
-                            few_shot_val_lst.append(filename)
-                            k_line = filename
-                            for j, j_label in enumerate(gt_label.tolist()):
-                                if dataset_type == 'endo':
-                                    sep_str = ' '
-                                elif dataset_type == 'chest' and j == 0:
-                                    sep_str = ' '
-                                elif dataset_type == 'chest' and j != 0:
-                                    sep_str = ','
-                                k_line += sep_str + str(j_label)
-                            f.write(k_line + '\n')
-                            val_cur += 1
-                        if len(few_shot_val_lst) + len(few_shot_lst) == len(
-                                train_img_infos):
-                            print('The validation set are not enough...')
-                            print(
-                                len(train_img_infos), len(few_shot_lst),
-                                len(few_shot_val_lst))
-                            break
+
