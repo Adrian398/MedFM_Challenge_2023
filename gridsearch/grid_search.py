@@ -97,6 +97,7 @@ def run_commands_on_cluster(commands, delay_seconds=1):
 
         gpu = next(gpu_cycle)
         job_name = command
+        print(job_name)
 
         slurm_cmd = f'sbatch -p ls6 \
         --gres=gpu:{gpu}:1 \
