@@ -16,6 +16,7 @@ print(type(metric))
 
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
 metric_tags = {"auc": "AUC/AUC_multiclass",
+               "aucl": "AUC/AUC_multilabe",
                "map": "multi-label/mAP",
                "agg": "Aggregate"}
 
@@ -30,19 +31,25 @@ shots = ["1", "5", "10"]
 # shots = ["1"]
 
 def get_max_metric_from_event_file(file_path, metric):
+
     event_acc = EventAccumulator(file_path)
     event_acc.Reload()
     scalar_tags = event_acc.Tags()['scalars']
 
-    if metric_tags["auc"] not in scalar_tags:
+    # skip, no auc
+    if metric_tags["auc"] not in scalar_tags and metric_tags["aucl"] not in scalar_tags:
         return -1
 
+    # skip no map
     if metric_tags["map"] not in scalar_tags:
         return -1
 
+    # determine auc type
+    auc_tag = metric_tags["auc"] if metric_tags["auc"] in scalar_tags else metric_tags["aucl"]
+
     if metric == "Aggregate" and metric not in scalar_tags:
         map_values = [item.value for item in event_acc.Scalars(metric_tags["map"])]
-        auc_values = [item.value for item in event_acc.Scalars(metric_tags["auc"])]
+        auc_values = [item.value for item in event_acc.Scalars(auc_tag)]
         max_index = map_values.index(max(map_values))
         return float((map_values[max_index] + auc_values[max_index]) / 2)
 
@@ -110,8 +117,6 @@ report = []
 best_runs = []
 
 for task in tasks:
-    if task != "colon":
-        metric_tags["auc"] = "AUC/AUC_multilabe"
     for shot in shots:
         best_run, best_score = get_best_run_dir(task, shot, metric)
         if best_run is None:
