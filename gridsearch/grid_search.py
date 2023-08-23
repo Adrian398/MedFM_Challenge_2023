@@ -121,7 +121,7 @@ if __name__ == "__main__":
     commands = generate_combinations(params_config=effective_config, exp_suffix=exp_suffix)
 
     # Display the generated commands
-    print("\nGenerated Commands:")
+    print("Generated Commands:")
     for command in commands:
         print(f"{' '.join(command)}")
 

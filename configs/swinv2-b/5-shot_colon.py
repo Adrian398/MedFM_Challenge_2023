@@ -154,7 +154,7 @@ test_pipeline = [
     dict(type='PackInputs'),
 ]
 train_bs = 8
-train_cfg = dict(by_epoch=True, max_epochs=1000, val_interval=25)
+train_cfg = dict(by_epoch=True, max_epochs=200, val_interval=25)
 train_dataloader = dict(
     batch_size=8,
     collate_fn=dict(type='default_collate'),
@@ -182,7 +182,7 @@ train_pipeline = [
 ]
 val_cfg = dict()
 val_dataloader = dict(
-    batch_size=64,
+    batch_size=16,
     collate_fn=dict(type='default_collate'),
     dataset=dict(
         ann_file='data_anns/MedFMC/colon/colon_5-shot_val_exp1.txt',
