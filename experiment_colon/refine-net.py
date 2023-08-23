@@ -17,7 +17,7 @@ nltk.download('punkt')
 train_batch_size = 32
 num_epochs = 5
 model_name = 'bert-base-uncased'
-model_save_path = 'refine-net/output/training_continue_training-' + model_name + '-' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+model_save_path = 'experiment_colon/refine-net/output/training_continue_training-' + model_name + '-' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 oscar = datasets.load_dataset(
     'oscar',
