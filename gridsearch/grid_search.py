@@ -88,7 +88,7 @@ def run_commands_on_cluster(commands, delay_seconds=10):
         cmd_str = " ".join(command)
 
         # Use the slurm command to run the command on the cluster
-        slurm_cmd = f'sbatch -p ls6 --gres=gpu:1 --wrap="{cmd_str}"'
+        slurm_cmd = f'sbatch -p ls6 --gres=gpu:rtx4090:1 --wrap="{cmd_str}"'
         subprocess.run(slurm_cmd, shell=True)
 
         # Delay for the specified number of seconds
