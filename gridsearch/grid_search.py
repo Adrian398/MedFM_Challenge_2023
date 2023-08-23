@@ -4,6 +4,7 @@ import os
 import subprocess
 import argparse
 import sys
+import time
 
 logging.basicConfig(level=logging.INFO)
 
@@ -54,9 +55,9 @@ def generate_combinations(params_config, exp_suffix, combination={}, index=0):
             combination_copy = combination.copy()
             combination_copy[param_name] = value
             commands.extend(generate_combinations(params_config=params_config,
-                                                 exp_suffix=exp_suffix,
-                                                 combination=combination_copy,
-                                                 index=index + 1))
+                                                  exp_suffix=exp_suffix,
+                                                  combination=combination_copy,
+                                                  index=index + 1))
     return commands
 
 
@@ -79,6 +80,19 @@ def check_pythonpath_from_cwd():
     if os.getcwd() not in sys.path:
         logging.error(f"PYTHONPATH not set.")
         sys.exit(1)
+
+
+def run_commands_on_cluster(commands, delay_seconds=10):
+    for command in commands:
+        # Convert the list of command arguments to a single string
+        cmd_str = " ".join(command)
+
+        # Use the slurm command to run the command on the cluster
+        slurm_cmd = f'sbatch -p ls6 --gres=gpu:1 --wrap="{cmd_str}"'
+        subprocess.run(slurm_cmd, shell=True)
+
+        # Delay for the specified number of seconds
+        time.sleep(delay_seconds)
 
 
 if __name__ == "__main__":
@@ -104,5 +118,10 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(log_level)
     effective_config = merge_configs(BASE_PARAMS_CONFIG, USER_OVERRIDE)
 
-    command_list = generate_combinations(params_config=effective_config, exp_suffix=exp_suffix)
-    print(command_list)
+    commands = generate_combinations(params_config=effective_config, exp_suffix=exp_suffix)
+
+    # Prompt the user
+    user_input = input(f"Do you want to run {len(commands)} commands on the cluster? (yes/no): ")
+
+    if user_input.strip().lower() == 'yes':
+        run_commands_on_cluster(commands)
