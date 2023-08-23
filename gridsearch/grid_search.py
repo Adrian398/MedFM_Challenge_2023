@@ -124,7 +124,7 @@ if __name__ == "__main__":
     # Display the generated commands
     print("\nGenerated Commands:\n")
     for command in commands:
-        print(f"{' '.join(command)}\n")
+        print(f"{' '.join(command)}")
 
     # Prompt the user
     user_input = input(f"Do you want to run {len(commands)} commands on the cluster? (yes/no): ")
