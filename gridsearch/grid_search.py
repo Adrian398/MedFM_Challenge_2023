@@ -18,7 +18,7 @@ BASE_PARAMS_CONFIG = {
 }
 
 
-def run_training(params, exp_suffix, dry_run=False):
+def run_training(params, exp_suffix):
     cfg_path = generate_config_path(params['model'], params['shot'], params['dataset'])
     command = ["python", "tools/train.py", cfg_path]
 
@@ -31,35 +31,33 @@ def run_training(params, exp_suffix, dry_run=False):
         command.extend(["--exp_suffix", str(exp_suffix)])
 
     logging.info(f"Generated command: {' '.join(command)}")
-
-    if not dry_run:
-        logging.info(f"Starting training with config: {params}")
-        subprocess.run(command)
-        logging.info(f"Training for config {params} completed")
+    return command
 
 
 def generate_config_path(model, shot, dataset):
     return f"configs/{model}/{shot}-shot_{dataset}.py"
 
 
-def generate_combinations(params_config, exp_suffix, combination={}, index=0, dry_run=False):
+def generate_combinations(params_config, exp_suffix, combination={}, index=0):
+    commands = []
     if index == len(params_config):
-        run_training(params=combination, exp_suffix=exp_suffix, dry_run=dry_run)
-        return
+        command = run_training(params=combination, exp_suffix=exp_suffix)
+        commands.append(command)
+    else:
+        param_name, values = list(params_config.items())[index]
 
-    param_name, values = list(params_config.items())[index]
+        # Wrap non-iterables (or strings) in a list
+        if not is_iterable(values) or isinstance(values, str):
+            values = [values]
 
-    # Wrap non-iterables (or strings) in a list
-    if not is_iterable(values) or isinstance(values, str):
-        values = [values]
-
-    for value in values:
-        combination[param_name] = value
-        generate_combinations(params_config=params_config,
-                              exp_suffix=exp_suffix,
-                              combination=combination,
-                              index=index + 1,
-                              dry_run=dry_run)
+        for value in values:
+            combination_copy = combination.copy()
+            combination_copy[param_name] = value
+            commands.extend(generate_combinations(params_config=params_config,
+                                                 exp_suffix=exp_suffix,
+                                                 combination=combination_copy,
+                                                 index=index + 1))
+    return commands
 
 
 def merge_configs(base, override):
@@ -103,8 +101,8 @@ if __name__ == "__main__":
     dry_run = config.SETTINGS['dry_run']
     log_level = config.SETTINGS['log_level']
 
-    print(exp_suffix)
-
     logging.getLogger().setLevel(log_level)
     effective_config = merge_configs(BASE_PARAMS_CONFIG, USER_OVERRIDE)
-    generate_combinations(params_config=effective_config, dry_run=dry_run, exp_suffix=exp_suffix)
+
+    command_list = generate_combinations(params_config=effective_config, exp_suffix=exp_suffix)
+    print(command_list)
