@@ -32,12 +32,7 @@ data_preprocessor = dict(
 dataset = 'colon'
 dataset_type = 'Colon'
 default_hooks = dict(
-    checkpoint=dict(
-        _scope_='mmpretrain',
-        interval=250,
-        max_keep_ckpts=1,
-        save_best='auto',
-        type='CheckpointHook'),
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
     logger=dict(_scope_='mmpretrain', interval=10, type='LoggerHook'),
     param_scheduler=dict(_scope_='mmpretrain', type='ParamSchedulerHook'),
     sampler_seed=dict(_scope_='mmpretrain', type='DistSamplerSeedHook'),
@@ -145,6 +140,7 @@ test_dataloader = dict(
     pin_memory=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
 test_evaluator = [
+    dict(type='Aggregate'),
     dict(type='AveragePrecision'),
     dict(type='AUC'),
 ]

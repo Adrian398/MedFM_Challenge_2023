@@ -6,7 +6,7 @@ _base_ = [
     '../custom_imports.py'
 ]
 
-lr = 0.05
+lr = 5e-4
 train_bs = 8
 dataset = 'colon'
 model_name = 'swinv2'
@@ -58,12 +58,6 @@ train_pipeline = [
     dict(type='PackInputs'),
 ]
 
-val_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(type='Resize', scale=384, backend='pillow', interpolation='bicubic'),
-    dict(type='PackInputs'),
-]
-
 train_dataloader = dict(
     batch_size=train_bs,
     num_workers=4,
@@ -72,6 +66,12 @@ train_dataloader = dict(
         pipeline=train_pipeline
     )
 )
+
+val_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='Resize', scale=384, backend='pillow', interpolation='bicubic'),
+    dict(type='PackInputs'),
+]
 
 val_dataloader = dict(
     batch_size=32,
@@ -101,8 +101,6 @@ default_hooks = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=1000)
-
 optimizer = dict(
     type='AdamW',
     lr=lr,
@@ -125,4 +123,6 @@ param_scheduler = [
         begin=1)
 ]
 
-auto_scale_lr = dict(base_batch_size=1024, enable=False)
+train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=1000)
+
+auto_scale_lr = dict(base_batch_size=1024)

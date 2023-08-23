@@ -5,11 +5,8 @@ _base_ = [
     '../custom_imports.py',
 ]
 
-warmup_lr = 1e-3
 lr = 5e-4
-cos_end_lr = 1e-5
-train_bs = 4
-vpl = 5
+train_bs = 8
 dataset = 'colon'
 model_name = 'swin'
 exp_num = 1
@@ -22,7 +19,7 @@ model = dict(
     type='ImageClassifier',
     backbone=dict(
         type='PromptedSwinTransformer',
-        prompt_length=vpl,
+        prompt_length=5,
         arch='base',
         img_size=384,
         init_cfg=dict(
@@ -47,44 +44,42 @@ bgr_std = [57.375, 57.12, 58.395]
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
-        type='RandomErasing',
-        erase_prob=0.25,
-        mode='rand',
-        min_area_ratio=0.02,
-        max_area_ratio=1 / 3,
-        fill_color=bgr_mean,
-        fill_std=bgr_std),
-    dict(
-        type='RandAugment',
-        policies='timm_increasing',
-        num_policies=2,
-        total_level=10,
-        magnitude_level=8,
-        magnitude_std=0.7,
-        hparams=dict(pad_val=[round(x) for x in bgr_mean], interpolation='bicubic')
-    ),
-    dict(
-        type='RandomResizedCrop',
+        type='Resize',
         scale=384,
         backend='pillow',
-        interpolation='bicubic'),
-    dict(type='RandomFlip', prob=0.5, direction='horizontal'),
-    dict(type='RandomGrayscale', prob=0.5, keep_channels=True),
-    dict(type='RandomFlip', prob=0.5, direction='vertical'),
+        interpolation='bicubic'
+    ),
+    dict(
+        type='Normalize',
+        mean=bgr_mean,
+        std=bgr_std,
+        to_rgb=False
+    ),
     dict(type='PackInputs'),
 ]
-
 
 train_dataloader = dict(
     batch_size=train_bs,
     num_workers=16,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
-                 pipeline=train_pipeline),
+    dataset=dict(
+        ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
+        pipeline=train_pipeline
+    )
 )
 
+val_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='Resize', scale=384, backend='pillow', interpolation='bicubic'),
+    dict(type='PackInputs'),
+]
+
 val_dataloader = dict(
-    batch_size=128,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
+    batch_size=32,
+    num_workers=1,
+    dataset=dict(
+        ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt',
+        pipeline=val_pipeline
+    )
 )
 
 test_dataloader = dict(
@@ -99,77 +94,40 @@ test_pipeline = [
 ]
 
 val_evaluator = [
+    dict(type='Aggregate'),
     dict(type='AveragePrecision'),
     dict(type='AUC')
 ]
 test_evaluator = val_evaluator
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="auto"),
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
     logger=dict(interval=10),
 )
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
 optimizer = dict(
-        type='AdamW',
-        lr=lr,
-        weight_decay=0.05,
-        eps=1e-8,
-        betas=(0.9, 0.999)
+    type='AdamW',
+    lr=lr,
+    weight_decay=0.01,
+    eps=1e-8,
+    betas=(0.9, 0.999),
 )
 
-optim_wrapper = dict(
-    optimizer=optimizer,
-    paramwise_cfg=dict(
-        norm_decay_mult=0.0,
-        bias_decay_mult=0.0,
-        flat_decay_mult=0.0,
-        custom_keys={
-            '.absolute_pos_embed': dict(decay_mult=0.0),
-            '.relative_position_bias_table': dict(decay_mult=0.0)
-        }),
-)
+param_scheduler = [
+    dict(
+        type='LinearLR',
+        start_factor=1e-3,
+        by_epoch=True,
+        end=1
+    ),
+    dict(
+        type='CosineAnnealingLR',
+        eta_min=1e-5,
+        by_epoch=True,
+        begin=1)
+]
 
-# optim_wrapper = dict(
-#     type='OptimWrapper',
-#     optimizer=dict(
-#         type='SGD',
-#         lr=lr,
-#         momentum=0.9,  # Commonly used value
-#         weight_decay=0.01,  # You might adjust this based on earlier discussion
-#     ),
-#     #clip_grad=dict(max_norm=5.0),
-#     #paramwise_cfg=dict(
-#     #    norm_decay_mult=0.0,
-#     #    bias_decay_mult=0.0,
-#     #    flat_decay_mult=0.0,
-#     #    custom_keys={
-#     #        '.absolute_pos_embed': dict(decay_mult=0.0),
-#     #        '.relative_position_bias_table': dict(decay_mult=0.0)
-#     #    }),
-# )
-
-# param_scheduler = [
-#     dict(
-#         type='LinearLR',
-#         start_factor=1e-3,
-#         by_epoch=True,
-#         end=1
-#     ),
-#     dict(
-#        type='CosineAnnealingLR',
-#        eta_min=1e-5,
-#        by_epoch=True,
-#        begin=1)
-# ]
-
-# param_scheduler = [
-#     dict(type='MultiStepLR',
-#          milestones=[100, 200, 300, 400, 500, 600, 700, 800, 900],
-#          by_epoch=True,
-#          gamma=0.5)
-# ]
-
-train_cfg = dict(by_epoch=True, val_interval=100, max_epochs=1000)
-auto_scale_lr = dict(base_batch_size=1024, enable=False)
+train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=1000)
+auto_scale_lr = dict(base_batch_size=1024)
