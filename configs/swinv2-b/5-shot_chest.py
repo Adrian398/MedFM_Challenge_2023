@@ -13,8 +13,8 @@ model_name = 'swinv2'
 exp_num = 2
 nshot = 5
 
-run_name = f'{model_name}_bs{train_bs}_lr{lr}'
-work_dir = f'work_dirs/chest/{nshot}-shot/exp_{exp_num}/{run_name}'
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}'
+work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'
 
 model = dict(
     type='ImageClassifier',
