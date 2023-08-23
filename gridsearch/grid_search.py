@@ -129,4 +129,4 @@ if __name__ == "__main__":
     user_input = input(f"Do you want to run {len(commands)} commands on the cluster? (yes/no): ")
 
     if user_input.strip().lower() == 'yes':
-        run_commands_on_cluster(commands)
+        run_commands_on_cluster(commands, delay_seconds=2)
