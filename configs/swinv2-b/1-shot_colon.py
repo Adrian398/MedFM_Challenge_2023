@@ -30,10 +30,10 @@ model = dict(
         drop_path_rate=0.2,
         pretrained_window_sizes=[12, 12, 12, 6]),
     neck=dict(
-        type='SwAVNeck',
-        in_channels=1024,
-        hid_channels=512,
-        out_channels=1024,
+        type='GlobalAveragePooling',
+        # in_channels=1024,
+        # hid_channels=512,
+        # out_channels=1024,
     ),
     head=dict(
         type='LinearClsHead',
