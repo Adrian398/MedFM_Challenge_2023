@@ -42,6 +42,7 @@ def get_max_metric_from_event_file(file_path, metric):
 
 def get_ckpt_file_from_run_dir(run_dir):
     for entry in os.listdir(run_dir):
+        print("Checking", entry)
         if entry.__contains__(f"best_{metric.replace('/', '_')}"):
             return entry
     return None
@@ -77,6 +78,7 @@ def get_best_run_dir(task, shot, metric):
         # skip if no checkpoint
         ckpt_file = get_ckpt_file_from_run_dir(run_dir_path)
         if ckpt_file is None:
+            print("skipped no checkpoint")
             continue
 
         # skip if no event file
