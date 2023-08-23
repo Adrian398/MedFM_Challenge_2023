@@ -118,10 +118,12 @@ def get_best_run_dir(task, shot, metric):
 
 report = []
 best_runs = []
+scores = []
 
 for task in tasks:
     for shot in shots:
         best_run, best_score = get_best_run_dir(task, shot, metric)
+        scores.append(best_score)
         if best_run is None:
             report.append(f"| {shot}-shot_{task}\t No run found")
         else:
@@ -138,7 +140,8 @@ for line in report:
     else:
         print(line)
 print("---------------------------------------------------------------------------------------------------------------")
-
+print(f"|\t\t\tMean score: {sum(scores) / len(scores)}")
+print("---------------------------------------------------------------------------------------------------------------")
 if args.eval:
     exit()
 
