@@ -32,7 +32,6 @@ def run_training(params, exp_suffix):
     if exp_suffix:
         command.extend(["--exp_suffix", str(exp_suffix)])
 
-    logging.info(f"Generated command: {' '.join(command)}")
     return command
 
 
@@ -122,7 +121,7 @@ if __name__ == "__main__":
     commands = generate_combinations(params_config=effective_config, exp_suffix=exp_suffix)
 
     # Display the generated commands
-    print("\nGenerated Commands:\n")
+    print("\nGenerated Commands:")
     for command in commands:
         print(f"{' '.join(command)}")
 
