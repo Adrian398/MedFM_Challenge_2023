@@ -178,6 +178,12 @@ train_dataloader = dict(
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(backend='pillow', interpolation='bicubic', scale=384, type='Resize'),
+    dict(
+        type='Normalize',
+        mean=bgr_mean,
+        std=bgr_std,
+        to_rgb=False
+    ),
     dict(type='PackInputs'),
 ]
 val_cfg = dict()

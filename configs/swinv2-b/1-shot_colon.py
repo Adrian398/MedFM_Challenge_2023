@@ -30,10 +30,10 @@ model = dict(
         drop_path_rate=0.2,
         pretrained_window_sizes=[12, 12, 12, 6]),
     neck=dict(
-        type='GlobalAveragePooling',
-        # in_channels=1024,
-        # hid_channels=512,
-        # out_channels=1024,
+        type='SwAVNeck',
+        in_channels=1024,
+        hid_channels=512,
+        out_channels=1024,
     ),
     head=dict(
         type='LinearClsHead',
@@ -53,6 +53,12 @@ train_pipeline = [
         scale=384,
         backend='pillow',
         interpolation='bicubic'
+    ),
+    dict(
+        type='Normalize',
+        mean=bgr_mean,
+        std=bgr_std,
+        to_rgb=False
     ),
     dict(type='PackInputs'),
 ]
