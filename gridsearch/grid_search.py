@@ -83,7 +83,7 @@ def check_pythonpath_from_cwd():
         sys.exit(1)
 
 
-def run_commands_on_cluster(commands, delay_seconds=10):
+def run_commands_on_cluster(commands, delay_seconds=1):
     gpus = ['rtx4090', 'rtx3090', 'rtx3090']
     gpu_cycle = itertools.cycle(gpus)
 
@@ -93,16 +93,13 @@ def run_commands_on_cluster(commands, delay_seconds=10):
         os.makedirs(log_dir)
 
     for command in commands:
-        # Convert the list of command arguments to a single string
         cmd_str = " ".join(command)
 
         gpu = next(gpu_cycle)
 
-        # Use the slurm command to run the command on the cluster
         slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{cmd_str}" -o "{log_dir}/slurm-%j.out"'
         subprocess.run(slurm_cmd, shell=True)
 
-        # Delay for the specified number of seconds
         time.sleep(delay_seconds)
 
 
@@ -123,7 +120,6 @@ if __name__ == "__main__":
 
     # Extract additional settings
     exp_suffix = config.SETTINGS['exp_suffix']
-    dry_run = config.SETTINGS['dry_run']
     log_level = config.SETTINGS['log_level']
 
     logging.getLogger().setLevel(log_level)
@@ -140,4 +136,4 @@ if __name__ == "__main__":
     user_input = input(f"Do you want to run {len(commands)} commands on the cluster? (yes/no): ")
 
     if user_input.strip().lower() == 'yes':
-        run_commands_on_cluster(commands, delay_seconds=2)
+        run_commands_on_cluster(commands)
