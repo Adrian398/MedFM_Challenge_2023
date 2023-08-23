@@ -1,6 +1,7 @@
 import importlib.util
 import logging
 import os
+import pprint
 import subprocess
 import argparse
 import sys
@@ -119,6 +120,10 @@ if __name__ == "__main__":
     effective_config = merge_configs(BASE_PARAMS_CONFIG, USER_OVERRIDE)
 
     commands = generate_combinations(params_config=effective_config, exp_suffix=exp_suffix)
+
+    # Display the generated commands
+    print("Generated Commands:")
+    pprint.pprint(commands)
 
     # Prompt the user
     user_input = input(f"Do you want to run {len(commands)} commands on the cluster? (yes/no): ")
