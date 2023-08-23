@@ -1,4 +1,5 @@
 import importlib.util
+import itertools
 import logging
 import os
 import pprint
@@ -83,12 +84,17 @@ def check_pythonpath_from_cwd():
 
 
 def run_commands_on_cluster(commands, delay_seconds=10):
+    gpus = ['rtx4090', 'rtx3090', 'rtx3090']
+    gpu_cycle = itertools.cycle(gpus)
+
     for command in commands:
         # Convert the list of command arguments to a single string
         cmd_str = " ".join(command)
 
+        gpu = next(gpu_cycle)
+
         # Use the slurm command to run the command on the cluster
-        slurm_cmd = f'sbatch -p ls6 --gres=gpu:1 --wrap="{cmd_str}"'
+        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{cmd_str}"'
         subprocess.run(slurm_cmd, shell=True)
 
         # Delay for the specified number of seconds
