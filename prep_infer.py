@@ -82,13 +82,15 @@ def get_best_run_dir(task, shot, metric):
         # skip if no event file
         event_file = get_event_file_from_run_dir(run_dir_path)
         if event_file is None:
+            print("skipped no event file")
             continue
 
         # skip if metric not in event file
         score = get_max_metric_from_event_file(event_file, metric)
         if score == -1:
+            print("skipped no metric")
             continue
-        print(run_dir)
+
         if run_dir == "swinv2_bs8_lr0.0001_exp5_exp-test_20230823-002433":
             print("Metric", metric)
             print("Score", score)
