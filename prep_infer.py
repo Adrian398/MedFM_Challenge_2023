@@ -44,7 +44,11 @@ def get_ckpt_file_from_run_dir(run_dir):
     print("test")
     for entry in os.listdir(run_dir):
         print("Checking", entry)
-        if entry.__contains__(f"best_{metric.replace('/', '_')}"):
+        #if entry.__contains__(f"best_{metric.replace('/', '_')}"):
+        #    return entry
+        # TODO: Do not make checkpoint file dependent on metric, since even if the checkpoint is named
+        # TODO: aggregate, it still can contain AUC and mAP
+        if entry.__contains__(f"best_"):
             return entry
     return None
 
