@@ -121,7 +121,7 @@ if __name__ == "__main__":
     commands = generate_combinations(params_config=effective_config, exp_suffix=exp_suffix)
 
     # Display the generated commands
-    print("\nGenerated Commands:")
+    print("Generated Commands:")
     for command in commands:
         print(f"{' '.join(command)}")
 
@@ -129,4 +129,4 @@ if __name__ == "__main__":
     user_input = input(f"Do you want to run {len(commands)} commands on the cluster? (yes/no): ")
 
     if user_input.strip().lower() == 'yes':
-        run_commands_on_cluster(commands)
+        run_commands_on_cluster(commands, delay_seconds=2)

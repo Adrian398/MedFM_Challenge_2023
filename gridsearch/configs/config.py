@@ -1,7 +1,7 @@
 OVERRIDE = {
-    'model': ["swinv2-b", "clip-b_vpt"],
+    'model': ["swinv2-b"],
     'dataset': "colon",
-    'shot': 1,
+    'shot': 5,
     'exp_num': [1,2,3,4,5],
     'lr': 1e-4
 }
