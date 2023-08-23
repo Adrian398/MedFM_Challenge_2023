@@ -34,6 +34,10 @@ model = dict(
         in_channels=1024,
         hid_channels=512,
         out_channels=1024,
+        with_avg_pool=True,
+        with_l2norm=True,
+        norm_cfg=dict(type='SyncBN'),
+        init_cfg=[{'type': 'Constant', 'val': 1, 'layer': ['_BatchNorm', 'GroupNorm']}]
     ),
     head=dict(
         type='LinearClsHead',
