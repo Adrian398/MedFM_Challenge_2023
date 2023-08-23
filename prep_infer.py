@@ -1,8 +1,9 @@
+import argparse
 import os
 import shutil
 from datetime import datetime
+
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
-import argparse
 from termcolor import colored
 
 parser = argparse.ArgumentParser(description='Choose by which metric the best runs should be picked: map / auc / agg)')
@@ -21,6 +22,7 @@ metric = metric_tags[metric]
 
 tasks = ["colon", "endo", "chest"]
 shots = ["1", "5", "10"]
+
 
 # DEBUG
 # tasks = ["colon"]
