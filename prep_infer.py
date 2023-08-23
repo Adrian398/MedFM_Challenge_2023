@@ -41,9 +41,7 @@ def get_max_metric_from_event_file(file_path, metric):
 
 
 def get_ckpt_file_from_run_dir(run_dir):
-    print("test")
     for entry in os.listdir(run_dir):
-        print("Checking", entry)
         #if entry.__contains__(f"best_{metric.replace('/', '_')}"):
         #    return entry
         # TODO: Do not make checkpoint file dependent on metric, since even if the checkpoint is named
@@ -83,25 +81,17 @@ def get_best_run_dir(task, shot, metric):
         # skip if no checkpoint
         ckpt_file = get_ckpt_file_from_run_dir(run_dir_path)
         if ckpt_file is None:
-            print("skipped no checkpoint")
             continue
 
         # skip if no event file
         event_file = get_event_file_from_run_dir(run_dir_path)
         if event_file is None:
-            print("skipped no event file")
             continue
 
         # skip if metric not in event file
         score = get_max_metric_from_event_file(event_file, metric)
         if score == -1:
-            print("skipped no metric")
             continue
-
-        if run_dir == "swinv2_bs8_lr0.0001_exp5_exp-test_20230823-002433":
-            print("Metric", metric)
-            print("Score", score)
-            print("Best_Score", best_score)
 
         if score > best_score:
             best_score = score
