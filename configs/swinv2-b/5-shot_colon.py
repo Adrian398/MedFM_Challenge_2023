@@ -129,7 +129,6 @@ test_dataloader = dict(
     collate_fn=dict(type='default_collate'),
     dataset=dict(
         ann_file='data_anns/MedFMC/colon/test_WithLabel.txt',
-        data_prefix='/scratch/medfm/data/MedFMC_train/colon/images',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
@@ -160,7 +159,6 @@ train_dataloader = dict(
     collate_fn=dict(type='default_collate'),
     dataset=dict(
         ann_file='data_anns/MedFMC/colon/colon_5-shot_train_exp1.txt',
-        data_prefix='/scratch/medfm/data/MedFMC_train/colon/images',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
@@ -186,7 +184,6 @@ val_dataloader = dict(
     collate_fn=dict(type='default_collate'),
     dataset=dict(
         ann_file='data_anns/MedFMC/colon/colon_5-shot_val_exp1.txt',
-        data_prefix='/scratch/medfm/data/MedFMC_train/colon/images',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
