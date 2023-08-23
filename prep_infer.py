@@ -8,7 +8,7 @@ from termcolor import colored
 
 parser = argparse.ArgumentParser(description='Choose by which metric the best runs should be picked: map / auc / agg)')
 parser.add_argument('--metric', type=str, default='map', help='Metric type, default is map')
-parers.add_argument('--eval', action='store_true', help='If this flag is set, no files will be created, simply the best runs will be listed. (default false)')
+parser.add_argument('--eval', action='store_true', help='If this flag is set, no files will be created, simply the best runs will be listed. (default false)')
 args = parser.parse_args()
 metric = args.metric
 print(metric)
@@ -110,6 +110,8 @@ report = []
 best_runs = []
 
 for task in tasks:
+    if task != "colon":
+        metric_tags["auc"] = "AUC/AUC_multilabe"
     for shot in shots:
         best_run, best_score = get_best_run_dir(task, shot, metric)
         if best_run is None:
