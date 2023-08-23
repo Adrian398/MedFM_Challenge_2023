@@ -12,7 +12,7 @@ exp_num = 2
 nshot = 10
 
 run_name = f'dinov2-b_{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}'
-work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'
+work_dir = f'work_dirs/chest/{nshot}-shot/exp_{exp_num}/{run_name}'
 
 model = dict(
     type='ImageClassifier',
