@@ -122,8 +122,9 @@ if __name__ == "__main__":
     commands = generate_combinations(params_config=effective_config, exp_suffix=exp_suffix)
 
     # Display the generated commands
-    print("Generated Commands:")
-    pprint.pprint(commands)
+    print("\nGenerated Commands:\n")
+    for idx, command in enumerate(commands, 1):
+        print(f"{idx}. {' '.join(command)}\n")
 
     # Prompt the user
     user_input = input(f"Do you want to run {len(commands)} commands on the cluster? (yes/no): ")
