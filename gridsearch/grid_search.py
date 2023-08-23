@@ -2,7 +2,6 @@ import importlib.util
 import itertools
 import logging
 import os
-import pprint
 import subprocess
 import argparse
 import sys
@@ -18,6 +17,7 @@ BASE_PARAMS_CONFIG = {
     'shot': [1, 5, 10],
     'exp_num': [1, 2, 3, 4, 5],
     'lr': [1e-4, 1e-5, 1e-6],
+    'neck': ["GlobalAveragePooling", "SwAVNeck"]
 }
 
 
