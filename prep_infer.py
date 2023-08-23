@@ -41,6 +41,7 @@ def get_max_metric_from_event_file(file_path, metric):
 
 
 def get_ckpt_file_from_run_dir(run_dir):
+    print("test")
     for entry in os.listdir(run_dir):
         print("Checking", entry)
         if entry.__contains__(f"best_{metric.replace('/', '_')}"):
