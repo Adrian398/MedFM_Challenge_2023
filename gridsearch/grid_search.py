@@ -123,8 +123,8 @@ if __name__ == "__main__":
 
     # Display the generated commands
     print("\nGenerated Commands:\n")
-    for idx, command in enumerate(commands, 1):
-        print(f"{idx}. {' '.join(command)}\n")
+    for command in commands:
+        print(f"{' '.join(command)}\n")
 
     # Prompt the user
     user_input = input(f"Do you want to run {len(commands)} commands on the cluster? (yes/no): ")
