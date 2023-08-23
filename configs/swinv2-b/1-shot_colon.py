@@ -150,5 +150,7 @@ param_scheduler = [
         by_epoch=True,
         begin=1)
 ]
+test_cfg = dict()
+val_cfg = dict()
 
 auto_scale_lr = dict(base_batch_size=1024, enable=False)
