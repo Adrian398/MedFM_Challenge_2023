@@ -102,8 +102,7 @@ def run_commands_on_cluster(commands, delay_seconds=1):
         slurm_cmd = f'sbatch -p ls6 \
         --gres=gpu:{gpu}:1 \
         --wrap="{cmd_str}" \
-        -o "{log_dir}/slurm-%j.out" \
-        --job-name={job_name}'
+        -o "{log_dir}/slurm-%j.out"'
 
         subprocess.run(slurm_cmd, shell=True)
 
