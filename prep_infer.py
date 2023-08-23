@@ -47,6 +47,9 @@ def get_max_metric_from_event_file(file_path, metric):
     # determine auc type
     auc_tag = metric_tags["auc"] if metric_tags["auc"] in scalar_tags else metric_tags["aucl"]
 
+    if metric.__contains__("AUC"):
+        metric = auc_tag
+
     if metric == "Aggregate" and metric not in scalar_tags:
         map_values = [item.value for item in event_acc.Scalars(metric_tags["map"])]
         auc_values = [item.value for item in event_acc.Scalars(auc_tag)]
