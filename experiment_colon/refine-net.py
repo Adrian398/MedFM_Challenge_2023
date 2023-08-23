@@ -1,8 +1,9 @@
 import re
 from datetime import datetime
 
-from sentence_transformers import models, SentenceTransformer, losses
+from sentence_transformers import models, SentenceTransformer, losses, InputExample
 from sentence_transformers.datasets import DenoisingAutoEncoderDataset
+from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator
 from torch.utils.data import DataLoader
 
 import datasets
@@ -55,17 +56,24 @@ model = SentenceTransformer(modules=[bert, pooling_model])
 
 loss = losses.DenoisingAutoEncoderLoss(model, tie_encoder_decoder=True)
 
-# Train the model
+sts = datasets.load_dataset('glue', 'stsb', split='validation')
+sts = sts.map(lambda x: {'label': x['label'] / 5.0})
+validation_samples = [InputExample(texts=[sample['sentence1'], sample['sentence2']], label=sample['label']) for sample in sts]
+
+evaluator = EmbeddingSimilarityEvaluator.from_input_examples(validation_samples, write_csv=False)
+
+
 model.fit(
     train_objectives=[(loader, loss)],
     epochs=num_epochs,
     weight_decay=0,
     scheduler='constantlr',
     optimizer_params={'lr': 3e-05},
+    evaluator=evaluator,
+    evaluation_steps=500,
     save_best_model=True,
     show_progress_bar=True,
-    output_path=model_save_path,
-    callback=writer.add_scalar
+    output_path=model_save_path
 )
 
 model.save(model_save_path)
