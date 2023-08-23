@@ -29,7 +29,7 @@ model = dict(
         window_size=[24, 24, 24, 12],
         drop_path_rate=0.2,
         pretrained_window_sizes=[12, 12, 12, 6]),
-    neck=dict(type='GlobalAveragePooling'),
+    neck=dict(type='SwAVNeck'),
     head=dict(
         type='LinearClsHead',
         num_classes=2,
