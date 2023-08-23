@@ -1,6 +1,6 @@
 _base_ = [
     '../datasets/colon.py',
-    '../swin_schedule.py',
+    #'../swin_schedule.py',
     'mmpretrain::_base_/models/swin_transformer_v2/base_384.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py'
@@ -113,11 +113,11 @@ visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBack
 train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=1000)
 
 optimizer = dict(
-        type='AdamW',
-        lr=lr,
-        weight_decay=0.01,
-        eps=1e-8,
-        betas=(0.9, 0.999)
+    type='AdamW',
+    lr=lr,
+    weight_decay=0.01,
+    eps=1e-8,
+    betas=(0.9, 0.999),
 )
 
 param_scheduler = [
