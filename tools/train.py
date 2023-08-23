@@ -166,7 +166,6 @@ def merge_custom_args(cfg, args):
 
     if args.lr is not None:
         cfg.optim_wrapper.optimizer.lr = args.lr
-        cfg.lr = args.lr
         cfg.run_name = re.sub(r'lr[0-9.]+', f'lr{args.lr}', cfg.run_name)
         cfg.work_dir = re.sub(r'lr[0-9.]+', f'lr{args.lr}', cfg.work_dir)
 
