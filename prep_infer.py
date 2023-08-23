@@ -32,8 +32,18 @@ def get_max_metric_from_event_file(file_path, metric):
     event_acc = EventAccumulator(file_path)
     event_acc.Reload()
     scalar_tags = event_acc.Tags()['scalars']
-    if metric not in scalar_tags:
+
+    if metric_tags["auc"] not in scalar_tags:
         return -1
+
+    if metric_tags["map"] not in scalar_tags:
+        return -1
+
+    if metric == "Aggregate" and metric not in scalar_tags:
+        map_values = [item.value for item in event_acc.Scalars(metric_tags["map"])]
+        auc_values = [item.value for item in event_acc.Scalars(metric_tags["auc"])]
+        max_index = map_values.index(max(map_values))
+        return float((map_values[max_index] + auc_values[max_index]) / 2)
 
     # Extract relevant values
     values = event_acc.Scalars(metric)
@@ -42,11 +52,7 @@ def get_max_metric_from_event_file(file_path, metric):
 
 def get_ckpt_file_from_run_dir(run_dir):
     for entry in os.listdir(run_dir):
-        #if entry.__contains__(f"best_{metric.replace('/', '_')}"):
-        #    return entry
-        # TODO: Do not make checkpoint file dependent on metric, since even if the checkpoint is named
-        # TODO: aggregate, it still can contain AUC and mAP
-        if entry.__contains__(f"best_"):
+        if entry.__contains__(f"best"):
             return entry
     return None
 
