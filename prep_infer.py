@@ -33,6 +33,12 @@ def get_max_metric_from_event_file(file_path, metric):
     event_acc.Reload()
     scalar_tags = event_acc.Tags()['scalars']
 
+    if metric_tags["auc"] not in scalar_tags:
+        return -1
+
+    if metric_tags["map"] not in scalar_tags:
+        return -1
+
     if metric == "Aggregate" and metric not in scalar_tags:
         map_values = [item.value for item in event_acc.Scalars(metric_tags["map"])]
         auc_values = [item.value for item in event_acc.Scalars(metric_tags["auc"])]
