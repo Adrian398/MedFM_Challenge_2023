@@ -29,7 +29,12 @@ model = dict(
         window_size=[24, 24, 24, 12],
         drop_path_rate=0.2,
         pretrained_window_sizes=[12, 12, 12, 6]),
-    neck=dict(type='SwAVNeck'),
+    neck=dict(
+        type='SwAVNeck',
+        in_channels=1024,
+        hid_channels=512,
+        out_channels=1024,
+    ),
     head=dict(
         type='LinearClsHead',
         num_classes=2,
