@@ -78,8 +78,6 @@ def parse_args():
                         help='Override the learning rate from the config file.')
     parser.add_argument('--exp_num', type=int, default=None,
                         help='Experiment number for data_anns')
-    parser.add_argument('--neck', type=str, default=None,
-                        help='The neck for the model.')
     ########################################################################################
 
     args = parser.parse_args()
@@ -165,9 +163,6 @@ def merge_custom_args(cfg, args):
         cfg.train_dataloader.dataset.ann_file = re.sub(r'exp[0-9]+', f'exp{args.exp_num}', cfg.train_dataloader.dataset.ann_file)
         cfg.val_dataloader.dataset.ann_file = re.sub(r'exp[0-9]+', f'exp{args.exp_num}', cfg.val_dataloader.dataset.ann_file)
         cfg.work_dir = re.sub(r'exp[0-9]+', f'exp{args.exp_num}', cfg.work_dir)
-
-    if args.neck is not None:
-        cfg.model.neck = dict(type=args.neck)
 
     if args.lr is not None:
         cfg.optim_wrapper.optimizer.lr = args.lr
