@@ -4,7 +4,6 @@ OVERRIDE = {
     'shot': [1,5],
     #'exp_num': [1],
     'lr': 1e-5,
-    'neck': "SwAVNeck"
 }
 
 SETTINGS = {
