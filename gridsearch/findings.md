@@ -1,0 +1,15 @@
+- swinv2-b:
+  - Exp-Num:        2, 5 perform significantly worse than 1, 3, and 4
+  - LR:             Smaller = Better -> 1e-5 better than 1e-4 (even with kinda scuffed LR config)
+  - Dropout:
+  - Weight Decay:
+  - Optimizer:
+    - Weight-Decay:
+    - Epsilon
+  - Batch-Size:
+  - Window-Size:
+  - Loss:
+    - LabelSmoothLoss:
+    - BinaryCrossEntropy:
+  - Augmentation:
+  - Scheduler:
