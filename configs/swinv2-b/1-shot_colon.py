@@ -1,6 +1,6 @@
 _base_ = [
     '../datasets/colon.py',
-    # '../swin_schedule.py',
+    '../swin_schedule.py',
     'mmpretrain::_base_/models/swin_transformer_v2/base_384.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py'
@@ -29,16 +29,7 @@ model = dict(
         window_size=[24, 24, 24, 12],
         drop_path_rate=0.2,
         pretrained_window_sizes=[12, 12, 12, 6]),
-    neck=dict(
-        type='SwAVNeck',
-        in_channels=1024,
-        hid_channels=512,
-        out_channels=1024,
-        with_avg_pool=True,
-        with_l2norm=True,
-        norm_cfg=dict(type='SyncBN'),
-        init_cfg=[{'type': 'Constant', 'val': 1, 'layer': ['_BatchNorm', 'GroupNorm']}]
-    ),
+    neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
         num_classes=2,
@@ -112,23 +103,6 @@ visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBack
 
 train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=1000)
 
-optim_wrapper = dict(
-    optimizer=dict(
-        type='AdamW',
-        lr=lr,
-        weight_decay=0.01,
-        eps=1e-8,
-        betas=(0.9, 0.999),
-    ),
-    paramwise_cfg=dict(
-        bias_decay_mult=0.0,
-        custom_keys=dict({
-            '.absolute_pos_embed': dict(decay_mult=0.0),
-            '.relative_position_bias_table': dict(decay_mult=0.0)
-        }),
-        flat_decay_mult=0.0,
-        norm_decay_mult=0.0))
-
 optimizer = dict(
     type='AdamW',
     lr=lr,
@@ -150,7 +124,5 @@ param_scheduler = [
         by_epoch=True,
         begin=1)
 ]
-test_cfg = dict()
-val_cfg = dict()
 
 auto_scale_lr = dict(base_batch_size=1024, enable=False)
