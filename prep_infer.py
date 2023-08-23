@@ -110,6 +110,8 @@ report = []
 best_runs = []
 
 for task in tasks:
+    if task != "colon":
+        metric_tags["auc"] = "AUC/AUC_multilabe"
     for shot in shots:
         best_run, best_score = get_best_run_dir(task, shot, metric)
         if best_run is None:
