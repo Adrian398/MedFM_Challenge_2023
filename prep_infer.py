@@ -88,7 +88,7 @@ def get_best_run_dir(task, shot, metric):
         score = get_max_metric_from_event_file(event_file, metric)
         if score == -1:
             continue
-
+        print(run_dir)
         if run_dir == "swinv2_bs8_lr0.0001_exp5_exp-test_20230823-002433":
             print("Metric", metric)
             print("Score", score)
