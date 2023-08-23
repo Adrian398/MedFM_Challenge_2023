@@ -87,6 +87,11 @@ def run_commands_on_cluster(commands, delay_seconds=10):
     gpus = ['rtx4090', 'rtx3090', 'rtx3090']
     gpu_cycle = itertools.cycle(gpus)
 
+    # Ensure the log directory exists
+    log_dir = "grid_output"
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+
     for command in commands:
         # Convert the list of command arguments to a single string
         cmd_str = " ".join(command)
@@ -94,7 +99,7 @@ def run_commands_on_cluster(commands, delay_seconds=10):
         gpu = next(gpu_cycle)
 
         # Use the slurm command to run the command on the cluster
-        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{cmd_str}"'
+        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{cmd_str}" -o "{log_dir}/slurm-%j.out"'
         subprocess.run(slurm_cmd, shell=True)
 
         # Delay for the specified number of seconds
