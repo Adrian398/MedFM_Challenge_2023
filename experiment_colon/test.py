@@ -10,7 +10,7 @@ import nltk
 
 nltk.download('punkt')
 
-train_batch_size = 32
+train_batch_size = 16
 num_epochs = 1
 model_name = 'bert-base-uncased'
 model_save_path = 'output/training_continue_training-' + model_name + '-' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
