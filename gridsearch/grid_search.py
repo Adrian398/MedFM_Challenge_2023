@@ -26,7 +26,7 @@ def create_command(params, exp_suffix):
 
     for key, value in params.items():
         # only add params as command arg if required
-        if key not in ['model', 'shot', 'dataset', 'lr']:
+        if key not in ['model', 'shot', 'dataset']:
             command.extend([f"--{key}", str(value)])
 
     if exp_suffix:
@@ -36,7 +36,7 @@ def create_command(params, exp_suffix):
 
 
 def generate_config_path(model, shot, dataset):
-    return f"configs/{model}/{shot}-shot_{dataset}-tmp.py"
+    return f"configs/{model}/{shot}-shot_{dataset}.py"
 
 
 def generate_combinations(params_config, exp_suffix, combination={}, index=0):
