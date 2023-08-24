@@ -39,7 +39,7 @@ for given_run_path in best_runs:
     if task.__contains__("-"):
         task = task.split("-")[0]
     shot = given_run_path.split(os.sep)[1]
-
+    print(given_run_path)
     given_run_path = os.path.join("work_dirs", given_run_path)
     path_components = given_run_path.split(os.sep)
     run_dir = os.path.join(*path_components[:4])
