@@ -17,6 +17,8 @@ for f in checkpoint_filenames:
     print(f'Loading {f}')
     state_dicts.append(torch.load(f, map_location=device))
 
+print(type(state_dicts[0]))
+
 
 alphal = [1 / len(state_dicts) for i in range(len(state_dicts))]
 sd = get_sd(state_dicts, alphal)
