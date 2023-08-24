@@ -87,7 +87,7 @@ def run_commands_on_cluster(commands, delay_seconds=1):
     gpu_cycle = itertools.cycle(gpus)
 
     # Ensure the log directory exists
-    log_dir = "grid_output"
+    log_dir = "gridsearch/output"
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
