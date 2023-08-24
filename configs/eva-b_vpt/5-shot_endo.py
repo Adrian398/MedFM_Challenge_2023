@@ -12,7 +12,7 @@ exp_num = 4
 nshot = 5
 
 run_name = f'eva02-b_{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}_exp{exp_num}'
-work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'
+work_dir = f'work_dirs/endo/{nshot}-shot/{run_name}'
 
 data_preprocessor = dict(
     # RGB format normalization parameters
