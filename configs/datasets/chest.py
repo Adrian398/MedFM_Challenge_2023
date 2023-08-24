@@ -12,14 +12,19 @@ data_preprocessor = dict(
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
+    dict(type='NumpyToPIL', to_rgb=False),
+    dict(type='torchvision/RandomAffine', degrees=(-15, 15), translate=(0.05, 0.05), fill=128),
+    dict(type='PILToNumpy', to_bgr=False),
     dict(
         type='RandomResizedCrop',
         scale=384,
+        crop_ratio_range=(0.9, 1.0),
         backend='pillow',
         interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='PackInputs'),
 ]
+
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
