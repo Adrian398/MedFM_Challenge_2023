@@ -10,9 +10,9 @@ best_runs = [
     "endo/1-shot/swinv2_bs8_lr0.05_exp1_20230822-011058",  # swin-b testen (swinv2 in queue)
     "endo/5-shot/swin_bs8_lr0.0005_exp4__exp-test_20230824-120538",  # swinv2 testen (swinv2 in queue)
     "endo/10-shot/swin_bs8_lr0.0005_exp1_20230821_201554",  # swinv2 UND alle exps durchtesten
-    "chest/1-shot/vit-b_1-shot_ptokens-1_chest_baseline_test_exp2"
-    "chest/5-shot/vit-b_5-shot_ptokens-1_chest_baseline_test_exp2"
-    "chest/10-shot/vit-b_10-shot_ptokens-1_chest_baseline_test_exp2"
+    "chest/1-shot/vit-b_1-shot_ptokens-1_chest_baseline_test_exp2",
+    "chest/5-shot/vit-b_5-shot_ptokens-1_chest_baseline_test_exp2",
+    "chest/10-shot/vit-b_10-shot_ptokens-1_chest_baseline_test_exp2",
 ]
 
 # create dir for submission and config
@@ -39,7 +39,7 @@ for given_run_path in best_runs:
     if task.__contains__("-"):
         task = task.split("-")[0]
     shot = given_run_path.split(os.sep)[1]
-
+    print(given_run_path)
     given_run_path = os.path.join("work_dirs", given_run_path)
     path_components = given_run_path.split(os.sep)
     run_dir = os.path.join(*path_components[:4])
