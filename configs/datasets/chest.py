@@ -12,9 +12,9 @@ data_preprocessor = dict(
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='NumpyToPIL', to_rgb=False),
+    dict(type='NumpyToPIL', to_rgb=True),
     dict(type='torchvision/RandomAffine', degrees=(-15, 15), translate=(0.05, 0.05), fill=128),
-    dict(type='PILToNumpy', to_bgr=False),
+    dict(type='PILToNumpy', to_bgr=True),
     dict(
         type='RandomResizedCrop',
         scale=384,
