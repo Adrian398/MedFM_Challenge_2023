@@ -8,11 +8,17 @@ from termcolor import colored
 
 parser = argparse.ArgumentParser(description='Choose by which metric the best runs should be picked: map / auc / agg)')
 parser.add_argument('--metric', type=str, default='map', help='Metric type, default is map')
+parser.add_argument('--exclude', type=str, default='', help='Comma separated model names to exclude')
 parser.add_argument('--eval', action='store_true', help='If this flag is set, no files will be created, simply the best runs will be listed. (default false)')
 args = parser.parse_args()
 metric = args.metric
 print(metric)
 print(type(metric))
+
+exclude_models = []
+if len(args.exclude) > 0:
+    exclude_models = args.exclude.split(",")
+
 
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
 metric_tags = {"auc": "AUC/AUC_multiclass",
@@ -79,6 +85,12 @@ def get_event_file_from_run_dir(run_dir):
     except Exception:
         return None
 
+def exclude_model(name):
+    for exclude in exclude_models:
+        if name.__contains__(exclude):
+            return True
+    return False
+
 
 def get_best_run_dir(task, shot, metric):
     setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
@@ -92,6 +104,11 @@ def get_best_run_dir(task, shot, metric):
     best_run = None
 
     for run_dir in setting_run_dirs:
+        # skip if should be excluded
+        if exclude_model(run_dir):
+            print(f"--Excluding {task}/{shot}-shot/{run_dir}")
+            continue
+
         print(f"checking {task}/{shot}-shot/{run_dir}")
         run_dir_path = os.path.join(setting_directory, run_dir)
 
