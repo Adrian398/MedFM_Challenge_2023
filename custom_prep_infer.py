@@ -7,12 +7,12 @@ best_runs = [
     "colon/1-shot/swinv2_bs8_lr0.0001_exp5_exp-test_20230823-002433",
     "colon/5-shot/swin_bs8_lr0.0005_exp4__exp-test_20230824-102425",
     "colon/10-shot/swin_bs8_lr0.05_exp1_20230820-133202",
-    "endo/1-shot/swinv2_bs8_lr0.05_exp1_20230822-011058",  # swin-b testen (swinv2 in queue)
-    "endo/5-shot/swin_bs8_lr0.0005_exp4__exp-test_20230824-120538",  # swinv2 testen (swinv2 in queue)
+    "endo/1-shot/swinv2_bs8_lr1e-05_exp3__exp-test_20230824-132431_20230824-171326",  # swin-b testen (swinv2 in queue)
+    "endo/5-shot/swinv2_bs8_lr1e-05_exp4__exp-test_20230824-151647",  # swinv2 testen (swinv2 in queue)
     "endo/10-shot/swin_bs8_lr0.0005_exp1_20230821_201554",  # swinv2 UND alle exps durchtesten
     "chest/1-shot/vit-b_1-shot_ptokens-1_chest_baseline_test_exp2",
     "chest/5-shot/vit-b_5-shot_ptokens-1_chest_baseline_test_exp2",
-    "chest/10-shot/vit-b_10-shot_ptokens-1_chest_baseline_test_exp2",
+    "chest/10-shot/clip-b_1_bs4_lr0.001_10-shot_chest_exp1_baseline_test/20230824_010301",
 ]
 
 # create dir for submission and config

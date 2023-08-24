@@ -2,8 +2,8 @@ OVERRIDE = {
     'model': ["swinv2-b"],
     'dataset': "endo",
     'shot': [1],
-    'exp_num': [1],
-    'lr': 1e-5,
+    'exp_num': [4,3],
+    'lr': 1e-4,
 }
 
 SETTINGS = {

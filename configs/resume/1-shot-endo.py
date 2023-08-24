@@ -247,4 +247,4 @@ visualizer = dict(
     vis_backends=[
         dict(type='TensorboardVisBackend'),
     ])
-work_dir = '/scratch/medfm/medfm-challenge/work_dirs/endo/1-shot/swinv2_bs8_lr1e-05_exp3__exp-test_20230824-132431'
+work_dir = '/scratch/medfm/medfm-challenge/work_dirs/endo/1-shot/swinv2_bs8_lr1e-05_exp3__exp-test_'
