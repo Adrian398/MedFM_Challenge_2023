@@ -132,7 +132,7 @@ for task in tasks:
 
 print("")
 print("---------------------------------------------------------------------------------------------------------------")
-print("|\t\t\tBest runs for each setting:")
+print(f"| Best runs for each setting, ranked by {metric}:")
 print("---------------------------------------------------------------------------------------------------------------")
 for line in report:
     if line.__contains__("No run found"):
@@ -140,7 +140,7 @@ for line in report:
     else:
         print(line)
 print("---------------------------------------------------------------------------------------------------------------")
-print(f"|\t\t\tMean score: {sum(scores) / len(scores)}")
+print(f"| Mean score: {sum(scores) / len(scores)}")
 print("---------------------------------------------------------------------------------------------------------------")
 if args.eval:
     exit()
@@ -152,6 +152,12 @@ configs_dir = os.path.join(submission_dir, "configs")
 predictions_dir = os.path.join(submission_dir, "predictions")
 
 os.makedirs(submission_dir)
+with open(os.path.join(submission_dir, "report.txt"), "w") as file:
+    txt_report = ""
+    for line in report:
+        txt_report += line + "\n"
+    file.write(txt_report)
+
 os.makedirs(configs_dir)
 os.makedirs(predictions_dir)
 
