@@ -4,11 +4,11 @@ import os
 def get_sd(state_dicts, alphal):
   sd = {}  # Initialize an empty dictionary
   for k in state_dicts[0]['state_dict'].keys():
-      print(k)
+      #print(k)
       #print(state_dicts[0][k])
-      #sd[k] = state_dicts[0][k].clone() * alphal[0]
+      sd[k] = state_dicts[0][k].clone() * alphal[0]
   for i in range(1, len(state_dicts)):
-      for k in state_dicts[i].keys():
+      for k in state_dicts[i]['state_dict'].keys():
           sd[k] = sd[k] + state_dicts[i][k].clone() * alphal[i]
   return sd
 
