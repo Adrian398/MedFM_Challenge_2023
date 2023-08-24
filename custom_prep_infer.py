@@ -5,11 +5,14 @@ from datetime import datetime
 # todo, fill this array with run_dirs (from workdir, e.g. "colon/1-shot/swin_93878")
 best_runs = [
     "colon/1-shot/swinv2_bs8_lr0.0001_exp5_exp-test_20230823-002433",
-    "colon/5-shot/swin_bs8_lr0.0005_exp4__exp-test_20230824-102425", # ggf auch durch neuen ersetzen
+    "colon/5-shot/swin_bs8_lr0.0005_exp4__exp-test_20230824-102425",
     "colon/10-shot/swin_bs8_lr0.05_exp1_20230820-133202",
     "endo/1-shot/swinv2_bs8_lr0.05_exp1_20230822-011058",
-    "endo/5-shot/swin_bs8_lr0.0005_exp4_/20230822_004517", # nur ganz wenig trainiert bisher -> swin & swinv2 testen
-    "endo/10-shot/"
+    "endo/5-shot/swin_bs8_lr0.0005_exp4__exp-test_20230824-120538",  # swinv2 testen
+    "endo/10-shot/swin_bs8_lr0.0005_exp1_20230821_201554",  # swinv2 testen
+    "chest/1-shot/vit-b_1-shot_ptokens-1_chest_baseline_test_exp2"
+    "chest/5-shot/vit-b_5-shot_ptokens-1_chest_baseline_test_exp2"
+    "chest/10-shot/vit-b_10-shot_ptokens-1_chest_baseline_test_exp2"
 ]
 
 # create dir for submission and config
