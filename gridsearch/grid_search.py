@@ -36,7 +36,7 @@ def create_command(params, exp_suffix):
 
 
 def generate_config_path(model, shot, dataset):
-    return f"configs/{model}/{shot}-shot_{dataset}.py"
+    return f"configs/{model}/{shot}-shot_{dataset}-tmp.py"
 
 
 def generate_combinations(params_config, exp_suffix, combination={}, index=0):
