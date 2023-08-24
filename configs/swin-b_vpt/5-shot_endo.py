@@ -52,6 +52,7 @@ test_dataloader = dict(
 )
 
 val_evaluator = [
+    dict(type='Aggregate'),
     dict(type='AveragePrecision'),
     dict(type='AUC')
 ]
