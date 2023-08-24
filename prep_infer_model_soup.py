@@ -3,7 +3,7 @@ import os
 
 def get_sd(state_dicts, alphal):
   sd = {}  # Initialize an empty dictionary
-  for k in state_dicts[0].keys():
+  for k in state_dicts[0]['state_dict'].keys():
       print(k)
       #print(state_dicts[0][k])
       #sd[k] = state_dicts[0][k].clone() * alphal[0]
