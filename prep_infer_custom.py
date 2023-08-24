@@ -51,7 +51,7 @@ for given_run_path in best_runs:
     command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}\n"
     bash_script += command
 
-bash_script += f"echo {out_path}"
+bash_script += f"echo {submission_dir}"
 print(f"Saved respective configs to {configs_dir}")
 print("Created infer.sh")
 print(f"Run ./infer.sh to create prediction files in {predictions_dir}")
