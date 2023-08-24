@@ -7,6 +7,6 @@ OVERRIDE = {
 }
 
 SETTINGS = {
-    'exp_suffix': "-test_",
+    'exp_suffix': "exp-test_",
     'log_level': "INFO"
 }
