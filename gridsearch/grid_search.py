@@ -83,7 +83,8 @@ def check_pythonpath_from_cwd():
 
 
 def run_commands_on_cluster(commands, delay_seconds=1):
-    gpus = ['rtx4090', 'rtx3090', 'rtx3090']
+    #gpus = ['rtx4090', 'rtx3090', 'rtx3090']
+    gpus = ['rtx4090']
     gpu_cycle = itertools.cycle(gpus)
 
     # Ensure the log directory exists
