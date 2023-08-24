@@ -20,12 +20,11 @@ exp_suffix="swinv2_lr_test"
 config="configs/swinv2-b/1-shot_chest.py"
 
 lrs=(
-  5e-2
   5e-3
   5e-4
   5e-5
 )
 
 for lr in "${lrs[@]}"; do
-  sbatch -p ls6 --gres=gpu:3090:1 --wrap="python tools/train.py $config --exp_num=$exp_num --remove_timestamp --exp_suffix=$exp_suffix" -o $log_output
+  sbatch -p ls6 --gres=gpu:rtx3090:1 --wrap="python tools/train.py $config --exp_num=$exp_num --remove_timestamp --lr=$lr --exp_suffix=$exp_suffix" -o $log_output
 done

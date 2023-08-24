@@ -5,11 +5,11 @@ _base_ = [
     '../custom_imports.py',
 ]
 
-lr = 5e-3
+lr = 5e-4
 n = 1
 vpl = 5
 dataset = 'chest'
-exp_num = 2
+exp_num = 21
 nshot = 1
 
 run_name = f'in21k-swin-b_vpt-{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}_exp{exp_num}'
@@ -37,26 +37,28 @@ model = dict(
     ))
 
 train_dataloader = dict(
-    batch_size=4, 
+    batch_size=19,
     dataset=dict(
         ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
 
 val_dataloader = dict(
-    batch_size=8,  
+    batch_size=19,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
 )
 
 test_dataloader = dict(
-    batch_size=4,  
+    batch_size=19,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
 )
 
 optim_wrapper = dict(optimizer=dict(lr=lr))
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
-    logger=dict(interval=50),
+    checkpoint=dict(type='CheckpointHook', interval=10, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
+    logger=dict(interval=10),
 )
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
+
+train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=500)

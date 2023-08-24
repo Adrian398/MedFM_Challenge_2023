@@ -10,7 +10,7 @@ lr = 5e-4
 train_bs = 8
 dataset = 'chest'
 model_name = 'swinv2'
-exp_num = 2
+exp_num = 1
 nshot = 10
 
 run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}'
@@ -39,7 +39,7 @@ model = dict(
 )
 
 train_dataloader = dict(
-    batch_size=4, 
+    batch_size=4,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}_new/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
 
@@ -56,8 +56,10 @@ test_dataloader = dict(
 optim_wrapper = dict(optimizer=dict(lr=lr))
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
-    logger=dict(interval=50),
+    checkpoint=dict(type='CheckpointHook', interval=10, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
+    logger=dict(interval=10),
 )
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
+
+train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=500)
