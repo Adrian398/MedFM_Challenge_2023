@@ -20,7 +20,6 @@ exp_suffix="swinv2_lr_test"
 config="configs/swinv2-b/1-shot_chest.py"
 
 lrs=(
-  5e-2
   5e-3
   5e-4
   5e-5

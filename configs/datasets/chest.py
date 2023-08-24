@@ -64,5 +64,6 @@ val_evaluator = [
     dict(type='AveragePrecision'),
     dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
     dict(type='MultiLabelMetric', average='micro'),  # overall mean
-    dict(type='AUC', multilabel=True)]
+    dict(type='AUC', multilabel=True),
+    dict(type='Aggregate', multilabel=True)]
 test_evaluator = val_evaluator
