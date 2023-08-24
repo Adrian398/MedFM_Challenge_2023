@@ -39,17 +39,17 @@ model = dict(
 train_dataloader = dict(
     batch_size=10,
     dataset=dict(
-        ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
+        ann_file=f'data_anns/MedFMC/{dataset}_new/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
 
 val_dataloader = dict(
     batch_size=16,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}_new/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
 )
 
 test_dataloader = dict(
     batch_size=16,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}_new/test_WithLabel.txt'),
 )
 
 optim_wrapper = dict(optimizer=dict(lr=lr))
