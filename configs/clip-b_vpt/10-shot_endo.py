@@ -12,7 +12,7 @@ dataset = 'endo'
 exp_num = 1
 nshot = 10
 run_name = f'clip-b_{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}_exp{exp_num}'
-work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'
+work_dir = f'work_dirs/endo/{nshot}-shot/{run_name}'
 
 data_preprocessor = dict(
     num_classes=4,
