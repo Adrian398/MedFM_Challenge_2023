@@ -6,7 +6,7 @@ source /home/ls6/hekalo/Git/medfm-challenge/venv/bin/activate
 # export python path
 export PYTHONPATH="$PWD:$PYTHONPATH"
 
-log_output="/home/ls6/hekalo/job_output/slurm-%j.out"
+log_output="/home/ls6/hekalo/job_output/medfm-%j.out"
 
 # experiment numbers
 exp_num=1
