@@ -6,8 +6,7 @@ def get_sd(state_dicts, alphal):
   for k in state_dicts[0].keys():
       print(k)
       #print(state_dicts[0][k])
-      break
-      sd[k] = state_dicts[0][k].clone() * alphal[0]
+      #sd[k] = state_dicts[0][k].clone() * alphal[0]
   for i in range(1, len(state_dicts)):
       for k in state_dicts[i].keys():
           sd[k] = sd[k] + state_dicts[i][k].clone() * alphal[i]
