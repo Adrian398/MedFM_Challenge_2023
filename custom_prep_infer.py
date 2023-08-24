@@ -10,9 +10,9 @@ best_runs = [
     "endo/1-shot/swinv2_bs8_lr0.05_exp1_20230822-011058",  # swin-b testen (swinv2 in queue)
     "endo/5-shot/swin_bs8_lr0.0005_exp4__exp-test_20230824-120538",  # swinv2 testen (swinv2 in queue)
     "endo/10-shot/swin_bs8_lr0.0005_exp1_20230821_201554",  # swinv2 UND alle exps durchtesten
-    "chest/1-shot/vit-b_1-shot_ptokens-1_chest_baseline_test_exp2"
-    "chest/5-shot/vit-b_5-shot_ptokens-1_chest_baseline_test_exp2"
-    "chest/10-shot/vit-b_10-shot_ptokens-1_chest_baseline_test_exp2"
+    "chest/1-shot/vit-b_1-shot_ptokens-1_chest_baseline_test_exp2",
+    "chest/5-shot/vit-b_5-shot_ptokens-1_chest_baseline_test_exp2",
+    "chest/10-shot/vit-b_10-shot_ptokens-1_chest_baseline_test_exp2",
 ]
 
 # create dir for submission and config
