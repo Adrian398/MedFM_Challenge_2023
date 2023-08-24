@@ -76,12 +76,11 @@ test_pipeline = [
 # optim_wrapper = dict(optimizer=dict(lr=lr))
 
 val_evaluator = [
+    dict(type='Aggregate'),
     dict(type='AveragePrecision'),
-    dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
-    dict(type='MultiLabelMetric', average='micro'),  # overall mean
-    dict(type='Accuracy', topk=(1,)),
     dict(type='AUC')
 ]
+
 test_evaluator = val_evaluator
 
 default_hooks = dict(
