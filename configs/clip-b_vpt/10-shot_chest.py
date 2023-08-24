@@ -8,12 +8,11 @@ _base_ = [
 lr = 1e-3
 vpl = 1
 dataset = 'chest'
-exp_num = 2
+exp_num = 21
 nshot = 10
 
 run_name = f'clip-b_{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}_exp{exp_num}'
 work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'
-
 
 model = dict(
     type='ImageClassifier',
@@ -70,14 +69,14 @@ test_pipeline = [
 train_dataloader = dict(
     batch_size=4, 
     dataset=dict(
-        ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
+        ann_file=f'data_anns/MedFMC/{dataset}_new/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
         pipeline=train_pipeline),
 )
 
 val_dataloader = dict(
     batch_size=8,  
     dataset=dict(
-        ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt',
+        ann_file=f'data_anns/MedFMC/{dataset}_new/{dataset}_{nshot}-shot_val_exp{exp_num}.txt',
         pipeline=test_pipeline),
 )
 
