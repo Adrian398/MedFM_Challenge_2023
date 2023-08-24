@@ -6,10 +6,10 @@ def get_sd(state_dicts, alphal):
   for k in state_dicts[0]['state_dict'].keys():
       #print(k)
       #print(state_dicts[0][k])
-      sd[k] = state_dicts[0][k].clone() * alphal[0]
+      sd[k] = state_dicts[0]['state_dict'][k].clone() * alphal[0]
   for i in range(1, len(state_dicts)):
       for k in state_dicts[i]['state_dict'].keys():
-          sd[k] = sd[k] + state_dicts[i][k].clone() * alphal[i]
+          sd[k] = sd[k] + state_dicts[i]['state_dict'][k].clone() * alphal[i]
   return sd
 
 checkpoint_filenames = ["/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs4_lr0.0005_exp1_20230821-004750/best_multi-label_mAP_epoch_11.pth", "/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs8_lr0.0005_exp1_20230821-172020/best_multi-label_mAP_epoch_100.pth"]
