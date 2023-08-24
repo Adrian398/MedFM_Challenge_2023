@@ -3,8 +3,8 @@ import shutil
 from datetime import datetime
 
 # todo, fill this array with run_dirs (from workdir, e.g. "colon/1-shot/swin_93878")
-best_runs = ["",
-            ""]
+best_runs = ["endo/1-shot/swinv2_bs8_lr0.05_exp1_20230822-014008",
+            "colon/1-shot/swin_bs16_lr0.005_exp1_20230820-221921"]
 
 # create dir for submission and config
 date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
