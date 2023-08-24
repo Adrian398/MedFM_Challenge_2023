@@ -1,12 +1,12 @@
 OVERRIDE = {
-    'model': ["swinv2-b", "swin-b_vpt"],
+    'model': ["swin-b_vpt"],
     'dataset': "colon",
-    'shot': [1],
-    'exp_num': [1,3,4],
+    'shot': [5],
+    'exp_num': [1,2,3,4,5],
     'lr': 1e-5,
 }
 
 SETTINGS = {
-    'exp_suffix': "exp-test_",
+    'exp_suffix': "-test_",
     'log_level': "INFO"
 }
