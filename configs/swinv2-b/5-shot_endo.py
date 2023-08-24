@@ -64,7 +64,7 @@ model = dict(
     neck=dict(type='GlobalAveragePooling'),
     type='ImageClassifier')
 model_name = 'swinv2'
-nshot = 1
+nshot = 5
 optim_wrapper = dict(
     optimizer=dict(
         betas=(
@@ -127,7 +127,7 @@ train_dataloader = dict(
     batch_size=train_bs,
     collate_fn=dict(type='default_collate'),
     dataset=dict(
-        ann_file='data_anns/MedFMC/endo/endo_1-shot_train_exp1.txt',
+        ann_file='data_anns/MedFMC/endo/endo_5-shot_train_exp1.txt',
         data_prefix='data/MedFMC_train/endo/images',
         pipeline=[
             dict(type='LoadImageFromFile'),
@@ -184,8 +184,8 @@ val_dataloader = dict(
     batch_size=64,
     collate_fn=dict(type='default_collate'),
     dataset=dict(
-        ann_file='data_anns/MedFMC/endo/endo_1-shot_val_exp1.txt',
-        data_prefix='data/MedFMC_train/endo/images',
+        ann_file='data_anns/MedFMC/endo/endo_5-shot_val_exp1.txt',
+        data_prefix='/scratch/medfm/medfm-challenge/data/MedFMC_train/endo/images',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
@@ -219,4 +219,4 @@ visualizer = dict(
     vis_backends=[
         dict(type='TensorboardVisBackend'),
     ])
-work_dir = '/scratch/medfm/medfm-challenge/work_dirs/endo/1-shot/swinv2_bs8_lr0.05_exp1_'
+work_dir = '/scratch/medfm/medfm-challenge/work_dirs/endo/5-shot/swinv2_bs8_lr0.05_exp1_'
