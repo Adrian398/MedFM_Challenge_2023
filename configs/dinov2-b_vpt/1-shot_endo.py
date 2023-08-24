@@ -8,9 +8,11 @@ _base_ = [
 lr = 5e-3
 vpl = 1
 dataset = 'endo'
-exp_num = 1
+exp_num = 3
 nshot = 1
-run_name = f'dinov2-b_{nshot}-shot_ptokens-{vpl}_{dataset}'
+
+run_name = f'dinov2-b_{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}_exp{exp_num}'
+work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'
 
 data_preprocessor = dict(
     # RGB format normalization parameters
@@ -44,9 +46,13 @@ model = dict(
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
+    dict(type='NumpyToPIL', to_rgb=True),
+    dict(type='torchvision/RandomAffine', degrees=(-15, 15), translate=(0.05, 0.05), fill=128),
+    dict(type='PILToNumpy', to_bgr=True),
     dict(
         type='RandomResizedCrop',
         scale=518,
+        crop_ratio_range=(0.9, 1.0),
         backend='pillow',
         interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
@@ -79,12 +85,12 @@ test_dataloader = dict(
         ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt',
         pipeline=test_pipeline),
 )
+
 optim_wrapper = dict(optimizer=dict(lr=lr))
 
 default_hooks = dict(
-    checkpoint = dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
+    checkpoint=dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
     logger=dict(interval=50),
 )
 
-work_dir = f'work_dirs/dinov2-b/exp{exp_num}/{run_name}'
-
+visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])

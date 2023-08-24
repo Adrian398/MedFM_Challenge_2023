@@ -23,9 +23,6 @@ configs=(
   "configs/swin-b_vpt/1-shot_chest.py"
   "configs/swin-b_vpt/5-shot_chest.py"
   "configs/swin-b_vpt/10-shot_chest.py"
-  "configs/vit-b_vpt/1-shot_chest.py"
-  "configs/vit-b_vpt/5-shot_chest.py"
-  "configs/vit-b_vpt/10-shot_chest.py"
 )
 
 configs_v2=(
