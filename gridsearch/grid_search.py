@@ -20,7 +20,7 @@ BASE_PARAMS_CONFIG = {
 }
 
 
-def run_training(params, exp_suffix):
+def create_command(params, exp_suffix):
     cfg_path = generate_config_path(params['model'], params['shot'], params['dataset'])
     command = ["python", "tools/train.py", cfg_path]
 
@@ -36,13 +36,13 @@ def run_training(params, exp_suffix):
 
 
 def generate_config_path(model, shot, dataset):
-    return f"configs/{model}/{shot}-shot_{dataset}-tmp.py"
+    return f"configs/{model}/{shot}-shot_{dataset}.py"
 
 
 def generate_combinations(params_config, exp_suffix, combination={}, index=0):
     commands = []
     if index == len(params_config):
-        command = run_training(params=combination, exp_suffix=exp_suffix)
+        command = create_command(params=combination, exp_suffix=exp_suffix)
         commands.append(command)
     else:
         param_name, values = list(params_config.items())[index]
@@ -82,9 +82,22 @@ def check_pythonpath_from_cwd():
         sys.exit(1)
 
 
-def run_commands_on_cluster(commands, delay_seconds=1):
-    #gpus = ['rtx4090', 'rtx3090', 'rtx3090']
-    gpus = ['rtx4090']
+def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
+    """
+    Runs the generated commands on the cluster.
+    If no GPU is specified, the commands are queued on the cluster in the following scheme:
+    gpuc -> gpua / gpub -> gpua / gpub -> gpuc -> ...
+    """
+
+    if gpu == 'c':
+        gpus = ['rtx4090']
+    elif gpu == 'ab':
+        gpus = ['rtx3090']
+    elif gpu is None:
+        gpus = ['rtx4090', 'rtx3090', 'rtx3090']
+    else:
+        raise ValueError(f'Invalid gpu type {gpu}.')
+
     gpu_cycle = itertools.cycle(gpus)
 
     # Ensure the log directory exists
@@ -112,8 +125,10 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Run grid search for training.")
     parser.add_argument("--config", type=str, default=gridsearch_config_path, help="Path to the configuration file.")
+    parser.add_argument("--gpu", type=str, default=None, help="GPU type: 'c'=rtx4090 or 'ab'=rtx3090.")
     args = parser.parse_args()
 
+    gpu_type = args.gpu
     config_path = args.config
     spec = importlib.util.spec_from_file_location("config", config_path)
     config = importlib.util.module_from_spec(spec)
@@ -140,4 +155,4 @@ if __name__ == "__main__":
     user_input = input(f"Do you want to run {len(commands)} commands on the cluster? (yes/no): ")
 
     if user_input.strip().lower() == 'yes':
-        run_commands_on_cluster(commands)
+        run_commands_on_cluster(commands, gpu=gpu_type)
