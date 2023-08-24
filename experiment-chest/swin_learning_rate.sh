@@ -27,5 +27,5 @@ lrs=(
 )
 
 for lr in "${lrs[@]}"; do
-  sbatch -p ls6 --gres=gpu:3090:1 --wrap="python tools/train.py $config --exp_num=$exp_num --remove_timestamp --exp_suffix=$exp_suffix" -o $log_output
+  sbatch -p ls6 --gres=gpu:rtx3090:1 --wrap="python tools/train.py $config --exp_num=$exp_num --remove_timestamp --lr=$lr --exp_suffix=$exp_suffix" -o $log_output
 done
