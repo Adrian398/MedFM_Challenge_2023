@@ -11,24 +11,24 @@ exp_num=1
 exp_suffix="baseline_test"
 
 configs=(
-  "configs/clip-b_vpt/1-shot_chest.py"
-  "configs/clip-b_vpt/5-shot_chest.py"
-  "configs/clip-b_vpt/10-shot_chest.py"
-  "configs/dinov2-b_vpt/1-shot_chest.py"
-  "configs/dinov2-b_vpt/5-shot_chest.py"
-  "configs/dinov2-b_vpt/10-shot_chest.py"
-  "configs/eva-b_vpt/1-shot_chest.py"
-  "configs/eva-b_vpt/5-shot_chest.py"
-  "configs/eva-b_vpt/10-shot_chest.py"
-  #"configs/swin-b_vpt/1-shot_chest.py"
-  #"configs/swin-b_vpt/5-shot_chest.py"
-  #"configs/swin-b_vpt/10-shot_chest.py"
+  "configs/clip-b_vpt/1-shot_endo.py"
+  "configs/clip-b_vpt/5-shot_endo.py"
+  "configs/clip-b_vpt/10-shot_endo.py"
+  "configs/dinov2-b_vpt/1-shot_endo.py"
+  "configs/dinov2-b_vpt/5-shot_endo.py"
+  "configs/dinov2-b_vpt/10-shot_endo.py"
+  "configs/eva-b_vpt/1-shot_endo.py"
+  "configs/eva-b_vpt/5-shot_endo.py"
+  "configs/eva-b_vpt/10-shot_endo.py"
+  #"configs/swin-b_vpt/1-shot_endo.py"
+  #"configs/swin-b_vpt/5-shot_endo.py"
+  #"configs/swin-b_vpt/10-shot_endo.py"
 )
 
 configs_v2=(
-  #"configs/swinv2-b/1-shot_chest.py"
-  #"configs/swinv2-b/5-shot_chest.py"
-  #"configs/swinv2-b/10-shot_chest.py"
+  #"configs/swinv2-b/1-shot_endo.py"
+  #"configs/swinv2-b/5-shot_endo.py"
+  #"configs/swinv2-b/10-shot_endo.py"
 )
 
 for config in "${configs[@]}"; do
