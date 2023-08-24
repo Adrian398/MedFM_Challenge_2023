@@ -88,7 +88,7 @@ default_hooks = dict(
 optim_wrapper = dict(
     optimizer=dict(
         type='AdamW',
-        lr=5e-4 * 1024 / 512,
+        lr=5e-5 * 1024 / 512,
         weight_decay=0.05,
         eps=1e-8,
         betas=(0.9, 0.999)),
@@ -104,5 +104,5 @@ optim_wrapper = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=250, max_epochs=1500)
+train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=1500)
 
