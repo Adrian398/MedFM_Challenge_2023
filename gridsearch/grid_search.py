@@ -26,7 +26,7 @@ def run_training(params, exp_suffix):
 
     for key, value in params.items():
         # only add params as command arg if required
-        if key not in ['model', 'shot', 'dataset']:
+        if key not in ['model', 'shot', 'dataset', 'lr']:
             command.extend([f"--{key}", str(value)])
 
     if exp_suffix:
