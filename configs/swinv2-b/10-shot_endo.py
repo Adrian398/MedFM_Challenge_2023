@@ -64,7 +64,7 @@ model = dict(
     neck=dict(type='GlobalAveragePooling'),
     type='ImageClassifier')
 model_name = 'swinv2'
-nshot = 5
+nshot = 10
 optim_wrapper = dict(
     optimizer=dict(
         betas=(
@@ -72,7 +72,7 @@ optim_wrapper = dict(
             0.999,
         ),
         eps=1e-08,
-        lr=0.001,
+        lr=1e-05,
         type='AdamW',
         weight_decay=0.01),
     paramwise_cfg=dict(
@@ -122,7 +122,7 @@ test_pipeline = [
     dict(type='PackInputs'),
 ]
 train_bs = 8
-train_cfg = dict(by_epoch=True, max_epochs=400, val_interval=25)
+train_cfg = dict(by_epoch=True, max_epochs=1000, val_interval=25)
 train_dataloader = dict(
     batch_size=train_bs,
     collate_fn=dict(type='default_collate'),
