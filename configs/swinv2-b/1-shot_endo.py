@@ -72,7 +72,7 @@ optim_wrapper = dict(
             0.999,
         ),
         eps=1e-08,
-        lr=0.001,
+        lr=1e-05,
         type='AdamW',
         weight_decay=0.01),
     paramwise_cfg=dict(
@@ -84,8 +84,8 @@ optim_wrapper = dict(
         flat_decay_mult=0.0,
         norm_decay_mult=0.0))
 param_scheduler = [
-    dict(by_epoch=True, end=5, start_factor=0.001, type='LinearLR'),
-    dict(begin=5, by_epoch=True, eta_min=1e-06, type='CosineAnnealingLR'),
+    dict(by_epoch=True, end=1, start_factor=0.001, type='LinearLR'),
+    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
 ]
 randomness = dict(deterministic=False, seed=None)
 resume = False
