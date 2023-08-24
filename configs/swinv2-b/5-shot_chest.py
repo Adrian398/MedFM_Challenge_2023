@@ -6,7 +6,7 @@ _base_ = [
     '../custom_imports.py',
 ]
 
-lr = 5e-2
+lr = 5e-4
 train_bs = 8
 dataset = 'chest'
 model_name = 'swinv2'
@@ -40,12 +40,12 @@ model = dict(
 
 train_dataloader = dict(
     batch_size=4, 
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}_new/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
 
 val_dataloader = dict(
     batch_size=8,  
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}_new/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
 )
 
 test_dataloader = dict(

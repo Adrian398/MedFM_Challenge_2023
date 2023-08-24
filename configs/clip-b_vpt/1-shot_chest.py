@@ -8,7 +8,7 @@ _base_ = [
 lr = 1e-3
 vpl = 1
 dataset = 'chest'
-exp_num = 2
+exp_num = 21
 nshot = 1
 
 run_name = f'clip-b_{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}_exp{exp_num}'
@@ -70,14 +70,14 @@ test_pipeline = [
 train_dataloader = dict(
     batch_size=4,
     dataset=dict(
-        ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
+        ann_file=f'data_anns/MedFMC/{dataset}_new/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
         pipeline=train_pipeline),
 )
 
 val_dataloader = dict(
     batch_size=8,
     dataset=dict(
-        ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt',
+        ann_file=f'data_anns/MedFMC/{dataset}_new/{dataset}_{nshot}-shot_val_exp{exp_num}.txt',
         pipeline=test_pipeline),
 )
 
