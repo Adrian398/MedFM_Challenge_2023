@@ -20,9 +20,9 @@ configs=(
   "configs/eva-b_vpt/1-shot_chest.py"
   "configs/eva-b_vpt/5-shot_chest.py"
   "configs/eva-b_vpt/10-shot_chest.py"
-  "configs/swin-b_vpt/1-shot_chest.py"
-  "configs/swin-b_vpt/5-shot_chest.py"
-  "configs/swin-b_vpt/10-shot_chest.py"
+  #"configs/swin-b_vpt/1-shot_chest.py"
+  #"configs/swin-b_vpt/5-shot_chest.py"
+  #"configs/swin-b_vpt/10-shot_chest.py"
 )
 
 configs_v2=(
@@ -32,7 +32,8 @@ configs_v2=(
 )
 
 for config in "${configs[@]}"; do
-  sbatch -p ls6 --gres=gpu:1 --nodelist=gpu8a --wrap="python tools/train.py $config --exp_num=$exp_num --remove_timestamp --exp_suffix=$exp_suffix" -o $log_output
+  print(config)
+  sbatch -p ls6 --gres=gpu:1 --nodelist=gpu8a --wrap="python tools/train.py $config --remove_timestamp --exp_suffix=$exp_suffix" -o $log_output
 done
 
 # for config_v2 in "${configs_v2[@]}"; do
