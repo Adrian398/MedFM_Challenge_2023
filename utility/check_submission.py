@@ -1,6 +1,5 @@
 import os
 from datetime import datetime
-
 import pandas as pd
 
 """
@@ -16,8 +15,14 @@ val_dir = "../data/MedFMC_val/"
 path = os.path.join('..', 'submissions')
 directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
 format = "%d-%m_%H-%M-%S"
+valid_directories = []
+for d in directories:
+    try:
+        valid_directories.append((datetime.strptime(d, format), d))
+    except Exception:
+        pass
 
-newest_directory = max(directories, key=lambda d: datetime.strptime(d, format))
+newest_directory = max(valid_directories, key=lambda x: x[0])[1]
 print(f"Checking newest submission {newest_directory}")
 results_dir = os.path.join(path, newest_directory, "predictions")
 
