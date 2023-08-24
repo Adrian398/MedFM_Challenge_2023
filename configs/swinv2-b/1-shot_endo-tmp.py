@@ -26,7 +26,7 @@ default_hooks = dict(
         _scope_='mmpretrain',
         interval=250,
         max_keep_ckpts=1,
-        save_best='auto',
+        save_best="Aggregate", rule="greater",
         type='CheckpointHook'),
     logger=dict(_scope_='mmpretrain', interval=10, type='LoggerHook'),
     param_scheduler=dict(_scope_='mmpretrain', type='ParamSchedulerHook'),
@@ -135,6 +135,7 @@ test_dataloader = dict(
     pin_memory=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
 test_evaluator = [
+    dict(type='Aggregate'),
     dict(type='AveragePrecision'),
     dict(type='AUC'),
 ]
@@ -192,6 +193,7 @@ val_dataloader = dict(
     pin_memory=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
 val_evaluator = [
+    dict(type='Aggregate'),
     dict(type='AveragePrecision'),
     dict(type='AUC'),
 ]
