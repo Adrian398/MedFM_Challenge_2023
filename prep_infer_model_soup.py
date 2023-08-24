@@ -21,6 +21,7 @@ print(type(state_dicts[0]))
 
 
 alphal = [1 / len(state_dicts) for i in range(len(state_dicts))]
+print(alphal)
 sd = get_sd(state_dicts, alphal)
 
 folder_path =  checkpoint_filenames[0].split("-shot")[0] + "-shot/modelsoup"
