@@ -32,7 +32,7 @@ exp_num = 1
 launcher = 'none'
 load_from = None
 log_level = 'INFO'
-lr = 0.05
+lr = 1e-8
 model = dict(
     _scope_='mmpretrain',
     backbone=dict(
@@ -84,7 +84,7 @@ optim_wrapper = dict(
         flat_decay_mult=0.0,
         norm_decay_mult=0.0))
 param_scheduler = [
-    dict(by_epoch=True, end=1, start_factor=0.001, type='LinearLR'),
+    dict(by_epoch=True, end=1, start_factor=1, type='LinearLR'),
     dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
 ]
 randomness = dict(deterministic=False, seed=None)
@@ -123,14 +123,14 @@ test_pipeline = [
 ]
 train_bs = 8
 train_cfg = dict(by_epoch=True, max_epochs=1000, val_interval=25)
-train_dataloader = dict(
-    batch_size=train_bs,
-    collate_fn=dict(type='default_collate'),
-    dataset=dict(
-        ann_file='data_anns/MedFMC/endo/endo_1-shot_train_exp1.txt',
-        data_prefix='data/MedFMC_train/endo/images',
-        pipeline=[
+train_pipeline = [
             dict(type='LoadImageFromFile'),
+            dict(
+                type='Normalize',
+                mean=mean,
+                std=std,
+                to_rgb=False
+            ),
             dict(
                 backend='pillow',
                 interpolation='bicubic',
@@ -162,30 +162,26 @@ train_dataloader = dict(
                 angle=10
             ),
             dict(type='PackInputs'),
-        ],
+        ]
+train_dataloader = dict(
+    batch_size=train_bs,
+    collate_fn=dict(type='default_collate'),
+    dataset=dict(
+        ann_file='data_anns/MedFMC/endo/endo_10-shot_train_exp1.txt',
+        data_prefix='data/MedFMC_train/endo/images',
+        pipeline=train_pipeline,
         type='Endoscopy'),
     num_workers=4,
     persistent_workers=True,
     pin_memory=True,
     sampler=dict(shuffle=True, type='DefaultSampler'))
-train_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(backend='pillow', interpolation='bicubic', scale=384, type='Resize'),
-    dict(
-        type='Normalize',
-        mean=mean,
-        std=std,
-        to_rgb=False
-    ),
-    dict(type='PackInputs'),
-]
 val_cfg = dict()
 val_dataloader = dict(
     batch_size=64,
     collate_fn=dict(type='default_collate'),
     dataset=dict(
         ann_file='data_anns/MedFMC/endo/endo_1-shot_val_exp1.txt',
-        data_prefix='data/MedFMC_train/endo/images',
+        data_prefix='/scratch/medfm/medfm-challenge/data/MedFMC_train/endo/images',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(

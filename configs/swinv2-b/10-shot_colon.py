@@ -32,12 +32,7 @@ data_preprocessor = dict(
 dataset = 'colon'
 dataset_type = 'Colon'
 default_hooks = dict(
-    checkpoint=dict(
-        _scope_='mmpretrain',
-        interval=250,
-        max_keep_ckpts=2,
-        save_best='auto',
-        type='CheckpointHook'),
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=2, save_best="Aggregate", rule="greater"),
     logger=dict(_scope_='mmpretrain', interval=10, type='LoggerHook'),
     param_scheduler=dict(_scope_='mmpretrain', type='ParamSchedulerHook'),
     sampler_seed=dict(_scope_='mmpretrain', type='DistSamplerSeedHook'),
@@ -129,7 +124,7 @@ test_dataloader = dict(
     collate_fn=dict(type='default_collate'),
     dataset=dict(
         ann_file='data_anns/MedFMC/colon/test_WithLabel.txt',
-        data_prefix='/scratch/medfm/data/MedFMC_train/colon/images',
+        data_prefix='/scratch/medfm/medfm-challenge/data/MedFMC_train/colon/images',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
@@ -145,6 +140,7 @@ test_dataloader = dict(
     pin_memory=True,
     sampler=dict(shuffle=False, type='DefaultSampler'))
 test_evaluator = [
+    dict(type='Aggregate'),
     dict(type='AveragePrecision'),
     dict(type='AUC'),
 ]
@@ -154,13 +150,13 @@ test_pipeline = [
     dict(type='PackInputs'),
 ]
 train_bs = 8
-train_cfg = dict(by_epoch=True, max_epochs=1000, val_interval=20)
+train_cfg = dict(by_epoch=True, max_epochs=200, val_interval=25)
 train_dataloader = dict(
     batch_size=8,
     collate_fn=dict(type='default_collate'),
     dataset=dict(
         ann_file='data_anns/MedFMC/colon/colon_10-shot_train_exp1.txt',
-        data_prefix='/scratch/medfm/data/MedFMC_train/colon/images',
+        data_prefix='/scratch/medfm/medfm-challenge/data/MedFMC_train/colon/images',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
@@ -178,15 +174,21 @@ train_dataloader = dict(
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(backend='pillow', interpolation='bicubic', scale=384, type='Resize'),
+    dict(
+        type='Normalize',
+        mean=bgr_mean,
+        std=bgr_std,
+        to_rgb=False
+    ),
     dict(type='PackInputs'),
 ]
 val_cfg = dict()
 val_dataloader = dict(
-    batch_size=64,
+    batch_size=16,
     collate_fn=dict(type='default_collate'),
     dataset=dict(
         ann_file='data_anns/MedFMC/colon/colon_10-shot_val_exp1.txt',
-        data_prefix='/scratch/medfm/data/MedFMC_train/colon/images',
+        data_prefix='/scratch/medfm/medfm-challenge/data/MedFMC_train/colon/images',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
