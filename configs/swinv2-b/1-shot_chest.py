@@ -14,48 +14,47 @@ model_name = 'swinv2'
 exp_num = 1
 nshot = 1
 
-run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}'
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
 work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
 
 model = dict(
-    type='ImageClassifier',
+    _scope_='mmpretrain',
     backbone=dict(
+        arch='base',
+        drop_path_rate=0.2,
         img_size=384,
         init_cfg=dict(
-            type='Pretrained',
             checkpoint=
             'https://download.openmmlab.com/mmclassification/v0/swin-v2/swinv2-base-w24_in21k-pre_3rdparty_in1k-384px_20220803-44eb70f8.pth',
             prefix='backbone',
-        ),
-        window_size=[24, 24, 24, 12],
-        drop_path_rate=0.2,
-        pretrained_window_sizes=[12, 12, 12, 6]),
-    neck=dict(type='GlobalAveragePooling'),
+            type='Pretrained'),
+        pretrained_window_sizes=[12, 12, 12, 6],
+        type='SwinTransformerV2',
+        window_size=[24, 24, 24, 12]),
     head=dict(
-        type='LinearClsHead',
-        num_classes=19,
         in_channels=1024,
-        loss=dict(type='LabelSmoothLoss', loss_weight=1.0),
-    )
-)
+        num_classes=19,
+        type='MultiLabelLinearClsHead'),
+    neck=dict(type='GlobalAveragePooling'),
+    type='ImageClassifier')
 
 train_dataloader = dict(
     batch_size=train_bs,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}_new/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
 )
 
 val_dataloader = dict(
     batch_size=val_bs,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}_new/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
 )
 
 test_dataloader = dict(
-    batch_size=4,  
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}_new/test_WithLabel.txt'),
+    batch_size=8,
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
 )
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=10, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
     logger=dict(interval=10),
 )
 
