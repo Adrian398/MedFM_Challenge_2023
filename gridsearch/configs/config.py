@@ -3,7 +3,7 @@ OVERRIDE = {
     'dataset': "endo",
     'shot': [10],
     #'exp_num': [1,2,3,4,5],
-    'lr': 1e-4,
+    'lr': 1e-6,
 }
 
 SETTINGS = {
