@@ -123,14 +123,14 @@ test_pipeline = [
 ]
 train_bs = 8
 train_cfg = dict(by_epoch=True, max_epochs=200, val_interval=25)
-train_dataloader = dict(
-    batch_size=train_bs,
-    collate_fn=dict(type='default_collate'),
-    dataset=dict(
-        ann_file='data_anns/MedFMC/endo/endo_10-shot_train_exp1.txt',
-        data_prefix='data/MedFMC_train/endo/images',
-        pipeline=[
+train_pipeline = [
             dict(type='LoadImageFromFile'),
+            dict(
+                type='Normalize',
+                mean=mean,
+                std=std,
+                to_rgb=False
+            ),
             dict(
                 backend='pillow',
                 interpolation='bicubic',
@@ -162,23 +162,19 @@ train_dataloader = dict(
                 angle=10
             ),
             dict(type='PackInputs'),
-        ],
+        ]
+train_dataloader = dict(
+    batch_size=train_bs,
+    collate_fn=dict(type='default_collate'),
+    dataset=dict(
+        ann_file='data_anns/MedFMC/endo/endo_10-shot_train_exp1.txt',
+        data_prefix='data/MedFMC_train/endo/images',
+        pipeline=train_pipeline,
         type='Endoscopy'),
     num_workers=4,
     persistent_workers=True,
     pin_memory=True,
     sampler=dict(shuffle=True, type='DefaultSampler'))
-train_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(backend='pillow', interpolation='bicubic', scale=384, type='Resize'),
-    dict(
-        type='Normalize',
-        mean=mean,
-        std=std,
-        to_rgb=False
-    ),
-    dict(type='PackInputs'),
-]
 val_cfg = dict()
 val_dataloader = dict(
     batch_size=64,

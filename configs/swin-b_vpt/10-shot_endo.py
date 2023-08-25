@@ -1,153 +1,249 @@
-
-
-
-_base_ = [
-    '../datasets/endoscopy.py',
-    '../swin_schedule.py',
-    'mmpretrain::_base_/default_runtime.py',
-    '../custom_imports.py',
+auto_scale_lr = dict(base_batch_size=1024)
+bgr_mean = [
+    123.675,
+    116.28,
+    103.53,
 ]
-
-warmup_lr = 1e-3
-lr = 5e-4
-cos_end_lr = 1e-6
-train_bs = 8
-vpl = 5
+bgr_std = [
+    58.395,
+    57.12,
+    57.375,
+]
+custom_imports = dict(
+    allow_failed_imports=False,
+    imports=[
+        'medfmc.datasets.medical_datasets',
+        'medfmc.evaluation.metrics.auc',
+        'medfmc.models',
+    ])
+data_preprocessor = dict(
+    mean=bgr_mean,
+    num_classes=4,
+    std=bgr_std,
+    to_onehot=True,
+    to_rgb=True)
 dataset = 'endo'
-model_name = 'swin'
+dataset_type = 'Endoscopy'
+default_hooks = dict(
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
+    logger=dict(_scope_='mmpretrain', interval=10, type='LoggerHook'),
+    param_scheduler=dict(_scope_='mmpretrain', type='ParamSchedulerHook'),
+    sampler_seed=dict(_scope_='mmpretrain', type='DistSamplerSeedHook'),
+    timer=dict(_scope_='mmpretrain', type='IterTimerHook'),
+    visualization=dict(
+        _scope_='mmpretrain', enable=False, type='VisualizationHook'))
+default_scope = 'mmpretrain'
+env_cfg = dict(
+    cudnn_benchmark=False,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
 exp_num = 1
-nshot = 10
-run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
-work_dir = f'work_dirs/endo/{nshot}-shot/{run_name}'
-
+launcher = 'none'
+load_from = None
+log_level = 'INFO'
+lr = 1e-8
+vpl = 5
 model = dict(
-    type='ImageClassifier',
     backbone=dict(
-        type='PromptedSwinTransformer',
-        prompt_length=vpl,
         arch='base',
         img_size=384,
         init_cfg=dict(
-            type='Pretrained',
             checkpoint=
             'https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
             prefix='backbone',
-        ),
-        stage_cfgs=dict(block_cfgs=dict(window_size=12))),
+            type='Pretrained'),
+        prompt_length=vpl,
+        stage_cfgs=dict(block_cfgs=dict(window_size=12)),
+        type='PromptedSwinTransformer'),
+    head=dict(in_channels=1024, num_classes=4, type='MultiLabelLinearClsHead'),
     neck=None,
-    head=dict(
-        type='MultiLabelLinearClsHead',
-        num_classes=4,
-        in_channels=1024,
-    ))
-
-#add endo std diviation
-bgr_mean = [123.675, 116.28, 103.53]
-bgr_std = [58.395, 57.12, 57.375]
-
+    type='ImageClassifier')
+model_name = 'swin'
+nshot = 10
+optim_wrapper = dict(
+    optimizer=dict(
+        betas=(
+            0.9,
+            0.999,
+        ),
+        eps=1e-08,
+        lr=0.0005,
+        type='AdamW',
+        weight_decay=0.05),
+    paramwise_cfg=dict(
+        bias_decay_mult=0.0,
+        custom_keys=dict({
+            '.absolute_pos_embed': dict(decay_mult=0.0),
+            '.relative_position_bias_table': dict(decay_mult=0.0)
+        }),
+        flat_decay_mult=0.0,
+        norm_decay_mult=0.0))
+param_scheduler = [
+    dict(by_epoch=True, end=1, start_factor=1, type='LinearLR'),
+    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
+]
+randomness = dict(deterministic=False, seed=None)
+resume = False
+run_name = 'swin_bs8_lr0.0005_exp1_'
+test_cfg = dict()
+test_dataloader = dict(
+    batch_size=4,
+    collate_fn=dict(type='default_collate'),
+    dataset=dict(
+        ann_file='data_anns/MedFMC/endo/test_WithLabel.txt',
+        data_prefix='/scratch/medfm/medfm-challenge/data/MedFMC_train/endo/images',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                backend='pillow',
+                interpolation='bicubic',
+                scale=384,
+                type='Resize'),
+            dict(type='PackInputs'),
+        ],
+        type='Endoscopy'),
+    num_workers=2,
+    persistent_workers=True,
+    pin_memory=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+test_evaluator = [
+    dict(type='Aggregate'),
+    dict(type='AveragePrecision'),
+    dict(type='AUC'),
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(backend='pillow', interpolation='bicubic', scale=384, type='Resize'),
+    dict(type='PackInputs'),
+]
+train_bs = 8
+train_cfg = dict(by_epoch=True, max_epochs=200, val_interval=25)
+train_dataloader = dict(
+    batch_size=train_bs,
+    collate_fn=dict(type='default_collate'),
+    dataset=dict(
+        ann_file='data_anns/MedFMC/endo/endo_10-shot_train_exp1.txt',
+        data_prefix='/scratch/medfm/medfm-challenge/data/MedFMC_train/endo/images',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                erase_prob=0.25,
+                fill_color=[
+                    123.675,
+                    116.28,
+                    103.53,
+                ],
+                fill_std=[
+                    58.395,
+                    57.12,
+                    57.375,
+                ],
+                max_area_ratio=0.3333333333333333,
+                min_area_ratio=0.02,
+                mode='rand',
+                type='RandomErasing'),
+            dict(
+                hparams=dict(
+                    interpolation='bicubic', pad_val=[
+                        124,
+                        116,
+                        104,
+                    ]),
+                magnitude_level=8,
+                magnitude_std=0.7,
+                num_policies=2,
+                policies='timm_increasing',
+                total_level=10,
+                type='RandAugment'),
+            dict(
+                backend='pillow',
+                interpolation='bicubic',
+                scale=384,
+                type='RandomResizedCrop'),
+            dict(direction='horizontal', prob=0.5, type='RandomFlip'),
+            dict(keep_channels=True, prob=0.5, type='RandomGrayscale'),
+            dict(direction='vertical', prob=0.5, type='RandomFlip'),
+            dict(type='PackInputs'),
+        ],
+        type='Endoscopy'),
+    num_workers=16,
+    persistent_workers=True,
+    pin_memory=True,
+    sampler=dict(shuffle=True, type='DefaultSampler'))
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
-        type='RandomErasing',
-        erase_prob=0.25,
-        mode='rand',
-        min_area_ratio=0.02,
-        max_area_ratio=1 / 3,
-        fill_color=bgr_mean,
-        fill_std=bgr_std),
-    dict(
-        type='RandAugment',
-        policies='timm_increasing',
-        num_policies=2,
-        total_level=10,
-        magnitude_level=8,
-        magnitude_std=0.7,
-        hparams=dict(pad_val=[round(x) for x in bgr_mean], interpolation='bicubic')
+        type='Normalize',
+        mean=bgr_mean,
+        std=bgr_std,
+        to_rgb=False
     ),
+    dict(
+        backend='pillow',
+        interpolation='bicubic',
+        scale=384,
+        type='Resize'),
     dict(
         type='RandomResizedCrop',
         scale=384,
         backend='pillow',
         interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
-    dict(type='RandomGrayscale', prob=0.5, keep_channels=True),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
+    dict(
+        type='ColorJitter',
+        brightness=0.2,
+        contrast=(0.8, 1.2),
+        saturation=0.3,
+        hue=(-0.1, 0.1),
+        backend='pillow'
+    ),
+    dict(
+        type='Cutout',
+        shape=(64, 64),
+        pad_val=128,
+        prob=0.5
+    ),
+    dict(
+        type='Rotate',
+        angle=10
+    ),
     dict(type='PackInputs'),
 ]
-
-train_dataloader = dict(
-    batch_size=train_bs,
-    num_workers=16, 
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',  pipeline=train_pipeline),
-)
-
+val_cfg = dict()
 val_dataloader = dict(
-    batch_size=8,  
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
-)
-
-test_dataloader = dict(
-    batch_size=4,  
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
-)
-
-test_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(type='Resize', scale=1028, backend='pillow', interpolation='bicubic'),
-    dict(type='PackInputs'),
-]
-
-default_hooks = dict(
-    checkpoint = dict(type='CheckpointHook', interval=1, max_keep_ckpts=1, save_best="auto"),
-    logger=dict(interval=50),
-)
-
-# optim_wrapper = dict(optimizer=dict(lr=lr))
-
+    batch_size=8,
+    collate_fn=dict(type='default_collate'),
+    dataset=dict(
+        ann_file='data_anns/MedFMC/endo/endo_10-shot_val_exp1.txt',
+        data_prefix='/scratch/medfm/medfm-challenge/data/MedFMC_train/endo/images',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                backend='pillow',
+                interpolation='bicubic',
+                scale=384,
+                type='Resize'),
+            dict(type='PackInputs'),
+        ],
+        type='Endoscopy'),
+    num_workers=2,
+    persistent_workers=True,
+    pin_memory=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
 val_evaluator = [
+    dict(type='Aggregate'),
     dict(type='AveragePrecision'),
-    dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
-    dict(type='MultiLabelMetric', average='micro'),  # overall mean
-    dict(type='AUC')
+    dict(type='AUC'),
 ]
-test_evaluator = val_evaluator
-
-default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=100, max_keep_ckpts=1, save_best="auto"),
-    logger=dict(interval=10),
-)
-
-
-visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
-
-optim_wrapper = dict(
-    optimizer=dict(
-        type='AdamW',
-        lr=lr,
-        weight_decay=0.05,
-        eps=1e-8,
-        betas=(0.9, 0.999)),
-    paramwise_cfg=dict(
-        norm_decay_mult=0.0,
-        bias_decay_mult=0.0,
-        flat_decay_mult=0.0,
-        custom_keys={
-            '.absolute_pos_embed': dict(decay_mult=0.0),
-            '.relative_position_bias_table': dict(decay_mult=0.0)
-        }),
-)
-
-param_scheduler = [
-    dict(type='MultiStepLR',
-         milestones=[50, 70, 85, 100, 110, 120, 125, 130, 135, 140, 145, 150, 155],
-         by_epoch=True,
-         gamma=0.5)
+vis_backends = [
+    dict(_scope_='mmpretrain', type='LocalVisBackend'),
 ]
-
-train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=200)
-
-
-
-
-
-#auto_scale_lr = dict(base_batch_size=1024, enable=False)
+visualizer = dict(
+    _scope_='mmpretrain',
+    type='Visualizer',
+    vis_backends=[
+        dict(type='TensorboardVisBackend'),
+    ])
+vpl = 5
+work_dir = '/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs8_lr0.0005_exp1_'
