@@ -63,10 +63,3 @@ train_evaluator = [
 ]
 val_evaluator = train_evaluator
 test_evaluator = train_evaluator
-
-default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
-    logger=dict(interval=10),
-)
-
-visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
