@@ -2,7 +2,6 @@ _base_ = [
     '../datasets/chest.py',
     '../schedules/adamw_inverted_cosine_lr.py',
     'mmpretrain::_base_/default_runtime.py',
-    #'mmpretrain::_base_/models/swin_transformer_v2/base_384.py',
     '../custom_imports.py',
 ]
 
