@@ -32,7 +32,7 @@ model = dict(
         window_size=[24, 24, 24, 12]),
     head=dict(
         in_channels=1024,
-        num_classes=4,
+        num_classes=19,
         type='MultiLabelLinearClsHead'),
     neck=dict(type='GlobalAveragePooling'),
     type='ImageClassifier')
