@@ -43,7 +43,6 @@ val_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
 
-
 test_dataloader = dict(
     batch_size=4,
     num_workers=2,
@@ -59,7 +58,7 @@ test_dataloader = dict(
 train_evaluator = [
     dict(type='Aggregate'),
     dict(type='AveragePrecision'),
-    dict(type='AUC'),
+    dict(type='AUC')
 ]
 val_evaluator = train_evaluator
 test_evaluator = train_evaluator
