@@ -121,7 +121,7 @@ test_pipeline = [
     dict(backend='pillow', interpolation='bicubic', scale=384, type='Resize'),
     dict(type='PackInputs'),
 ]
-train_bs = 8
+train_bs = 2
 train_cfg = dict(by_epoch=True, max_epochs=200, val_interval=25)
 train_pipeline = [
             dict(type='LoadImageFromFile'),
