@@ -13,7 +13,7 @@ optim_wrapper = dict(
 )
 
 param_scheduler = [
-    dict(by_epoch=True, end=1, start_factor=0.001, type='LinearLR'),
+    dict(by_epoch=True, end=1, start_factor=1, type='LinearLR'),
     dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
 ]
 
