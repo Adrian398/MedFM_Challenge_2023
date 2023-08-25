@@ -7,6 +7,7 @@ _base_ = [
 
 lr = 1e-6
 train_bs = 8
+val_bs = 32
 dataset = 'colon'
 model_name = 'swinv2'
 exp_num = 1
@@ -49,7 +50,7 @@ train_dataloader = dict(
 )
 
 val_dataloader = dict(
-    batch_size=128,
+    batch_size=val_bs,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
 )
 
