@@ -99,11 +99,7 @@ test_dataloader = dict(
         data_prefix='data/MedFMC_train/endo/images',
         pipeline=[
             dict(type='LoadImageFromFile'),
-            dict(
-                backend='pillow',
-                interpolation='bicubic',
-                scale=384,
-                type='Resize'),
+            dict(type='RandomResizedCrop', scale=384),
             dict(type='PackInputs'),
         ],
         type='Endoscopy'),
@@ -118,21 +114,21 @@ test_evaluator = [
 ]
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(backend='pillow', interpolation='bicubic', scale=384, type='Resize'),
+    dict(type='RandomResizedCrop', scale=384),
     dict(type='PackInputs'),
 ]
 train_bs = 8
 train_cfg = dict(by_epoch=True, max_epochs=200, val_interval=25)
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(backend='pillow', interpolation='bicubic', scale=384, type='Resize'),
-    dict(
-        type='RandomResizedCrop',
-        size=(384, 384),
-        scale=(0.05, 0.9),
-        ratio=(0.75, 1.33),
-        backend='pillow',
-        interpolation='bicubic'),
+    dict(type='RandomResizedCrop', scale=384),
+    # dict(
+    #     type='RandomResizedCrop',
+    #     size=384,
+    #     scale=(0.05, 0.9),
+    #     ratio=(0.75, 1.33),
+    #     backend='pillow',
+    #     interpolation='bicubic'),
     dict(
         type='Cutout',
         shape=(64, 64),
@@ -176,11 +172,7 @@ val_dataloader = dict(
         data_prefix='/scratch/medfm/medfm-challenge/data/MedFMC_train/endo/images',
         pipeline=[
             dict(type='LoadImageFromFile'),
-            dict(
-                backend='pillow',
-                interpolation='bicubic',
-                scale=384,
-                type='Resize'),
+            dict(type='RandomResizedCrop', scale=384),
             dict(type='PackInputs'),
         ],
         type='Endoscopy'),
