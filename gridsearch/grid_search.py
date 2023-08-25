@@ -16,7 +16,8 @@ BASE_PARAMS_CONFIG = {
     'dataset': ["chest", "colon", "endo"],
     'shot': [1, 5, 10],
     'exp_num': [1, 2, 3, 4, 5],
-    'lr': [1e-4, 1e-5, 1e-6]
+    'lr': [1e-6, 1e-7, 1e-8],
+    'train_bs': [2, 4, 6, 8]
 }
 
 

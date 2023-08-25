@@ -78,6 +78,8 @@ def parse_args():
                         help='Override the learning rate from the config file.')
     parser.add_argument('--exp_num', type=int, default=None,
                         help='Experiment number for data_anns')
+    parser.add_argument('--train_bs', type=int, default=None,
+                        help='Training batch size.')
     ########################################################################################
 
     args = parser.parse_args()
@@ -168,6 +170,12 @@ def merge_custom_args(cfg, args):
         cfg.optim_wrapper.optimizer.lr = args.lr
         cfg.run_name = re.sub(r'lr[0-9.]+', f'lr{args.lr}', cfg.run_name)
         cfg.work_dir = re.sub(r'lr[0-9.]+', f'lr{args.lr}', cfg.work_dir)
+
+    if args.train_bs is not None:
+        cfg.train_bs = args.train_bs
+        cfg.train_dataloader.batch_size = args.train_bs
+        cfg.run_name = re.sub(r'bs[0-9.]+', f'bs{args.train_bs}', cfg.run_name)
+        cfg.work_dir = re.sub(r'bs[0-9.]+', f'bs{args.train_bs}', cfg.work_dir)
 
     # add prefix to workdir and dataset
     if args.dir_prefix is not None:

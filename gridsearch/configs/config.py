@@ -1,9 +1,10 @@
 OVERRIDE = {
     'model': ["swinv2-b"],
-    'dataset': "endo",
-    'shot': [1],
-    'exp_num': [4,3],
-    'lr': 1e-4,
+    'dataset': "chest",
+    'shot': [10],
+    'exp_num': [2],
+    #'lr': [1e-8],  # Start learning rate that increases up to 1e-5 (until max_epochs) with cosine annealing
+    'train_bs': [8]
 }
 
 SETTINGS = {

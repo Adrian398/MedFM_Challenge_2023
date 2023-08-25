@@ -110,17 +110,8 @@ optimizer = dict(
 )
 
 param_scheduler = [
-    dict(
-        type='LinearLR',
-        start_factor=1e-3,
-        by_epoch=True,
-        end=1
-    ),
-    dict(
-        type='CosineAnnealingLR',
-        eta_min=1e-5,
-        by_epoch=True,
-        begin=1)
+    dict(by_epoch=True, end=1, start_factor=0.001, type='LinearLR'),
+    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
 ]
 
 train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=1000)

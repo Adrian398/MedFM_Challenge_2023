@@ -21,6 +21,7 @@
 - AUC-Klassenperformance überprüfen
   - besonders bei Chest
   - micro/macro?
+  - macro
 - Grid-Search
   - Ray-tune?
   - Welche Parameter?
@@ -30,3 +31,41 @@
     - Efficientnet
     - DenseNet
   - Einfluss von einzelnen Bildern auf das Training/Modell
+
+
+
+
+
+Wichtiges Metric ist Ergebnis auf dem Hold out Validation set und Test SET!!!
+Beste Modelle:
+  - Swinv2
+  - Swinvpt
+  - Clip
+
+Model:
+  - Model soup oder ensembel bauen
+  - VRAM swinv2 nur inference (Adrian) 
+  - swinv2 tiny vram (Marcel)
+  - grid search (Marcel) 
+  - Endo swinv2 mit 10 shot (Marcel)
+  - Endo swinv2 vs swinvpt 1shot (Marcel)
+  - Chest Swinv2 1-shot, 5-shot, 10-shot (Marcel)
+  - Wird Dataugmentation richtig durchgeführt? (Amar)
+
+Datensatz:
+  - Endo einfach die Patienten mit den meisten Bildern! 
+  - (leave one out vllt nocht implementieren(Adrian))
+  - alle Patienten durchgehen um die besten zu finden! Vor allem wichtig für Chest und Colon (Micha)
+
+Hyperparameter search:
+ - hauptsächlich swinv2
+ - Learning rate optimieren (1e-6)
+
+Metric pro Klasse optmieren: 
+ - compute AUC pro klassen (micha) Endo, chest
+ - mAP mirco oder macro? (micha)
+ - jede klasse einzeln anschauen 
+ - Bei Patienten mit wenig bei colon testen
+
+
+ 
