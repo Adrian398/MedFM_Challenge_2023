@@ -122,7 +122,7 @@ test_pipeline = [
     dict(type='PackInputs'),
 ]
 train_bs = 8
-train_cfg = dict(by_epoch=True, max_epochs=1000, val_interval=25)
+train_cfg = dict(by_epoch=True, max_epochs=200, val_interval=25)
 train_dataloader = dict(
     batch_size=train_bs,
     collate_fn=dict(type='default_collate'),
