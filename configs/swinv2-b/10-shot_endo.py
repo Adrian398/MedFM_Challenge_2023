@@ -124,13 +124,6 @@ test_pipeline = [
 train_bs = 8
 train_cfg = dict(by_epoch=True, max_epochs=200, val_interval=25)
 # train_pipeline = [
-#             dict(type='LoadImageFromFile'),
-#             dict(
-#                 type='Normalize',
-#                 mean=mean,
-#                 std=std,
-#                 to_rgb=False
-#             ),
 #             dict(
 #                 backend='pillow',
 #                 interpolation='bicubic',
@@ -171,6 +164,15 @@ train_pipeline = [
         mean=mean,
         std=std,
         to_rgb=False
+    ),
+    dict(
+        type='RandomResizedCrop',
+        scale=384,
+        backend='pillow',
+        interpolation='bicubic'),
+    dict(
+        type='Rotate',
+        angle=10
     ),
     dict(type='PackInputs'),
 ]
