@@ -61,11 +61,10 @@ Hyperparameter search:
  - hauptsächlich swinv2
  - Learning rate optimieren (1e-6)
 
-Metric pro Klasse optmieren: 
+Metric pro Klasse optimieren: 
  - compute AUC pro klassen (micha) Endo, chest
  - mAP mirco oder macro? (micha)
  - jede klasse einzeln anschauen 
  - Bei Patienten mit wenig bei colon testen
 
 
- 
