@@ -7,6 +7,7 @@ _base_ = [
 
 lr = 1e-6
 train_bs = 8
+val_bs = 32
 dataset = 'endo'
 model_name = 'swinv2'
 exp_num = 1
@@ -42,7 +43,7 @@ train_dataloader = dict(
 )
 
 val_dataloader = dict(
-    batch_size=32,
+    batch_size=val_bs,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
 )
 
@@ -57,6 +58,5 @@ default_hooks = dict(
 )
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
-
 
 train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=400)
