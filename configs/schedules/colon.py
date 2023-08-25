@@ -1,12 +1,7 @@
-# for batch in each gpu is 128, 8 gpu
-# lr = 5e-4 * 128 * 8 / 512 = 0.001
+optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=0.05, type='AdamW', weight_decay=0.01)
+
 optim_wrapper = dict(
-    optimizer=dict(
-        type='AdamW',
-        lr=5e-4 * 1024 / 512,
-        weight_decay=0.05,
-        eps=1e-8,
-        betas=(0.9, 0.999)),
+    optimizer=optimizer,
     paramwise_cfg=dict(
         norm_decay_mult=0.0,
         bias_decay_mult=0.0,
@@ -17,18 +12,9 @@ optim_wrapper = dict(
         }),
 )
 
-# learning policy
 param_scheduler = [
-    # warm up learning rate scheduler
-    dict(
-        type='LinearLR',
-        start_factor=1e-3,
-        by_epoch=True,
-        end=1,
-        # update by iter
-        convert_to_iter_based=True),
-    # main learning rate scheduler
-    dict(type='CosineAnnealingLR', eta_min=1e-5, by_epoch=True, begin=1)
+    dict(by_epoch=True, end=1, start_factor=0.001, type='LinearLR'),
+    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
 ]
 
 # train, val, test setting
@@ -36,6 +22,4 @@ train_cfg = dict(by_epoch=True, max_epochs=20, val_interval=1)
 val_cfg = dict()
 test_cfg = dict()
 
-# NOTE: `auto_scale_lr` is for automatically scaling LR,
-# based on the actual training batch size.
 auto_scale_lr = dict(base_batch_size=1024)
