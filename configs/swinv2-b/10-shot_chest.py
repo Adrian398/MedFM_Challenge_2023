@@ -121,7 +121,7 @@ test_pipeline = [
     dict(backend='pillow', interpolation='bicubic', scale=384, type='Resize'),
     dict(type='PackInputs'),
 ]
-train_bs = 2
+train_bs = 1
 train_cfg = dict(by_epoch=True, max_epochs=200, val_interval=25)
 train_pipeline = [
             dict(type='LoadImageFromFile'),
@@ -177,7 +177,7 @@ train_dataloader = dict(
     sampler=dict(shuffle=True, type='DefaultSampler'))
 val_cfg = dict()
 val_dataloader = dict(
-    batch_size=64,
+    batch_size=8,
     collate_fn=dict(type='default_collate'),
     dataset=dict(
         ann_file='data_anns/MedFMC/chest/chest_10-shot_val_exp1.txt',
