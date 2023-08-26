@@ -115,6 +115,7 @@ def gen_support_set_colon(df: pd.DataFrame, k_shot: int, strategy: str = 'random
     return: support set of colon dataset
     """
     support_set = []
+    df.insert(2,  'patient_id', df['img_id'].apply(lambda x: x[:-9]))
     df_full = df.copy(deep=True)
     labels = [0, 1]
 
@@ -123,31 +124,31 @@ def gen_support_set_colon(df: pd.DataFrame, k_shot: int, strategy: str = 'random
         df_cur = df[df['tumor'] == label]
 
         # get all study_ids of the filtered dataframe
-        slide_ids = df_cur['slide_id'].unique().tolist()
+        patient_ids = df_cur['patient_id'].unique().tolist()
 
-        # safety_check: if there are less slide_ds than k_shot, sample the missing ids from the full dataframe
-        if len(slide_ids) < k_shot:
+        # safety_check: if there are less patient_ids than k_shot, sample the missing ids from the full dataframe
+        if len(patient_ids) < k_shot:
             df_temp = df_full[df_full['tumor'] == label]
-            slide_ids = df_temp['slide_id'].unique().tolist()
+            patient_ids = df_temp['patient_id'].unique().tolist()
 
         if strategy == 'random':
             # randomly sample k_shot study_ids from the filtered dataframe
-            sample = random.sample(slide_ids, k_shot)
+            sample = random.sample(patient_ids, k_shot)
 
         elif strategy == 'max':
             # order the study_ids by the number of images they have
-            study_ids_ordered = df_cur.groupby('slide_id').count().sort_values(by='img_id', ascending=False).index.tolist()
+            study_ids_ordered = df_cur.groupby('patient_id').count().sort_values(by='img_id', ascending=False).index.tolist()
             # take the first k_shot study_ids from the ordered list
             sample = study_ids_ordered[:k_shot]
         else:
             raise ValueError(f'Invalid strategy {strategy}.')
 
         # filter out images where study_id is in the sampled study_ids
-        df_cur = df_cur[df_cur['slide_id'].isin(sample)]
+        df_cur = df_cur[df_cur['patient_id'].isin(sample)]
         # add the img_ids and labels of the sampled study_ids to the support set
         support_set += (df_cur[['img_id', 'tumor']].values.tolist())
         # remove the sampled study_ids from the dataframe to avoid duplicates
-        df = df[~df['slide_id'].isin(sample)]
+        df = df[~df['patient_id'].isin(sample)]
 
     return support_set
 
@@ -170,9 +171,9 @@ def generate_val_set(full_df, support_set, dataset_type):
 
 def get_annotations(dataset_type: str):
     annotations = {
-        'endo': 'data/MedFMC_train/endo/endo_train.csv',
-        'colon': 'data/MedFMC_train/colon/colon_train.csv',
-        'chest': 'data/MedFMC_train/chest/chest_train.csv'
+        'endo': os.path.join('data', 'MedFMC_train', 'endo', 'endo_train.csv'),
+        'colon': os.path.join('data', 'MedFMC_train', 'colon', 'colon_train.csv'),
+        'chest': os.path.join('data', 'MedFMC_train', 'chest', 'chest_train.csv')
     }
 
     return pd.read_csv(annotations[dataset_type])
@@ -180,9 +181,9 @@ def get_annotations(dataset_type: str):
 
 def write_dataset_to_txt_files(dataset, dataset_type, k_shot, exp_num, mode='train'):
     destinations = {
-        'endo': 'data_anns/MedFMC/endo_new',
-        'colon': 'data_anns/MedFMC/colon_new',
-        'chest': 'data_anns/MedFMC/chest_new'
+        'endo': os.path.join('data_anns', 'MedFMC', 'endo_new'),
+        'colon': os.path.join('data_anns', 'MedFMC', 'colon_new'),
+        'chest': os.path.join('data_anns', 'MedFMC', 'chest_new')
     }
 
     # simply writes the dataset given as a list of lists to a txt file
