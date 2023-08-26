@@ -40,4 +40,4 @@ torch.save(sd, model_soup_path)
 ##### create validation #####
 ### config file auch angeben und dann validation machen! 
 #runn tool/test.py with config file
-os.system('python tools/test.py "configs/swinv2-b/10-shot_endo.py" "' + model_soup_path + '"')
+os.system('python tools/test.py "configs/swinv2-b/10-shot_endo.py" "' + model_soup_path + '" --out "model_soup_results" --out_item "metrics"')
