@@ -34,5 +34,10 @@ model = "swin"
 if not os.path.exists(folder_path):
     # If the folder doesn't exist, create it
     os.makedirs(folder_path)
-torch.save(sd, folder_path + "/" + model + "_soup.pth")
+model_soup_path = folder_path + "/" + model + "_soup.pth"
+torch.save(sd, model_soup_path)
 
+##### create validation #####
+### config file auch angeben und dann validation machen! 
+#runn tool/test.py with config file
+os.system('python tools/test.py "/Users/stellaris/endo/server_code/medfm-challenge/configs/swinv2-b/10-shot_endo.py" "' + model_soup_path + '"')
