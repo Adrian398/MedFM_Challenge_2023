@@ -112,10 +112,10 @@ param_scheduler = []
                                               "work_dir = f'work_dirs/dataset_creation/")
 
         # Replace experiment number in config
-        target_config = re.sub(r'_exp(\d+)_', f'_exp{exp}_', target_config)
+        target_config = re.sub(r"(exp_num\s*=\s*)(\d+)", lambda m: m.group(1) + str(exp), target_config)
 
         # ==================================================================================
-
+        print(exp)
         new_config_name = f'{shot}-shot_{dataset_type}_exp{exp}.py'
         print(f"Created config:\t{new_config_name}")
         exp_configs.append(new_config_name)
