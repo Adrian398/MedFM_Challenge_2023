@@ -45,10 +45,10 @@ def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
-    for command in commands:
+    for cmd_str in commands:
         gpu = next(gpu_cycle)
 
-        file_name = extract_filename(command)
+        file_name = extract_filename(cmd_str)
         slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{cmd_str}" -o "{log_dir}/{file_name}_slurm-%j.out"'
 
         subprocess.run(slurm_cmd, shell=True)
