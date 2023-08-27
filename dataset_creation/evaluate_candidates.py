@@ -5,6 +5,12 @@ config_dir = os.path.join('configs', 'swinv2-b')
 candidate_data_dir = os.path.join('dataset_creation', 'candidate_data')
 exp_configs = []
 
+shot_2_max_epochs = {
+    1: 20,
+    5: 10,
+    10: 5
+}
+
 '''
     Notes on configs for dataset evaluation:
     
@@ -56,8 +62,8 @@ def create_config(train_f, val_f, config, shot, dataset_type):
         exp = extract_exp_number(train_f)
         src_config = f.read()
 
-        # This indentation is necessary, don't refactor
-        # Todo inject proper work_dir, to save results
+        max_epochs = shot_2_max_epochs[shot]
+
         config_injection = f'''
 train_dataloader = dict(
     batch_size=8,
@@ -76,7 +82,7 @@ default_hooks = dict(
 
 randomness = dict(seed=0)
 
-train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=20)
+train_cfg = dict(by_epoch=True, val_interval={max_epochs}, max_epochs={max_epochs})
         '''
 
         optimizer_content = '''
@@ -148,6 +154,7 @@ def generate_train_commands():
 
 
 if __name__ == "__main__":
+    # TODO: Clear configs before creating them to avoid bugs
     train_commands = generate_train_commands()
     command_str = "\n".join(train_commands)
     output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'train_commands.sh')
