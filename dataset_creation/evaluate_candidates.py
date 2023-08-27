@@ -37,8 +37,6 @@ exp_configs = []
     > param_scheduler = []
 '''
 
-config_list = os.listdir(config_dir)
-
 
 def extract_config_info(cfg):
     match = re.match(r'(\d+)-shot_([\w]+).py', cfg)
@@ -53,7 +51,7 @@ def extract_exp_number(filename):
     return int(match.group(1)) if match else 0
 
 
-def create_config(train_f, val_f):
+def create_config(train_f, val_f, config, shot, dataset_type):
     with open(os.path.join(config_dir, config), 'r') as f:
         exp = extract_exp_number(train_f)
         src_config = f.read()
@@ -120,27 +118,30 @@ param_scheduler = []
             config_file.write(target_config)
 
 
-for config in config_list:
-    shot, dataset_type = extract_config_info(config)
-    dataset_candidate_data_dir = os.path.join(candidate_data_dir, dataset_type)
+def generate_train_commands():
+    config_list = os.listdir(config_dir)
 
-    txt_files = os.listdir(dataset_candidate_data_dir)
-    txt_files_train = list(filter(lambda x: f'{shot}-shot_train' in x, txt_files))
-    txt_files_train.sort(key=extract_exp_number)
-    txt_files_val = list(filter(lambda x: f'{shot}-shot_val' in x, txt_files))
-    txt_files_val.sort(key=extract_exp_number)
+    for config in config_list:
+        shot, dataset_type = extract_config_info(config)
+        dataset_candidate_data_dir = os.path.join(candidate_data_dir, dataset_type)
 
-    for train_file, val_file in zip(txt_files_train, txt_files_val):
-        create_config(train_file, val_file)
+        txt_files = os.listdir(dataset_candidate_data_dir)
+        txt_files_train = list(filter(lambda x: f'{shot}-shot_train' in x, txt_files))
+        txt_files_train.sort(key=extract_exp_number)
+        txt_files_val = list(filter(lambda x: f'{shot}-shot_val' in x, txt_files))
+        txt_files_val.sort(key=extract_exp_number)
 
-# Create bash file for training runs
-bash_content = ""
-for config in exp_configs:
-    bash_content += f'python tools/train.py {os.path.join("configs", "dataset_creation", config)}\n'
-with open('evaluate.sh', 'w') as bash_file:
-    bash_file.write(bash_content)
-os.chmod("evaluate.sh", 0o755)
-print("Created ´evaluate.sh´ bash script in root directory")
+        for train_file, val_file in zip(txt_files_train, txt_files_val):
+            create_config(train_file, val_file, config=config, shot=shot, dataset_type=dataset_type)
 
-# Todo write separate script (reusing logic from prep_infer) to find best runs => use their exp_numbers to
-#  extract best datasets
+    return [f'python tools/train.py configs/dataset_creation/{exp_config}' for exp_config in exp_configs]
+
+
+if __name__ == "__main__":
+    train_commands = generate_train_commands()
+    command_str = "\n".join(train_commands)
+    output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'train_commands.sh')
+
+    with open(output_path, 'w') as file:
+        file.write(command_str)
+        print(f"Saving train commands to {output_path}")
