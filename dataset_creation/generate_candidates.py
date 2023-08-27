@@ -267,7 +267,7 @@ def clear_candidate_data():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="A script to clear candidate data and generate experiments.")
     parser.add_argument('--local', action='store_true', help="Flag to indicate if the script is run locally.")
-    parser.add_argument('--num_exp', action='store_true', help="The amount of experiments to generate.")
+    parser.add_argument('--num_exp', type=int, default=10, help="The amount of experiments to generate.")
     args = parser.parse_args()
 
     if args.local:
