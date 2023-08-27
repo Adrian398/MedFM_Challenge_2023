@@ -4,7 +4,7 @@ _base_ = [
     '../custom_imports.py',
 ]
 
-lr = 5e-3
+lr = 0.001
 train_bs = 8
 dataset = 'colon'
 model_name = 'swin'
@@ -113,7 +113,7 @@ optim_wrapper = dict(
             0.999,
         ),
         eps=1e-08,
-        lr=0.001,
+        lr=lr,
         type='AdamW',
         weight_decay=0.05),
     paramwise_cfg=dict(
@@ -124,15 +124,7 @@ optim_wrapper = dict(
         }),
         flat_decay_mult=0.0,
         norm_decay_mult=0.0))
-optimizer = dict(
-    betas=(
-        0.9,
-        0.999,
-    ),
-    eps=1e-08,
-    lr=0.0005,
-    type='AdamW',
-    weight_decay=0.01)
+
 param_scheduler = []
 
 val_cfg = dict()
