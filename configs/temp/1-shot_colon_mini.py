@@ -130,5 +130,7 @@ optimizer = dict(
 #     #     begin=1)
 # ]
 
+val_cfg = dict()
+test_cfg = dict()
 randomness = dict(seed=0)
 train_cfg = dict(by_epoch=True, val_interval=5, max_epochs=50)
