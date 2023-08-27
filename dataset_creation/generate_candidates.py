@@ -2,6 +2,8 @@ import os
 import random
 import pandas as pd
 
+data_prefix = '/scratch/medfm/medfm-challenge/'
+
 
 def gen_support_set_chest(df: pd.DataFrame, k_shot: int, strategy: str = "random"):
     """
@@ -171,7 +173,6 @@ def generate_val_set(full_df, support_set, dataset_type):
 
 
 def get_annotations(dataset_type: str):
-    data_prefix = '/scratch/medfm/medfm-challenge/'
     annotations = {
         'endo': os.path.join(data_prefix, 'data', 'MedFMC_train', 'endo', 'endo_train.csv'),
         'colon': os.path.join(data_prefix, 'data', 'MedFMC_train', 'colon', 'colon_train.csv'),
@@ -183,9 +184,9 @@ def get_annotations(dataset_type: str):
 
 def write_dataset_to_txt_files(dataset, dataset_type, k_shot, exp_num, mode='train'):
     destinations = {
-        'endo': os.path.join('dataset_creation', 'candidate_data', 'endo'),
-        'colon': os.path.join('dataset_creation', 'candidate_data', 'colon'),
-        'chest': os.path.join('dataset_creation', 'candidate_data', 'chest')
+        'endo': os.path.join(data_prefix, 'dataset_creation', 'candidate_data', 'endo'),
+        'colon': os.path.join(data_prefix, 'dataset_creation', 'candidate_data', 'colon'),
+        'chest': os.path.join(data_prefix, 'dataset_creation', 'candidate_data', 'chest')
     }
 
     # Make sure that the destination directory exists
@@ -257,9 +258,9 @@ def delete_all_files_from_directory(directory_path):
 
 
 def clear_candidate_data():
-    delete_all_files_from_directory(os.path.join('dataset_creation', 'candidate_data', 'endo'))
-    delete_all_files_from_directory(os.path.join('dataset_creation', 'candidate_data', 'chest'))
-    delete_all_files_from_directory(os.path.join('dataset_creation', 'candidate_data', 'colon'))
+    delete_all_files_from_directory(os.path.join(data_prefix, 'dataset_creation', 'candidate_data', 'endo'))
+    delete_all_files_from_directory(os.path.join(data_prefix, 'dataset_creation', 'candidate_data', 'chest'))
+    delete_all_files_from_directory(os.path.join(data_prefix, 'dataset_creation', 'candidate_data', 'colon'))
 
 
 if __name__ == "__main__":
