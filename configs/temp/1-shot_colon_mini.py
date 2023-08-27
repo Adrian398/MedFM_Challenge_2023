@@ -101,7 +101,7 @@ val_evaluator = [
 test_evaluator = val_evaluator
 
 default_hooks = dict(
-    # checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
+    checkpoint=dict(type='CheckpointHook', interval=25000, max_keep_ckpts=0, save_best="Aggregate", rule="greater"),
     logger=dict(interval=10),
 )
 
