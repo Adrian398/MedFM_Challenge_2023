@@ -65,7 +65,7 @@ train_dataloader = dict(
 )
 
 val_dataloader = dict(
-    batch_size=128,
+    batch_size=16,
     dataset=dict(ann_file='{candidate_data_dir}/{dataset_type}/{val_f}'),
 )
 
