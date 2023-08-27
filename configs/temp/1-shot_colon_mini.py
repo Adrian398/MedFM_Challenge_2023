@@ -116,12 +116,12 @@ optimizer = dict(
 )
 
 param_scheduler = [
-    # dict(
-    #     type='LinearLR',
-    #     start_factor=1e-3,
-    #     by_epoch=True,
-    #     end=1
-    # ),
+    dict(
+        type='LinearLR',
+        start_factor=1e-3,
+        by_epoch=True,
+        end=1
+    ),
     # dict(
     #     type='CosineAnnealingLR',
     #     eta_min=1e-5,
