@@ -40,13 +40,10 @@ exp_configs = []
 config_list = os.listdir(config_dir)
 
 
-def read_dataset_type_from_config(cfg):
-    if cfg.__contains__("colon"):
-        return "colon"
-    if cfg.__contains__("endo"):
-        return "endo"
-    if cfg.__contains__("chest"):
-        return "chest"
+def extract_config_info(cfg):
+    match = re.match(r'(\d+)-shot_([\w]+).py', cfg)
+    if match:
+        return int(match.group(1)), match.group(2)
     print(f"Aborting, wrong name for config {cfg}")
     exit()
 
@@ -66,12 +63,12 @@ def create_config(train_f, val_f):
         config_injection = f'''
 train_dataloader = dict(
     batch_size=8,
-    dataset=dict(ann_file='{candidate_data_dir}/{task}/{train_f}'),
+    dataset=dict(ann_file='{candidate_data_dir}/{dataset_type}/{train_f}'),
 )
 
 val_dataloader = dict(
     batch_size=128,
-    dataset=dict(ann_file='{candidate_data_dir}/{task}/{val_f}'),
+    dataset=dict(ann_file='{candidate_data_dir}/{dataset_type}/{val_f}'),
 )
 
 default_hooks = dict(
@@ -109,7 +106,8 @@ param_scheduler = []
         '''
         config_injection += additional_content
 
-        new_config_name = f'{shot}-shot_{task}_exp{exp}.py'
+        new_config_name = f'{shot}-shot_{dataset_type}_exp{exp}.py'
+        print(f"Created config:\t{new_config_name}")
         exp_configs.append(new_config_name)
 
         target_dir = os.path.join('configs', 'dataset_creation')
@@ -121,10 +119,8 @@ param_scheduler = []
 
 
 for config in config_list:
-    print(config)
-    shot = config[:1]
-    task = read_dataset_type_from_config(config)
-    dataset_candidate_data_dir = os.path.join(candidate_data_dir, task)
+    shot, dataset_type = extract_config_info(config)
+    dataset_candidate_data_dir = os.path.join(candidate_data_dir, dataset_type)
 
     txt_files = os.listdir(dataset_candidate_data_dir)
     txt_files_train = list(filter(lambda x: f'{shot}-shot_train' in x, txt_files))
