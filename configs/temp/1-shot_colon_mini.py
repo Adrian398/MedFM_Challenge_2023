@@ -108,14 +108,6 @@ default_hooks = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-optimizer = dict(
-    type='AdamW',
-    lr=lr,
-    weight_decay=0.01,
-    eps=1e-8,
-    betas=(0.9, 0.999),
-)
-
 # param_scheduler = [
 #     dict(
 #         type='LinearLR',
@@ -130,6 +122,15 @@ optimizer = dict(
 #     #     begin=1)
 # ]
 
+optimizer = dict(
+    betas=(
+        0.9,
+        0.999,
+    ), eps=1e-08, lr=0.05, type='AdamW', weight_decay=0.01)
+param_scheduler = [
+    dict(by_epoch=True, end=1, start_factor=0.001, type='LinearLR'),
+    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
+]
 val_cfg = dict()
 test_cfg = dict()
 randomness = dict(seed=0)
