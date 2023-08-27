@@ -9,7 +9,7 @@ lr = 5e-4
 train_bs = 8
 dataset = 'colon'
 model_name = 'swin'
-exp_num = 1
+exp_num = 2
 nshot = 1
 
 run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
@@ -101,7 +101,7 @@ val_evaluator = [
 test_evaluator = val_evaluator
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
+    # checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
     logger=dict(interval=10),
 )
 
