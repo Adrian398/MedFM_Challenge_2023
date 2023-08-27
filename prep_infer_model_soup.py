@@ -1,6 +1,11 @@
 import torch 
 import os
 
+import mmengine
+from mmengine.config import Config, ConfigDict, DictAction
+from mmengine.evaluator import DumpResults
+from mmengine.runner import Runner
+
 def get_sd(state_dicts, alphal):
   sd = {}  # Initialize an empty dictionary
   for k in state_dicts[0]['state_dict'].keys():
@@ -40,4 +45,10 @@ torch.save(sd, model_soup_path)
 ##### create validation #####
 ### config file auch angeben und dann validation machen! 
 #runn tool/test.py with config file
-os.system('python tools/test.py "configs/swinv2-b/10-shot_endo.py" "' + model_soup_path + '" --out "model_soup_results/out.pkl" --out-item "metrics"')
+cfg = Config.fromfile("configs/swinv2-b/10-shot_endo.py")
+cfg.load_from = model_soup_path
+runner = Runner.from_cfg(cfg)
+metrics = runner.test()
+print(metrics)
+
+#os.system('python tools/test.py "configs/swinv2-b/10-shot_endo.py" "' + model_soup_path + '" --out "model_soup_results/out.pkl" --out-item "metrics"')
