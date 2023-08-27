@@ -138,6 +138,7 @@ for config in exp_configs:
 with open('evaluate.sh', 'w') as bash_file:
     bash_file.write(bash_content)
 os.chmod("evaluate.sh", 0o755)
+print("Created ´evaluate.sh´ bash script in root directory")
 
 # Todo write separate script (reusing logic from prep_infer) to find best runs => use their exp_numbers to
 #  extract best datasets
