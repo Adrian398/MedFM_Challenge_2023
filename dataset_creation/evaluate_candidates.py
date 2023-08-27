@@ -1,7 +1,9 @@
 import os
 import re
+from generate_candidates import delete_all_files_from_directory
 
-config_dir = os.path.join('configs', 'swinv2-b')
+config_source_dir = os.path.join('configs', 'swinv2-b')
+config_target_dir = os.path.join('configs', 'dataset_creation')
 candidate_data_dir = os.path.join('dataset_creation', 'candidate_data')
 exp_configs = []
 
@@ -58,7 +60,7 @@ def extract_exp_number(filename):
 
 
 def create_config(train_f, val_f, config, shot, dataset_type):
-    with open(os.path.join(config_dir, config), 'r') as f:
+    with open(os.path.join(config_source_dir, config), 'r') as f:
         exp = extract_exp_number(train_f)
         src_config = f.read()
 
@@ -135,7 +137,11 @@ param_scheduler = []
 
 
 def generate_train_commands():
-    config_list = os.listdir(config_dir)
+    delete_all_files_from_directory(os.path.join(config_target_dir, 'chest'))
+    delete_all_files_from_directory(os.path.join(config_target_dir, 'colon'))
+    delete_all_files_from_directory(os.path.join(config_target_dir, 'endo'))
+
+    config_list = os.listdir(config_source_dir)
 
     for config in config_list:
         shot, dataset_type = extract_config_info(config)
@@ -154,7 +160,6 @@ def generate_train_commands():
 
 
 if __name__ == "__main__":
-    # TODO: Clear configs before creating them to avoid bugs
     train_commands = generate_train_commands()
     command_str = "\n".join(train_commands)
     output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'train_commands.sh')
