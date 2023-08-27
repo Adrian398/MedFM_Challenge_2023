@@ -115,7 +115,7 @@ param_scheduler = []
         target_config = re.sub(r"(exp_num\s*=\s*)(\d+)", lambda m: m.group(1) + str(exp), target_config)
 
         # ==================================================================================
-        print(exp)
+
         new_config_name = f'{shot}-shot_{dataset_type}_exp{exp}.py'
         print(f"Created config:\t{new_config_name}")
         exp_configs.append(new_config_name)
