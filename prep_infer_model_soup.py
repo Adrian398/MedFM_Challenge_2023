@@ -37,7 +37,7 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
 #checkpoint_filenames = ["/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs4_lr0.0005_exp1_20230821-004750/best_multi-label_mAP_epoch_11.pth", "/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs8_lr0.0005_exp1_20230821-172020/best_multi-label_mAP_epoch_100.pth"]
 
 print(checkpoint_filenames)
-'''
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 state_dicts = []
 
@@ -45,21 +45,21 @@ for f in checkpoint_filenames:
     print(f'Loading {f}')
     state_dicts.append(torch.load(f, map_location=device))
 
-print(type(state_dicts[0]))
+# print(type(state_dicts[0]))
+
+########stadard soup#########
+# alphal = [1 / len(state_dicts) for i in range(len(state_dicts))]
+# sd = get_sd(state_dicts, alphal)
+
+# folder_path =  checkpoint_filenames[0].split("-shot")[0] + "-shot/modelsoup"
+# model = "swin"
 
 
-alphal = [1 / len(state_dicts) for i in range(len(state_dicts))]
-sd = get_sd(state_dicts, alphal)
-
-folder_path =  checkpoint_filenames[0].split("-shot")[0] + "-shot/modelsoup"
-model = "swin"
-
-
-if not os.path.exists(folder_path):
-    # If the folder doesn't exist, create it
-    os.makedirs(folder_path)
-model_soup_path = folder_path + "/" + model + "_soup.pth"
-torch.save(sd, model_soup_path)
+# if not os.path.exists(folder_path):
+#     # If the folder doesn't exist, create it
+#     os.makedirs(folder_path)
+# model_soup_path = folder_path + "/" + model + "_soup.pth"
+# torch.save(sd, model_soup_path)
 
 ##### create validation #####
 ### config file auch angeben und dann validation machen! 
@@ -91,28 +91,28 @@ print(val_results)
 ranked_candidates = [i for i in range(len(state_dicts))]
 ranked_candidates.sort(key=lambda x: -val_results[x])
 
+print(ranked_candidates)
+print(val_results)
 
 
-
-current_best = val_results[ranked_candidates[0]]
-best_ingredients = ranked_candidates[:1]
-for i in range(1, len(state_dicts)):
-  # add current index to the ingredients
-  ingredient_indices = best_ingredients \
-    + [ranked_candidates[i]]
-  alphal = [0 for i in range(len(state_dicts))]
-  for j in ingredient_indices:
-    alphal[j] = 1 / len(ingredient_indices)
+# current_best = val_results[ranked_candidates[0]]
+# best_ingredients = ranked_candidates[:1]
+# for i in range(1, len(state_dicts)):
+#   # add current index to the ingredients
+#   ingredient_indices = best_ingredients \
+#     + [ranked_candidates[i]]
+#   alphal = [0 for i in range(len(state_dicts))]
+#   for j in ingredient_indices:
+#     alphal[j] = 1 / len(ingredient_indices)
   
-  # benchmark and conditionally append
-  model = get_model(state_dicts, alphal)
-  current = validate(model)
-  print(f'Models {ingredient_indices} got {current*100}% on validation.')
-  if current > current_best:
-    current_best = current
-    best_ingredients = ingredient_indices
+#   # benchmark and conditionally append
+#   model = get_model(state_dicts, alphal)
+#   current = validate(model)
+#   print(f'Models {ingredient_indices} got {current*100}% on validation.')
+#   if current > current_best:
+#     current_best = current
+#     best_ingredients = ingredient_indices
 
 
 
 #os.system('python tools/test.py "configs/swinv2-b/10-shot_endo.py" "' + model_soup_path + '" --out "model_soup_results/out.pkl" --out-item "metrics"')
-'''
