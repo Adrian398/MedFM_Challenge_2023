@@ -130,4 +130,4 @@ param_scheduler = [
 ]
 
 randomness = dict(seed=0)
-train_cfg = dict(by_epoch=True, val_interval=1, max_epochs=20)
+train_cfg = dict(by_epoch=True, val_interval=5, max_epochs=50)
