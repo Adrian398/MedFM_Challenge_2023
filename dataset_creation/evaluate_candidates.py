@@ -103,8 +103,18 @@ paramwise_cfg=dict(
 param_scheduler = []
         '''
         target_config = src_config + config_injection + optimizer_content
+
+        # ==================================================================================
+        # =========================       Config Adjustments       =========================
+
+        # Replace work_dir in config
         target_config = target_config.replace("work_dir = f'work_dirs/",
                                               "work_dir = f'work_dirs/dataset_creation/")
+
+        # Replace experiment number in config
+        target_config = re.sub(r'_exp(\d+)_', f'_exp{exp}_', target_config)
+
+        # ==================================================================================
 
         new_config_name = f'{shot}-shot_{dataset_type}_exp{exp}.py'
         print(f"Created config:\t{new_config_name}")
