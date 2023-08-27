@@ -1,7 +1,7 @@
 #!/bin/bash
 
-declare -a TASKS=("colon" "lung" "liver")  # You can add or remove tasks from this array
-declare -a SHOTS=("1" "5" "10")            # Similarly, you can modify this array for shot values
+declare -a TASKS=("colon" "endo" "chest")
+declare -a SHOTS=("1" "5" "10")
 
 # If arguments are provided, only process for the specific task and shot
 if [ "$#" -eq 2 ]; then
