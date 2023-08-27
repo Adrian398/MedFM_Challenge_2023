@@ -185,9 +185,9 @@ def get_annotations(dataset_type: str):
 
 def write_dataset_to_txt_files(dataset, dataset_type, k_shot, exp_num, mode='train'):
     destinations = {
-        'endo': os.path.join(data_prefix, 'dataset_creation', 'candidate_data', 'endo'),
-        'colon': os.path.join(data_prefix, 'dataset_creation', 'candidate_data', 'colon'),
-        'chest': os.path.join(data_prefix, 'dataset_creation', 'candidate_data', 'chest')
+        'endo': os.path.join('dataset_creation', 'candidate_data', 'endo'),
+        'colon': os.path.join('dataset_creation', 'candidate_data', 'colon'),
+        'chest': os.path.join('dataset_creation', 'candidate_data', 'chest')
     }
 
     # Make sure that the destination directory exists
@@ -259,9 +259,9 @@ def delete_all_files_from_directory(directory_path):
 
 
 def clear_candidate_data():
-    delete_all_files_from_directory(os.path.join(data_prefix, 'dataset_creation', 'candidate_data', 'endo'))
-    delete_all_files_from_directory(os.path.join(data_prefix, 'dataset_creation', 'candidate_data', 'chest'))
-    delete_all_files_from_directory(os.path.join(data_prefix, 'dataset_creation', 'candidate_data', 'colon'))
+    delete_all_files_from_directory(os.path.join('dataset_creation', 'candidate_data', 'endo'))
+    delete_all_files_from_directory(os.path.join('dataset_creation', 'candidate_data', 'chest'))
+    delete_all_files_from_directory(os.path.join('dataset_creation', 'candidate_data', 'colon'))
 
 
 if __name__ == "__main__":
