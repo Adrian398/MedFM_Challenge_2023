@@ -46,8 +46,6 @@ def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
         os.makedirs(log_dir)
 
     for command in commands:
-        cmd_str = " ".join(command)
-
         gpu = next(gpu_cycle)
 
         file_name = extract_filename(command)
