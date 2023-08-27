@@ -267,6 +267,7 @@ def clear_candidate_data():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="A script to clear candidate data and generate experiments.")
     parser.add_argument('--local', action='store_true', help="Flag to indicate if the script is run locally.")
+    parser.add_argument('--num_exp', action='store_true', help="The amount of experiments to generate.")
     args = parser.parse_args()
 
     if args.local:
@@ -274,5 +275,10 @@ if __name__ == "__main__":
     else:
         data_prefix = '/scratch/medfm/medfm-challenge/'
 
+    if args.num_exp:
+        num_exp = args.num_exp
+    else:
+        num_exp = 10
+
     clear_candidate_data()
-    generate_experiments_random(num_experiments=1)
+    generate_experiments_random(num_experiments=num_exp)
