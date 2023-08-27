@@ -4,7 +4,7 @@ _base_ = [
     '../custom_imports.py',
 ]
 
-lr = 0.0015
+lr = 0.002
 train_bs = 8
 dataset = 'colon'
 model_name = 'swin'
