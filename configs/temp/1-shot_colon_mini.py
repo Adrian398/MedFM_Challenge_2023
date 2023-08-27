@@ -1,6 +1,5 @@
 _base_ = [
     '../datasets/colon.py',
-    '../swin_schedule.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
 ]
@@ -67,6 +66,8 @@ train_dataloader = dict(
     )
 )
 
+optim_wrapper = dict(optimizer=dict(lr=lr))
+
 val_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='Resize', scale=384, backend='pillow', interpolation='bicubic'),
@@ -115,19 +116,19 @@ optimizer = dict(
     betas=(0.9, 0.999),
 )
 
-param_scheduler = [
-    dict(
-        type='LinearLR',
-        start_factor=1e-3,
-        by_epoch=True,
-        end=1
-    ),
-    # dict(
-    #     type='CosineAnnealingLR',
-    #     eta_min=1e-5,
-    #     by_epoch=True,
-    #     begin=1)
-]
+# param_scheduler = [
+#     dict(
+#         type='LinearLR',
+#         start_factor=1e-3,
+#         by_epoch=True,
+#         end=1
+#     ),
+#     # dict(
+#     #     type='CosineAnnealingLR',
+#     #     eta_min=1e-5,
+#     #     by_epoch=True,
+#     #     begin=1)
+# ]
 
 randomness = dict(seed=0)
 train_cfg = dict(by_epoch=True, val_interval=5, max_epochs=50)
