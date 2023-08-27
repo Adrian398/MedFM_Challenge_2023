@@ -115,7 +115,7 @@ param_scheduler = []
 
         # Replace work_dir in config
         target_config = target_config.replace("work_dir = f'work_dirs/",
-                                              "work_dir = f'work_dirs/dataset_creation/")
+                                              "work_dir = f'dataset_creation/work_dirs/")
 
         # Replace experiment number in config
         target_config = re.sub(r"(exp_num\s*=\s*)(\d+)", lambda m: m.group(1) + str(exp), target_config)
