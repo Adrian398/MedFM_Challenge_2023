@@ -1,7 +1,7 @@
 import os
 import re
 
-config_dir = os.path.join('configs', 'swin-b_vpt')
+config_dir = os.path.join('configs', 'swinv2-b')
 candidate_data_dir = os.path.join('dataset_creation', 'candidate_data')
 exp_configs = []
 
@@ -40,7 +40,7 @@ exp_configs = []
 config_list = os.listdir(config_dir)
 
 
-def task_from_config(cfg):
+def read_dataset_type_from_config(cfg):
     if cfg.__contains__("colon"):
         return "colon"
     if cfg.__contains__("endo"):
@@ -51,14 +51,14 @@ def task_from_config(cfg):
     exit()
 
 
-def extract_number(filename):
+def extract_exp_number(filename):
     match = re.search(r'(\d+)\.txt$', filename)
     return int(match.group(1)) if match else 0
 
 
 def create_config(train_f, val_f):
     with open(os.path.join(config_dir, config), 'r') as f:
-        exp = extract_number(train_f)
+        exp = extract_exp_number(train_f)
         config_content = f.read()
 
         # This indentation is necessary, don't refactor
@@ -86,21 +86,26 @@ train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=20)
 
         new_config_name = f'{shot}-shot_{task}_exp{exp}.py'
         exp_configs.append(new_config_name)
-        with open(os.path.join('configs', 'dataset_creation', new_config_name), 'w') as cf:
-            cf.write(config_content + config_injection)
+
+        target_dir = os.path.join('configs', 'dataset_creation')
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
+
+        with open(os.path.join(target_dir, new_config_name), 'w') as config_file:
+            config_file.write(config_content + config_injection)
 
 
-for config in config_list[:1]:
+for config in config_list:
     print(config)
     shot = config[:1]
-    task = task_from_config(config)
-    task_candidate_data_dir = os.path.join(candidate_data_dir, task)
+    task = read_dataset_type_from_config(config)
+    dataset_candidate_data_dir = os.path.join(candidate_data_dir, task)
 
-    txt_files = os.listdir(task_candidate_data_dir)
+    txt_files = os.listdir(dataset_candidate_data_dir)
     txt_files_train = list(filter(lambda x: f'{shot}-shot_train' in x, txt_files))
-    txt_files_train.sort(key=extract_number)
+    txt_files_train.sort(key=extract_exp_number)
     txt_files_val = list(filter(lambda x: f'{shot}-shot_val' in x, txt_files))
-    txt_files_val.sort(key=extract_number)
+    txt_files_val.sort(key=extract_exp_number)
 
     for train_file, val_file in zip(txt_files_train, txt_files_val):
         create_config(train_file, val_file)
