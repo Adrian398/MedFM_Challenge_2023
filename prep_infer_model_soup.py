@@ -45,10 +45,54 @@ torch.save(sd, model_soup_path)
 ##### create validation #####
 ### config file auch angeben und dann validation machen! 
 #runn tool/test.py with config file
-cfg = Config.fromfile("configs/swinv2-b/10-shot_endo.py")
-cfg.load_from = model_soup_path
-runner = Runner.from_cfg(cfg)
-metrics = runner.test()
-print(metrics)
+#cfg = Config.fromfile("configs/swinv2-b/10-shot_endo.py")
+#cfg.load_from = model_soup_path
+#runner = Runner.from_cfg(cfg)
+#metrics = runner.test()
+#print(metrics)
+
+
+
+
+####create greedy soup
+val_results = []
+#create val results
+
+for filename in checkpoint_filenames:
+    cfg = Config.fromfile("configs/swinv2-b/10-shot_endo.py")
+    cfg.load_from = filename
+    runner = Runner.from_cfg(cfg)
+    metrics = runner.test()
+    print(metrics)
+    val_results.append(metrics)
+
+print(val_results)
+'''
+ranked_candidates = [i for i in range(len(state_dicts))]
+ranked_candidates.sort(key=lambda x: -val_results[x])
+
+
+
+
+current_best = val_results[ranked_candidates[0]]
+best_ingredients = ranked_candidates[:1]
+for i in range(1, len(state_dicts)):
+  # add current index to the ingredients
+  ingredient_indices = best_ingredients \
+    + [ranked_candidates[i]]
+  alphal = [0 for i in range(len(state_dicts))]
+  for j in ingredient_indices:
+    alphal[j] = 1 / len(ingredient_indices)
+  
+  # benchmark and conditionally append
+  model = get_model(state_dicts, alphal)
+  current = validate(model)
+  print(f'Models {ingredient_indices} got {current*100}% on validation.')
+  if current > current_best:
+    current_best = current
+    best_ingredients = ingredient_indices
+
+
 
 #os.system('python tools/test.py "configs/swinv2-b/10-shot_endo.py" "' + model_soup_path + '" --out "model_soup_results/out.pkl" --out-item "metrics"')
+'''
