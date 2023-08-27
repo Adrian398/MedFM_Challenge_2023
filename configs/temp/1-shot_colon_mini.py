@@ -5,7 +5,7 @@ _base_ = [
     '../custom_imports.py',
 ]
 
-lr = 5e-4
+lr = 5e-3
 train_bs = 8
 dataset = 'colon'
 model_name = 'swin'
