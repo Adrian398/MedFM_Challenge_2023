@@ -56,7 +56,7 @@ def extract_exp_number(filename):
 def create_config(train_f, val_f):
     with open(os.path.join(config_dir, config), 'r') as f:
         exp = extract_exp_number(train_f)
-        config_content = f.read()
+        src_config = f.read()
 
         # This indentation is necessary, don't refactor
         # Todo inject proper work_dir, to save results
@@ -81,7 +81,7 @@ randomness = dict(seed=0)
 train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=20)
         '''
 
-        additional_content = '''
+        optimizer_content = '''
 lr = 0.002
 optim_wrapper = dict(
 optimizer=dict(
@@ -104,7 +104,9 @@ paramwise_cfg=dict(
 
 param_scheduler = []
         '''
-        config_injection += additional_content
+        target_config = src_config + config_injection + optimizer_content
+        target_config = target_config.replace("work_dir = f'work_dirs/",
+                                              "work_dir = f'work_dirs/dataset_creation/")
 
         new_config_name = f'{shot}-shot_{dataset_type}_exp{exp}.py'
         print(f"Created config:\t{new_config_name}")
@@ -115,7 +117,7 @@ param_scheduler = []
             os.makedirs(target_dir)
 
         with open(os.path.join(target_dir, new_config_name), 'w') as config_file:
-            config_file.write(config_content + config_injection)
+            config_file.write(target_config)
 
 
 for config in config_list:
