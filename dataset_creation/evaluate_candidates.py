@@ -85,27 +85,27 @@ train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=20)
         '''
 
         additional_content = '''
-        lr = 0.002
-        optim_wrapper = dict(
-        optimizer=dict(
-            betas=(
-                0.9,
-                0.999,
-            ),
-            eps=1e-08,
-            lr=lr,
-            type='AdamW',
-            weight_decay=0.05),
-        paramwise_cfg=dict(
-            bias_decay_mult=0.0,
-            custom_keys=dict({
-                '.absolute_pos_embed': dict(decay_mult=0.0),
-                '.relative_position_bias_table': dict(decay_mult=0.0)
-            }),
-            flat_decay_mult=0.0,
-            norm_decay_mult=0.0))
+lr = 0.002
+optim_wrapper = dict(
+optimizer=dict(
+    betas=(
+        0.9,
+        0.999,
+    ),
+    eps=1e-08,
+    lr=lr,
+    type='AdamW',
+    weight_decay=0.05),
+paramwise_cfg=dict(
+    bias_decay_mult=0.0,
+    custom_keys=dict({
+        '.absolute_pos_embed': dict(decay_mult=0.0),
+        '.relative_position_bias_table': dict(decay_mult=0.0)
+    }),
+    flat_decay_mult=0.0,
+    norm_decay_mult=0.0))
 
-        param_scheduler = []
+param_scheduler = []
         '''
         config_injection += additional_content
 
