@@ -1,3 +1,4 @@
+import argparse
 import os
 import random
 import pandas as pd
@@ -264,5 +265,14 @@ def clear_candidate_data():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="A script to clear candidate data and generate experiments.")
+    parser.add_argument('--local', action='store_true', help="Flag to indicate if the script is run locally.")
+    args = parser.parse_args()
+
+    if args.local:
+        data_prefix = ''
+    else:
+        data_prefix = '/scratch/medfm/medfm-challenge/'
+
     clear_candidate_data()
     generate_experiments_random(num_experiments=10)
