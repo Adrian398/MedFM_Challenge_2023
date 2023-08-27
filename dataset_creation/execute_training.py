@@ -34,7 +34,7 @@ def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
     elif gpu == 'ab':
         gpus = ['rtx3090']
     elif gpu is None:
-        gpus = ['rtx4090', 'rtx3090', 'rtx3090']
+        gpus = ['rtx4090', 'rtx3090', 'rtx4090', 'rtx3090']
     else:
         raise ValueError(f'Invalid gpu type {gpu}.')
 
@@ -49,7 +49,7 @@ def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
         gpu = next(gpu_cycle)
 
         file_name = extract_filename(cmd_str)
-        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{cmd_str}" -o "{log_dir}/{file_name}_slurm-%j.out"'
+        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{cmd_str}" -o "{log_dir}/slurm-%j_{file_name}.out"'
 
         subprocess.run(slurm_cmd, shell=True)
 
