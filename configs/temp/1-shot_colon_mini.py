@@ -66,8 +66,6 @@ train_dataloader = dict(
     )
 )
 
-optim_wrapper = dict(optimizer=dict(lr=lr))
-
 val_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='Resize', scale=384, backend='pillow', interpolation='bicubic'),
