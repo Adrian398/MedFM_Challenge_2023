@@ -30,7 +30,7 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
         # For each file in the directory
         for filename in filenames:
             # Check if the file ends with ".pth"
-            if filename.endswith(".pth"):
+            if filename.endswith(".pth") and "best" in filename:
                 # Append the full path of the file to the list
                 checkpoint_filenames.append(os.path.join(start_dir, dirpath, filename))
 
