@@ -275,4 +275,4 @@ if __name__ == "__main__":
         data_prefix = '/scratch/medfm/medfm-challenge/'
 
     clear_candidate_data()
-    generate_experiments_random(num_experiments=10)
+    generate_experiments_random(num_experiments=1)
