@@ -137,7 +137,7 @@ for task in tasks:
             keep_files.append(f"{task}_{shot}-shot_train_exp{exp_num}.txt")
             keep_files.append(f"{task}_{shot}-shot_val_exp{exp_num}.txt")
 
-    target_task_dir = os.path.join(base_path_target, task)
+    target_task_dir = os.path.join(base_path_target, f"{task}_tuned")
     base_task_dir = os.path.join(base_path_source, task)
 
     if os.path.isdir(target_task_dir):
