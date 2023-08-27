@@ -106,12 +106,12 @@ def gen_support_set_endo(df: pd.DataFrame, k_shot: int, strategy: str = 'random'
 
 def gen_support_set_colon(df: pd.DataFrame, k_shot: int, strategy: str = 'random'):
     """
-    generate support set for endo dataset with k_shot images per class while making sure there are no duplicates
-    df: dataframe of endo dataset
+    generate support set for colon dataset with k_shot images per class while making sure there are no duplicates
+    df: dataframe of colon dataset
     k_shot: number of images per class
     strategy: 'random' or 'max':
-    if 'random, randomly sample k_shot images per class;
-    if 'max', sample k_shot patients which have the most images;
+        if 'random, randomly sample k_shot images per class;
+        if 'max', sample k_shot patients which have the most images;
     return: support set of colon dataset
     """
     support_set = []
