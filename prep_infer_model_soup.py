@@ -1,6 +1,5 @@
 import torch 
 import os
-
 import mmengine
 from mmengine.config import Config, ConfigDict, DictAction
 from mmengine.evaluator import DumpResults
@@ -17,8 +16,28 @@ def get_sd(state_dicts, alphal):
           sd[k] = sd[k] + state_dicts[i]['state_dict'][k].clone() * alphal[i]
   return sd
 
-checkpoint_filenames = ["/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs4_lr0.0005_exp1_20230821-004750/best_multi-label_mAP_epoch_11.pth", "/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs8_lr0.0005_exp1_20230821-172020/best_multi-label_mAP_epoch_100.pth"]
 
+
+checkpoint_filenames = []
+
+
+start_dir = "/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot"
+
+# Walk through the base directory and its subdirectories
+for dirpath, dirnames, filenames in os.walk(start_dir):
+    # Check if the directory starts with "swin_bs"
+    if os.path.basename(dirpath).startswith("swin_bs"):
+        # For each file in the directory
+        for filename in filenames:
+            # Check if the file ends with ".pth"
+            if filename.endswith(".pth"):
+                # Append the full path of the file to the list
+                checkpoint_filenames.append(os.path.join(start_dir, dirpath, filename))
+
+#checkpoint_filenames = ["/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs4_lr0.0005_exp1_20230821-004750/best_multi-label_mAP_epoch_11.pth", "/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs8_lr0.0005_exp1_20230821-172020/best_multi-label_mAP_epoch_100.pth"]
+
+print(checkpoint_filenames)
+'''
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 state_dicts = []
 
@@ -67,6 +86,7 @@ for filename in checkpoint_filenames:
     val_results.append(metrics)
 
 print(val_results)
+'''
 '''
 ranked_candidates = [i for i in range(len(state_dicts))]
 ranked_candidates.sort(key=lambda x: -val_results[x])
