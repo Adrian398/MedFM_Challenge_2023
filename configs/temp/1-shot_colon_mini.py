@@ -1,7 +1,6 @@
 _base_ = [
     '../datasets/colon.py',
     'mmpretrain::_base_/default_runtime.py',
-    '../schedules/adamw_inverted_cosine_lr.py',
     '../custom_imports.py',
 ]
 
@@ -107,19 +106,34 @@ default_hooks = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-# param_scheduler = [
-#     dict(
-#         type='LinearLR',
-#         start_factor=1e-3,
-#         by_epoch=True,
-#         end=1
-#     ),
-#     # dict(
-#     #     type='CosineAnnealingLR',
-#     #     eta_min=1e-5,
-#     #     by_epoch=True,
-#     #     begin=1)
-# ]
+optim_wrapper = dict(
+    optimizer=dict(
+        betas=(
+            0.9,
+            0.999,
+        ),
+        eps=1e-08,
+        lr=0.001,
+        type='AdamW',
+        weight_decay=0.05),
+    paramwise_cfg=dict(
+        bias_decay_mult=0.0,
+        custom_keys=dict({
+            '.absolute_pos_embed': dict(decay_mult=0.0),
+            '.relative_position_bias_table': dict(decay_mult=0.0)
+        }),
+        flat_decay_mult=0.0,
+        norm_decay_mult=0.0))
+optimizer = dict(
+    betas=(
+        0.9,
+        0.999,
+    ),
+    eps=1e-08,
+    lr=0.0005,
+    type='AdamW',
+    weight_decay=0.01)
+param_scheduler = []
 
 val_cfg = dict()
 test_cfg = dict()
