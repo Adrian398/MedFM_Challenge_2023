@@ -171,10 +171,11 @@ def generate_val_set(full_df, support_set, dataset_type):
 
 
 def get_annotations(dataset_type: str):
+    data_prefix = '/scratch/medfm/medfm-challenge/'
     annotations = {
-        'endo': os.path.join('data', 'MedFMC_train', 'endo', 'endo_train.csv'),
-        'colon': os.path.join('data', 'MedFMC_train', 'colon', 'colon_train.csv'),
-        'chest': os.path.join('data', 'MedFMC_train', 'chest', 'chest_train.csv')
+        'endo': os.path.join(data_prefix, 'data', 'MedFMC_train', 'endo', 'endo_train.csv'),
+        'colon': os.path.join(data_prefix, 'data', 'MedFMC_train', 'colon', 'colon_train.csv'),
+        'chest': os.path.join(data_prefix, 'data', 'MedFMC_train', 'chest', 'chest_train.csv')
     }
 
     return pd.read_csv(annotations[dataset_type])
