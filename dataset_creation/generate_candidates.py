@@ -188,6 +188,12 @@ def write_dataset_to_txt_files(dataset, dataset_type, k_shot, exp_num, mode='tra
         'chest': os.path.join('dataset_creation', 'candidate_data', 'chest')
     }
 
+    # Make sure that the destination directory exists
+    for key, path in destinations.items():
+        if not os.path.exists(path):
+            os.makedirs(path)
+            print(f"Created directory: {path}")
+
     # simply writes the dataset given as a list of lists to a txt file
     # labels are written with integer precision
     with open(os.path.join(destinations[dataset_type], f'{dataset_type}_{k_shot}-shot_{mode}_exp{exp_num}.txt'),
