@@ -122,13 +122,13 @@ param_scheduler = [
         by_epoch=True,
         end=1
     ),
-    dict(
-        type='CosineAnnealingLR',
-        eta_min=1e-5,
-        by_epoch=True,
-        begin=1)
+    # dict(
+    #     type='CosineAnnealingLR',
+    #     eta_min=1e-5,
+    #     by_epoch=True,
+    #     begin=1)
 ]
 
 randomness = dict(seed=0)
-train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=20)
+train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=20)
 auto_scale_lr = dict(base_batch_size=1024)
