@@ -16,10 +16,7 @@ def get_sd(state_dicts, alphal):
           sd[k] = sd[k] + state_dicts[i]['state_dict'][k].clone() * alphal[i]
   return sd
 
-
-
 checkpoint_filenames = []
-
 
 start_dir = "/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot"
 
@@ -39,46 +36,15 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
 print(checkpoint_filenames)
 
 checkpoint_filenames = checkpoint_filenames[:10]
-
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 state_dicts = []
-
 for f in checkpoint_filenames:
     print(f'Loading {f}')
     state_dicts.append(torch.load(f, map_location=device))
 
-# print(type(state_dicts[0]))
-
-########stadard soup#########
-# alphal = [1 / len(state_dicts) for i in range(len(state_dicts))]
-# sd = get_sd(state_dicts, alphal)
-
-# folder_path =  checkpoint_filenames[0].split("-shot")[0] + "-shot/modelsoup"
-# model = "swin"
-
-
-# if not os.path.exists(folder_path):
-#     # If the folder doesn't exist, create it
-#     os.makedirs(folder_path)
-# model_soup_path = folder_path + "/" + model + "_soup.pth"
-# torch.save(sd, model_soup_path)
-
-##### create validation #####
-### config file auch angeben und dann validation machen! 
-#runn tool/test.py with config file
-#cfg = Config.fromfile("configs/swinv2-b/10-shot_endo.py")
-#cfg.load_from = model_soup_path
-#runner = Runner.from_cfg(cfg)
-#metrics = runner.test()
-#print(metrics)
-
-
-
-
 ####create greedy soup
 val_results = []
-#create val results
-
+#create val results of all models which could be included in the soup
 for filename in checkpoint_filenames:
     cfg = Config.fromfile("configs/swinv2-b/10-shot_endo.py")
     cfg.load_from = filename
@@ -88,16 +54,13 @@ for filename in checkpoint_filenames:
     val_results.append(metrics['Aggregate'])
 
 print(val_results)
-'''
-'''
-#val_results = [i / 100 for i in val_results]
+
+#rank all those models
 ranked_candidates = [i for i in range(len(state_dicts))]
 ranked_candidates.sort(key=lambda x: -val_results[x])
 
-print(ranked_candidates)
-print(val_results)
 
-
+# run greedy soup algorithm
 current_best = val_results[ranked_candidates[0]]
 best_ingredients = ranked_candidates[:1]
 for i in range(1, len(state_dicts)):
@@ -154,4 +117,28 @@ print("Best result: " + str(best_result))
 
 
 
-#os.system('python tools/test.py "configs/swinv2-b/10-shot_endo.py" "' + model_soup_path + '" --out "model_soup_results/out.pkl" --out-item "metrics"')
+
+# print(type(state_dicts[0]))
+
+########stadard soup#########
+# alphal = [1 / len(state_dicts) for i in range(len(state_dicts))]
+# sd = get_sd(state_dicts, alphal)
+
+# folder_path =  checkpoint_filenames[0].split("-shot")[0] + "-shot/modelsoup"
+# model = "swin"
+
+
+# if not os.path.exists(folder_path):
+#     # If the folder doesn't exist, create it
+#     os.makedirs(folder_path)
+# model_soup_path = folder_path + "/" + model + "_soup.pth"
+# torch.save(sd, model_soup_path)
+
+##### create validation #####
+### config file auch angeben und dann validation machen! 
+#runn tool/test.py with config file
+#cfg = Config.fromfile("configs/swinv2-b/10-shot_endo.py")
+#cfg.load_from = model_soup_path
+#runner = Runner.from_cfg(cfg)
+#metrics = runner.test()
+#print(metrics)
