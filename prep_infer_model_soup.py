@@ -128,7 +128,7 @@ for i in range(1, len(state_dicts)):
   metrics = runner.test()
   current = metrics['Aggregate']
 
-  print(f'Models {ingredient_indices} got {current*100}% on validation.')
+  print(f'Models {ingredient_indices} got {current}% on validation.')
   if current > current_best:
     current_best = current
     best_ingredients = ingredient_indices
