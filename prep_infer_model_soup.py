@@ -90,7 +90,7 @@ for filename in checkpoint_filenames:
 print(val_results)
 '''
 '''
-val_results = [i / 100 for i in val_results]
+#val_results = [i / 100 for i in val_results]
 ranked_candidates = [i for i in range(len(state_dicts))]
 ranked_candidates.sort(key=lambda x: -val_results[x])
 
@@ -99,22 +99,54 @@ print(val_results)
 
 
 current_best = val_results[ranked_candidates[0]]
-# best_ingredients = ranked_candidates[:1]
-# for i in range(1, len(state_dicts)):
-#   # add current index to the ingredients
-#   ingredient_indices = best_ingredients \
-#     + [ranked_candidates[i]]
-#   alphal = [0 for i in range(len(state_dicts))]
-#   for j in ingredient_indices:
-#     alphal[j] = 1 / len(ingredient_indices)
+best_ingredients = ranked_candidates[:1]
+for i in range(1, len(state_dicts)):
+  # add current index to the ingredients
+  ingredient_indices = best_ingredients \
+    + [ranked_candidates[i]]
+  alphal = [0 for i in range(len(state_dicts))]
+  for j in ingredient_indices:
+    alphal[j] = 1 / len(ingredient_indices)
   
-#   # benchmark and conditionally append
-#   model = get_model(state_dicts, alphal)
-#   current = validate(model)
-#   print(f'Models {ingredient_indices} got {current*100}% on validation.')
-#   if current > current_best:
-#     current_best = current
-#     best_ingredients = ingredient_indices
+  # benchmark and conditionally append
+  sd = get_sd(state_dicts, alphal)
+  folder_path =  checkpoint_filenames[0].split("-shot")[0] + "-shot/modelsoup"
+  model = "swin"
+
+
+  if not os.path.exists(folder_path):
+    # If the folder doesn't exist, create it
+    os.makedirs(folder_path)
+  model_soup_path = folder_path + "/" + model + "_soup.pth"
+  torch.save(sd, model_soup_path)
+
+
+  #### do validate with model soup state dict:
+  cfg = Config.fromfile("configs/swinv2-b/10-shot_endo.py")
+  cfg.load_from = model_soup_path
+  runner = Runner.from_cfg(cfg)
+  metrics = runner.test()
+  current = metrics['Aggregate']
+
+  print(f'Models {ingredient_indices} got {current*100}% on validation.')
+  if current > current_best:
+    current_best = current
+    best_ingredients = ingredient_indices
+
+
+alphal = [0 for i in range(len(state_dicts))]
+for j in best_ingredients:
+  alphal[j] = 1 / len(best_ingredients)
+sd = get_sd(state_dicts, alphal)
+
+best_model_soup_path = folder_path + "/" + model + "_soup_best.pth"
+torch.save(sd, best_model_soup_path)
+cfg = Config.fromfile("configs/swinv2-b/10-shot_endo.py")
+cfg.load_from = best_model_soup_path
+runner = Runner.from_cfg(cfg)
+metrics = runner.test()
+best_result = metrics['Aggregate']
+print("Best result: " + str(best_result))
 
 
 
