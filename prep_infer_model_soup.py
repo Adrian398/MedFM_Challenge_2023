@@ -146,6 +146,8 @@ cfg.load_from = best_model_soup_path
 runner = Runner.from_cfg(cfg)
 metrics = runner.test()
 best_result = metrics['Aggregate']
+
+print("Best_ingredients: " + str(best_ingredients))
 print("Best result: " + str(best_result))
 
 
