@@ -147,6 +147,8 @@ runner = Runner.from_cfg(cfg)
 metrics = runner.test()
 best_result = metrics['Aggregate']
 
+
+print(val_results)
 print("Best_ingredients: " + str(best_ingredients))
 print("Best result: " + str(best_result))
 
