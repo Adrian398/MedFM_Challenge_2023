@@ -38,6 +38,8 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
 
 print(checkpoint_filenames)
 
+checkpoint_filenames = checkpoint_filenames[:2]
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 state_dicts = []
 
@@ -83,7 +85,7 @@ for filename in checkpoint_filenames:
     runner = Runner.from_cfg(cfg)
     metrics = runner.test()
     print(metrics)
-    val_results.append(metrics)
+    val_results.append(metrics['Aggregate'])
 
 print(val_results)
 '''
