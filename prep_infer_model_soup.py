@@ -38,6 +38,8 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
 
 print(checkpoint_filenames)
 
+checkpoint_filenames = checkpoint_filenames[:3]
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 state_dicts = []
 
@@ -83,11 +85,12 @@ for filename in checkpoint_filenames:
     runner = Runner.from_cfg(cfg)
     metrics = runner.test()
     print(metrics)
-    val_results.append(metrics)
+    val_results.append(metrics['Aggregate'])
 
 print(val_results)
 '''
 '''
+val_results = [i / 100 for i in val_results]
 ranked_candidates = [i for i in range(len(state_dicts))]
 ranked_candidates.sort(key=lambda x: -val_results[x])
 
@@ -95,7 +98,7 @@ print(ranked_candidates)
 print(val_results)
 
 
-# current_best = val_results[ranked_candidates[0]]
+current_best = val_results[ranked_candidates[0]]
 # best_ingredients = ranked_candidates[:1]
 # for i in range(1, len(state_dicts)):
 #   # add current index to the ingredients
