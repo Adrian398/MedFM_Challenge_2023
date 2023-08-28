@@ -38,7 +38,7 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
 
 print(checkpoint_filenames)
 
-checkpoint_filenames = checkpoint_filenames[:2]
+checkpoint_filenames = checkpoint_filenames[:3]
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 state_dicts = []
