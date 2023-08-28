@@ -80,6 +80,8 @@ def parse_args():
                         help='Experiment number for data_anns')
     parser.add_argument('--train_bs', type=int, default=None,
                         help='Training batch size.')
+    parser.add_argument('--seed', type=int, default=None,
+                        help='The seed for training.')
     ########################################################################################
 
     args = parser.parse_args()
@@ -170,6 +172,9 @@ def merge_custom_args(cfg, args):
         cfg.optim_wrapper.optimizer.lr = args.lr
         cfg.run_name = re.sub(r'lr[0-9.]+', f'lr{args.lr}', cfg.run_name)
         cfg.work_dir = re.sub(r'lr[0-9.]+', f'lr{args.lr}', cfg.work_dir)
+
+    if args.seed is not None:
+        cfg.randomness = dict(seed=args.seed)
 
     if args.train_bs is not None:
         cfg.train_bs = args.train_bs

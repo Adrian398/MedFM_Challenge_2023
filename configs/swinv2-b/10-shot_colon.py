@@ -66,4 +66,4 @@ default_hooks = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=200)
+train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=125)

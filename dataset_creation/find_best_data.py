@@ -15,7 +15,9 @@ metric = args.metric
 print(metric)
 
 
-work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "dataset_creation","work_dirs")
+#work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "dataset_creation","work_dirs")
+work_dir_path = os.path.join("dataset_creation", "work_dirs")
+
 metric_tags = {"auc": "AUC/AUC_multiclass",
                "aucl": "AUC/AUC_multilabe",
                "map": "multi-label/mAP",
@@ -109,7 +111,7 @@ def get_5_best_run_dirs(task, shot, metric):
 
     run_score_list.sort(key=lambda x: x[1])
 
-    return run_score_list[5:]
+    return run_score_list[:5]
 
 
 def extract_exp_number(path):
@@ -119,8 +121,11 @@ def extract_exp_number(path):
 best_settings = {}
 
 for task in tasks:
+    best_settings[task] = {}
+
     for shot in shots:
         best_runs = get_5_best_run_dirs(task, shot, metric)
+        assert len(best_runs) == 5
         best_settings[task][shot] = best_runs
 
 print(best_settings)
