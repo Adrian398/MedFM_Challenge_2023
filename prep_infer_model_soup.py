@@ -90,7 +90,7 @@ for filename in checkpoint_filenames:
 print(val_results)
 '''
 '''
-val_results = val_results/100
+val_results = [i / 100 for i in val_results]
 ranked_candidates = [i for i in range(len(state_dicts))]
 ranked_candidates.sort(key=lambda x: -val_results[x])
 
