@@ -169,7 +169,7 @@ class AUC(BaseMetric):
 
         aucs_per_class = cal_auc_per_class(target, pred)
         for i in range(len(aucs_per_class)):
-            result_metrics[f'AUC_{i+1}'] = aucs_per_class[i]
+            result_metrics[f'AUC_class{i+1}'] = aucs_per_class[i]
         return result_metrics
 
 
