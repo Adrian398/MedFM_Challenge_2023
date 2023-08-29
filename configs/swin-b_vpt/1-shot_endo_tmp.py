@@ -6,7 +6,7 @@ _base_ = [
 ]
 
 warmup_lr = 1e-3
-lr = 5e-4
+lr = 1e-5
 cos_end_lr = 1e-6
 train_bs = 8
 vpl = 5
@@ -93,10 +93,10 @@ optim_wrapper = dict(
 )
 
 param_scheduler = [
-    dict(type='MultiStepLR',
-         milestones=[100, 200, 300],
-         by_epoch=True,
-         gamma=0.5)
+    # dict(type='MultiStepLR',
+    #      milestones=[100, 200, 300],
+    #      by_epoch=True,
+    #      gamma=0.5)
 ]
 randomness = dict(seed=seed)
 train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=500)
