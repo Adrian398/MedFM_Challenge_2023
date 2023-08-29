@@ -121,7 +121,7 @@ param_scheduler = [
     dict(by_epoch=True, end=1, start_factor=0.001, type='LinearLR'),
     dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
 ]
-randomness = dict(deterministic=False, seed=None)
+randomness = dict(deterministic=True, seed=0)
 resume = False
 run_name = 'swinv2_bs8_lr0.0001_exp1_exp-test_'
 test_cfg = dict()
