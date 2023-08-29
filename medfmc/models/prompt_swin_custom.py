@@ -785,7 +785,7 @@ class CustomPromptedSwinTransformer(SwinTransformer):
         if self.prompt_pos == 'prepend':
             # x = torch.cat([x[:, :1, :], prompt[0, :, :, :], x[:, 1:, :]],
             #               dim=1)
-            x = torch.cat([dynamic_prompt[0, :, :, :], x], dim=1)
+            x = torch.cat([dynamic_prompt, x], dim=1)
             # vpt_swin: (batch_size, n_prompt + n_patches, hidden_dim)
 
         outs = []
