@@ -12,7 +12,7 @@ train_bs = 8
 vpl = 5
 dataset = 'endo'
 model_name = 'swin'
-exp_num = 3
+exp_num = 5
 nshot = 1
 seed = 2023
 randomness = dict(seed=seed)
@@ -22,7 +22,7 @@ work_dir = f'work_dirs/temp/{nshot}-shot/{run_name}'
 model = dict(
     type='ImageClassifier',
     backbone=dict(
-        type='CustomPromptedSwinTransformer',
+        type='PromptedSwinTransformer',
         prompt_length=vpl,
         arch='base',
         img_size=384,
