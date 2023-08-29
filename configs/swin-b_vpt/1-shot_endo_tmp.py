@@ -14,15 +14,16 @@ dataset = 'endo'
 model_name = 'swin'
 exp_num = 5
 nshot = 1
-seed = 2023
+seed = 2049
 randomness = dict(seed=seed)
-run_name = f'endo_seed{seed}_{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
+mt = "CustomPromptedSwinTransformer"
+run_name = f'endo_seed{seed}_{mt}_bs{train_bs}_lr{lr}_exp{exp_num}_'
 work_dir = f'work_dirs/temp/{nshot}-shot/{run_name}'
 
 model = dict(
     type='ImageClassifier',
     backbone=dict(
-        type='CustomPromptedSwinTransformer',
+        type=mt,
         prompt_length=vpl,
         arch='base',
         img_size=384,
@@ -97,5 +98,5 @@ param_scheduler = [
          by_epoch=True,
          gamma=0.5)
 ]
-randomness = dict(seed=2023)
-train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=200)
+randomness = dict(seed=seed)
+train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=500)
