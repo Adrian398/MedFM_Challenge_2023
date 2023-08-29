@@ -24,6 +24,25 @@ def compute_auc(cls_scores, cls_labels):
     return cls_aucs
 
 
+def cal_auc_per_class(target, cosine_scores):
+    '''Calculate AUC per class.'''
+    sample_num = target.shape[0]
+    cls_num = cosine_scores.shape[1]
+
+    gt_labels = np.zeros((sample_num, cls_num))
+    for k in range(target.shape[0]):
+        label = target[k]
+        gt_labels[k, :] = label
+
+    cls_scores = np.zeros((sample_num, cls_num))
+    for k in range(target.shape[0]):
+        cos_score = cosine_scores[k]
+        norm_scores = [1 / (1 + math.exp(-1 * v)) for v in cos_score]
+        cls_scores[k, :] = np.array(norm_scores)
+
+    cls_aucs = compute_auc(cls_scores, gt_labels)
+    return cls_aucs
+
 def cal_metrics_multilabel(target, cosine_scores):
     """Calculate mean AUC with given dataset information and cosine scores."""
 
@@ -147,6 +166,10 @@ class AUC(BaseMetric):
             result_metrics['AUC_multilabe'] = float(res)
         else:
             result_metrics['AUC_multiclass'] = float(res)
+
+        aucs_per_class = cal_auc_per_class(target, pred)
+        for i in range(len(aucs_per_class)):
+            result_metrics[f'AUC_{i+1}'] = aucs_per_class[i]
         return result_metrics
 
 
