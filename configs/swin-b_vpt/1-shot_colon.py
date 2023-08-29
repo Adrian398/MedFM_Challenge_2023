@@ -131,3 +131,5 @@ param_scheduler = [
 
 train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=1000)
 auto_scale_lr = dict(base_batch_size=1024)
+
+randomness = dict(seed=0)
