@@ -9,10 +9,10 @@ warmup_lr = 1e-3
 lr = 1e-4
 cos_end_lr = 1e-6
 train_bs = 8
-vpl = 1
+vpl = 5
 dataset = 'endo'
 model_name = 'swin'
-exp_num = 3
+exp_num = 1
 nshot = 1
 seed = 2049
 randomness = dict(seed=seed)
