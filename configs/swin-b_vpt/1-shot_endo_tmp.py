@@ -16,7 +16,7 @@ exp_num = 1
 nshot = 1
 seed = 2049
 randomness = dict(seed=seed)
-mt = "CustomPromptedSwinTransformer"
+mt = "PromptedSwinTransformer"
 run_name = f'endo_seed{seed}_{mt}_bs{train_bs}_lr{lr}_exp{exp_num}_'
 work_dir = f'work_dirs/temp/{nshot}-shot/{run_name}'
 
