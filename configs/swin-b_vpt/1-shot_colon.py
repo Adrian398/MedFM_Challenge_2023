@@ -101,7 +101,7 @@ val_evaluator = [
 test_evaluator = val_evaluator
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=-1, save_best="Aggregate", rule="greater", save_last=False),
     logger=dict(interval=10),
 )
 
@@ -129,7 +129,7 @@ param_scheduler = [
         begin=1)
 ]
 
-train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=300)
+train_cfg = dict(by_epoch=True, val_interval=200, max_epochs=1000)
 auto_scale_lr = dict(base_batch_size=1024)
 
 randomness = dict(seed=0)
