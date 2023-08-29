@@ -6,7 +6,7 @@ _base_ = [
 ]
 
 warmup_lr = 1e-3
-lr = 5e-5
+lr = 1e-4
 cos_end_lr = 1e-6
 train_bs = 8
 vpl = 5
