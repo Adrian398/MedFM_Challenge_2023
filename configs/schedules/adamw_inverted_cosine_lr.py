@@ -1,4 +1,4 @@
-optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=3e-2, type='AdamW', weight_decay=0.01)
+optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=1e-2, type='AdamW', weight_decay=0.01)
 
 optim_wrapper = dict(
     optimizer=optimizer,
