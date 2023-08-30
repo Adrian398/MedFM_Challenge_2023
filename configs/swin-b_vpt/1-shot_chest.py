@@ -12,7 +12,7 @@ dataset = 'chest'
 exp_num = 1
 nshot = 1
 seed = 2049
-randomness = dict(seed=seed)
+randomness = dict(seed=seed, deterministic=True)
 
 run_name = f'in21k-swin-b_vpt-{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}_exp{exp_num}'
 work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'

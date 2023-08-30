@@ -13,7 +13,7 @@ model_name = 'swinv2-t'
 exp_num = 1
 nshot = 1
 seed = 2049
-randomness = dict(seed=seed)
+randomness = dict(seed=seed, deterministic=True)
 
 run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}'
 work_dir = f'work_dirs/colon/{nshot}-shot/{run_name}'
