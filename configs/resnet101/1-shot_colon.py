@@ -25,6 +25,7 @@ model = dict(
     backbone=dict(
         type='ResNet',
         depth=101,
+        drop_path_rate=0.2,
         num_stages=4,
         out_indices=(3, ),
         style='pytorch',
@@ -36,7 +37,7 @@ model = dict(
         num_classes=2,
         in_channels=2048,
         num_heads=1,
-        lam=0.15,
+        lam=0.1,
         loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)))
 
 # dataset setting
@@ -126,6 +127,6 @@ param_scheduler = [
     dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
 ]
 
-train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
+train_cfg = dict(by_epoch=True, val_interval=50, max_epochs=500)
 val_cfg = dict()
 test_cfg = dict()
