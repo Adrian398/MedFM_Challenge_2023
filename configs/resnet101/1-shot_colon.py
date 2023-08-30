@@ -1,9 +1,9 @@
 _base_ = [
     '../datasets/colon.py',
     '../schedules/adamw_inverted_cosine_lr.py',
-    'mmpretrain::_base_/datasets/voc_bs16.py',
+    #'mmpretrain::_base_/datasets/voc_bs16.py',
     'mmpretrain::_base_/default_runtime.py'
-    #'../custom_imports.py',
+    '../custom_imports.py',
 ]
 
 # Pre-trained Checkpoint Path
@@ -11,6 +11,7 @@ checkpoint = 'https://download.openmmlab.com/mmclassification/v0/resnet/resnet10
 
 lr = 0.0002
 train_bs = 8
+val_bs = 32
 dataset = 'colon'
 model_name = 'resnet101'
 exp_num = 1
