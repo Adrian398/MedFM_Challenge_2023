@@ -145,7 +145,6 @@ class PromptedPatchMerging(PatchMerging):
 
         # add the prompt back:
         if self.prompt_pos == 'prepend':
-            print("Swin shapes", prompt_emb.shape, x.shape)
             x = torch.cat((prompt_emb, x), dim=1)
 
         x = self.norm(x) if self.norm else x
@@ -359,16 +358,13 @@ class PromptedShiftWindowMSA(ShiftWindowMSA):
 
     def forward(self, query, hw_shape):
         B, L, C = query.shape
-        print("query shape", query.shape)
         H, W = hw_shape
-        print("hw shape", hw_shape)
 
         if self.prompt_pos == 'prepend':
             # change input size
             prompt_emb = query[:, :self.prompt_length, :]
             query = query[:, self.prompt_length:, :]
             L = L - self.prompt_length
-            print(L, self.prompt_length)
 
         assert L == H * W, f"The query length {L} doesn't match the input "\
             f'shape ({H}, {W}).'
@@ -538,7 +534,6 @@ class PromptedSwinBlock(SwinBlock):
 
         def _inner_forward(x):
             identity = x
-            print("BLA", x.shape)
 
             x = self.norm1(x)
             x = self.attn(x, hw_shape)

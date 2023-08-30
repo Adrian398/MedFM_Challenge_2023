@@ -693,11 +693,6 @@ class CustomPromptedSwinTransformer(SwinTransformer):
         self.prompt_pos = prompt_pos
         self.avgpool = nn.AdaptiveAvgPool1d(1)
 
-        self.prompt_network = nn.Sequential(
-            nn.Linear(self.embed_dims, 512),
-            nn.ReLU(),
-            nn.Linear(512, self.prompt_length * self.embed_dims)
-        )
 
         # stochastic depth
         total_depth = sum(self.depths)
@@ -745,6 +740,12 @@ class CustomPromptedSwinTransformer(SwinTransformer):
             embed_dims.append(stage.out_channels)
         for param in self.parameters():
             param.requires_grad = False
+
+        self.prompt_network = nn.Sequential(
+            nn.Linear(self.embed_dims, 512),
+            nn.ReLU(),
+            nn.Linear(512, self.prompt_length * self.embed_dims)
+        )
 
         self.prompt_layers = [0] if prompt_layers is None else prompt_layers
         prompt = torch.empty(
