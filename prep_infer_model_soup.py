@@ -51,23 +51,25 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
                         if seed_string in config and exp_num_string in config:
                             configs_for_checkpoints.append(config)
                             filenames_to_get_pth = os.listdir(os.path.join(start_dir, dirpath))
-                            if filename.endswith(".pth") and "best" in filename:
-                                # Append the full path of the file to the list
-                                checkpoint_filenames.append(os.path.join(start_dir, dirpath, filename))
+                            for file_name_to_get_pth in filenames_to_get_pth:
+                                if file_name_to_get_pth.endswith(".pth") and "best" in file_name_to_get_pth:
+                                    # Append the full path of the file to the list
+                                    checkpoint_filenames.append(os.path.join(start_dir, dirpath, file_name_to_get_pth))
                     else: 
                         if exp_num_string in config:
                             configs_for_checkpoints.append(config)
                             filenames_to_get_pth = os.listdir(os.path.join(start_dir, dirpath))
-                            if filename.endswith(".pth") and "best" in filename:
-                                # Append the full path of the file to the list
-                                checkpoint_filenames.append(os.path.join(start_dir, dirpath, filename))
+                            for file_name_to_get_pth in filenames_to_get_pth:
+                                if file_name_to_get_pth.endswith(".pth") and "best" in file_name_to_get_pth:
+                                    # Append the full path of the file to the list
+                                    checkpoint_filenames.append(os.path.join(start_dir, dirpath, file_name_to_get_pth))
 
 
 #checkpoint_filenames = ["/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs4_lr0.0005_exp1_20230821-004750/best_multi-label_mAP_epoch_11.pth", "/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs8_lr0.0005_exp1_20230821-172020/best_multi-label_mAP_epoch_100.pth"]
 
 print(checkpoint_filenames)
 print(configs_for_checkpoints)
-
+'''
 checkpoint_filenames = checkpoint_filenames[:10]
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 state_dicts = []
@@ -174,4 +176,4 @@ print("Best result: " + str(best_result))
 #cfg.load_from = model_soup_path
 #runner = Runner.from_cfg(cfg)
 #metrics = runner.test()
-#print(metrics)
+#print(metrics)'''
