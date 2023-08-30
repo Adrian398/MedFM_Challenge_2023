@@ -1,5 +1,5 @@
 _base_ = [
-    '../datasets/colon.py',
+    '../datasets/chest.py',
     '../schedules/chest.py',
     'mmpretrain::_base_/models/swin_transformer_v2/tiny_256.py',
     'mmpretrain::_base_/default_runtime.py',
@@ -16,7 +16,7 @@ seed = 2049
 randomness = dict(seed=seed)
 
 run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}'
-work_dir = f'work_dirs/colon/{nshot}-shot/{run_name}'
+work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
 
 model = dict(
     type='ImageClassifier',
