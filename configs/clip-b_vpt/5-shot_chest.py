@@ -8,7 +8,7 @@ _base_ = [
 lr = 1e-3
 vpl = 1
 dataset = 'chest'
-exp_num = 21
+exp_num = 1
 nshot = 5
 seed = 2049
 randomness = dict(seed=seed)
