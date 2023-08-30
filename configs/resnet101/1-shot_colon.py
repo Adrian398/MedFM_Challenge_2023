@@ -17,6 +17,9 @@ model_name = 'resnet101'
 exp_num = 1
 nshot = 1
 
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
+work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
+
 model = dict(
     type='ImageClassifier',
     backbone=dict(
