@@ -9,7 +9,7 @@ _base_ = [
 # Pre-trained Checkpoint Path
 checkpoint = 'https://download.openmmlab.com/mmclassification/v0/resnet/resnet101_8xb32_in1k_20210831-539c63f8.pth'  # noqa
 
-lr = 5e-6
+lr = 1e-5
 train_bs = 32
 val_bs = 256
 dataset = 'colon'
@@ -25,7 +25,6 @@ model = dict(
     backbone=dict(
         type='ResNet',
         depth=101,
-        drop_path_rate=0.2,
         num_stages=4,
         out_indices=(3, ),
         style='pytorch',
@@ -49,6 +48,7 @@ model = dict(
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='RandomResizedCrop', scale=448, crop_ratio_range=(0.7, 1.0)),
+    dict(type='ColorJitter', hue=0.3, brightness=0.4, contrast=0.4, saturation=0.4),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
@@ -108,7 +108,7 @@ visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBack
 #     dict(type='StepLR', by_epoch=True, step_size=6, gamma=0.1)
 # ]
 
-optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=lr, type='AdamW', weight_decay=0.01)
+optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=lr, type='AdamW', weight_decay=0.05)
 
 optim_wrapper = dict(
     optimizer=optimizer,
@@ -124,9 +124,11 @@ optim_wrapper = dict(
 
 param_scheduler = [
     dict(by_epoch=True, end=1, start_factor=1, type='LinearLR'),
-    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
+    dict(begin=1, by_epoch=True, eta_min=1e-04, type='CosineAnnealingLR'),
 ]
 
 train_cfg = dict(by_epoch=True, val_interval=50, max_epochs=500)
 val_cfg = dict()
 test_cfg = dict()
+
+randomness = dict(seed=0)
