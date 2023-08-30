@@ -10,7 +10,7 @@ log_output="/home/ls6/hekalo/job_output/medfm-%j.out"
 
 # experiment numbers
 exp_num=1
-exp_suffix="deterministic_sanity_check"
+exp_suffix="seed_sanity_check"
 
 configs=(
   "configs/clip-b_vpt/1-shot_chest.py"

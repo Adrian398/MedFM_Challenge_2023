@@ -11,7 +11,7 @@ dataset = 'chest'
 exp_num = 21
 nshot = 1
 seed = 2049
-randomness = dict(seed=seed, deterministic=True)
+randomness = dict(seed=seed)
 
 run_name = f'clip-b_{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}_exp{exp_num}'
 work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'

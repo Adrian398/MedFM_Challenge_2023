@@ -11,7 +11,7 @@ train_bs = 8
 dataset = 'chest'
 model_name = 'swinv2-t'
 exp_num = 1
-nshot = 1
+nshot = 10
 seed = 2049
 randomness = dict(seed=seed)
 
