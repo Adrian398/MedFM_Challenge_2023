@@ -26,7 +26,7 @@ seed = 2049
 
 
 checkpoint_filenames = []
-configs_for_checkpoints = []
+configs_for_checkpoints_filenames = []
 
 seed = False
 
@@ -49,7 +49,7 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
                     exp_num_string = "exp_num = " + str(exp_num) 
                     if seed:
                         if seed_string in config and exp_num_string in config:
-                            configs_for_checkpoints.append(config)
+                            configs_for_checkpoints_filenames.append(os.path.join(start_dir, dirpath, filename))
                             filenames_to_get_pth = os.listdir(os.path.join(start_dir, dirpath))
                             for file_name_to_get_pth in filenames_to_get_pth:
                                 if file_name_to_get_pth.endswith(".pth") and "best" in file_name_to_get_pth:
@@ -57,7 +57,7 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
                                     checkpoint_filenames.append(os.path.join(start_dir, dirpath, file_name_to_get_pth))
                     else: 
                         if exp_num_string in config:
-                            configs_for_checkpoints.append(config)
+                            configs_for_checkpoints_filenames.append(os.path.join(start_dir, dirpath, filename))
                             filenames_to_get_pth = os.listdir(os.path.join(start_dir, dirpath))
                             for file_name_to_get_pth in filenames_to_get_pth:
                                 if file_name_to_get_pth.endswith(".pth") and "best" in file_name_to_get_pth:
