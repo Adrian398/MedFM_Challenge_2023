@@ -7,7 +7,7 @@ _base_ = [
 
 lr = 1e-6
 train_bs = 8
-val_bs = 32
+val_bs = 64
 dataset = 'colon'
 model_name = 'swinv2-b_vpt'
 exp_num = 1
@@ -68,4 +68,4 @@ default_hooks = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
+train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=500)
