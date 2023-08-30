@@ -65,4 +65,4 @@ visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBack
 
 train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=500)
 
-randomness = dict(seed=0)
+randomness = dict(seed=42)
