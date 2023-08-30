@@ -1,7 +1,6 @@
 _base_ = [
     '../datasets/colon.py',
     '../schedules/adamw_inverted_cosine_lr.py',
-    #'mmpretrain::_base_/datasets/voc_bs16.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
 ]
@@ -100,7 +99,7 @@ optim_wrapper = dict(
 
 param_scheduler = [
     dict(by_epoch=True, end=1, start_factor=1, type='LinearLR'),
-    dict(begin=1, by_epoch=True, eta_min=5e-05, type='CosineAnnealingLR'),
+    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
 ]
 
 train_cfg = dict(by_epoch=True, val_interval=15, max_epochs=250)

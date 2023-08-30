@@ -1,7 +1,6 @@
 _base_ = [
     '../datasets/colon.py',
     '../schedules/adamw_inverted_cosine_lr.py',
-    #'mmpretrain::_base_/datasets/voc_bs16.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
 ]
@@ -9,7 +8,7 @@ _base_ = [
 # Pre-trained Checkpoint Path
 checkpoint = 'https://download.openmmlab.com/mmclassification/v0/resnet/resnet101_8xb32_in1k_20210831-539c63f8.pth'  # noqa
 
-lr = 1e-5
+lr = 1e-6
 train_bs = 32
 val_bs = 256
 dataset = 'colon'
@@ -38,12 +37,6 @@ model = dict(
         num_heads=1,
         lam=0.1,
         loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)))
-
-# dataset setting
-# data_preprocessor = dict(
-#     # RGB format normalization parameters
-#     mean=[0, 0, 0],
-#     std=[255, 255, 255])
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
@@ -90,24 +83,6 @@ default_hooks = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-
-# optimizer
-# the lr of classifier.head is 10 * base_lr, which help convergence.
-# optim_wrapper = dict(
-#     optimizer=dict(type='SGD', lr=0.0002, momentum=0.9, weight_decay=0.0001),
-#     paramwise_cfg=dict(custom_keys={'head': dict(lr_mult=10)}))
-
-# param_scheduler = [
-#     dict(
-#         type='LinearLR',
-#         start_factor=1e-7,
-#         by_epoch=True,
-#         begin=0,
-#         end=1,
-#         convert_to_iter_based=True),
-#     dict(type='StepLR', by_epoch=True, step_size=6, gamma=0.1)
-# ]
-
 optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=lr, type='AdamW', weight_decay=0.05)
 
 optim_wrapper = dict(
@@ -124,7 +99,7 @@ optim_wrapper = dict(
 
 param_scheduler = [
     dict(by_epoch=True, end=1, start_factor=1, type='LinearLR'),
-    dict(begin=1, by_epoch=True, eta_min=1e-04, type='CosineAnnealingLR'),
+    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
 ]
 
 train_cfg = dict(by_epoch=True, val_interval=50, max_epochs=500)
