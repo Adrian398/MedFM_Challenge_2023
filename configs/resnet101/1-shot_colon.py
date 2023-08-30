@@ -10,8 +10,8 @@ _base_ = [
 checkpoint = 'https://download.openmmlab.com/mmclassification/v0/resnet/resnet101_8xb32_in1k_20210831-539c63f8.pth'  # noqa
 
 lr = 1e-6
-train_bs = 16
-val_bs = 128
+train_bs = 32
+val_bs = 256
 dataset = 'colon'
 model_name = 'resnet101'
 exp_num = 4
@@ -35,8 +35,8 @@ model = dict(
         type='CSRAClsHead',
         num_classes=2,
         in_channels=2048,
-        num_heads=1,
-        lam=0.1,
+        num_heads=4,
+        lam=0.02,
         loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)))
 
 # dataset setting
