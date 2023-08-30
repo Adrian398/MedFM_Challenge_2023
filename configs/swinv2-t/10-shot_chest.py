@@ -1,66 +1,59 @@
 _base_ = [
-    '../datasets/colon.py',
-    '../swin_schedule.py',
+    '../datasets/chest.py',
+    '../schedules/chest.py',
+    'mmpretrain::_base_/models/swin_transformer_v2/tiny_256.py',
     'mmpretrain::_base_/default_runtime.py',
-    '../custom_imports.py',
+    '../custom_imports.py'
 ]
 
 lr = 5e-4
 train_bs = 8
-dataset = 'colon'
-model_name = 'swin'
+dataset = 'chest'
+model_name = 'swinv2-t'
 exp_num = 1
-nshot = 1
+nshot = 10
+seed = 2049
+randomness = dict(seed=seed)
 
-run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
-work_dir = f'work_dirs/colon/{nshot}-shot/{run_name}'
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}'
+work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
 
 model = dict(
     type='ImageClassifier',
     backbone=dict(
-        type='PromptedSwinTransformer',
-        prompt_length=5,
-        arch='base',
-        img_size=384,
+        img_size=256,
         init_cfg=dict(
             type='Pretrained',
             checkpoint=
-            'https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
+            'https://download.openmmlab.com/mmclassification/v0/swin-v2/swinv2-tiny-w16_3rdparty_in1k-256px_20220803-9651cdd7.pth',
             prefix='backbone',
         ),
-        stage_cfgs=dict(block_cfgs=dict(window_size=12))),
-    neck=None,
+        window_size=[16, 16, 16, 8],
+        drop_path_rate=0.2,
+        #pretrained_window_sizes=[12, 12, 12, 6]
+    ),
+    neck=dict(type='GlobalAveragePooling'),
     head=dict(
         type='LinearClsHead',
         num_classes=2,
         in_channels=1024,
-        loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
+        loss=dict(type='LabelSmoothLoss', loss_weight=1.0),
     )
 )
 
-bgr_mean = [103.53, 116.28, 123.675]
-bgr_std = [57.375, 57.12, 58.395]
-
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(
-        type='Resize',
-        scale=384,
-        backend='pillow',
-        interpolation='bicubic'
-    ),
-    dict(
-        type='Normalize',
-        mean=bgr_mean,
-        std=bgr_std,
-        to_rgb=False
-    ),
+    dict(type='NumpyToPIL', to_rgb=True),
+    dict(type='torchvision/RandomAffine', degrees=(-15, 15), translate=(0.05, 0.05), fill=128),
+    dict(type='PILToNumpy', to_bgr=True),
+    dict(type='RandomResizedCrop', scale=256, crop_ratio_range=(0.9, 1.0), backend='pillow', interpolation='bicubic'),
+    dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='PackInputs'),
 ]
 
 train_dataloader = dict(
     batch_size=train_bs,
-    num_workers=16,
+    num_workers=4,
     dataset=dict(
         ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
         pipeline=train_pipeline
@@ -69,7 +62,7 @@ train_dataloader = dict(
 
 val_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='Resize', scale=384, backend='pillow', interpolation='bicubic'),
+    dict(type='Resize', scale=256, backend='pillow', interpolation='bicubic'),
     dict(type='PackInputs'),
 ]
 
@@ -82,17 +75,6 @@ val_dataloader = dict(
     )
 )
 
-test_dataloader = dict(
-    batch_size=8,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
-)
-
-test_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(type='Resize', scale=384, backend='pillow', interpolation='bicubic'),
-    dict(type='PackInputs'),
-]
-
 val_evaluator = [
     dict(type='Aggregate'),
     dict(type='AveragePrecision'),
@@ -101,7 +83,12 @@ val_evaluator = [
 test_evaluator = val_evaluator
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=-1, save_best="Aggregate", rule="greater", save_last=False),
+    checkpoint=dict(
+        type='CheckpointHook',
+        interval=250,
+        max_keep_ckpts=1,
+        save_best="Aggregate", rule="greater"
+    ),
     logger=dict(interval=10),
 )
 
@@ -129,7 +116,6 @@ param_scheduler = [
         begin=1)
 ]
 
-train_cfg = dict(by_epoch=True, val_interval=200, max_epochs=1000)
-auto_scale_lr = dict(base_batch_size=1024)
+train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=1000)
 
-randomness = dict(seed=0)
+auto_scale_lr = dict(base_batch_size=1024)

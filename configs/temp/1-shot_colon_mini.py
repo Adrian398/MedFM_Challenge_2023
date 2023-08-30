@@ -4,7 +4,7 @@ _base_ = [
     '../custom_imports.py',
 ]
 
-lr = 0.004
+lr = 0.0005
 train_bs = 8
 dataset = 'colon'
 model_name = 'swin'
@@ -130,4 +130,4 @@ param_scheduler = []
 val_cfg = dict()
 test_cfg = dict()
 randomness = dict(seed=0)
-train_cfg = dict(by_epoch=True, val_interval=5, max_epochs=50)
+train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=100)
