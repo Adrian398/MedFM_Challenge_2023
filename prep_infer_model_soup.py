@@ -28,8 +28,9 @@ seed = 2049
 checkpoint_filenames = []
 configs_for_checkpoints = []
 
-start_dir = "/scratch/medfm/medfm-challenge/work_dirs/" + dataset + "/" + str(nshot) + "-shot"
+seed = False
 
+start_dir = "/scratch/medfm/medfm-challenge/work_dirs/" + dataset + "/" + str(nshot) + "-shot"
 # Walk through the base directory and its subdirectories
 for dirpath, dirnames, filenames in os.walk(start_dir):
     # Check if the directory starts with "swin_bs"
@@ -46,12 +47,21 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
                     
                     seed_string = "seed = " + str(seed)
                     exp_num_string = "exp_num = " + str(exp_num) 
-                    if seed_string in config and exp_num_string in config:
-                        configs_for_checkpoints.append(config)
-                        filenames_to_get_pth = os.listdir(os.path.join(start_dir, dirpath))
-                        if filename.endswith(".pth") and "best" in filename:
-                            # Append the full path of the file to the list
-                            checkpoint_filenames.append(os.path.join(start_dir, dirpath, filename))
+                    if seed:
+                        if seed_string in config and exp_num_string in config:
+                            configs_for_checkpoints.append(config)
+                            filenames_to_get_pth = os.listdir(os.path.join(start_dir, dirpath))
+                            if filename.endswith(".pth") and "best" in filename:
+                                # Append the full path of the file to the list
+                                checkpoint_filenames.append(os.path.join(start_dir, dirpath, filename))
+                    else: 
+                        if exp_num_string in config:
+                            configs_for_checkpoints.append(config)
+                            filenames_to_get_pth = os.listdir(os.path.join(start_dir, dirpath))
+                            if filename.endswith(".pth") and "best" in filename:
+                                # Append the full path of the file to the list
+                                checkpoint_filenames.append(os.path.join(start_dir, dirpath, filename))
+
 
 #checkpoint_filenames = ["/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs4_lr0.0005_exp1_20230821-004750/best_multi-label_mAP_epoch_11.pth", "/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs8_lr0.0005_exp1_20230821-172020/best_multi-label_mAP_epoch_100.pth"]
 
