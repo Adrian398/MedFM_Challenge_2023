@@ -11,16 +11,13 @@ from typing import Sequence
 import torch
 import torch.nn as nn
 import torch.utils.checkpoint as cp
-from mmcv.cnn.bricks.transformer import PatchEmbed, PatchMerging
 from mmengine.model import ModuleList
 from mmpretrain.registry import MODELS
 
 from mmpretrain.models.utils import (ShiftWindowMSA, resize_pos_embed, to_2tuple)
 
 
-from mmpretrain.models.backbones.swin_transformer import (SwinBlock,
-                                                     SwinBlockSequence,
-                                                     SwinTransformer)
+from mmpretrain.models.backbones.swin_transformer import (SwinBlock, SwinBlockSequence, SwinTransformer)
 from mmpretrain.models.utils.attention import ShiftWindowMSA, WindowMSA
 from mmcv.cnn.bricks.transformer import (AdaptivePadding, PatchEmbed,
                                          PatchMerging)
@@ -148,6 +145,7 @@ class PromptedPatchMerging(PatchMerging):
 
         # add the prompt back:
         if self.prompt_pos == 'prepend':
+            print("Swin shapes", prompt_emb.shape, x.shape)
             x = torch.cat((prompt_emb, x), dim=1)
 
         x = self.norm(x) if self.norm else x
@@ -361,13 +359,16 @@ class PromptedShiftWindowMSA(ShiftWindowMSA):
 
     def forward(self, query, hw_shape):
         B, L, C = query.shape
+        print("query shape", query.shape)
         H, W = hw_shape
+        print("hw shape", hw_shape)
 
         if self.prompt_pos == 'prepend':
             # change input size
             prompt_emb = query[:, :self.prompt_length, :]
             query = query[:, self.prompt_length:, :]
             L = L - self.prompt_length
+            print(L, self.prompt_length)
 
         assert L == H * W, f"The query length {L} doesn't match the input "\
             f'shape ({H}, {W}).'
@@ -537,6 +538,8 @@ class PromptedSwinBlock(SwinBlock):
 
         def _inner_forward(x):
             identity = x
+            print("BLA", x.shape)
+
             x = self.norm1(x)
             x = self.attn(x, hw_shape)
             x = x + identity
@@ -721,6 +724,7 @@ class PromptedSwinTransformer(SwinTransformer):
                 'prompt_pos': prompt_pos,
                 **stage_cfg
             }
+
             _patch_cfg = dict(
                 in_channels=in_channels,
                 input_size=img_size,
@@ -735,14 +739,15 @@ class PromptedSwinTransformer(SwinTransformer):
 
             stage = PromptedSwinBlockSequence(**_stage_cfg)
             self.stages.append(stage)
+
             dpr = dpr[depth:]
             embed_dims.append(stage.out_channels)
+
         for param in self.parameters():
             param.requires_grad = False
 
         self.prompt_layers = [0] if prompt_layers is None else prompt_layers
-        prompt = torch.empty(
-            len(self.prompt_layers), prompt_length, self.embed_dims)
+        prompt = torch.empty(len(self.prompt_layers), prompt_length, self.embed_dims)
         if prompt_init == 'uniform':
             nn.init.uniform_(prompt, -0.08, 0.08)
         elif prompt_init == 'zero':

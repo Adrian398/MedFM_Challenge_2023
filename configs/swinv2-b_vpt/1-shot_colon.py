@@ -43,7 +43,7 @@ model = dict(
             type='LabelSmoothLoss'),
         num_classes=2,
         type='LinearClsHead'),
-    neck=dict(type='GlobalAveragePooling')
+    neck=None
 )
 
 train_dataloader = dict(
