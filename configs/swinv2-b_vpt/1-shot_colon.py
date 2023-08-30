@@ -33,16 +33,11 @@ model = dict(
         pretrained_window_sizes=[12, 12, 12, 6],
         window_size=[24, 24, 24, 12]),
     head=dict(
-        cal_acc=False,
-        in_channels=1024,
-        init_cfg=None,
-        loss=dict(
-            label_smooth_val=0.1,
-            loss_weight=1.0,
-            mode='original',
-            type='LabelSmoothLoss'),
+        type='LinearClsHead',
         num_classes=2,
-        type='LinearClsHead'),
+        in_channels=1024,
+        loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
+    ),
     neck=None
 )
 
