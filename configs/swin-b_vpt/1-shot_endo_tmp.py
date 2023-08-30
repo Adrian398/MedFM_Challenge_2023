@@ -14,7 +14,7 @@ dataset = 'endo'
 model_name = 'swin'
 exp_num = 1
 nshot = 1
-seed = 2049
+seed = 123
 randomness = dict(seed=seed)
 mt = "PromptedSwinTransformer"
 run_name = f'endo_seed{seed}_{mt}_bs{train_bs}_lr{lr}_exp{exp_num}_'
