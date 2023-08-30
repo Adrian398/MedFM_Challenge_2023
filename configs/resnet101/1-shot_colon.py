@@ -1,6 +1,6 @@
 _base_ = [
     '../datasets/colon.py',
-    #'../schedules/adamw_inverted_cosine_lr.py',
+    '../schedules/adamw_inverted_cosine_lr.py',
     #'mmpretrain::_base_/datasets/voc_bs16.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
@@ -9,12 +9,12 @@ _base_ = [
 # Pre-trained Checkpoint Path
 checkpoint = 'https://download.openmmlab.com/mmclassification/v0/resnet/resnet101_8xb32_in1k_20210831-539c63f8.pth'  # noqa
 
-lr = 0.0002
-train_bs = 8
-val_bs = 32
+lr = 1e-6
+train_bs = 16
+val_bs = 128
 dataset = 'colon'
 model_name = 'resnet101'
-exp_num = 1
+exp_num = 4
 nshot = 1
 
 run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
@@ -40,10 +40,10 @@ model = dict(
         loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)))
 
 # dataset setting
-data_preprocessor = dict(
-    # RGB format normalization parameters
-    mean=[0, 0, 0],
-    std=[255, 255, 255])
+# data_preprocessor = dict(
+#     # RGB format normalization parameters
+#     mean=[0, 0, 0],
+#     std=[255, 255, 255])
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
@@ -91,20 +91,20 @@ visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBack
 
 # optimizer
 # the lr of classifier.head is 10 * base_lr, which help convergence.
-optim_wrapper = dict(
-    optimizer=dict(type='SGD', lr=0.0002, momentum=0.9, weight_decay=0.0001),
-    paramwise_cfg=dict(custom_keys={'head': dict(lr_mult=10)}))
+# optim_wrapper = dict(
+#     optimizer=dict(type='SGD', lr=0.0002, momentum=0.9, weight_decay=0.0001),
+#     paramwise_cfg=dict(custom_keys={'head': dict(lr_mult=10)}))
 
-param_scheduler = [
-    dict(
-        type='LinearLR',
-        start_factor=1e-7,
-        by_epoch=True,
-        begin=0,
-        end=1,
-        convert_to_iter_based=True),
-    dict(type='StepLR', by_epoch=True, step_size=6, gamma=0.1)
-]
+# param_scheduler = [
+#     dict(
+#         type='LinearLR',
+#         start_factor=1e-7,
+#         by_epoch=True,
+#         begin=0,
+#         end=1,
+#         convert_to_iter_based=True),
+#     dict(type='StepLR', by_epoch=True, step_size=6, gamma=0.1)
+# ]
 
 train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
 val_cfg = dict()
