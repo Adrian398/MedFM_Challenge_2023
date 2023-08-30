@@ -16,7 +16,7 @@ exp_num = 3
 nshot = 1
 seed = 123
 randomness = dict(seed=seed)
-mt = "PromptedSwinTransformer"
+mt = "CustomPromptedSwinTransformer"
 run_name = f'endo_seed{seed}_{mt}_bs{train_bs}_lr{lr}_exp{exp_num}_'
 work_dir = f'work_dirs/temp/{nshot}-shot/{run_name}'
 
@@ -47,7 +47,7 @@ train_dataloader = dict(
 )
 
 val_dataloader = dict(
-    batch_size=16,
+    batch_size=32,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
 )
 
@@ -99,4 +99,4 @@ param_scheduler = [
     #      gamma=0.5)
 ]
 randomness = dict(seed=seed)
-train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=500)
+train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=500)
