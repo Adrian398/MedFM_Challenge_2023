@@ -742,7 +742,21 @@ class CustomPromptedSwinTransformer(SwinTransformer):
             param.requires_grad = False
 
         self.prompt_network = nn.Sequential(
-            nn.Linear(self.embed_dims, 512),
+            # First convolutional layer
+            nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1),  # output: (8, 32, 384, 384)
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),  # output: (8, 32, 192, 192)
+
+            # Second convolutional layer
+            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),  # output: (8, 64, 192, 192)
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),  # output: (8, 64, 96, 96)
+
+            # Flatten
+            nn.Flatten(),  # output: (8, 64*96*96)
+
+            # Fully connected layers, similar to what you had
+            nn.Linear(64*96*96, 512),
             nn.ReLU(),
             nn.Linear(512, self.prompt_length * self.embed_dims)
         )
@@ -764,6 +778,7 @@ class CustomPromptedSwinTransformer(SwinTransformer):
         self.prompt = nn.Parameter(prompt, requires_grad=True)
 
     def forward(self, x):
+        dynamic_prompt = self.prompt_network(x)
         x, hw_shape = self.patch_embed(x)
         if self.use_abs_pos_embed:
             x = x + resize_pos_embed(
@@ -778,7 +793,6 @@ class CustomPromptedSwinTransformer(SwinTransformer):
             self.prompt_initialized = True
 
         x_avg = x.mean(dim=1)  # Average across the sequence dimension
-        dynamic_prompt = self.prompt_network(x_avg)
         dynamic_prompt = dynamic_prompt.view(-1, self.prompt_length, self.embed_dims)
 
         # prompt = self.prompt.unsqueeze(1).expand(-1, x.shape[0], -1, -1)
