@@ -6,8 +6,8 @@ _base_ = [
 ]
 
 lr = 1e-6
-train_bs = 2
-val_bs = 4
+train_bs = 4
+val_bs = 24
 dataset = 'colon'
 model_name = 'swinv2-l'
 exp_num = 1
