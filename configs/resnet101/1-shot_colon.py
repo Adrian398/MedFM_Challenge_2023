@@ -9,9 +9,9 @@ _base_ = [
 # Pre-trained Checkpoint Path
 checkpoint = 'https://download.openmmlab.com/mmclassification/v0/resnet/resnet101_8xb32_in1k_20210831-539c63f8.pth'  # noqa
 
-lr = 1e-6
-train_bs = 16
-val_bs = 128
+lr = 5e-6
+train_bs = 32
+val_bs = 256
 dataset = 'colon'
 model_name = 'resnet101'
 exp_num = 4
@@ -36,7 +36,7 @@ model = dict(
         num_classes=2,
         in_channels=2048,
         num_heads=1,
-        lam=0.1,
+        lam=0.15,
         loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)))
 
 # dataset setting
@@ -49,6 +49,7 @@ train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='RandomResizedCrop', scale=448, crop_ratio_range=(0.7, 1.0)),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
 ]
 
@@ -105,6 +106,25 @@ visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBack
 #         convert_to_iter_based=True),
 #     dict(type='StepLR', by_epoch=True, step_size=6, gamma=0.1)
 # ]
+
+optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=lr, type='AdamW', weight_decay=0.01)
+
+optim_wrapper = dict(
+    optimizer=optimizer,
+    paramwise_cfg=dict(
+        norm_decay_mult=0.0,
+        bias_decay_mult=0.0,
+        flat_decay_mult=0.0,
+        custom_keys={
+            '.absolute_pos_embed': dict(decay_mult=0.0),
+            '.relative_position_bias_table': dict(decay_mult=0.0)
+        }),
+)
+
+param_scheduler = [
+    dict(by_epoch=True, end=1, start_factor=1, type='LinearLR'),
+    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
+]
 
 train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
 val_cfg = dict()
