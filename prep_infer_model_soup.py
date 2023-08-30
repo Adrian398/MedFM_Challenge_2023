@@ -22,13 +22,13 @@ nshot = 10
 dataset = 'endo'
 model_name = 'swinv2'
 exp_num = 1
-seed = 2049
+seed = -1000
 
 
 checkpoint_filenames = []
-configs_for_checkpoints = []
+configs_for_checkpoints_filenames = []
 
-seed = False
+use_seed = False
 
 start_dir = "/scratch/medfm/medfm-challenge/work_dirs/" + dataset + "/" + str(nshot) + "-shot"
 # Walk through the base directory and its subdirectories
@@ -47,9 +47,9 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
                     
                     seed_string = "seed = " + str(seed)
                     exp_num_string = "exp_num = " + str(exp_num) 
-                    if seed:
+                    if use_seed:
                         if seed_string in config and exp_num_string in config:
-                            configs_for_checkpoints.append(config)
+                            configs_for_checkpoints_filenames.append(os.path.join(start_dir, dirpath, filename))
                             filenames_to_get_pth = os.listdir(os.path.join(start_dir, dirpath))
                             for file_name_to_get_pth in filenames_to_get_pth:
                                 if file_name_to_get_pth.endswith(".pth") and "best" in file_name_to_get_pth:
@@ -57,7 +57,7 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
                                     checkpoint_filenames.append(os.path.join(start_dir, dirpath, file_name_to_get_pth))
                     else: 
                         if exp_num_string in config:
-                            configs_for_checkpoints.append(config)
+                            configs_for_checkpoints_filenames.append(os.path.join(start_dir, dirpath, filename))
                             filenames_to_get_pth = os.listdir(os.path.join(start_dir, dirpath))
                             for file_name_to_get_pth in filenames_to_get_pth:
                                 if file_name_to_get_pth.endswith(".pth") and "best" in file_name_to_get_pth:
@@ -68,9 +68,11 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
 #checkpoint_filenames = ["/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs4_lr0.0005_exp1_20230821-004750/best_multi-label_mAP_epoch_11.pth", "/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs8_lr0.0005_exp1_20230821-172020/best_multi-label_mAP_epoch_100.pth"]
 
 print(checkpoint_filenames)
-print(configs_for_checkpoints)
-'''
-checkpoint_filenames = checkpoint_filenames[:10]
+print(configs_for_checkpoints_filenames)
+
+#take just three 
+###############REMOVE LATER!!!!!##############################################
+checkpoint_filenames = checkpoint_filenames[:3]
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 state_dicts = []
 for f in checkpoint_filenames:
@@ -80,8 +82,8 @@ for f in checkpoint_filenames:
 ####create greedy soup
 val_results = []
 #create val results of all models which could be included in the soup
-for filename in checkpoint_filenames:
-    cfg = Config.fromfile("configs/swinv2-b/10-shot_endo.py")
+for i, filename in enumerate(checkpoint_filenames):
+    cfg = Config.fromfile(configs_for_checkpoints_filenames[i])
     cfg.load_from = filename
     runner = Runner.from_cfg(cfg)
     metrics = runner.test()
@@ -109,13 +111,12 @@ for i in range(1, len(state_dicts)):
   # benchmark and conditionally append
   sd = get_sd(state_dicts, alphal)
   folder_path =  checkpoint_filenames[0].split("-shot")[0] + "-shot/modelsoup"
-  model = "swin"
 
 
   if not os.path.exists(folder_path):
     # If the folder doesn't exist, create it
     os.makedirs(folder_path)
-  model_soup_path = folder_path + "/" + model + "_soup.pth"
+  model_soup_path = folder_path + "/" + model_name + "_soup.pth"
   torch.save(sd, model_soup_path)
 
 
@@ -137,9 +138,9 @@ for j in best_ingredients:
   alphal[j] = 1 / len(best_ingredients)
 sd = get_sd(state_dicts, alphal)
 
-best_model_soup_path = folder_path + "/" + model + "_soup_best.pth"
+best_model_soup_path = folder_path + "/" + model_name + "exp" + str(exp_num) + str(seed) +  "_soup_best.pth"
 torch.save(sd, best_model_soup_path)
-cfg = Config.fromfile("configs/swinv2-b/10-shot_endo.py")
+cfg = Config.fromfile(configs_for_checkpoints_filenames[0])
 cfg.load_from = best_model_soup_path
 runner = Runner.from_cfg(cfg)
 metrics = runner.test()
