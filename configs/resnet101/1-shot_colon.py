@@ -3,7 +3,7 @@ _base_ = [
     '../schedules/adamw_inverted_cosine_lr.py',
     'mmpretrain::_base_/datasets/voc_bs16.py',
     'mmpretrain::_base_/default_runtime.py'
-    '../custom_imports.py',
+    #'../custom_imports.py',
 ]
 
 # Pre-trained Checkpoint Path
