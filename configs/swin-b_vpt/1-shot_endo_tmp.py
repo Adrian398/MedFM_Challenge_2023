@@ -12,11 +12,11 @@ train_bs = 8
 vpl = 5
 dataset = 'endo'
 model_name = 'swin'
-exp_num = 1
+exp_num = 2
 nshot = 5
 seed = 123
 randomness = dict(seed=seed)
-mt = "SemiFreezePromptedSwinTransformer"
+mt = "PromptedSwinTransformer"
 run_name = f'endo_seed{seed}_{mt}_bs{train_bs}_lr{lr}_exp{exp_num}_'
 work_dir = f'work_dirs/temp/{nshot}-shot/{run_name}'
 
