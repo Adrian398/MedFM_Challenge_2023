@@ -9,8 +9,8 @@ _base_ = [
 checkpoint = 'https://download.openmmlab.com/mmclassification/v0/resnet/resnet101_8xb32_in1k_20210831-539c63f8.pth'  # noqa
 
 lr = 1e-6
-train_bs = 2
-val_bs = 4
+train_bs = 32
+val_bs = 256
 dataset = 'colon'
 model_name = 'resnet101'
 exp_num = 4
