@@ -5,7 +5,7 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 from termcolor import colored
 
 parser = argparse.ArgumentParser(description='Choose by which metric the best runs should be picked: map / auc / agg)')
-parser.add_argument('--metric', type=str, default='map', help='Metric type, default is map')
+parser.add_argument('--metric', type=str, default='agg', help='Metric type, default is agg')
 parser.add_argument('--exclude', type=str, default='', help='Comma separated model names to exclude')
 parser.add_argument('--eval', action='store_true',
                     help='If this flag is set, no files will be created, simply the best runs will be listed. (default false)')
