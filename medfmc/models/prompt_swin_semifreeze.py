@@ -730,9 +730,9 @@ class SemiFreezePromptedSwinTransformer(SwinTransformer):
             dpr = dpr[depth:]
             embed_dims.append(stage.out_channels)
 
-        for param in self.parameters():
-            if random() >= 0.9:
-                param.requires_grad = False
+        # for param in self.parameters():
+        #     if random() >= 0.9:
+        #         param.requires_grad = False
 
         self.prompt_layers = [0] if prompt_layers is None else prompt_layers
         prompt = torch.empty(len(self.prompt_layers), prompt_length, self.embed_dims)
