@@ -187,13 +187,12 @@ for task in tasks:
                 report.append(
                     "---------------------------------------------------------------------------------------------------------------")
 
+            for run in best_settings[task][shot][exp]:
+                run_path_to_print = run[0].split(os.sep)[-1]
+                report.append(f"| {task}/{shot}-shot/exp{exp}\t{metric}: {run[1]:.2f}\t{run_path_to_print}")
             if len(best_runs) < N_best:
                 for i in range(N_best - len(best_runs)):
                     report.append(f"| {task}/{shot}-shot/exp{exp}\tNo run found")
-            else:
-                for run in best_settings[task][shot][exp]:
-                    run_path_to_print = run[0].split(os.sep)[-1]
-                    report.append(f"| {task}/{shot}-shot/exp{exp}\t{metric}: {run[1]:.2f}\t{run_path_to_print}")
 
 data_complete = True
 report.append(
