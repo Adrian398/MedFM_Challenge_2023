@@ -235,10 +235,13 @@ user_input = input(f"\nDo you want to continue with inference on the cluster? (y
 if user_input.strip().lower() == 'no':
     exit()
 
+submission_dir = os.path.join("submissions", "evaluation")
+if not os.path.exists(submission_dir):
+    os.makedirs(submission_dir)
+
 # create dir for submission and config
 date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
-
-submission_dir = os.path.join("submissions", "evaluation", date_pattern)
+submission_dir_timestamp = os.path.join(submission_dir, date_pattern)
 configs_dir = os.path.join(submission_dir, "configs")
 predictions_dir = os.path.join(submission_dir, "predictions")
 scratch_repo_path = os.path.join("/scratch", "medfm", "medfm-challenge")
