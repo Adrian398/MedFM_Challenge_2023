@@ -205,9 +205,8 @@ def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
     gpu_cycle = itertools.cycle(gpus)
 
     for command in commands:
-        cmd_str = " ".join(command)
         gpu = next(gpu_cycle)
-        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{cmd_str}"'
+        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}"'
         subprocess.run(slurm_cmd, shell=True)
         time.sleep(delay_seconds)
 
