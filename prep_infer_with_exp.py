@@ -261,6 +261,11 @@ for run_path in best_runs:
     checkpoint_path = os.path.join(run_path, checkpoint_filename)
 
     images_path = os.path.join(scratch_repo_path, "data", "MedFMC_val", task, "images")
+
+    predictions_dest_dir = os.path.join(predictions_dir, f"exp{exp}")
+    if not os.path.exists(predictions_dest_dir):
+        os.makedirs(predictions_dest_dir)
+
     csv_name = f"{task}_{shot}_submission.csv"
     out_path = os.path.join(predictions_dir, f"exp{exp}", csv_name)
 
