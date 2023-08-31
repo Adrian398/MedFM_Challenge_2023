@@ -13,7 +13,7 @@ from termcolor import colored
 parser = argparse.ArgumentParser(description='Choose by which metric the best runs should be picked: map / auc / agg)')
 parser.add_argument('--metric', type=str, default='agg', help='Metric type, default is agg')
 parser.add_argument('--exclude', type=str, default='', help='Comma separated model names to exclude')
-parser.add_argument('--n_best', type=int, default=5, help='Returns the N best models per setting')
+parser.add_argument('--n_best', type=int, default=1, help='Returns the N best models per setting')
 parser.add_argument("--gpu", type=str, default=None, help="GPU type: 'c'=rtx4090, '8a'=rtx2070ti or 'ab'=rtx3090.")
 parser.add_argument('--eval', action='store_true',
                     help='If this flag is set, no files will be created, simply the best runs will be listed. (default false)')
