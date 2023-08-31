@@ -15,8 +15,7 @@ parser.add_argument('--metric', type=str, default='agg', help='Metric type, defa
 parser.add_argument('--exclude', type=str, default='', help='Comma separated model names to exclude')
 parser.add_argument('--n_best', type=int, default=1, help='Returns the N best models per setting')
 parser.add_argument("--gpu", type=str, default=None, help="GPU type: 'c'=rtx4090, '8a'=rtx2070ti or 'ab'=rtx3090.")
-parser.add_argument('--eval', action='store_true',
-                    help='If this flag is set, no files will be created, simply the best runs will be listed. (default false)')
+
 args = parser.parse_args()
 metric = args.metric
 gpu_type = args.gpu
@@ -174,9 +173,6 @@ for line in report:
     else:
         print(line)
 report.append("---------------------------------------------------------------------------------------------------------------")
-
-if args.eval:
-    exit()
 
 if not data_complete:
     print(colored(f"Could not find {N_best} runs for every setting, aborting the creation of infer file.", 'red'))
