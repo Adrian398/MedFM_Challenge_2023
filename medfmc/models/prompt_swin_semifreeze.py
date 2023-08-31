@@ -795,7 +795,7 @@ class SemiFreezePromptedSwinTransformer(SwinTransformer):
         # Names of some parameters in has been changed.
         version = local_metadata.get('version', None)
         if (version is None or version < 2) and \
-                self.__class__ is PromptedSwinTransformer:
+                self.__class__ is SemiFreezePromptedSwinTransformer:
             final_stage_num = len(self.stages) - 1
             state_dict_keys = list(state_dict.keys())
             for k in state_dict_keys:
@@ -804,7 +804,7 @@ class SemiFreezePromptedSwinTransformer(SwinTransformer):
                     state_dict[convert_key] = state_dict[k]
                     del state_dict[k]
         if (version is None or version < 3) and \
-                self.__class__ is PromptedSwinTransformer:
+                self.__class__ is SemiFreezePromptedSwinTransformer:
             state_dict_keys = list(state_dict.keys())
             for k in state_dict_keys:
                 if 'attn_mask' in k:
