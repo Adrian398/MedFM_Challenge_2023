@@ -1,30 +1,19 @@
 # Copyright (c) OpenMMLab. All rights reserved.
+from copy import deepcopy
+from typing import Sequence
+from random import random
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.checkpoint as cp
-from copy import deepcopy
-
-from copy import deepcopy
-from typing import Sequence
-
-import torch
-import torch.nn as nn
-import torch.utils.checkpoint as cp
-from mmcv.cnn.bricks.transformer import PatchEmbed, PatchMerging
-from mmengine.model import ModuleList
-from mmpretrain.registry import MODELS
-
-from mmpretrain.models.utils import (ShiftWindowMSA, resize_pos_embed, to_2tuple)
-
-
-from mmpretrain.models.backbones.swin_transformer import (SwinBlock,
-                                                     SwinBlockSequence,
-                                                     SwinTransformer)
-from mmpretrain.models.utils.attention import ShiftWindowMSA, WindowMSA
-from mmcv.cnn.bricks.transformer import (AdaptivePadding, PatchEmbed,
+from mmcv.cnn.bricks.transformer import (PatchEmbed,
                                          PatchMerging)
-from typing import List, Sequence
+from mmengine.model import ModuleList
+from mmpretrain.models.backbones.swin_transformer import (SwinBlock, SwinBlockSequence, SwinTransformer)
+from mmpretrain.models.utils import (resize_pos_embed, to_2tuple)
+from mmpretrain.models.utils.attention import ShiftWindowMSA, WindowMSA
+from mmpretrain.registry import MODELS
 
 
 class PromptedPatchMerging(PatchMerging):
@@ -60,18 +49,18 @@ class PromptedPatchMerging(PatchMerging):
     """
 
     def __init__(
-        self,
-        in_channels,
-        out_channels,
-        kernel_size=2,
-        stride=None,
-        padding='corner',
-        dilation=1,
-        bias=False,
-        norm_cfg=dict(type='LN'),
-        init_cfg=None,
-        prompt_length=1,
-        prompt_pos='prepend',
+            self,
+            in_channels,
+            out_channels,
+            kernel_size=2,
+            stride=None,
+            padding='corner',
+            dilation=1,
+            bias=False,
+            norm_cfg=dict(type='LN'),
+            init_cfg=None,
+            prompt_length=1,
+            prompt_pos='prepend',
     ):
         super().__init__(
             in_channels=in_channels,
@@ -217,9 +206,9 @@ class PromptedWindowMSA(WindowMSA):
 
         relative_position_bias = self.relative_position_bias_table[
             self.relative_position_index.view(-1)].view(
-                self.window_size[0] * self.window_size[1],
-                self.window_size[0] * self.window_size[1],
-                -1)  # Wh*Ww,Wh*Ww,nH
+            self.window_size[0] * self.window_size[1],
+            self.window_size[0] * self.window_size[1],
+            -1)  # Wh*Ww,Wh*Ww,nH
         relative_position_bias = relative_position_bias.permute(
             2, 0, 1).contiguous()  # nH, Wh*Ww, Wh*Ww
 
@@ -239,7 +228,7 @@ class PromptedWindowMSA(WindowMSA):
                 _H + self.prompt_length,
                 self.prompt_length,
                 device=attn.device), relative_position_bias),
-                                               dim=-1)
+                dim=-1)
 
         attn = attn + relative_position_bias.unsqueeze(0)
 
@@ -251,13 +240,13 @@ class PromptedWindowMSA(WindowMSA):
                 # expand relative_position_bias
                 mask = torch.cat((torch.zeros(
                     nW, self.prompt_length, _W, device=attn.device), mask),
-                                 dim=1)
+                    dim=1)
                 mask = torch.cat((torch.zeros(
                     nW,
                     _H + self.prompt_length,
                     self.prompt_length,
                     device=attn.device), mask),
-                                 dim=-1)
+                    dim=-1)
 
             attn = attn.view(B_ // nW, nW, self.num_heads, N,
                              N) + mask.unsqueeze(1).unsqueeze(0)
@@ -320,10 +309,10 @@ class PromptedShiftWindowMSA(ShiftWindowMSA):
                  proj_drop=0,
                  dropout_layer=dict(type='DropPath', drop_prob=0.),
                  pad_small_map=False,
-                #  input_resolution=None,
-                #  auto_pad=None,
+                 #  input_resolution=None,
+                 #  auto_pad=None,
                  window_msa=WindowMSA,
-                #  msa_cfg=dict(),
+                 #  msa_cfg=dict(),
                  init_cfg=None,
                  prompt_length=1,
                  prompt_pos='prepend'):
@@ -369,8 +358,8 @@ class PromptedShiftWindowMSA(ShiftWindowMSA):
             query = query[:, self.prompt_length:, :]
             L = L - self.prompt_length
 
-        assert L == H * W, f"The query length {L} doesn't match the input "\
-            f'shape ({H}, {W}).'
+        assert L == H * W, f"The query length {L} doesn't match the input " \
+                           f'shape ({H}, {W}).'
         query = query.view(B, H, W, C)
 
         window_size = self.window_size
@@ -410,7 +399,7 @@ class PromptedShiftWindowMSA(ShiftWindowMSA):
         # nW*B, window_size, window_size, C
         query_windows = self.window_partition(query, window_size)
         # nW*B, window_size*window_size, C
-        query_windows = query_windows.view(-1, window_size**2, C)
+        query_windows = query_windows.view(-1, window_size ** 2, C)
 
         # add back the prompt for attn for parralel-based prompts
         # nW*B, prompt_length + window_size*window_size, C
@@ -537,6 +526,7 @@ class PromptedSwinBlock(SwinBlock):
 
         def _inner_forward(x):
             identity = x
+
             x = self.norm1(x)
             x = self.attn(x, hw_shape)
             x = x + identity
@@ -668,31 +658,30 @@ class PromptedSwinBlockSequence(SwinBlockSequence):
 
 
 @MODELS.register_module()
-class CustomPromptedSwinTransformer(SwinTransformer):
+class SemiFreezePromptedSwinTransformer(SwinTransformer):
 
     def __init__(
-        self,
-        arch='base',
-        img_size=224,
-        patch_size=4,
-        in_channels=3,
-        window_size=7,
-        drop_path_rate=0.1,
-        with_cp=False,
-        pad_small_map=False,
-        stage_cfgs=dict(),
-        patch_cfg=dict(),
-        prompt_length=1,
-        prompt_layers=None,
-        prompt_pos='prepend',
-        prompt_init='normal',
-        **kwargs
+            self,
+            arch='base',
+            img_size=224,
+            patch_size=4,
+            in_channels=3,
+            window_size=7,
+            drop_path_rate=0.1,
+            with_cp=False,
+            pad_small_map=False,
+            stage_cfgs=dict(),
+            patch_cfg=dict(),
+            prompt_length=1,
+            prompt_layers=None,
+            prompt_pos='prepend',
+            prompt_init='normal',
+            **kwargs
     ):
         super().__init__(arch=arch, **kwargs)
         self.prompt_length = prompt_length
         self.prompt_pos = prompt_pos
         self.avgpool = nn.AdaptiveAvgPool1d(1)
-
 
         # stochastic depth
         total_depth = sum(self.depths)
@@ -722,6 +711,7 @@ class CustomPromptedSwinTransformer(SwinTransformer):
                 'prompt_pos': prompt_pos,
                 **stage_cfg
             }
+
             _patch_cfg = dict(
                 in_channels=in_channels,
                 input_size=img_size,
@@ -736,35 +726,30 @@ class CustomPromptedSwinTransformer(SwinTransformer):
 
             stage = PromptedSwinBlockSequence(**_stage_cfg)
             self.stages.append(stage)
+
             dpr = dpr[depth:]
             embed_dims.append(stage.out_channels)
+
         for param in self.parameters():
-            param.requires_grad = False
+            if random() >= 0.5:
+                param.requires_grad = False
 
-        self.prompt_network = nn.Sequential(
-            # First convolutional layer
-            nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1),  # output: (8, 32, 384, 384)
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # output: (8, 32, 192, 192)
-
-            # Second convolutional layer
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),  # output: (8, 64, 192, 192)
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # output: (8, 64, 96, 96)
-
-            # Flatten
-            nn.Flatten(),  # output: (8, 64*96*96)
-
-            # Fully connected layers, similar to what you had
-            nn.Linear(64*96*96, 512),
-            nn.ReLU(),
-            nn.Linear(512, self.prompt_length * self.embed_dims),
-            nn.Tanh()
-        )
         self.prompt_layers = [0] if prompt_layers is None else prompt_layers
+        prompt = torch.empty(len(self.prompt_layers), prompt_length, self.embed_dims)
+        if prompt_init == 'uniform':
+            nn.init.uniform_(prompt, -0.08, 0.08)
+        elif prompt_init == 'zero':
+            nn.init.zeros_(prompt)
+        elif prompt_init == 'kaiming':
+            nn.init.kaiming_normal_(prompt)
+        elif prompt_init == 'token':
+            nn.init.zeros_(prompt)
+            self.prompt_initialized = False
+        else:
+            nn.init.normal_(prompt, std=0.02)
+        self.prompt = nn.Parameter(prompt, requires_grad=True)
 
     def forward(self, x):
-        dynamic_prompt = self.prompt_network(x)
         x, hw_shape = self.patch_embed(x)
         if self.use_abs_pos_embed:
             x = x + resize_pos_embed(
@@ -777,16 +762,12 @@ class CustomPromptedSwinTransformer(SwinTransformer):
             with torch.no_grad():
                 self.prompt.data += x.mean([0, 1]).detach().clone()
             self.prompt_initialized = True
-
-        x_avg = x.mean(dim=1)  # Average across the sequence dimension
-        dynamic_prompt = dynamic_prompt.view(-1, self.prompt_length, self.embed_dims)
-
-        # prompt = self.prompt.unsqueeze(1).expand(-1, x.shape[0], -1, -1)
+        prompt = self.prompt.unsqueeze(1).expand(-1, x.shape[0], -1, -1)
         # prompt: [layer, batch, length, dim]
         if self.prompt_pos == 'prepend':
             # x = torch.cat([x[:, :1, :], prompt[0, :, :, :], x[:, 1:, :]],
             #               dim=1)
-            x = torch.cat([dynamic_prompt, x], dim=1)
+            x = torch.cat([prompt[0, :, :, :], x], dim=1)
             # vpt_swin: (batch_size, n_prompt + n_patches, hidden_dim)
 
         outs = []
@@ -814,7 +795,7 @@ class CustomPromptedSwinTransformer(SwinTransformer):
         # Names of some parameters in has been changed.
         version = local_metadata.get('version', None)
         if (version is None or version < 2) and \
-                self.__class__ is CustomPromptedSwinTransformer:
+                self.__class__ is SemiFreezePromptedSwinTransformer:
             final_stage_num = len(self.stages) - 1
             state_dict_keys = list(state_dict.keys())
             for k in state_dict_keys:
@@ -823,7 +804,7 @@ class CustomPromptedSwinTransformer(SwinTransformer):
                     state_dict[convert_key] = state_dict[k]
                     del state_dict[k]
         if (version is None or version < 3) and \
-                self.__class__ is CustomPromptedSwinTransformer:
+                self.__class__ is SemiFreezePromptedSwinTransformer:
             state_dict_keys = list(state_dict.keys())
             for k in state_dict_keys:
                 if 'attn_mask' in k:
