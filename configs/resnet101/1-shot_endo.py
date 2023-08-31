@@ -9,11 +9,11 @@ _base_ = [
 checkpoint = 'https://download.openmmlab.com/mmclassification/v0/resnet/resnet101_8xb32_in1k_20210831-539c63f8.pth'  # noqa
 
 lr = 1e-6
-train_bs = 32
+train_bs = 20
 val_bs = 128
 dataset = 'endo'
 model_name = 'resnet101'
-exp_num = 1
+exp_num = 3
 nshot = 1
 
 run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
@@ -85,3 +85,8 @@ visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBack
 train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
 
 randomness = dict(seed=0)
+
+param_scheduler = [
+    dict(by_epoch=True, end=1, start_factor=0.1, type='LinearLR'),
+    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
+]
