@@ -731,7 +731,7 @@ class SemiFreezePromptedSwinTransformer(SwinTransformer):
             embed_dims.append(stage.out_channels)
 
         for param in self.parameters():
-            if random() >= 0.3:
+            if random() >= 0.1:
                 param.requires_grad = False
 
         self.prompt_layers = [0] if prompt_layers is None else prompt_layers
