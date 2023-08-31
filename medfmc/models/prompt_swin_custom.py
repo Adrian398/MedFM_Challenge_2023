@@ -758,7 +758,8 @@ class CustomPromptedSwinTransformer(SwinTransformer):
             # Fully connected layers, similar to what you had
             nn.Linear(64*96*96, 512),
             nn.ReLU(),
-            nn.Linear(512, self.prompt_length * self.embed_dims)
+            nn.Linear(512, self.prompt_length * self.embed_dims),
+            nn.Tanh()
         )
 
         self.prompt_layers = [0] if prompt_layers is None else prompt_layers
@@ -791,6 +792,7 @@ class CustomPromptedSwinTransformer(SwinTransformer):
             with torch.no_grad():
                 self.prompt.data += x.mean([0, 1]).detach().clone()
             self.prompt_initialized = True
+        prompt = self.prompt.unsqueeze(1).expand(-1, x.shape[0], -1, -1)
 
         x_avg = x.mean(dim=1)  # Average across the sequence dimension
         dynamic_prompt = dynamic_prompt.view(-1, self.prompt_length, self.embed_dims)
@@ -801,6 +803,7 @@ class CustomPromptedSwinTransformer(SwinTransformer):
             # x = torch.cat([x[:, :1, :], prompt[0, :, :, :], x[:, 1:, :]],
             #               dim=1)
             x = torch.cat([dynamic_prompt, x], dim=1)
+            x = torch.cat([prompt[0, :, :, :], x], dim=1)
             # vpt_swin: (batch_size, n_prompt + n_patches, hidden_dim)
 
         outs = []
