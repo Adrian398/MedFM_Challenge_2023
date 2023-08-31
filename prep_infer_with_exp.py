@@ -242,10 +242,10 @@ if not os.path.exists(submission_dir):
 # create dir for submission and config
 date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
 submission_dir_timestamp = os.path.join(submission_dir, date_pattern)
+
 configs_dir = os.path.join(submission_dir, "configs")
 predictions_dir = os.path.join(submission_dir, "predictions")
 scratch_repo_path = os.path.join("/scratch", "medfm", "medfm-challenge")
-os.makedirs(submission_dir)
 os.makedirs(configs_dir)
 os.makedirs(predictions_dir)
 
