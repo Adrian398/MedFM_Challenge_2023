@@ -9,14 +9,14 @@ warmup_lr = 1e-3
 lr = 1e-4
 cos_end_lr = 1e-6
 train_bs = 8
-vpl = 10
+vpl = 5
 dataset = 'endo'
 model_name = 'swin'
 exp_num = 1
 nshot = 5
 seed = 123
 randomness = dict(seed=seed)
-mt = "PromptedSwinTransformer"
+mt = "CustomPromptedSwinTransformer"
 run_name = f'endo_seed{seed}_{mt}_bs{train_bs}_lr{lr}_exp{exp_num}_'
 work_dir = f'work_dirs/temp/{nshot}-shot/{run_name}'
 
