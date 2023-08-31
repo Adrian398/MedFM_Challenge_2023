@@ -143,7 +143,7 @@ for task in tasks:
         for exp in exps:
             best_runs = get_5_best_exp_run_dirs(task=task, shot=shot, exp=exp, metric=metric)
             best_settings[task][shot][exp] = best_runs
-            print("---------------------------------------------------------------------------------------------------------------")
+            report.append("---------------------------------------------------------------------------------------------------------------")
 
             if len(best_runs) == 0:
                 report.append(f"| {task}/{shot}-shot/exp{exp}\tNo run found")
