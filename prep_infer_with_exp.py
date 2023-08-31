@@ -265,7 +265,8 @@ for run_path in best_runs:
     out_path = os.path.join(predictions_dir, f"exp{exp}", csv_name)
 
     config_dest_dir = os.path.join(configs_dir, f"exp{exp}")
-    os.makedirs(config_dest_dir)
+    if not os.path.exists(config_dest_dir):
+        os.makedirs(config_dest_dir)
 
     # copy config into submission directory
     shutil.copy(config_path, os.path.join(config_dest_dir, config_filename))
