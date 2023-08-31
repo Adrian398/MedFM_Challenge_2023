@@ -194,7 +194,8 @@ best_runs = []
 for task in tasks:
     for shot in shots:
         for exp in exps:
-            best_runs.append(best_settings[task][shot][exp])
+            for run in best_settings[task][shot][exp]:
+                best_runs.append(run)
 
 print("\n".join(best_runs))
 
