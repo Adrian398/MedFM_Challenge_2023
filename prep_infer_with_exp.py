@@ -1,5 +1,8 @@
 import argparse
 import os
+import re
+import shutil
+from datetime import datetime
 
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from termcolor import colored
@@ -124,14 +127,17 @@ def get_N_best_exp_run_dirs(task, shot, exp, metric):
         if score == -1:
             continue
 
-        run_score_list.append((run_dir, score))
+        run_score_list.append((run_dir_path, score))
 
     run_score_list.sort(key=lambda x: x[1], reverse=True)
 
     return run_score_list[:min(N_best, len(run_score_list))]
 
-
 report = []
+report.append("\n---------------------------------------------------------------------------------------------------------------")
+report.append(f"| Best runs for each setting, ranked by {metric}:")
+report.append("---------------------------------------------------------------------------------------------------------------")
+
 best_settings = {}
 
 for task in tasks:
@@ -143,76 +149,75 @@ for task in tasks:
         for exp in exps:
             best_runs = get_N_best_exp_run_dirs(task=task, shot=shot, exp=exp, metric=metric)
             best_settings[task][shot][exp] = best_runs
-            report.append("---------------------------------------------------------------------------------------------------------------")
+            if N_best > 1:
+                report.append("---------------------------------------------------------------------------------------------------------------")
 
             if len(best_runs) < N_best:
                 for i in range(N_best - len(best_runs)):
                     report.append(f"| {task}/{shot}-shot/exp{exp}\tNo run found")
             else:
                 for run in best_settings[task][shot][exp]:
-                    report.append(f"| {task}/{shot}-shot/exp{exp}\t{metric}: {run[1]:.2f}\t{run[0]}")
+                    run_path_to_print = run[0].split(os.sep)[-1]
+                    report.append(f"| {task}/{shot}-shot/exp{exp}\t{metric}: {run[1]:.2f}\t{run_path_to_print}")
 
-print("")
-print("---------------------------------------------------------------------------------------------------------------")
-print(f"| Best runs for each setting, ranked by {metric}:")
-print("---------------------------------------------------------------------------------------------------------------")
+
 for line in report:
     if line.__contains__("No run found"):
         print(colored(line, 'red'))
     else:
         print(line)
-print("---------------------------------------------------------------------------------------------------------------")
+report.append("---------------------------------------------------------------------------------------------------------------")
 
-# if args.eval:
-#     exit()
+if args.eval:
+    exit()
 
-# # create dir for submission and config
-# date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
-# submission_dir = os.path.join("submissions", date_pattern)
-# configs_dir = os.path.join(submission_dir, "configs")
-# predictions_dir = os.path.join(submission_dir, "predictions")
-#
-# os.makedirs(submission_dir)
-# with open(os.path.join(submission_dir, "report.txt"), "w") as file:
-#     txt_report = ""
-#     for line in report:
-#         txt_report += line + "\n"
-#     file.write(txt_report)
-#
-# os.makedirs(configs_dir)
-# os.makedirs(predictions_dir)
-#
-# bash_script = "#!/bin/bash\n"
-# for given_run_path in best_runs:
-#     scratch_repo_path = os.path.join("/scratch", "medfm", "medfm-challenge")
-#
-#     task = given_run_path.split(os.sep)[0]
-#     if task.__contains__("-"):
-#         task = task.split("-")[0]
-#     shot = given_run_path.split(os.sep)[1]
-#
-#     given_run_path = os.path.join("work_dirs", given_run_path)
-#     path_components = given_run_path.split(os.sep)
-#     run_dir = os.path.join(*path_components[:4])
-#     run_dir = os.path.join(scratch_repo_path, run_dir)
-#
-#     config_filename = [file for file in os.listdir(run_dir) if file.endswith(".py")][0]
-#     checkpoint_filename = [file for file in os.listdir(run_dir) if file.endswith(".pth") and file.__contains__("best")][0]
-#
-#     config_path = os.path.join(run_dir, config_filename)
-#     checkpoint_path = os.path.join(run_dir, checkpoint_filename)
-#     images_path = os.path.join(scratch_repo_path, "data", "MedFMC_val", task, "images")
-#     csv_name = f"{task}_{shot}_submission.csv"
-#     out_path = os.path.join(predictions_dir, csv_name)
-#
-#     # copy config into submission directory
-#     shutil.copy(config_path, configs_dir)
-#     command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}\n"
-#     bash_script += command
-#
-# print(f"Saved respective configs to {configs_dir}")
-# print("Created infer.sh")
-# print(f"Run ./infer.sh to create prediction files in {predictions_dir}")
-# with open("infer.sh", "w") as file:
-#     file.write(bash_script)
-# os.chmod("infer.sh", 0o755)
+
+def extract_exp_number(string):
+    match = re.search(r'exp(\d+)', string)
+    return int(match.group(1)) if match else 0
+
+
+# create dir for submission and config
+date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
+
+submission_dir = os.path.join("submissions", "evaluation", date_pattern)
+configs_dir = os.path.join(submission_dir, "configs")
+predictions_dir = os.path.join(submission_dir, "predictions")
+scratch_repo_path = os.path.join("/scratch", "medfm", "medfm-challenge")
+os.makedirs(submission_dir)
+os.makedirs(configs_dir)
+os.makedirs(predictions_dir)
+
+with open(os.path.join(submission_dir, "report.txt"), "w") as file:
+    file.write("\n".join(report))
+
+best_runs = [best_settings[task][shot][exp] for task in tasks for shot in shots for exp in exps]
+print("\n".join(best_runs))
+
+bash_script = "#!/bin/bash\n"
+for run_path in best_runs:
+
+    split_path = run_path.split(os.sep)
+    task, shot, exp = split_path[5], split_path[6], extract_exp_number(split_path[7])
+
+    config_filename = [file for file in os.listdir(run_path) if file.endswith(".py")][0]
+    checkpoint_filename = [file for file in os.listdir(run_path) if file.endswith(".pth") and file.__contains__("best")][0]
+
+    config_path = os.path.join(run_path, config_filename)
+    checkpoint_path = os.path.join(run_path, checkpoint_filename)
+
+    images_path = os.path.join(scratch_repo_path, "data", "MedFMC_val", task, "images")
+    csv_name = f"{task}_{shot}_submission.csv"
+    out_path = os.path.join(predictions_dir, f"exp{exp}", csv_name)
+
+    # copy config into submission directory
+    shutil.copy(config_path, configs_dir)
+    command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}\n"
+    bash_script += command
+
+print(f"Saved respective configs to {configs_dir}")
+print("Created infer.sh")
+print(f"Run ./infer.sh to create prediction files in {predictions_dir}")
+with open("infer.sh", "w") as file:
+    file.write(bash_script)
+os.chmod("infer.sh", 0o755)
