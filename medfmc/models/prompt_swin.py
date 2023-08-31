@@ -1,27 +1,18 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.utils.checkpoint as cp
-from copy import deepcopy
-
 from copy import deepcopy
 from typing import Sequence
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.utils.checkpoint as cp
-from mmengine.model import ModuleList
-from mmpretrain.registry import MODELS
-
-from mmpretrain.models.utils import (ShiftWindowMSA, resize_pos_embed, to_2tuple)
-
-
-from mmpretrain.models.backbones.swin_transformer import (SwinBlock, SwinBlockSequence, SwinTransformer)
-from mmpretrain.models.utils.attention import ShiftWindowMSA, WindowMSA
-from mmcv.cnn.bricks.transformer import (AdaptivePadding, PatchEmbed,
+from mmcv.cnn.bricks.transformer import (PatchEmbed,
                                          PatchMerging)
-from typing import List, Sequence
+from mmengine.model import ModuleList
+from mmpretrain.models.backbones.swin_transformer import (SwinBlock, SwinBlockSequence, SwinTransformer)
+from mmpretrain.models.utils import (resize_pos_embed, to_2tuple)
+from mmpretrain.models.utils.attention import ShiftWindowMSA, WindowMSA
+from mmpretrain.registry import MODELS
 
 
 class PromptedPatchMerging(PatchMerging):
@@ -57,18 +48,18 @@ class PromptedPatchMerging(PatchMerging):
     """
 
     def __init__(
-        self,
-        in_channels,
-        out_channels,
-        kernel_size=2,
-        stride=None,
-        padding='corner',
-        dilation=1,
-        bias=False,
-        norm_cfg=dict(type='LN'),
-        init_cfg=None,
-        prompt_length=1,
-        prompt_pos='prepend',
+            self,
+            in_channels,
+            out_channels,
+            kernel_size=2,
+            stride=None,
+            padding='corner',
+            dilation=1,
+            bias=False,
+            norm_cfg=dict(type='LN'),
+            init_cfg=None,
+            prompt_length=1,
+            prompt_pos='prepend',
     ):
         super().__init__(
             in_channels=in_channels,
@@ -214,9 +205,9 @@ class PromptedWindowMSA(WindowMSA):
 
         relative_position_bias = self.relative_position_bias_table[
             self.relative_position_index.view(-1)].view(
-                self.window_size[0] * self.window_size[1],
-                self.window_size[0] * self.window_size[1],
-                -1)  # Wh*Ww,Wh*Ww,nH
+            self.window_size[0] * self.window_size[1],
+            self.window_size[0] * self.window_size[1],
+            -1)  # Wh*Ww,Wh*Ww,nH
         relative_position_bias = relative_position_bias.permute(
             2, 0, 1).contiguous()  # nH, Wh*Ww, Wh*Ww
 
@@ -236,7 +227,7 @@ class PromptedWindowMSA(WindowMSA):
                 _H + self.prompt_length,
                 self.prompt_length,
                 device=attn.device), relative_position_bias),
-                                               dim=-1)
+                dim=-1)
 
         attn = attn + relative_position_bias.unsqueeze(0)
 
@@ -248,13 +239,13 @@ class PromptedWindowMSA(WindowMSA):
                 # expand relative_position_bias
                 mask = torch.cat((torch.zeros(
                     nW, self.prompt_length, _W, device=attn.device), mask),
-                                 dim=1)
+                    dim=1)
                 mask = torch.cat((torch.zeros(
                     nW,
                     _H + self.prompt_length,
                     self.prompt_length,
                     device=attn.device), mask),
-                                 dim=-1)
+                    dim=-1)
 
             attn = attn.view(B_ // nW, nW, self.num_heads, N,
                              N) + mask.unsqueeze(1).unsqueeze(0)
@@ -317,10 +308,10 @@ class PromptedShiftWindowMSA(ShiftWindowMSA):
                  proj_drop=0,
                  dropout_layer=dict(type='DropPath', drop_prob=0.),
                  pad_small_map=False,
-                #  input_resolution=None,
-                #  auto_pad=None,
+                 #  input_resolution=None,
+                 #  auto_pad=None,
                  window_msa=WindowMSA,
-                #  msa_cfg=dict(),
+                 #  msa_cfg=dict(),
                  init_cfg=None,
                  prompt_length=1,
                  prompt_pos='prepend'):
@@ -366,8 +357,8 @@ class PromptedShiftWindowMSA(ShiftWindowMSA):
             query = query[:, self.prompt_length:, :]
             L = L - self.prompt_length
 
-        assert L == H * W, f"The query length {L} doesn't match the input "\
-            f'shape ({H}, {W}).'
+        assert L == H * W, f"The query length {L} doesn't match the input " \
+                           f'shape ({H}, {W}).'
         query = query.view(B, H, W, C)
 
         window_size = self.window_size
@@ -407,7 +398,7 @@ class PromptedShiftWindowMSA(ShiftWindowMSA):
         # nW*B, window_size, window_size, C
         query_windows = self.window_partition(query, window_size)
         # nW*B, window_size*window_size, C
-        query_windows = query_windows.view(-1, window_size**2, C)
+        query_windows = query_windows.view(-1, window_size ** 2, C)
 
         # add back the prompt for attn for parralel-based prompts
         # nW*B, prompt_length + window_size*window_size, C
@@ -669,22 +660,22 @@ class PromptedSwinBlockSequence(SwinBlockSequence):
 class PromptedSwinTransformer(SwinTransformer):
 
     def __init__(
-        self,
-        arch='base',
-        img_size=224,
-        patch_size=4,
-        in_channels=3,
-        window_size=7,
-        drop_path_rate=0.1,
-        with_cp=False,
-        pad_small_map=False,
-        stage_cfgs=dict(),
-        patch_cfg=dict(),
-        prompt_length=1,
-        prompt_layers=None,
-        prompt_pos='prepend',
-        prompt_init='normal',
-        **kwargs
+            self,
+            arch='base',
+            img_size=224,
+            patch_size=4,
+            in_channels=3,
+            window_size=7,
+            drop_path_rate=0.1,
+            with_cp=False,
+            pad_small_map=False,
+            stage_cfgs=dict(),
+            patch_cfg=dict(),
+            prompt_length=1,
+            prompt_layers=None,
+            prompt_pos='prepend',
+            prompt_init='normal',
+            **kwargs
     ):
         super().__init__(arch=arch, **kwargs)
         self.prompt_length = prompt_length
