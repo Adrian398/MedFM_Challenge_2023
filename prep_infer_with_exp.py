@@ -178,6 +178,11 @@ if not data_complete:
     print(colored(f"Could not find {N_best} runs for every setting, aborting the creation of infer file.", 'red'))
     exit()
 
+# Prompt the user
+user_input = input(f"\nDo you want to continue with inference on the cluster? (yes/no): ")
+
+if user_input.strip().lower() == 'no':
+    exit()
 
 def extract_exp_number(string):
     match = re.search(r'exp(\d+)', string)
