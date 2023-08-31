@@ -254,7 +254,7 @@ for run_path in best_runs:
     # copy config into submission directory
     shutil.copy(config_path, configs_dir)
     command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}\n"
-    commands += command
+    commands.extend(command)
 
 print(f"Saved respective configs to {configs_dir}")
 
