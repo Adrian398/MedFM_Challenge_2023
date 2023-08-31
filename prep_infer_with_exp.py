@@ -260,7 +260,7 @@ print(commands)
 # Display the generated commands
 print("Generated Infer Commands:")
 for command in commands:
-    print(f"{' '.join(command)}")
+    print(command)
 
 # Prompt the user
 user_input = input(f"Do you want to run {len(commands)} commands on the cluster? (yes/no): ")
