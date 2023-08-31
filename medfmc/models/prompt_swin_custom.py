@@ -758,13 +758,13 @@ class CustomPromptedSwinTransformer(SwinTransformer):
             # Fully connected layers, similar to what you had
             nn.Linear(64*96*96, 512),
             nn.ReLU(),
-            nn.Linear(512, (self.prompt_length / 2) * self.embed_dims),
+            nn.Linear(512, int(self.prompt_length / 2) * self.embed_dims),
             nn.Tanh()
         )
 
         self.prompt_layers = [0] if prompt_layers is None else prompt_layers
         prompt = torch.empty(
-            len(self.prompt_layers), (prompt_length / 2), self.embed_dims)
+            len(self.prompt_layers), int(prompt_length / 2), self.embed_dims)
         if prompt_init == 'uniform':
             nn.init.uniform_(prompt, -0.08, 0.08)
         elif prompt_init == 'zero':
