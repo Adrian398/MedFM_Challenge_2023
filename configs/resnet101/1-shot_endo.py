@@ -85,8 +85,3 @@ visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBack
 train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
 
 randomness = dict(seed=0)
-
-param_scheduler = [
-    dict(by_epoch=True, end=1, start_factor=0.1, type='LinearLR'),
-    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
-]

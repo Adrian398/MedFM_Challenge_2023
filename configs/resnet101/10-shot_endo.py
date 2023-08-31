@@ -84,5 +84,4 @@ visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBack
 
 train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=125)
 
-
 randomness = dict(seed=0)
