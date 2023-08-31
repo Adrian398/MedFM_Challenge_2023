@@ -17,10 +17,10 @@ nshot = 5
 seed = 123
 randomness = dict(seed=seed)
 # mt = "CustomPromptedSwinTransformer"
-mt = "SemiFreezePromptedSwinTransformer"
-# mt = "PromptedSwinTransformer"
-# run_name = f'endo_seed{seed}_{mt}_bs{train_bs}_lr{lr}_exp{exp_num}_'
-run_name = f'endo_seed{seed}_{mt}__freeze05_bs{train_bs}_lr{lr}_exp{exp_num}_'
+# mt = "SemiFreezePromptedSwinTransformer"
+mt = "PromptedSwinTransformer"
+run_name = f'endo_seed{seed}_{mt}_bs{train_bs}_lr{lr}_exp{exp_num}_'
+# run_name = f'endo_seed{seed}_{mt}__freeze05_bs{train_bs}_lr{lr}_exp{exp_num}_'
 work_dir = f'work_dirs/temp/{nshot}-shot/{run_name}'
 
 model = dict(
