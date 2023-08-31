@@ -1,0 +1,50 @@
+
+---------------------------------------------------------------------------------------------------------------
+| Best runs for each setting, ranked by Aggregate:
+---------------------------------------------------------------------------------------------------------------
+| colon/1-shot/exp1	Aggregate: 89.87	resnet101_bs32_lr1e-06e-06_exp1__seed_test_20230830-231522
+| colon/1-shot/exp2	Aggregate: 76.47	resnet101_bs32_lr1e-06e-06_exp2__seed_test_20230831-153001
+| colon/1-shot/exp3	Aggregate: 81.45	resnet101_bs32_lr1e-06e-06_exp3__seed_test_20230831-000237
+| colon/1-shot/exp4	Aggregate: 92.87	swinv2_bs8_lr1e-06e-06_exp4__eval-submission_20230828-214810
+| colon/1-shot/exp5	Aggregate: 94.44	swinv2_bs8_lr1e-06e-06_exp5__eval-submission_20230828-201728
+| colon/5-shot/exp1	Aggregate: 98.00	resnet101_bs32_lr1e-06e-06_exp1__seed_test_20230831-011304
+| colon/5-shot/exp2	Aggregate: 97.85	swinv2_bs8_lr1e-06e-06_exp2__eval-submission_20230828-231344
+| colon/5-shot/exp3	Aggregate: 97.53	resnet101_bs32_lr1e-06e-06_exp3__seed_test_20230831-022740
+| colon/5-shot/exp4	Aggregate: 99.25	resnet101_bs32_lr1e-06e-06_exp4__seed_test_20230831-032022
+| colon/5-shot/exp5	Aggregate: 95.00	swin_bs8_lr0.0005_exp5__exp-test_20230824-101643
+| colon/10-shot/exp1	Aggregate: 99.13	swinv2_bs8_lr1e-06e-06_exp1__eval-submission_20230828-223206
+| colon/10-shot/exp2	Aggregate: 98.87	swinv2_bs8_lr1e-06e-06_exp2__eval-submission_20230829-031254
+| colon/10-shot/exp3	Aggregate: 97.46	resnet101_bs32_lr1e-06e-06_exp3__seed_test_20230831-052039
+| colon/10-shot/exp4	Aggregate: 99.04	swinv2_bs8_lr1e-06e-06_exp4__eval-submission_20230829-041641
+| colon/10-shot/exp5	Aggregate: 97.44	resnet101_bs32_lr1e-06e-06_exp5__seed_test_20230831-063616
+| endo/1-shot/exp1	Aggregate: 54.82	swinv2_bs8_lr1e-06e-06_exp1__eval-submission_20230829-063225
+| endo/1-shot/exp2	Aggregate: 50.96	swinv2_bs8_lr1e-06e-06_exp2__eval-submission_20230829-065915
+| endo/1-shot/exp3	Aggregate: 58.44	swinv2_bs8_lr1e-06e-06_exp3__eval-submission_20230829-072320
+| endo/1-shot/exp4	Aggregate: 44.97	resnet101_bs32_lr5e-06e-06_exp4__seed_test_20230831-142923
+| endo/1-shot/exp5	Aggregate: 46.48	resnet101_bs32_lr5e-06e-06_exp5__seed_test_20230831-151531
+| endo/5-shot/exp1	Aggregate: 67.00	swinv2_bs8_lr1e-06e-06_exp1__sanity-test_20230825-162043
+| endo/5-shot/exp2	Aggregate: 65.65	swinv2_bs8_lr1e-06e-06_exp2__eval-submission_20230829-021004
+| endo/5-shot/exp3	Aggregate: 73.46	swinv2_bs8_lr1e-06e-06_exp3__eval-submission_20230829-023635
+| endo/5-shot/exp4	Aggregate: 76.82	swinv2_bs8_lr1e-05_exp4__exp-test_20230824-151647
+| endo/5-shot/exp5	Aggregate: 59.78	swinv2_bs8_lr1e-06e-06_exp5__eval-submission_20230829-103035
+| endo/10-shot/exp1	Aggregate: 88.61	swinv2_bs8_lr1e-06e-06_exp1__eval-submission_20230829-104507
+| endo/10-shot/exp2	Aggregate: 87.54	swinv2_bs8_lr1e-06e-06_exp2__eval-submission_20230829-113620
+| endo/10-shot/exp3	Aggregate: 82.84	swinv2_bs8_lr1e-06e-06_exp3__eval-submission_20230829-115945
+| endo/10-shot/exp4	Aggregate: 88.40	swinv2_bs8_lr1e-06e-06_exp4__eval-submission_20230829-122811
+| endo/10-shot/exp5	Aggregate: 86.59	swinv2_bs8_lr1e-06e-06_exp5__eval-submission_20230829-131208
+| chest/1-shot/exp1	Aggregate: 41.71	swinv2_bs8_lr1e-06e-06_exp1__seed_sanity_check
+| chest/1-shot/exp2	Aggregate: 42.53	swinv2_bs8_lr1e-06e-06_exp2__eval-submission_20230828-164405
+| chest/1-shot/exp3	Aggregate: 37.78	swinv2_bs8_lr1e-06e-06_exp3__eval-submission_20230828-165126
+| chest/1-shot/exp4	Aggregate: 39.20	swinv2_bs8_lr1e-06e-06_exp4__eval-submission_20230828-170854
+| chest/1-shot/exp5	Aggregate: 42.17	swinv2_bs8_lr1e-06e-06_exp5__eval-submission_20230828-171006
+| chest/5-shot/exp1	Aggregate: 57.86	swinv2_bs8_lr1e-06e-06_exp1__eval-submission_20230828-172855
+| chest/5-shot/exp2	Aggregate: 58.74	swinv2_bs8_lr1e-06e-06_exp2__eval-submission_20230828-175625
+| chest/5-shot/exp3	Aggregate: 61.49	swinv2_bs8_lr1e-06e-06_exp3__eval-submission_20230828-174157
+| chest/5-shot/exp4	Aggregate: 60.02	swinv2_bs8_lr1e-06e-06_exp4__eval-submission_20230828-182634
+| chest/5-shot/exp5	Aggregate: 60.61	swinv2_bs8_lr1e-06e-06_exp5__eval-submission_20230828-185242
+| chest/10-shot/exp1	Aggregate: 74.81	swinv2_bs8_lr1e-06e-06_exp1__eval-submission_20230828-182026
+| chest/10-shot/exp2	Aggregate: 72.19	clip-b_1_bs4_lr0.001_10-shot_chest_baseline_test_exp2
+| chest/10-shot/exp3	Aggregate: 73.96	swinv2_bs8_lr1e-06e-06_exp3__eval-submission_20230828-194706
+| chest/10-shot/exp4	Aggregate: 75.54	swinv2_bs8_lr1e-06e-06_exp4__eval-submission_20230828-185627
+| chest/10-shot/exp5	Aggregate: 72.78	swinv2_bs8_lr1e-06e-06_exp5__eval-submission_20230828-201640
+---------------------------------------------------------------------------------------------------------------
