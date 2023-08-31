@@ -1,7 +1,5 @@
 import argparse
 import os
-import shutil
-from datetime import datetime
 
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from termcolor import colored
@@ -9,7 +7,8 @@ from termcolor import colored
 parser = argparse.ArgumentParser(description='Choose by which metric the best runs should be picked: map / auc / agg)')
 parser.add_argument('--metric', type=str, default='map', help='Metric type, default is map')
 parser.add_argument('--exclude', type=str, default='', help='Comma separated model names to exclude')
-parser.add_argument('--eval', action='store_true', help='If this flag is set, no files will be created, simply the best runs will be listed. (default false)')
+parser.add_argument('--eval', action='store_true',
+                    help='If this flag is set, no files will be created, simply the best runs will be listed. (default false)')
 args = parser.parse_args()
 metric = args.metric
 print(metric)
@@ -18,7 +17,6 @@ print(type(metric))
 exclude_models = []
 if len(args.exclude) > 0:
     exclude_models = args.exclude.split(",")
-
 
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
 metric_tags = {"auc": "AUC/AUC_multiclass",
@@ -38,7 +36,6 @@ exps = [1, 2, 3, 4, 5]
 # shots = ["1"]
 
 def get_max_metric_from_event_file(file_path, metric):
-
     event_acc = EventAccumulator(file_path)
     event_acc.Reload()
     scalar_tags = event_acc.Tags()['scalars']
@@ -86,6 +83,7 @@ def get_event_file_from_run_dir(run_dir):
     except Exception:
         return None
 
+
 def exclude_model(name):
     for exclude in exclude_models:
         if name.__contains__(exclude):
@@ -130,7 +128,7 @@ def get_5_best_exp_run_dirs(task, shot, exp, metric):
 
     run_score_list.sort(key=lambda x: x[1], reverse=True)
 
-    return run_score_list[:max(5, len(run_score_list))]
+    return run_score_list[:min(5, len(run_score_list))]
 
 
 report = []
@@ -145,13 +143,13 @@ for task in tasks:
         for exp in exps:
             best_runs = get_5_best_exp_run_dirs(task=task, shot=shot, exp=exp, metric=metric)
             best_settings[task][shot][exp] = best_runs
+            print("---------------------------------------------------------------------------------------------------------------")
 
             if len(best_runs) == 0:
-                report.append(f"| {task}/{shot}-shot/exp{exp}\t No run found")
+                report.append(f"| {task}/{shot}-shot/exp{exp}\tNo run found")
             else:
                 for run in best_settings[task][shot][exp]:
-                    report.append(f"| {task}/{shot}-shot/exp{exp}\t{metric}: {run[1]}\t{run[0]}")
-                    #best_runs.append(os.path.join(task, f"{shot}-shot", best_run))
+                    report.append(f"| {task}/{shot}-shot/exp{exp}\t{metric}: {round(run[1], 2)}\t{run[0]}")
 
 print("")
 print("---------------------------------------------------------------------------------------------------------------")
@@ -162,8 +160,6 @@ for line in report:
         print(colored(line, 'red'))
     else:
         print(line)
-#print("---------------------------------------------------------------------------------------------------------------")
-#print(f"| Mean score: {sum(scores) / len(scores)}")
 print("---------------------------------------------------------------------------------------------------------------")
 
 # if args.eval:
