@@ -205,7 +205,7 @@ for line in report:
         print(line)
 
 if not data_complete:
-    print(colored(f"Could not find {N_best} runs for every setting, aborting the creation of infer file.", 'red'))
+    print(colored(f"Could not find {N_best} runs for every setting, aborting...", 'red'))
     exit()
 
 if N_best > 1:
