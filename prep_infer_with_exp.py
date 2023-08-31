@@ -11,8 +11,6 @@ parser.add_argument('--eval', action='store_true',
                     help='If this flag is set, no files will be created, simply the best runs will be listed. (default false)')
 args = parser.parse_args()
 metric = args.metric
-print(metric)
-print(type(metric))
 
 exclude_models = []
 if len(args.exclude) > 0:
