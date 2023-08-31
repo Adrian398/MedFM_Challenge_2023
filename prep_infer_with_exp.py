@@ -190,8 +190,12 @@ os.makedirs(predictions_dir)
 
 with open(os.path.join(submission_dir, "report.txt"), "w") as file:
     file.write("\n".join(report))
+best_runs = []
+for task in tasks:
+    for shot in shots:
+        for exp in exps:
+            best_runs.append(best_settings[task][shot][exp])
 
-best_runs = [best_settings[task][shot][exp] for task in tasks for shot in shots for exp in exps]
 print("\n".join(best_runs))
 
 bash_script = "#!/bin/bash\n"
