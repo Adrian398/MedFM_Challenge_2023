@@ -7,6 +7,7 @@ from termcolor import colored
 parser = argparse.ArgumentParser(description='Choose by which metric the best runs should be picked: map / auc / agg)')
 parser.add_argument('--metric', type=str, default='agg', help='Metric type, default is agg')
 parser.add_argument('--exclude', type=str, default='', help='Comma separated model names to exclude')
+parser.add_argument('--n_best', type=int, default=5, help='Returns the N best models per setting')
 parser.add_argument('--eval', action='store_true',
                     help='If this flag is set, no files will be created, simply the best runs will be listed. (default false)')
 args = parser.parse_args()
@@ -24,6 +25,7 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
 
 metric = metric_tags[metric]
 
+N_best = args.n_best
 tasks = ["colon", "endo", "chest"]
 shots = ["1", "5", "10"]
 exps = [1, 2, 3, 4, 5]
@@ -95,7 +97,7 @@ def filter_directories_by_exp(directories, exp_number):
     return filtered_dirs
 
 
-def get_5_best_exp_run_dirs(task, shot, exp, metric):
+def get_N_best_exp_run_dirs(task, shot, exp, metric):
     setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
     # a setting is a combination of task and shot, e.g. colon/1-shot
     # within such a setting we then also have different experiments -> colon/1-shot/...exp1...
@@ -126,7 +128,7 @@ def get_5_best_exp_run_dirs(task, shot, exp, metric):
 
     run_score_list.sort(key=lambda x: x[1], reverse=True)
 
-    return run_score_list[:min(5, len(run_score_list))]
+    return run_score_list[:min(N_best, len(run_score_list))]
 
 
 report = []
@@ -139,12 +141,13 @@ for task in tasks:
         best_settings[task][shot] = {}
 
         for exp in exps:
-            best_runs = get_5_best_exp_run_dirs(task=task, shot=shot, exp=exp, metric=metric)
+            best_runs = get_N_best_exp_run_dirs(task=task, shot=shot, exp=exp, metric=metric)
             best_settings[task][shot][exp] = best_runs
             report.append("---------------------------------------------------------------------------------------------------------------")
 
-            if len(best_runs) == 0:
-                report.append(f"| {task}/{shot}-shot/exp{exp}\tNo run found")
+            if len(best_runs) < N_best:
+                for i in range(N_best - len(best_runs)):
+                    report.append(f"| {task}/{shot}-shot/exp{exp}\tNo run found")
             else:
                 for run in best_settings[task][shot][exp]:
                     report.append(f"| {task}/{shot}-shot/exp{exp}\t{metric}: {run[1]:.2f}\t{run[0]}")
