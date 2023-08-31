@@ -10,37 +10,38 @@ from datetime import datetime
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from termcolor import colored
 
-parser = argparse.ArgumentParser(description='Choose by which metric the best runs should be picked: map / auc / agg)')
-parser.add_argument('--metric', type=str, default='agg', help='Metric type, default is agg')
-parser.add_argument('--exclude', type=str, default='', help='Comma separated model names to exclude')
-parser.add_argument('--n_best', type=int, default=1, help='Returns the N best models per setting')
-parser.add_argument("--gpu", type=str, default=None, help="GPU type: 'c'=rtx4090, '8a'=rtx2070ti or 'ab'=rtx3090.")
 
-args = parser.parse_args()
-metric = args.metric
-gpu_type = args.gpu
-
-exclude_models = []
-if len(args.exclude) > 0:
-    exclude_models = args.exclude.split(",")
-
-work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
-metric_tags = {"auc": "AUC/AUC_multiclass",
-               "aucl": "AUC/AUC_multilabe",
-               "map": "multi-label/mAP",
-               "agg": "Aggregate"}
-
-metric = metric_tags[metric]
-
-N_best = args.n_best
-tasks = ["colon", "endo", "chest"]
-shots = ["1", "5", "10"]
-exps = [1, 2, 3, 4, 5]
+def extract_exp_number(string):
+    match = re.search(r'exp(\d+)', string)
+    return int(match.group(1)) if match else 0
 
 
-# DEBUG
-# tasks = ["colon"]
-# shots = ["1"]
+def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
+    """
+    Runs the generated commands on the cluster.
+    If no GPU is specified, the commands are queued on the cluster in the following scheme:
+    gpuc -> gpua / gpub -> gpua / gpub -> gpuc -> ...
+    """
+
+    if gpu == 'c':
+        gpus = ['rtx4090']
+    elif gpu == 'ab':
+        gpus = ['rtx3090']
+    elif gpu == '8a':
+        gpus = ['rtx2080ti']
+    elif gpu is None:
+        gpus = ['rtx4090', 'rtx3090', 'rtx3090']
+    else:
+        raise ValueError(f'Invalid gpu type {gpu}.')
+
+    gpu_cycle = itertools.cycle(gpus)
+
+    for command in commands:
+        gpu = next(gpu_cycle)
+        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}"'
+        subprocess.run(slurm_cmd, shell=True)
+        time.sleep(delay_seconds)
+
 
 def get_max_metric_from_event_file(file_path, metric):
     event_acc = EventAccumulator(file_path)
@@ -137,10 +138,39 @@ def get_N_best_exp_run_dirs(task, shot, exp, metric):
 
     return run_score_list[:min(N_best, len(run_score_list))]
 
-report = []
-report.append("\n---------------------------------------------------------------------------------------------------------------")
-report.append(f"| Best runs for each setting, ranked by {metric}:")
-report.append("---------------------------------------------------------------------------------------------------------------")
+
+parser = argparse.ArgumentParser(description='Choose by which metric the best runs should be picked: map / auc / agg)')
+parser.add_argument('--metric', type=str, default='agg', help='Metric type, default is agg')
+parser.add_argument('--exclude', type=str, default='', help='Comma separated model names to exclude')
+parser.add_argument('--n_best', type=int, default=1, help='Returns the N best models per setting')
+parser.add_argument("--gpu", type=str, default=None, help="GPU type: 'c'=rtx4090, '8a'=rtx2070ti or 'ab'=rtx3090.")
+
+args = parser.parse_args()
+metric = args.metric
+gpu_type = args.gpu
+
+exclude_models = []
+if len(args.exclude) > 0:
+    exclude_models = args.exclude.split(",")
+
+work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
+metric_tags = {"auc": "AUC/AUC_multiclass",
+               "aucl": "AUC/AUC_multilabe",
+               "map": "multi-label/mAP",
+               "agg": "Aggregate"}
+
+metric = metric_tags[metric]
+
+N_best = args.n_best
+tasks = ["colon", "endo", "chest"]
+shots = ["1", "5", "10"]
+exps = [1, 2, 3, 4, 5]
+model_soup = False
+
+report = [
+    "\n---------------------------------------------------------------------------------------------------------------",
+    f"| Best runs for each setting, ranked by {metric}:",
+    "---------------------------------------------------------------------------------------------------------------"]
 
 best_settings = {}
 
@@ -154,7 +184,8 @@ for task in tasks:
             best_runs = get_N_best_exp_run_dirs(task=task, shot=shot, exp=exp, metric=metric)
             best_settings[task][shot][exp] = best_runs
             if N_best > 1:
-                report.append("---------------------------------------------------------------------------------------------------------------")
+                report.append(
+                    "---------------------------------------------------------------------------------------------------------------")
 
             if len(best_runs) < N_best:
                 for i in range(N_best - len(best_runs)):
@@ -164,9 +195,9 @@ for task in tasks:
                     run_path_to_print = run[0].split(os.sep)[-1]
                     report.append(f"| {task}/{shot}-shot/exp{exp}\t{metric}: {run[1]:.2f}\t{run_path_to_print}")
 
-
 data_complete = True
-report.append("---------------------------------------------------------------------------------------------------------------")
+report.append(
+    "---------------------------------------------------------------------------------------------------------------")
 for line in report:
     if line.__contains__("No run found"):
         data_complete = False
@@ -174,9 +205,19 @@ for line in report:
     else:
         print(line)
 
-
 if not data_complete:
     print(colored(f"Could not find {N_best} runs for every setting, aborting the creation of infer file.", 'red'))
+    exit()
+
+if N_best > 1:
+    model_soup = True
+    print(f"The {colored(N_best, 'red')} best experiments for each setting have been selected.")
+    user_input = input(f"\nDo you want to continue with {colored('Model Soup', 'blue')}? (yes/no): ")
+    if user_input.strip().lower() == 'no':
+        exit()
+
+if model_soup:
+    print(colored("Model Soup not implemented yet!", 'red'))
     exit()
 
 # Prompt the user
@@ -184,39 +225,6 @@ user_input = input(f"\nDo you want to continue with inference on the cluster? (y
 
 if user_input.strip().lower() == 'no':
     exit()
-
-
-def extract_exp_number(string):
-    match = re.search(r'exp(\d+)', string)
-    return int(match.group(1)) if match else 0
-
-
-def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
-    """
-    Runs the generated commands on the cluster.
-    If no GPU is specified, the commands are queued on the cluster in the following scheme:
-    gpuc -> gpua / gpub -> gpua / gpub -> gpuc -> ...
-    """
-
-    if gpu == 'c':
-        gpus = ['rtx4090']
-    elif gpu == 'ab':
-        gpus = ['rtx3090']
-    elif gpu == '8a':
-        gpus = ['rtx2080ti']
-    elif gpu is None:
-        gpus = ['rtx4090', 'rtx3090', 'rtx3090']
-    else:
-        raise ValueError(f'Invalid gpu type {gpu}.')
-
-    gpu_cycle = itertools.cycle(gpus)
-
-    for command in commands:
-        gpu = next(gpu_cycle)
-        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}"'
-        subprocess.run(slurm_cmd, shell=True)
-        time.sleep(delay_seconds)
-
 
 # create dir for submission and config
 date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
@@ -243,12 +251,12 @@ print("\n".join(best_runs))
 bash_script = "#!/bin/bash\n"
 commands = []
 for run_path in best_runs:
-
     split_path = run_path.split(os.sep)
     task, shot, exp = split_path[5], split_path[6], extract_exp_number(split_path[7])
 
     config_filename = [file for file in os.listdir(run_path) if file.endswith(".py")][0]
-    checkpoint_filename = [file for file in os.listdir(run_path) if file.endswith(".pth") and file.__contains__("best")][0]
+    checkpoint_filename = \
+        [file for file in os.listdir(run_path) if file.endswith(".pth") and file.__contains__("best")][0]
 
     config_path = os.path.join(run_path, config_filename)
     checkpoint_path = os.path.join(run_path, checkpoint_filename)
@@ -263,7 +271,6 @@ for run_path in best_runs:
     commands.append(command)
 
 print(f"Saved respective configs to {configs_dir}\n")
-# Display the generated commands
 print("Generated Infer Commands:")
 
 for command in commands:
