@@ -12,8 +12,6 @@ dataset = 'chest'
 model_name = 'swinv2'
 exp_num = 1
 nshot = 1
-seed = 2049
-randomness = dict(seed=seed)
 
 run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
 work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
@@ -54,13 +52,13 @@ test_dataloader = dict(
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
 )
 
-optim_wrapper = dict(optimizer=dict(lr=lr))
-
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=10, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
     logger=dict(interval=10),
 )
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
 train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
+
+randomness = dict(seed=0)
