@@ -205,8 +205,9 @@ def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
     gpu_cycle = itertools.cycle(gpus)
 
     for command in commands:
+        cmd_str = " ".join(command)
         gpu = next(gpu_cycle)
-        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}"'
+        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{cmd_str}"'
         subprocess.run(slurm_cmd, shell=True)
         time.sleep(delay_seconds)
 
@@ -260,7 +261,7 @@ print(f"Saved respective configs to {configs_dir}")
 # Display the generated commands
 print("Generated Infer Commands:")
 for command in commands:
-    print(f"{command}\n")
+    print(f"{' '.join(command)}")
 
 # Prompt the user
 user_input = input(f"Do you want to run {len(commands)} commands on the cluster? (yes/no): ")
