@@ -256,7 +256,7 @@ for run_path in best_runs:
     commands.extend(command)
 
 print(f"Saved respective configs to {configs_dir}")
-
+print(commands)
 # Display the generated commands
 print("Generated Infer Commands:")
 for command in commands:
