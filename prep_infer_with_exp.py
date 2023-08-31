@@ -1,7 +1,10 @@
 import argparse
+import itertools
 import os
 import re
 import shutil
+import subprocess
+import time
 from datetime import datetime
 
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
@@ -11,10 +14,12 @@ parser = argparse.ArgumentParser(description='Choose by which metric the best ru
 parser.add_argument('--metric', type=str, default='agg', help='Metric type, default is agg')
 parser.add_argument('--exclude', type=str, default='', help='Comma separated model names to exclude')
 parser.add_argument('--n_best', type=int, default=5, help='Returns the N best models per setting')
+parser.add_argument("--gpu", type=str, default=None, help="GPU type: 'c'=rtx4090, '8a'=rtx2070ti or 'ab'=rtx3090.")
 parser.add_argument('--eval', action='store_true',
                     help='If this flag is set, no files will be created, simply the best runs will be listed. (default false)')
 args = parser.parse_args()
 metric = args.metric
+gpu_type = args.gpu
 
 exclude_models = []
 if len(args.exclude) > 0:
@@ -177,9 +182,37 @@ if not data_complete:
     print(colored(f"Could not find {N_best} runs for every setting, aborting the creation of infer file.", 'red'))
     exit()
 
+
 def extract_exp_number(string):
     match = re.search(r'exp(\d+)', string)
     return int(match.group(1)) if match else 0
+
+
+def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
+    """
+    Runs the generated commands on the cluster.
+    If no GPU is specified, the commands are queued on the cluster in the following scheme:
+    gpuc -> gpua / gpub -> gpua / gpub -> gpuc -> ...
+    """
+
+    if gpu == 'c':
+        gpus = ['rtx4090']
+    elif gpu == 'ab':
+        gpus = ['rtx3090']
+    elif gpu == '8a':
+        gpus = ['rtx2080ti']
+    elif gpu is None:
+        gpus = ['rtx4090', 'rtx3090', 'rtx3090']
+    else:
+        raise ValueError(f'Invalid gpu type {gpu}.')
+
+    gpu_cycle = itertools.cycle(gpus)
+
+    for command in commands:
+        gpu = next(gpu_cycle)
+        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}"'
+        subprocess.run(slurm_cmd, shell=True)
+        time.sleep(delay_seconds)
 
 
 # create dir for submission and config
@@ -205,6 +238,7 @@ for task in tasks:
 print("\n".join(best_runs))
 
 bash_script = "#!/bin/bash\n"
+commands = []
 for run_path in best_runs:
 
     split_path = run_path.split(os.sep)
@@ -223,11 +257,17 @@ for run_path in best_runs:
     # copy config into submission directory
     shutil.copy(config_path, configs_dir)
     command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}\n"
-    bash_script += command
+    commands += command
 
 print(f"Saved respective configs to {configs_dir}")
-print("Created infer.sh")
-print(f"Run ./infer.sh to create prediction files in {predictions_dir}")
-with open("infer.sh", "w") as file:
-    file.write(bash_script)
-os.chmod("infer.sh", 0o755)
+
+# Display the generated commands
+print("Generated Infer Commands:")
+for command in commands:
+    print(f"{command}\n")
+
+# Prompt the user
+user_input = input(f"Do you want to run {len(commands)} commands on the cluster? (yes/no): ")
+
+if user_input.strip().lower() == 'yes':
+    run_commands_on_cluster(commands, gpu=gpu_type)
