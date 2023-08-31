@@ -9,8 +9,8 @@ chest_val.csv / colon_val.csv / endo_val.csv
 """
 
 experiments = ["exp1", "exp2", "exp3", "exp4", "exp5"]
-val_dir = "../data/MedFMC_val/"
-path = os.path.join('..', 'submissions')
+val_dir = "data/MedFMC_val/"
+path = os.path.join('submissions', 'evaluation')
 directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
 format = "%d-%m_%H-%M-%S"
 valid_directories = []

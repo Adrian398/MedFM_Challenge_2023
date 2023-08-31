@@ -11,7 +11,7 @@ if they have the right amount of entries, and if the order of image IDs correspo
 experiments = ["exp1", "exp2", "exp3", "exp4", "exp5"]
 tasks = ["endo", "colon", "chest"]
 n_shots = ["1", "5", "10"]
-images_dir = "../data/MedFMC_val/"
+images_dir = "data/MedFMC_val/"
 
 path = os.path.join('submissions', 'evaluation')
 
