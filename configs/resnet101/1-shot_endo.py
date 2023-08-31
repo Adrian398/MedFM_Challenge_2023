@@ -9,11 +9,11 @@ _base_ = [
 checkpoint = 'https://download.openmmlab.com/mmclassification/v0/resnet/resnet101_8xb32_in1k_20210831-539c63f8.pth'  # noqa
 
 lr = 1e-6
-train_bs = 16
-val_bs = 64
+train_bs = 20
+val_bs = 128
 dataset = 'endo'
 model_name = 'resnet101'
-exp_num = 1
+exp_num = 3
 nshot = 1
 
 run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
