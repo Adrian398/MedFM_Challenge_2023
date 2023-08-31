@@ -161,8 +161,10 @@ for task in tasks:
                     report.append(f"| {task}/{shot}-shot/exp{exp}\t{metric}: {run[1]:.2f}\t{run_path_to_print}")
 
 
+data_complete = True
 for line in report:
     if line.__contains__("No run found"):
+        data_complete = False
         print(colored(line, 'red'))
     else:
         print(line)
@@ -171,6 +173,9 @@ report.append("-----------------------------------------------------------------
 if args.eval:
     exit()
 
+if not data_complete:
+    print(colored(f"Could not find {N_best} runs for every setting, aborting the creation of infer file.", 'red'))
+    exit()
 
 def extract_exp_number(string):
     match = re.search(r'exp(\d+)', string)
