@@ -36,9 +36,19 @@ def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
 
     gpu_cycle = itertools.cycle(gpus)
 
+    # Ensure the log directory exists
+    log_dir = os.path.join(submission_dir, "logs")
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+
     for command in commands:
         gpu = next(gpu_cycle)
-        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}"'
+
+        command_splitted = command.split(" ")[2].split("/")
+        task, shot, exp = command_splitted[5], command_splitted[6], extract_exp_number(command_splitted[7])
+        log_file_name = f"{task}_{shot}_exp{exp}_slurm-%j"
+
+        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
         subprocess.run(slurm_cmd, shell=True)
         time.sleep(delay_seconds)
 
