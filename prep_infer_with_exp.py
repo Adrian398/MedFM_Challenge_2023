@@ -264,8 +264,11 @@ for run_path in best_runs:
     csv_name = f"{task}_{shot}_submission.csv"
     out_path = os.path.join(predictions_dir, f"exp{exp}", csv_name)
 
+    config_dest_dir = os.path.join(configs_dir, f"exp{exp}")
+    os.makedirs(config_dest_dir)
+
     # copy config into submission directory
-    shutil.copy(config_path, os.path.join(configs_dir, f"exp{exp}", config_filename))
+    shutil.copy(config_path, os.path.join(config_dest_dir, config_filename))
     command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}\n"
     commands.append(command)
 
