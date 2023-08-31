@@ -149,7 +149,7 @@ for task in tasks:
                 report.append(f"| {task}/{shot}-shot/exp{exp}\tNo run found")
             else:
                 for run in best_settings[task][shot][exp]:
-                    report.append(f"| {task}/{shot}-shot/exp{exp}\t{metric}: {round(run[1], 2)}\t{run[0]}")
+                    report.append(f"| {task}/{shot}-shot/exp{exp}\t{metric}: {run[1]:.2f}\t{run[0]}")
 
 print("")
 print("---------------------------------------------------------------------------------------------------------------")
