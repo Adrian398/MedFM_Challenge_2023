@@ -253,14 +253,15 @@ for run_path in best_runs:
     # copy config into submission directory
     shutil.copy(config_path, configs_dir)
     command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}\n"
-    commands.extend(command)
+    commands.append(command)
 
 print(f"Saved respective configs to {configs_dir}")
 print(commands)
 # Display the generated commands
 print("Generated Infer Commands:")
-for command in commands:
-    print(command)
+
+# for command in commands:
+#     print(command)
 
 # Prompt the user
 user_input = input(f"Do you want to run {len(commands)} commands on the cluster? (yes/no): ")
