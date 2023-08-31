@@ -758,13 +758,13 @@ class CustomPromptedSwinTransformer(SwinTransformer):
             # Fully connected layers, similar to what you had
             nn.Linear(64*96*96, 512),
             nn.ReLU(),
-            nn.Linear(512, self.prompt_length * self.embed_dims),
+            nn.Linear(512, (self.prompt_length / 2) * self.embed_dims),
             nn.Tanh()
         )
 
         self.prompt_layers = [0] if prompt_layers is None else prompt_layers
         prompt = torch.empty(
-            len(self.prompt_layers), prompt_length, self.embed_dims)
+            len(self.prompt_layers), (prompt_length / 2), self.embed_dims)
         if prompt_init == 'uniform':
             nn.init.uniform_(prompt, -0.08, 0.08)
         elif prompt_init == 'zero':
@@ -795,7 +795,7 @@ class CustomPromptedSwinTransformer(SwinTransformer):
         prompt = self.prompt.unsqueeze(1).expand(-1, x.shape[0], -1, -1)
 
         x_avg = x.mean(dim=1)  # Average across the sequence dimension
-        dynamic_prompt = dynamic_prompt.view(-1, self.prompt_length, self.embed_dims)
+        dynamic_prompt = dynamic_prompt.view(-1, (self.prompt_length / 2), self.embed_dims)
 
         # prompt = self.prompt.unsqueeze(1).expand(-1, x.shape[0], -1, -1)
         # prompt: [layer, batch, length, dim]
