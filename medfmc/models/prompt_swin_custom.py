@@ -795,7 +795,7 @@ class CustomPromptedSwinTransformer(SwinTransformer):
         prompt = self.prompt.unsqueeze(1).expand(-1, x.shape[0], -1, -1)
 
         x_avg = x.mean(dim=1)  # Average across the sequence dimension
-        dynamic_prompt = dynamic_prompt.view(-1, (self.prompt_length / 2), self.embed_dims)
+        dynamic_prompt = dynamic_prompt.view(-1, int(self.prompt_length / 2), self.embed_dims)
 
         # prompt = self.prompt.unsqueeze(1).expand(-1, x.shape[0], -1, -1)
         # prompt: [layer, batch, length, dim]
