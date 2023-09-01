@@ -130,7 +130,7 @@ for i in range(1, len(state_dicts)):
 
     # benchmark and conditionally append
     sd = get_sd(state_dicts, alphal)
-    exit()
+    # exit()
     folder_path = checkpoint_filenames[0].split("-shot")[0] + "-shot/modelsoup"
 
     if not os.path.exists(folder_path):
