@@ -140,7 +140,7 @@ for i in range(1, len(state_dicts)):
     torch.save(sd, model_soup_path)
 
     #### do validate with model soup state dict:
-    cfg = Config.fromfile("configs/swinv2-b/10-shot_endo.py")
+    cfg = Config.fromfile(configs_for_checkpoints_filenames[0])
     cfg.load_from = model_soup_path
     runner = Runner.from_cfg(cfg)
     metrics = runner.test()
