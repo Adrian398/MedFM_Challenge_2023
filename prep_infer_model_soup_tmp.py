@@ -13,18 +13,18 @@ def get_sd(state_dicts, alphal):
         sd[k] = state_dicts[0]['state_dict'][k].clone() * alphal[0]
 
     # Print a few weights from the first state dict for comparison.
-    print("Initial weights (first state dict):")
-    print("Key:", list(state_dicts[0]['state_dict'].keys())[0])
-    print(state_dicts[0]['state_dict'][list(state_dicts[0]['state_dict'].keys())[0]])
+    # print("Initial weights (first state dict):")
+    # print("Key:", list(state_dicts[0]['state_dict'].keys())[0])
+    # print(state_dicts[0]['state_dict'][list(state_dicts[0]['state_dict'].keys())[0]])
 
     for i in range(1, len(state_dicts)):
         for k in state_dicts[i]['state_dict'].keys():
             sd[k] = sd[k] + state_dicts[i]['state_dict'][k].clone() * alphal[i]
 
     # Print a few combined weights for comparison
-    print("Combined weights:")
-    print("Key:", list(sd.keys())[0])
-    print(sd[list(sd.keys())[0]])
+    # print("Combined weights:")
+    # print("Key:", list(sd.keys())[0])
+    # print(sd[list(sd.keys())[0]])
 
     return sd
 
