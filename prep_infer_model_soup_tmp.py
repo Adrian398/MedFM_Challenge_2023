@@ -71,7 +71,6 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
 
 # checkpoint_filenames = ["/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs4_lr0.0005_exp1_20230821-004750/best_multi-label_mAP_epoch_11.pth", "/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs8_lr0.0005_exp1_20230821-172020/best_multi-label_mAP_epoch_100.pth"]
 
-exit()
 
 # take just three
 ###############REMOVE LATER!!!!!##############################################
@@ -96,6 +95,7 @@ for i, filename in enumerate(checkpoint_filenames):
 
 print(val_results)
 
+exit()
 # rank all those models
 ranked_candidates = [i for i in range(len(state_dicts))]
 ranked_candidates.sort(key=lambda x: -val_results[x])
