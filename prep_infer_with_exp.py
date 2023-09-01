@@ -248,7 +248,7 @@ if model_soup:
     exit()
 
 # Prompt the user
-user_input = input(f"\nDo you want to continue with inference on the cluster? (yes/no): ")
+user_input = input(f"\nDo you want to generate the inference commands? (yes/no): ")
 
 if user_input.strip().lower() == 'no':
     exit()
