@@ -85,13 +85,18 @@ for f in checkpoint_filenames:
 val_results = []
 # create val results of all models which could be included in the soup
 #
-for i, filename in enumerate(checkpoint_filenames):
-    cfg = Config.fromfile(configs_for_checkpoints_filenames[i])
-    cfg.load_from = filename
-    runner = Runner.from_cfg(cfg)
-    metrics = runner.test()
-    print(metrics)
-    val_results.append(metrics['Aggregate'])
+
+# todo uncomment this block
+# for i, filename in enumerate(checkpoint_filenames):
+#     cfg = Config.fromfile(configs_for_checkpoints_filenames[i])
+#     cfg.load_from = filename
+#     runner = Runner.from_cfg(cfg)
+#     metrics = runner.test()
+#     print(metrics)
+#     val_results.append(metrics['Aggregate'])
+
+# todo remove this line
+val_results = [45.00792341317261, 44.82873940940721, 43.304168015432424, 44.90430179772772, 43.469599720660455]
 
 print(val_results)
 
@@ -102,9 +107,11 @@ ranked_candidates.sort(key=lambda x: -val_results[x])
 # run greedy soup algorithm
 current_best = val_results[ranked_candidates[0]]
 best_ingredients = ranked_candidates[:1]
+print("Starting model soup search")
 for i in range(1, len(state_dicts)):
     # add current index to the ingredients
     ingredient_indices = best_ingredients + [ranked_candidates[i]]
+    print("Trying ingredients: " + str(ingredient_indices))
     alphal = [0 for i in range(len(state_dicts))]
     for j in ingredient_indices:
         alphal[j] = 1 / len(ingredient_indices)
@@ -128,8 +135,12 @@ for i in range(1, len(state_dicts)):
 
     print(f'Models {ingredient_indices} got {current}% on validation.')
     if current > current_best:
+        print('New best model soup')
         current_best = current
         best_ingredients = ingredient_indices
+    else:
+        print('No improvement')
+
 
 alphal = [0 for i in range(len(state_dicts))]
 for j in best_ingredients:
