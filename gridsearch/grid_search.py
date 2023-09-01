@@ -17,7 +17,7 @@ BASE_PARAMS_CONFIG = {
     'shot': [1, 5, 10],
     'exp_num': [1, 2, 3, 4, 5],
     'lr': [1e-6, 1e-7, 1e-8],
-    'train_bs': [2, 4, 6, 8]
+    #'train_bs': [2, 4, 6, 8]
 }
 
 
@@ -27,7 +27,7 @@ def create_command(params, exp_suffix):
 
     for key, value in params.items():
         # only add params as command arg if required
-        if key not in ['model', 'shot', 'dataset']:
+        if key not in ['model', 'shot', 'dataset', 'train_bs']:
             command.extend([f"--{key}", str(value)])
 
     if exp_suffix:
@@ -94,6 +94,8 @@ def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
         gpus = ['rtx4090']
     elif gpu == 'ab':
         gpus = ['rtx3090']
+    elif gpu == '8a':
+        gpus = ['rtx2080ti']
     elif gpu is None:
         gpus = ['rtx4090', 'rtx3090', 'rtx3090']
     else:

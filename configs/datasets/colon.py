@@ -2,21 +2,16 @@
 dataset_type = 'Colon'
 data_preprocessor = dict(
     num_classes=2,
-    # RGB format normalization parameters
     mean=[123.675, 116.28, 103.53],
     std=[58.395, 57.12, 57.375],
-    # convert image from BGR to RGB
-    to_rgb=True,
+    to_rgb=True, # convert image from BGR to RGB
 )
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(
-        type='RandomResizedCrop',
-        scale=384,
-        backend='pillow',
-        interpolation='bicubic'),
+    dict(type='RandomResizedCrop', scale=384, backend='pillow', interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
 ]
 
@@ -48,7 +43,6 @@ val_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
 
-
 test_dataloader = dict(
     batch_size=4,
     num_workers=2,
@@ -61,5 +55,10 @@ test_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
 
-val_evaluator = [dict(type='Accuracy', topk=(1, )), dict(type='AUC')]
-test_evaluator = val_evaluator
+train_evaluator = [
+    dict(type='Aggregate'),
+    dict(type='AveragePrecision'),
+    dict(type='AUC')
+]
+val_evaluator = train_evaluator
+test_evaluator = train_evaluator

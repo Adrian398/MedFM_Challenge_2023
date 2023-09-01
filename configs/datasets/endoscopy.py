@@ -12,12 +12,9 @@ data_preprocessor = dict(
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(
-        type='RandomResizedCrop',
-        scale=384,
-        backend='pillow',
-        interpolation='bicubic'),
+    dict(type='RandomResizedCrop', scale=384, backend='pillow', interpolation='bicubic'),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
 ]
 
@@ -34,7 +31,7 @@ train_dataloader = dict(
         type=dataset_type,
         data_prefix='/scratch/medfm/medfm-challenge/data/MedFMC_train/endo/images',
         ann_file='data_anns/MedFMC/endo/train_20.txt',
-        pipeline=train_pipeline,),
+        pipeline=train_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=True),
 )
 
@@ -49,7 +46,6 @@ val_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
 
-
 test_dataloader = dict(
     batch_size=4,
     num_workers=2,
@@ -62,10 +58,10 @@ test_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
 
-val_evaluator = [
+train_evaluator = [
+    dict(type='Aggregate'),
     dict(type='AveragePrecision'),
-    dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
-    dict(type='MultiLabelMetric', average='micro'),  # overall mean
     dict(type='AUC')
 ]
-test_evaluator = val_evaluator
+val_evaluator = train_evaluator
+test_evaluator = train_evaluator

@@ -28,7 +28,7 @@ model = dict(
             'https://download.openmmlab.com/mmclassification/v0/swin-transformer/convert/swin_base_patch4_window12_384_22kto1k-d59b0d1d.pth',
             prefix='backbone',
         ),
-        stage_cfgs=dict(block_cfgs=dict(window_size=16))),
+        stage_cfgs=dict(block_cfgs=dict(window_size=12))),
     neck=None,
     head=dict(
         type='LinearClsHead',
@@ -101,7 +101,7 @@ val_evaluator = [
 test_evaluator = val_evaluator
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=-1, save_best="Aggregate", rule="greater", save_last=False),
     logger=dict(interval=10),
 )
 
@@ -129,5 +129,7 @@ param_scheduler = [
         begin=1)
 ]
 
-train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=1000)
+train_cfg = dict(by_epoch=True, val_interval=200, max_epochs=1000)
 auto_scale_lr = dict(base_batch_size=1024)
+
+randomness = dict(seed=0)
