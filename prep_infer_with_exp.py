@@ -149,17 +149,35 @@ def get_N_best_exp_run_dirs(task, shot, exp, metric):
     return run_score_list[:min(N_best, len(run_score_list))]
 
 
+def run_on_bash(commands):
+    if len(commands) == 0:
+        print(colored('No commands found to run on the bash.', 'red'))
+        exit()
+    bash_script = "#!/bin/bash\n"
+    for c in commands:
+        bash_script += c
+    bash_script += f"echo {submission_dir}"
+    print(f"Saved respective configs to {configs_dir}")
+    print("Created infer.sh")
+    print(f"Run ./infer.sh to create prediction files in {predictions_dir}")
+    with open("infer.sh", "w") as file:
+        file.write(bash_script)
+    os.chmod("infer.sh", 0o755)
+
+
 parser = argparse.ArgumentParser(description='Choose by which metric the best runs should be picked: map / auc / agg)')
 parser.add_argument('--metric', type=str, default='agg', help='Metric type, default is agg')
 parser.add_argument('--exclude', type=str, default='', help='Comma separated model names to exclude')
 parser.add_argument('--n_best', type=int, default=1, help='Returns the N best models per setting')
 parser.add_argument('--bs', type=int, default=4, help='The batch size for inference')
-parser.add_argument("--gpu", type=str, default=None, help="GPU type: 'c'=rtx4090, '8a'=rtx2070ti or 'ab'=rtx3090.")
-
+parser.add_argument("--gpu", type=str, default=None, help="GPU type: 'c'=rtx4090, '8a'=rtx2070ti or 'ab'=rtx3090")
+parser.add_argument("--bash", type=bool, default="store_true", help="Create a bash script containing the commands")
 args = parser.parse_args()
+
 metric = args.metric
 gpu_type = args.gpu
 batch_size = args.bs
+bash = args.bash
 
 exclude_models = []
 if len(args.exclude) > 0:
@@ -257,9 +275,6 @@ for task in tasks:
             for run in best_settings[task][shot][exp]:
                 best_runs.append(run[0])
 
-#print("\n".join(best_runs))
-
-bash_script = "#!/bin/bash\n"
 commands = []
 for run_path in best_runs:
     split_path = run_path.split(os.sep)
@@ -292,12 +307,28 @@ for run_path in best_runs:
 
 print(f"Saved respective configs to {configs_dir}\n")
 print("Generated Infer Commands:")
-
 for command in commands:
     print(command)
 
-# Prompt the user
-user_input = input(f"Do you want to run {len(commands)} commands on the cluster? (yes/no): ")
+user_input_medium = input(f"Do you want to run the commands on the {colored('cluster', 'red')} or {colored('bash', 'blue')}? (cluster/bash): ")
+
+if user_input_medium.strip().lower() == 'cluster':
+    medium_txt = colored('cluster', 'red')
+    medium = 'cluster'
+elif user_input_medium.strip().lower() == 'bash':
+    medium_txt = colored('bash', 'blue')
+    medium = 'bash'
+else:
+    print(colored('No valid medium selected...', 'red'))
+    exit()
+
+user_input_start = input(f"Start {len(commands)} commands on the {medium_txt}? (yes/no): ")
 
 if user_input.strip().lower() == 'yes':
-    run_commands_on_cluster(commands, gpu=gpu_type)
+    if medium == 'cluster':
+        run_commands_on_cluster(commands, gpu=gpu_type)
+    elif medium == 'bash':
+        run_on_bash(commands)
+    else:
+        print(colored('No valid medium or answer...', 'red'))
+        exit()
