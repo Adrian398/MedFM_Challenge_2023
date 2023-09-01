@@ -153,11 +153,13 @@ parser = argparse.ArgumentParser(description='Choose by which metric the best ru
 parser.add_argument('--metric', type=str, default='agg', help='Metric type, default is agg')
 parser.add_argument('--exclude', type=str, default='', help='Comma separated model names to exclude')
 parser.add_argument('--n_best', type=int, default=1, help='Returns the N best models per setting')
+parser.add_argument('--bs', type=int, default=4, help='The batch size for inference')
 parser.add_argument("--gpu", type=str, default=None, help="GPU type: 'c'=rtx4090, '8a'=rtx2070ti or 'ab'=rtx3090.")
 
 args = parser.parse_args()
 metric = args.metric
 gpu_type = args.gpu
+batch_size = args.bs
 
 exclude_models = []
 if len(args.exclude) > 0:
@@ -255,7 +257,7 @@ for task in tasks:
             for run in best_settings[task][shot][exp]:
                 best_runs.append(run[0])
 
-print("\n".join(best_runs))
+#print("\n".join(best_runs))
 
 bash_script = "#!/bin/bash\n"
 commands = []
@@ -285,7 +287,7 @@ for run_path in best_runs:
 
     # copy config into submission directory
     shutil.copy(config_path, os.path.join(config_dest_dir, config_filename))
-    command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --out {out_path}\n"
+    command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --batch-size {batch_size} --out {out_path}\n"
     commands.append(command)
 
 print(f"Saved respective configs to {configs_dir}\n")
