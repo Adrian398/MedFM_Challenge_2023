@@ -95,7 +95,6 @@ for i, filename in enumerate(checkpoint_filenames):
 
 print(val_results)
 
-exit()
 # rank all those models
 ranked_candidates = [i for i in range(len(state_dicts))]
 ranked_candidates.sort(key=lambda x: -val_results[x])
