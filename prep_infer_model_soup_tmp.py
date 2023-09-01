@@ -73,7 +73,8 @@ print(f"Checking {start_dir}")
 # Walk through the base directory and its subdirectories
 for dirpath, dirnames, filenames in os.walk(start_dir):
     # Check if the directory starts with the model name
-    if os.path.basename(dirpath).startswith(model_name):
+    # todo potentially remove the soup check
+    if os.path.basename(dirpath).startswith(model_name) and not os.path.basename(dirpath).__contains__("soup"):
         config_filename = f"{nshot}-shot_{dataset}.py"
         if config_filename in filenames:
             configs_for_checkpoints_filenames.append(os.path.join(dirpath, config_filename))
