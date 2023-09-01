@@ -42,7 +42,7 @@ def find_checkpoints_in_config(directory, config_filename, seed, exp_num, use_se
 
     if (use_seed and seed_string in config and exp_num_string in config) or (not use_seed and exp_num_string in config):
         checkpoint_filenames = get_valid_files_from_directory(directory, ".pth", "best")
-        print("Found checkpoint files: " + str(checkpoint_filenames))
+        print("Adding checkpoint files: " + str(checkpoint_filenames))
         return join_files_with_directory(directory, checkpoint_filenames)
     return []
 
@@ -62,7 +62,6 @@ configs_for_checkpoints_filenames = []
 print(f"Checking {start_dir}")
 # Walk through the base directory and its subdirectories
 for dirpath, dirnames, filenames in os.walk(start_dir):
-    print(f"Checking {dirpath} {dirnames} {filenames}")
     # Check if the directory starts with the model name
     if os.path.basename(dirpath).startswith(model_name):
         config_filename = f"{nshot}-shot_{dataset}.py"
