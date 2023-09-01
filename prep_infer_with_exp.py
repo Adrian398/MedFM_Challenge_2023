@@ -270,7 +270,7 @@ for run_path in best_runs:
     config_path = os.path.join(run_path, config_filename)
     checkpoint_path = os.path.join(run_path, checkpoint_filename)
 
-    images_path = os.path.join(scratch_repo_path, "data", "MedFMC_val", task, "images")
+    images_path = os.path.join(scratch_repo_path, "data", "MedFMC_test", task, "images")
 
     predictions_dest_dir = os.path.join(predictions_dir, f"exp{exp}")
     if not os.path.exists(predictions_dest_dir):
