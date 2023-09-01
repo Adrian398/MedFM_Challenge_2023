@@ -9,7 +9,7 @@ chest_val.csv / colon_val.csv / endo_val.csv
 """
 
 experiments = ["exp1", "exp2", "exp3", "exp4", "exp5"]
-val_dir = "data/MedFMC_val/"
+images_dir = "data/MedFMC_test/"
 path = os.path.join('submissions', 'evaluation')
 directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
 format = "%d-%m_%H-%M-%S"
@@ -32,9 +32,10 @@ for exp in experiments:
     for file in csv_files:
         submission_csv_path = os.path.join(exp_dir, file)
 
-        # Read colon_val.csv/endo_val.csv/chest_val.csv and remove rows without image ids
+        # Read test_WithoutLabel.txt and remove rows without image ids
         task = file.split("_")[0]
-        df_val_order = pd.read_csv(f"{val_dir}{task}/{task}_val.csv").dropna(subset="img_id")
+        df_val_order = pd.read_csv(f"{images_dir}{task}/test_WithoutLabel.txt", header=None, names=['img_id'])
+        df_val_order.dropna(inplace=True)
 
         # Read generated submission csv, name first column 'img_id' for easier merge
         df_submission = pd.read_csv(submission_csv_path, header=None).rename(columns={0: 'img_id'})

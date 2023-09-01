@@ -11,7 +11,7 @@ if they have the right amount of entries, and if the order of image IDs correspo
 experiments = ["exp1", "exp2", "exp3", "exp4", "exp5"]
 tasks = ["endo", "colon", "chest"]
 n_shots = ["1", "5", "10"]
-images_dir = "data/MedFMC_val/"
+images_dir = "data/MedFMC_test/"
 
 path = os.path.join('submissions', 'evaluation')
 
@@ -52,22 +52,23 @@ for exp in experiments:
     for file in csv_files:
         submission_csv_path = os.path.join(exp_dir, file)
 
-        # Read colon_val.csv/endo_val.csv/chest_val.csv and remove rows without image ids
+        # Read test_WithoutLabel.txt and remove rows without image ids
         task = file.split("_")[0]
-        df_val_order = pd.read_csv(f"{images_dir}{task}/{task}_val.csv").dropna(subset="img_id")
+        df_test_order = pd.read_csv(f"{images_dir}{task}/test_WithoutLabel.txt", header=None, names=['img_id'])
+        df_test_order.dropna(inplace=True)
 
-        # Read generated submission csv (as one column, since infer generates white-space separation)
+        # Read generated submission csv
         df_submission = pd.read_csv(submission_csv_path, header=None)
 
-        if len(df_val_order) != len(df_submission):
+        if len(df_test_order) != len(df_submission):
             file_lengths_correct = False
             print(f"Incorrect number of entries in {file}, was {len(df_submission['img_id'])}, "
-                  f"expected {len(df_val_order['img_id'])}")
+                  f"expected {len(df_test_order['img_id'])}")
             print("You might have done the inference on the wrong image folder (e.g. on train instead of val)")
         # Check if final result is correct
         wrong_order_in_file = False
-        for i in range(len(df_val_order)):
-            if df_submission[0][i] != df_val_order["img_id"][i]:
+        for i in range(len(df_test_order)):
+            if df_submission[0][i] != df_test_order["img_id"][i]:
                 wrong_order_in_file = True
                 file_orders_correct = False
 
