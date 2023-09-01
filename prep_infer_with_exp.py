@@ -170,7 +170,7 @@ parser.add_argument('--metric', type=str, default='agg', help='Metric type, defa
 parser.add_argument('--exclude', type=str, default='', help='Comma separated model names to exclude')
 parser.add_argument('--n_best', type=int, default=1, help='Returns the N best models per setting')
 parser.add_argument('--bs', type=int, default=4, help='The batch size for inference')
-parser.add_argument("--gpu", type=str, default=None, help="GPU type: 'c'=rtx4090, '8a'=rtx2070ti or 'ab'=rtx3090")
+parser.add_argument("--gpu", type=str, default='c', help="GPU type: 'c'=rtx4090, '8a'=rtx2070ti or 'ab'=rtx3090")
 parser.add_argument("--bash", type=bool, default="store_true", help="Create a bash script containing the commands")
 args = parser.parse_args()
 
