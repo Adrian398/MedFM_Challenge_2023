@@ -42,7 +42,7 @@ def find_checkpoints_in_config(directory, config_filename, seed, exp_num, use_se
 
     if (use_seed and seed_string in config and exp_num_string in config) or (not use_seed and exp_num_string in config):
         checkpoint_filenames = get_valid_files_from_directory(directory, ".pth", "best")
-        print("Adding checkpoint files: " + str(checkpoint_filenames))
+        print("Adding checkpoint files: " + str(directory))
         return join_files_with_directory(directory, checkpoint_filenames)
     return []
 
@@ -71,8 +71,6 @@ for dirpath, dirnames, filenames in os.walk(start_dir):
 
 # checkpoint_filenames = ["/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs4_lr0.0005_exp1_20230821-004750/best_multi-label_mAP_epoch_11.pth", "/scratch/medfm/medfm-challenge/work_dirs/endo/10-shot/swin_bs8_lr0.0005_exp1_20230821-172020/best_multi-label_mAP_epoch_100.pth"]
 
-print(checkpoint_filenames)
-print(configs_for_checkpoints_filenames)
 exit()
 
 # take just three
