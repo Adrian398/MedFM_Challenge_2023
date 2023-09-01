@@ -38,7 +38,7 @@ def find_checkpoints_in_config(directory, config_filename, seed, exp_num, use_se
     with open(config_path, 'r') as file:
         config = file.read()
     seed_string = "seed = " + str(seed)
-    exp_num_string = "exp_num = " + str(exp_num)
+    exp_num_string = f"exp{exp_num}.txt"
 
     if (use_seed and seed_string in config and exp_num_string in config) or (not use_seed and exp_num_string in config):
         checkpoint_filenames = get_valid_files_from_directory(directory, ".pth", "best")
