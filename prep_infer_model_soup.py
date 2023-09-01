@@ -20,7 +20,7 @@ def get_sd(state_dicts, alphal):
 #parameter
 nshot = 10
 dataset = 'endo'
-model_name = 'swinv2'
+model_name = 'resnet101'
 exp_num = 1
 seed = -1000
 
@@ -72,7 +72,7 @@ print(configs_for_checkpoints_filenames)
 
 #take just three 
 ###############REMOVE LATER!!!!!##############################################
-checkpoint_filenames = checkpoint_filenames[:3]
+checkpoint_filenames = checkpoint_filenames[:5]
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 state_dicts = []
 for f in checkpoint_filenames:
