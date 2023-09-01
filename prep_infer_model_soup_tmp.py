@@ -49,7 +49,7 @@ def find_checkpoints_in_config(directory, config_filename, seed, exp_num, use_se
 
 # Parameters
 nshot = 5
-dataset = 'endo'
+dataset = 'chest'
 model_name = 'resnet101'
 exp_num = 1
 seed = -1000
