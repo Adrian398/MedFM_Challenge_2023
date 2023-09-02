@@ -123,6 +123,8 @@ print("Starting model soup search")
 for i in range(1, len(state_dicts)):
     # add current index to the ingredients
     ingredient_indices = best_ingredients + [ranked_candidates[i]]
+    # todo remove below
+    ingredient_indices = ranked_candidates
     print("Trying ingredients: " + str(ingredient_indices))
     alphal = [0 for i in range(len(state_dicts))]
     for j in ingredient_indices:
