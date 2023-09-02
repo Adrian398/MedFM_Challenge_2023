@@ -42,12 +42,6 @@ def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=1):
 
     gpu_cycle = itertools.cycle(gpus)
 
-    task_gpu_map = {
-        'colon': 'gpu1c',
-        'chest': 'gpu1b',
-        'endo': 'gpu1a'
-    }
-
     task_counter = {
         'colon': 0,
         'chest': 0,
@@ -59,14 +53,9 @@ def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=1):
 
         task = command.split("/")[6]
 
-        if task not in task_gpu_map:
-            raise ValueError(f'Invalid task {task} in command {command}.')
-
         # Check if we have already run the desired number of commands for this task
         if task_counter[task] >= num_commands:
             continue
-
-        gpu_name = task_gpu_map[task]
 
         cfg_path = command.split(" ")[3]
 
@@ -77,7 +66,7 @@ def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=1):
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        slurm_cmd = f'sbatch -p ls6 --nodelist={gpu_name} --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
+        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
         print(slurm_cmd)
 
         task_counter[task] += 1

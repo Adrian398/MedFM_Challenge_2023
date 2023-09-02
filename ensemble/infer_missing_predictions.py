@@ -24,7 +24,7 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
-def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
+def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=1):
     """
     Runs the generated commands on the cluster.
     Tasks are allocated to GPUs based on the task type:
@@ -33,11 +33,18 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
     - endo: rtx3090 (gpua)
     """
 
-    task_gpu_map = {
-        'colon': 'gpu1c',
-        'chest': 'gpu1b',
-        'endo': 'gpu1a'
-    }
+    if gpu == 'c':
+        gpus = ['rtx4090']
+    elif gpu == 'ab':
+        gpus = ['rtx3090']
+    elif gpu == '8a':
+        gpus = ['rtx2080ti']
+    elif gpu == 'all':
+        gpus = ['rtx4090', 'rtx3090', 'rtx4090', 'rtx3090']
+    else:
+        raise ValueError(f'Invalid gpu type {gpu}.')
+
+    gpu_cycle = itertools.cycle(gpus)
 
     task_counter = {
         'colon': 0,
@@ -46,16 +53,13 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
     }
 
     for command in commands:
-        task = command.split("/")[6]
+        gpu = next(gpu_cycle)
 
-        if task not in task_gpu_map:
-            raise ValueError(f'Invalid task {task} in command {command}.')
+        task = command.split("/")[6]
 
         # Check if we have already run the desired number of commands for this task
         if task_counter[task] >= num_commands:
             continue
-
-        gpu = task_gpu_map[task]
 
         cfg_path = command.split(" ")[2]
         cfg_path_split = cfg_path.split("/")
@@ -68,7 +72,7 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        slurm_cmd = f'sbatch -p ls6 --nodelist={gpu} --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
+        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
         print(slurm_cmd)
 
         task_counter[task] += 1
