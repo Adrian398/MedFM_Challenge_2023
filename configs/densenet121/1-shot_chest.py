@@ -1,46 +1,35 @@
 _base_ = [
     '../datasets/chest.py',
-    '../schedules/adamw_inverted_cosine_lr.py',
+    '../schedules/chest.py',
     'mmpretrain::_base_/default_runtime.py',
+    'mmpretrain::_base_/models/densenet/densenet121.py',
     '../custom_imports.py',
 ]
 
 # Pre-trained Checkpoint Path
 checkpoint = 'https://download.openmmlab.com/mmclassification/v0/densenet/densenet121_4xb256_in1k_20220426-07450f99.pth'  # noqa
 
-lr = 1e-6
-train_bs = 16
+lr = 1e-4
+train_bs = 4
 val_bs = 128
 dataset = 'chest'
 model_name = 'densenet121'
 exp_num = 1
 nshot = 1
 
-run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}'
 work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
 
 model = dict(
-    type='ImageClassifier',
-    backbone=dict(
-        type='DenseNet',
-        depth=121,
-        num_stages=4,
-        out_indices=(3,),
-        style='pytorch',
-        init_cfg=dict(type='Pretrained', checkpoint=checkpoint, prefix='backbone')
-    ),
-    neck='GlobalAveragePooling',
     head=dict(
-        type='CSRAClsHead',
+        type='MultiLabelLinearClsHead',
         num_classes=19,
-        in_channels=2048,
-        num_heads=1,
-        lam=0.1,
-        loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)))
+        in_channels=1024,
+        loss=dict(type='CrossEntropyLoss', loss_weight=1.0)))
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='RandomResizedCrop', scale=448, crop_ratio_range=(0.7, 1.0)),
+    dict(type='RandomResizedCrop', scale=256, crop_ratio_range=(0.7, 1.0)),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
@@ -48,7 +37,7 @@ train_pipeline = [
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='Resize', scale=448),
+    dict(type='Resize', scale=256),
     dict(
         type='PackInputs',
         # `gt_label_difficult` is needed for VOC evaluation
@@ -77,7 +66,7 @@ test_dataloader = dict(
 
 default_hooks = dict(
     checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="auto", rule="greater"),
-    logger=dict(interval=10),
+    logger=dict(interval=1),
 )
 
 optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=lr, type='AdamW', weight_decay=0.05)
@@ -99,9 +88,6 @@ param_scheduler = [
     dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
 ]
 
-
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
-
-randomness = dict(seed=0)
+train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=1000)
