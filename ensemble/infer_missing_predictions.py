@@ -167,7 +167,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
 
     for model_dir in model_dirs:
         # Extract task, shot, and model_dir_name from the model_dir path
-        model_dir_split = model_dir.split("work_dirs/")
+        model_dir_split = model_dir.split("work_dirs/")[1]
 
         task = model_dir_split[0]
         shot = model_dir_split[1].split('-')[0]
