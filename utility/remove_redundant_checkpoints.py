@@ -7,10 +7,14 @@ def find_pth_files(directory="."):
 
     for root, _, files in os.walk(directory):
         for file in files:
+            print(f"Checking {file}")
             if file.endswith('.pth') and not file.startswith('best'):
                 matching_files.append(os.path.join(root, file))
 
     return matching_files
 
 
-find_pth_files(directory="/scratch/medfm/medfm-challenge/work_dirs")
+files = find_pth_files(directory="/scratch/medfm/medfm-challenge/work_dirs")
+print("-----------------------------")
+print(f"Found {len(files)} files.")
+print(files)
