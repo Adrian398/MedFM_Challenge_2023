@@ -11,12 +11,14 @@ Example:                        chest_10-shot_submission.csv
 """
 import os
 import re
-
+from functools import lru_cache
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
+
+EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
 def extract_exp_number(string):
-    match = re.search(r'exp(\d+)', string)
+    match = EXP_PATTERN.search(string)
     return int(match.group(1)) if match else 0
 
 
@@ -24,7 +26,7 @@ def contains_csv_file(task, shot, model_dir):
     expected_filename = f"{task}_{shot}-shot_submission.csv"
 
     try:
-        return expected_filename in os.listdir(model_dir)
+        return os.path.exists(os.path.join(model_dir, expected_filename))
     except FileNotFoundError:
         pass
     except PermissionError as permission_error:
@@ -34,6 +36,7 @@ def contains_csv_file(task, shot, model_dir):
     return False
 
 
+@lru_cache(maxsize=None)
 def is_metric_in_event_file(file_path, metric):
     event_acc = EventAccumulator(file_path)
     event_acc.Reload()
@@ -46,6 +49,7 @@ def is_metric_in_event_file(file_path, metric):
         return False
 
 
+@lru_cache(maxsize=None)
 def get_event_file_from_model_dir(model_dir):
     try:
         for entry in os.listdir(model_dir):
