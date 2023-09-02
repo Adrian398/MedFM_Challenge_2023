@@ -259,8 +259,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
         # Destination Path
         out_filepath = os.path.join(model_path, f"{task}_{shot}_submission.csv")
 
-        command = (f"python tools/infer.py {config_filepath} {checkpoint_filepath} {images_path} --batch-size "
-                   f"{batch_size} --out {out_filepath}\n")
+        command = (f"python tools/infer.py {config_filepath} {checkpoint_filepath} {images_path} --batch-size {batch_size} --out {out_filepath}")
         commands.append(command)
 
     print("Generated Infer Commands:")
