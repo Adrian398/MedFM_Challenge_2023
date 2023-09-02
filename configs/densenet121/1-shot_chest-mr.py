@@ -30,6 +30,20 @@ model = dict(
         type='MultiLabelLinearClsHead'),
 )
 
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='RandomResizedCrop', scale=256, crop_ratio_range=(0.7, 1.0)),
+    dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(type='RandomFlip', prob=0.5, direction='vertical'),
+    dict(type='PackInputs'),
+]
+
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='Resize', scale=256),
+    dict(type='PackInputs'),
+]
+
 train_dataloader = dict(
     batch_size=train_bs,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt')
