@@ -102,13 +102,6 @@ def get_event_file_from_run_dir(run_dir):
         return None
 
 
-def exclude_model(name):
-    for exclude in exclude_models:
-        if name.__contains__(exclude):
-            return True
-    return False
-
-
 def filter_directories_by_exp(directories, exp_number):
     exp_str = f"exp{exp_number}"
     filtered_dirs = [dir for dir in directories if exp_str in dir]
