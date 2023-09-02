@@ -66,7 +66,7 @@ def run_commands_on_cluster(commands, log_dir=".ensemble/log", delay_seconds=1):
 
 
 def get_file_from_directory(directory, extension, contains_string=None):
-    """Get a file from the directory with the given extension and optional substring."""
+    """Get a file from an absolute directory (i.e. from /scratch/..) with the given extension and optional substring."""
     for file in os.listdir(directory):
         if file.endswith(extension) and (not contains_string or contains_string in file):
             return os.path.join(directory, file)
@@ -161,7 +161,7 @@ def get_model_dirs_without_prediction(task, shot):
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
         # Skip if no best checkpoint file
-        checkpoint_path = get_file_from_directory(model_path, ".pth", "best")
+        checkpoint_path = get_file_from_directory(abs_model_dir, ".pth", "best")
         if checkpoint_path is None:
             continue
 
