@@ -1,0 +1,14 @@
+For colon:
+1 log ACCURACY
+2 save best ACCURACY
+
+For chest / endo:
+1 Save best MAP in all configs!
+2 Train more? So we get per class MAP
+
+
+In general:
+1 Add copying of configs to run_out_dir in prep_infer_with_ensemble
+2 Optimize prep_infer_with_ensemble, don't do inferences we already did
+3 Create ensemble submission, weighted by AUC Scores (using prep_infer_with_ensemble and merge_predictions)
+4 Train more with per class map scores and create
