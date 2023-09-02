@@ -38,13 +38,6 @@ model = dict(
         lam=0.1,
         loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)))
 
-train_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(type='RandomResizedCrop', scale=448, crop_ratio_range=(0.7, 1.0)),
-    dict(type='RandomFlip', prob=0.5, direction='horizontal'),
-    dict(type='RandomFlip', prob=0.5, direction='vertical'),
-    dict(type='PackInputs'),
-]
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
@@ -59,8 +52,7 @@ test_pipeline = [
 
 train_dataloader = dict(
     batch_size=train_bs,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
-                 pipeline=train_pipeline)
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt')
 )
 
 val_dataloader = dict(
@@ -79,6 +71,25 @@ default_hooks = dict(
     checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
     logger=dict(interval=10),
 )
+
+optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=lr, type='AdamW', weight_decay=0.05)
+
+optim_wrapper = dict(
+    optimizer=optimizer,
+    paramwise_cfg=dict(
+        norm_decay_mult=0.0,
+        bias_decay_mult=0.0,
+        flat_decay_mult=0.0,
+        custom_keys={
+            '.absolute_pos_embed': dict(decay_mult=0.0),
+            '.relative_position_bias_table': dict(decay_mult=0.0)
+        }),
+)
+
+param_scheduler = [
+    dict(by_epoch=True, end=1, start_factor=1, type='LinearLR'),
+    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
+]
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
