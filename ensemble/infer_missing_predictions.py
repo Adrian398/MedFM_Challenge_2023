@@ -9,16 +9,60 @@ This script does the following steps:
 Prediction File Naming Scheme:  TASK_N-shot_submission.csv
 Example:                        chest_10-shot_submission.csv
 """
+import itertools
 import os
 import re
+import subprocess
 import sys
 import shutil
+import time
 from collections import Counter
 from multiprocessing import Pool
 from functools import lru_cache
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
 EXP_PATTERN = re.compile(r'exp(\d+)')
+
+
+def run_commands_on_cluster(commands, log_dir=".ensemble/log", delay_seconds=1):
+    """
+    Runs the generated commands on the cluster.
+    Tasks are allocated to GPUs based on the task type:
+    - colon: rtx4090 (gpuc)
+    - chest: rtx3090 (gpub)
+    - endo: rtx2080ti (gpua)
+    """
+
+    task_gpu_map = {
+        'colon': 'rtx4090',
+        'chest': 'rtx3090',
+        'endo': 'rtx3090'
+    }
+
+    # Ensure the log directory exists
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+
+    for command in commands:
+        task = command.split("/")[5]
+
+        if task not in task_gpu_map:
+            raise ValueError(f'Invalid task {task} in command {command}.')
+
+        gpu = task_gpu_map[task]
+
+        cfg_path = command.split(" ")[2]
+        cfg_path_split = cfg_path.split("/")
+        shot, exp = cfg_path_split[6], extract_exp_number(cfg_path_split[7])
+
+        log_dir = cfg_path.rsplit("/", 1)[0]
+        log_file_name = f"{task}_{shot}_exp{exp}_slurm-%j"
+
+        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
+        print(slurm_cmd)
+        #exit()
+        #subprocess.run(slurm_cmd, shell=True)
+        #time.sleep(delay_seconds)
 
 
 def get_file_from_directory(directory, extension, contains_string=None):
@@ -41,13 +85,6 @@ def print_report(model_infos):
     ]
     for line in report:
         print(line)
-
-
-def matches_model_directory(csv_file, task, shot):
-    csv_name = os.path.basename(csv_file)
-    expected_csv_name = f"{task}_{shot}-shot_submission.csv"
-    print("Is:",csv_name, "Expected:", expected_csv_name)
-    return csv_name == expected_csv_name
 
 
 def sort_key(entry):
@@ -123,6 +160,11 @@ def get_model_dirs_without_prediction(task, shot):
         my_print(f"Checking {task}/{shot}-shot/{model_dir}")
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
+        # Skip if no best checkpoint file
+        checkpoint_path = get_file_from_directory(model_path, ".pth", "best")
+        if checkpoint_path is None:
+            continue
+
         # Skip/Delete if no event file
         event_file = get_event_file_from_model_dir(abs_model_dir)
         if event_file is None:
@@ -178,7 +220,6 @@ if __name__ == "__main__":  # Important when using multiprocessing
             }
 
     print_report(model_infos)
-    task_counts = Counter(model["task"] for model in model_infos.values())
 
     user_input = input(f"\nDo you want to generate the inference commands? (yes/no): ")
     if user_input.strip().lower() == 'no':
@@ -193,27 +234,33 @@ if __name__ == "__main__":  # Important when using multiprocessing
         model_name = model['name']
 
         # Config Path
-        config_path = get_file_from_directory(model_path, ".py")
+        config_filepath = get_file_from_directory(model_path, ".py")
 
         # Checkpoint Path
-        checkpoint_path = get_file_from_directory(model_path, ".pth", "best")
+        checkpoint_filepath = get_file_from_directory(model_path, ".pth", "best")
 
         # Image Path
         images_path = os.path.join(work_dir_path, "data", "MedFMC_test", task, "images")
 
         # Destination Path
-        out_path = os.path.join(model_path, f"{task}_{shot}_submission.csv")
+        out_filepath = os.path.join(model_path, f"{task}_{shot}_submission.csv")
 
-        command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --batch-size {batch_size} --out {out_path}\n"
+        command = (f"python tools/infer.py {config_filepath} {checkpoint_filepath} {images_path} --batch-size "
+                   f"{batch_size} --out {out_filepath}\n")
         commands.append(command)
 
     print("Generated Infer Commands:")
     for command in commands:
         print(command)
 
+    task_counts = Counter(model["task"] for model in model_infos.values())
+
+    print("Task Counts:")
+    for task, count in task_counts.items():
+        print(f"{task.capitalize()}: {count}")
+
     while True:
-        user_input = input(
-            f"\nHow many inference commands per task do you want to generate?\n{task_counts}").strip().lower()
+        user_input = input("\nHow many inference commands per task do you want to generate? ").strip().lower()
 
         if user_input == 'no':
             exit()
@@ -223,3 +270,5 @@ if __name__ == "__main__":  # Important when using multiprocessing
             break
         except ValueError:
             print("Invalid input. Please enter a number or 'no' to exit.")
+
+    run_commands_on_cluster(commands)
