@@ -167,14 +167,13 @@ if __name__ == "__main__":  # Important when using multiprocessing
 
     for model_dir in model_dirs:
         # Extract task, shot, and model_dir_name from the model_dir path
-        model_dir_split = model_dir.split("work_dirs")
-        print(model_dir_split)
-        #task, shot, exp = model_dir_split[]
-        print(model_dir.split(os.sep, 2))
-        print(task, shot_with_suffix)
+        model_dir_split = model_dir.split("work_dirs/")
 
-        shot = shot_with_suffix.split('-')[0]
-        print(shot)
+        task = model_dir_split[0]
+        shot = model_dir_split[1].split('-')[0]
+        exp = extract_exp_number(model_dir_split[2])
+
+        print(task, shot, exp)
         exit()
 
         for csv_file in all_csv_files:
