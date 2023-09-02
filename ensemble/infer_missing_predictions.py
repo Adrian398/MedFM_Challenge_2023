@@ -13,11 +13,20 @@ import os
 import re
 import sys
 import shutil
+from collections import Counter
 from multiprocessing import Pool
 from functools import lru_cache
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
 EXP_PATTERN = re.compile(r'exp(\d+)')
+
+
+def get_file_from_directory(directory, extension, contains_string=None):
+    """Get a file from the directory with the given extension and optional substring."""
+    for file in os.listdir(directory):
+        if file.endswith(extension) and (not contains_string or contains_string in file):
+            return os.path.join(directory, file)
+    return None
 
 
 def print_report(model_infos):
@@ -133,16 +142,17 @@ def get_model_dirs_without_prediction(task, shot):
     return model_dirs
 
 
+# ========================================================================================
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
-
 tasks = ["colon", "endo", "chest"]
 shots = ["1", "5", "10"]
-#exps = [1, 2, 3, 4, 5]
-
+N_inferences_per_task = 10
+batch_size = 4
 metric_tags = {"auc": "AUC/AUC_multiclass",
                "aucl": "AUC/AUC_multilabe",
                "map": "multi-label/mAP",
                "agg": "Aggregate"}
+# ========================================================================================
 
 
 if __name__ == "__main__":  # Important when using multiprocessing
@@ -163,17 +173,17 @@ if __name__ == "__main__":  # Important when using multiprocessing
                 "task": task,
                 "shot": shot,
                 "exp_num": exp_num,
+                "name": model_name,
                 "path": model_path,
-                "name": model_name
             }
 
     print_report(model_infos)
+    task_counts = Counter(model["task"] for model in model_infos.values())
 
     user_input = input(f"\nDo you want to generate the inference commands? (yes/no): ")
     if user_input.strip().lower() == 'no':
         exit()
 
-    N_per_task = 10
     commands = []
     for model in model_infos.values():
         task = model['task']
@@ -182,21 +192,34 @@ if __name__ == "__main__":  # Important when using multiprocessing
         model_path = model['path']
         model_name = model['name']
 
-        print(task,shot,exp_num,model_path,model_name)
-        exit()
-
         # Config Path
-        config_filename = [file for file in os.listdir(model_path) if file.endswith(".py")][0]
-        config_path = os.path.join(model_path, config_filename)
+        config_path = get_file_from_directory(model_path, ".py")
 
         # Checkpoint Path
-        best_ckpt_filename = [file for file in os.listdir(model_path) if file.endswith(".pth")
-                              and file.__contains__("best")][0]
-        best_ckpt_path = os.path.join(model_path, best_ckpt_filename)
+        checkpoint_path = get_file_from_directory(model_path, ".pth", "best")
 
         # Image Path
         images_path = os.path.join(work_dir_path, "data", "MedFMC_test", task, "images")
 
         # Destination Path
-        pred_csv_filename = f"{task}_{shot}_submission.csv"
-        pred_dest_path = os.path.join(model_path, f"exp{exp_num}", pred_csv_filename)
+        out_path = os.path.join(model_path, f"{task}_{shot}_submission.csv")
+
+        command = f"python tools/infer.py {config_path} {checkpoint_path} {images_path} --batch-size {batch_size} --out {out_path}\n"
+        commands.append(command)
+
+    print("Generated Infer Commands:")
+    for command in commands:
+        print(command)
+
+    while True:
+        user_input = input(
+            f"\nHow many inference commands per task do you want to generate?\n{task_counts}").strip().lower()
+
+        if user_input == 'no':
+            exit()
+
+        try:
+            num_commands = int(user_input)
+            break
+        except ValueError:
+            print("Invalid input. Please enter a number or 'no' to exit.")
