@@ -112,10 +112,10 @@ def get_model_dirs_without_prediction(task, shot):
 
     for model_dir in setting_model_dirs:
         my_print(f"Checking {task}/{shot}-shot/{model_dir}")
-        model_dir = os.path.join(setting_directory, model_dir)
+        abs_model_dir = os.path.join(setting_directory, model_dir)
 
         # Skip/Delete if no event file
-        event_file = get_event_file_from_model_dir(model_dir)
+        event_file = get_event_file_from_model_dir(abs_model_dir)
         if event_file is None:
             #print("No event file found, skipping..")
             continue
@@ -126,7 +126,7 @@ def get_model_dirs_without_prediction(task, shot):
             continue
 
         # Skip if prediction csv file is present
-        if contains_csv_file(task, shot, model_dir):
+        if contains_csv_file(task, shot, abs_model_dir):
             continue
 
         model_dirs.append(model_dir)
