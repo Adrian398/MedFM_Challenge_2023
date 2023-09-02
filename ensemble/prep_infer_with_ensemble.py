@@ -147,7 +147,7 @@ def get_N_best_exp_run_dirs(task, shot, exp):
             print("Skip, no map")
             continue
 
-        run_score_list.append((run_dir_path, score, auc_class_values))
+        run_score_list.append((run_dir_path, score, class_values))
 
     run_score_list.sort(key=lambda x: x[1], reverse=True)
 
