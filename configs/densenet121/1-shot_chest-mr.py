@@ -1,7 +1,8 @@
 _base_ = [
     '../datasets/chest.py',
+    '../schedules/adamw_inverted_cosine_lr.py',
     'mmpretrain::_base_/models/densenet/densenet121.py',
-    'mmpretrain::_base_/schedules/imagenet_bs256.py',
+    #'mmpretrain::_base_/schedules/imagenet_bs256.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
 ]
@@ -10,8 +11,8 @@ _base_ = [
 checkpoint = 'https://download.openmmlab.com/mmclassification/v0/densenet/densenet121_4xb256_in1k_20220426-07450f99.pth'  # noqa
 
 lr = 1e-6
-train_bs = 8
-val_bs = 16
+train_bs = 16
+val_bs = 64
 dataset = 'chest'
 model_name = 'densenet121'
 exp_num = 1
