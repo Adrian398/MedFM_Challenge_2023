@@ -82,6 +82,8 @@ def get_map_and_class_scores(file_path):
     class_values = []
     for class_tag in class_tags:
         class_values.append(event_acc.Scalars(class_tag)[max_map_index].value)
+    print(f"Class values: {class_values}")
+    print(f"MAP: {max_map}")
 
     return max_map, class_values
 
