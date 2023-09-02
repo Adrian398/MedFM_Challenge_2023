@@ -12,19 +12,9 @@ def get_sd(state_dicts, alphal):
     for k in state_dicts[0]['state_dict'].keys():
         sd[k] = state_dicts[0]['state_dict'][k].clone() * alphal[0]
 
-    # Print a few weights from the first state dict for comparison.
-    # print("Initial weights (first state dict):")
-    # print("Key:", list(state_dicts[0]['state_dict'].keys())[0])
-    # print(state_dicts[0]['state_dict'][list(state_dicts[0]['state_dict'].keys())[0]])
-
     for i in range(1, len(state_dicts)):
         for k in state_dicts[i]['state_dict'].keys():
             sd[k] = sd[k] + state_dicts[i]['state_dict'][k].clone() * alphal[i]
-
-    # Print a few combined weights for comparison
-    # print("Combined weights:")
-    # print("Key:", list(sd.keys())[0])
-    # print(sd[list(sd.keys())[0]])
 
     return sd
 
@@ -58,8 +48,8 @@ def find_checkpoints_in_config(directory, config_filename, seed, exp_num, use_se
 
 
 # Parameters
-nshot = 10
-dataset = 'chest'
+nshot = 5
+dataset = 'endo'
 model_name = 'resnet101'
 exp_num = 1
 seed = -1000
