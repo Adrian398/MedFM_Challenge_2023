@@ -276,7 +276,7 @@ for run_info in best_runs:
     run_name = split_path[7]
     task, shot, exp = split_path[5], split_path[6], extract_exp_number(run_name)
 
-    run_out_dir = os.path.join(submission_dir, "tmp", task, f"{shot}-shot", f"exp{exp}", run_name)
+    run_out_dir = os.path.join(submission_dir, "tmp", task, f"{shot}", f"exp{exp}", run_name)
     os.makedirs(run_out_dir, exist_ok=True)
 
     config_filename = [file for file in os.listdir(run_path) if file.endswith(".py")][0]
