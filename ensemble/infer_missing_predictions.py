@@ -170,13 +170,10 @@ if __name__ == "__main__":  # Important when using multiprocessing
         shot = shot_with_suffix.split('-')[0]
 
         for csv_file in all_csv_files:
-            print(all_csv_files)
-            exit()
+
             if matches_model_directory(csv_file, task, shot):
-                # Construct the correct CSV path
                 correct_csv_path = os.path.join(model_dir, os.path.basename(csv_file))
 
-                # Copy
                 shutil.copy(csv_file, correct_csv_path)
                 print(f"Copied {csv_file} to {correct_csv_path}")
                 break  # Break once a match is found to avoid unnecessary further checking
