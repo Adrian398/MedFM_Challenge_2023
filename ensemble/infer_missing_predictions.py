@@ -24,13 +24,13 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
-def run_commands_on_cluster(commands, log_dir=".ensemble/log", delay_seconds=1):
+def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
     """
     Runs the generated commands on the cluster.
     Tasks are allocated to GPUs based on the task type:
     - colon: rtx4090 (gpuc)
     - chest: rtx3090 (gpub)
-    - endo: rtx2080ti (gpua)
+    - endo: rtx3090 (gpua)
     """
 
     task_gpu_map = {
@@ -39,15 +39,21 @@ def run_commands_on_cluster(commands, log_dir=".ensemble/log", delay_seconds=1):
         'endo': 'rtx3090'
     }
 
-    # Ensure the log directory exists
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
+    task_counter = {
+        'colon': 0,
+        'chest': 0,
+        'endo': 0
+    }
 
     for command in commands:
         task = command.split("/")[5]
 
         if task not in task_gpu_map:
             raise ValueError(f'Invalid task {task} in command {command}.')
+
+        # Check if we have already run the desired number of commands for this task
+        if task_counter[task] >= num_commands:
+            continue
 
         gpu = task_gpu_map[task]
 
@@ -58,11 +64,19 @@ def run_commands_on_cluster(commands, log_dir=".ensemble/log", delay_seconds=1):
         log_dir = cfg_path.rsplit("/", 1)[0]
         log_file_name = f"{task}_{shot}_exp{exp}_slurm-%j"
 
+        # Ensure the log directory exists
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+
         slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
         print(slurm_cmd)
-        #exit()
-        #subprocess.run(slurm_cmd, shell=True)
-        #time.sleep(delay_seconds)
+
+        # Increment the counter for the task
+        task_counter[task] += 1
+
+        # Uncomment the following lines if you want to actually run the commands
+        # subprocess.run(slurm_cmd, shell=True)
+        # time.sleep(delay_seconds)
 
 
 def get_file_from_directory(directory, extension, contains_string=None):
@@ -271,4 +285,4 @@ if __name__ == "__main__":  # Important when using multiprocessing
         except ValueError:
             print("Invalid input. Please enter a number or 'no' to exit.")
 
-    run_commands_on_cluster(commands)
+    run_commands_on_cluster(commands, num_commands)
