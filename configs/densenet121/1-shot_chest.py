@@ -1,6 +1,6 @@
 _base_ = [
     '../datasets/chest.py',
-    '../schedules/adamw_inverted_cosine_lr.py',
+    '../schedules/chest.py',
     'mmpretrain::_base_/default_runtime.py',
     'mmpretrain::_base_/models/densenet/densenet121.py',
     '../custom_imports.py',
@@ -9,7 +9,7 @@ _base_ = [
 # Pre-trained Checkpoint Path
 checkpoint = 'https://download.openmmlab.com/mmclassification/v0/densenet/densenet121_4xb256_in1k_20220426-07450f99.pth'  # noqa
 
-lr = 1e-5
+lr = 1e-4
 train_bs = 4
 val_bs = 128
 dataset = 'chest'
@@ -66,7 +66,7 @@ test_dataloader = dict(
 
 default_hooks = dict(
     checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="auto", rule="greater"),
-    logger=dict(interval=10),
+    logger=dict(interval=1),
 )
 
 optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=lr, type='AdamW', weight_decay=0.05)
@@ -85,11 +85,9 @@ optim_wrapper = dict(
 
 param_scheduler = [
     dict(by_epoch=True, end=1, start_factor=1, type='LinearLR'),
-    dict(begin=1, by_epoch=True, eta_min=1e-03, type='CosineAnnealingLR'),
+    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
 ]
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=500, max_epochs=500)
-
-randomness = dict(seed=0)
+train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=1000)
