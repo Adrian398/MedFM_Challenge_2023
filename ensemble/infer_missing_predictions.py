@@ -22,11 +22,12 @@ EXP_PATTERN = re.compile(r'exp(\d+)')
 
 def print_report(model_infos):
     model_dirs = [model["path"] for model in model_infos.values()]
+    sorted_report_entries = sorted([model_dir for model_dir in model_dirs], key=sort_key)
     report = [
         "\n---------------------------------------------------------------------------------------------------------------",
         f"| Valid Models without an existing prediction CSV file:",
         "---------------------------------------------------------------------------------------------------------------",
-        sorted([model_dir for model_dir in model_dirs], key=sort_key),
+        *sorted_report_entries,
         "---------------------------------------------------------------------------------------------------------------"
     ]
     for line in report:
