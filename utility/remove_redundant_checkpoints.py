@@ -13,4 +13,4 @@ def find_pth_files(directory="."):
     return matching_files
 
 
-find_pth_files()
+find_pth_files(directory="/scratch/medfm/medfm-challenge/work_dirs")
