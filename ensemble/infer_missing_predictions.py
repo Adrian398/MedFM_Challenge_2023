@@ -142,15 +142,15 @@ if __name__ == "__main__":  # Important when using multiprocessing
 
     model_dirs = []
     for task, shot, model_list in results:
-        if model_list:
-            model_dirs.extend(model_list)
+        for model_name in model_list:
+            model_path = os.path.join(task, f"{shot}-shot", model_name)
+            model_dirs.append(model_path)
 
     report_entries = [
-        f"{work_dir_path}/{task}/{shot}-shot/{model.split(os.sep)[-1]}"
-        for task, shot, model_list in results if model_list for model in model_list
+        f"| {model_dir}" for model_dir in model_dirs
     ]
 
-    report_entries = sorted(report_entries, key=sort_key)
+    #report_entries = sorted(report_entries, key=sort_key)
 
     report = [
         "\n---------------------------------------------------------------------------------------------------------------",
@@ -167,8 +167,8 @@ if __name__ == "__main__":  # Important when using multiprocessing
     if user_input.strip().lower() == 'no':
         exit()
 
-    print("\nGenerate Commands:\n")
     N_per_task = 10
     commands = []
-    for model_dir in report_entries:
-        print(model_dir)
+
+    for model_dir in model_dirs:
+        pass
