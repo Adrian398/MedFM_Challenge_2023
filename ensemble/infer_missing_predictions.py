@@ -257,7 +257,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
         images_path = os.path.join(work_dir_path, "data", "MedFMC_test", task, "images")
 
         # Destination Path
-        out_filepath = os.path.join(model_path, f"{task}_{shot}_submission.csv")
+        out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_submission.csv")
 
         command = (f"python tools/infer.py {config_filepath} {checkpoint_filepath} {images_path} --batch-size {batch_size} --out {out_filepath}")
         commands.append(command)
