@@ -12,11 +12,24 @@ Example:                        chest_10-shot_submission.csv
 import os
 import re
 import sys
+import shutil
 from multiprocessing import Pool
 from functools import lru_cache
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
 EXP_PATTERN = re.compile(r'exp(\d+)')
+
+
+def find_all_csv_files_in_directory(directory):
+    return [os.path.join(root, file)
+            for root, dirs, files in os.walk(directory)
+            for file in files if file.endswith('.csv')]
+
+
+def matches_model_directory(csv_file, task, shot):
+    csv_name = os.path.basename(csv_file)
+    expected_csv_name = f"{task}_{shot}-shot_submission.csv"
+    return csv_name == expected_csv_name
 
 
 def sort_key(entry):
@@ -113,7 +126,7 @@ def get_model_dirs_without_prediction(task, shot):
 
 
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
-#work_dir_path = os.path.join("work_dirs")
+
 tasks = ["colon", "endo", "chest"]
 shots = ["1", "5", "10"]
 #exps = [1, 2, 3, 4, 5]
@@ -146,8 +159,27 @@ if __name__ == "__main__":  # Important when using multiprocessing
         f"| {task}/{shot}-shot/exp{extract_exp_number(model.split(os.sep)[-1])}\t{model.split(os.sep)[-1]}"
         for task, shot, model_list in results if model_list for model in model_list
     ]
-
     report_entries = sorted(report_entries, key=sort_key)
+
+    misplaced_csv_dir = "./submissions/evaluation"
+    all_csv_files = find_all_csv_files_in_directory(misplaced_csv_dir)
+
+    for model_dir in model_dirs:
+        # Extract task, shot, and model_dir_name from the model_dir path
+        _, task, shot_with_suffix, _ = model_dir.split(os.sep)
+        shot = shot_with_suffix.split('-')[0]
+
+        for csv_file in all_csv_files:
+            print(all_csv_files)
+            exit()
+            if matches_model_directory(csv_file, task, shot):
+                # Construct the correct CSV path
+                correct_csv_path = os.path.join(model_dir, os.path.basename(csv_file))
+
+                # Copy
+                shutil.copy(csv_file, correct_csv_path)
+                print(f"Copied {csv_file} to {correct_csv_path}")
+                break  # Break once a match is found to avoid unnecessary further checking
 
     report = [
         "\n---------------------------------------------------------------------------------------------------------------",
