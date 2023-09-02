@@ -1,60 +1,101 @@
 import json
+
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-source_team = "uniwue"
-target_team = "validated"
 
-# Load the data
-with open(f"{source_team}.json", 'r') as uniwue_file:
-    uniwue_data = json.load(uniwue_file)
+def init_settings():
+    tasks_ = ["colon", "chest", "endo"]
+    shots_ = [str(i) + "-shot" for i in [1, 5, 10]]
+    exps_ = ["exp" + str(i) for i in range(1, 5 + 1)]
+    metrics_ = ["Acc_metric", "mAP_metric"]
+    return tasks_, shots_, exps_, metrics_, [task + "_" + shot for task in tasks_ for shot in shots_]
 
-with open(f"{target_team}.json", 'r') as validated_file:
-    validated_data = json.load(validated_file)
 
-# Comparison function
-def compare_values(uniwue_val, validated_val):
-    if uniwue_val > validated_val:
-        return uniwue_val, validated_val
-    elif uniwue_val < validated_val:
-        return uniwue_val, validated_val
-    else:
-        return uniwue_val, validated_val
+def load_team_data(team1, team2):
+    with open(f"{team1}.json", 'r') as src_file:
+        src_team_data = json.load(src_file)
+    with open(f"{team2}.json", 'r') as trg_file:
+        trg_team_data = json.load(trg_file)
+    return src_team_data, trg_team_data
 
-# Comparison result
-comparison_result = {}
 
-for exp, values in uniwue_data['task'].items():
-    comparison_result[exp] = {}
-    for shot, metrics in values.items():
-        comparison_result[exp][shot] = {}
-        for metric, uniwue_val in metrics.items():
-            validated_val = validated_data['task'][exp][shot].get(metric, None)
-            if validated_val:
-                uniwue_val, validated_val = compare_values(float(uniwue_val), float(validated_val))
-                comparison_result[exp][shot][metric] = {"uniwue": uniwue_val, "validated": validated_val}
+def get_values_from_data(data, exp, setting, metric_key):
+    """Fetch the metric values from the provided data."""
+    metric_data = data['task'][exp][setting].get(metric_key)
+    if metric_data:
+        return float(metric_data)
+    return None
 
-# Prepare data for the plots
-all_settings = list(comparison_result["exp1"].keys())
-all_experiments = list(comparison_result.keys())
+
+def compare_results(team1, team2):
+    comparison_result = {}
+    team1_name, team1_data = team1.values()
+    team2_name, team2_data = team2.values()
+    metrics = ['Acc_metric', 'mAP_metric']
+
+    for exp in exps:
+        comparison_result[exp] = {}
+
+        for setting in settings:
+            comparison_result[exp][setting] = {}
+
+            for metric in metrics:
+                team1_val = team1_data['task'][exp][setting].get(metric)
+                team2_val = team2_data['task'][exp][setting].get(metric)
+                if team1_val is not None and team2_val is not None:
+                    comparison_result[exp][setting][metric] = {team1_name: team1_val, team2_name: team2_val}
+    return comparison_result
+
+
+source_team_name = "uniwue"
+target_team_name = "validated"
+
+tasks, shots, exps, metrics, settings = init_settings()
+
+task2metric = {'colon': metrics[0], 'chest': metrics[1], 'endo': metrics[1]}
+
+source_data, target_data = load_team_data(team1=source_team_name, team2=target_team_name)
+result = compare_results(team1={'name': source_team_name, 'data': source_data},
+                         team2={'name': target_team_name, 'data': target_data})
 
 # Create a subplot with multiple rows
-fig = make_subplots(rows=len(all_settings), cols=1, subplot_titles=all_settings, vertical_spacing=0.05, shared_xaxes=True)
+fig = make_subplots(rows=len(settings), cols=1, subplot_titles=settings, vertical_spacing=0.05, shared_xaxes=True)
 
-for idx, setting in enumerate(all_settings):
-    uniwue_vals = [comparison_result[exp][setting]["mAP_metric"]["uniwue"] if "mAP_metric" in comparison_result[exp][setting] else comparison_result[exp][setting]["Acc_metric"]["uniwue"] for exp in all_experiments]
-    validated_vals = [comparison_result[exp][setting]["mAP_metric"]["validated"] if "mAP_metric" in comparison_result[exp][setting] else comparison_result[exp][setting]["Acc_metric"]["validated"] for exp in all_experiments]
+for idx, setting in enumerate(settings):
+    metric_key = task2metric[next(task for task in task2metric if task in setting)]
+
+    source_values = [get_values_from_data(source_data, exp, setting, metric_key) for exp in exps]
+    target_values = [get_values_from_data(target_data, exp, setting, metric_key) for exp in exps]
 
     # Add traces to the subplot
-    fig.add_trace(go.Bar(x=all_experiments, y=uniwue_vals, name="uniwue", marker=dict(color='blue'), showlegend=(idx==0)), row=idx+1, col=1)
-    fig.add_trace(go.Bar(x=all_experiments, y=validated_vals, name="validated", marker=dict(color='red'), showlegend=(idx==0)), row=idx+1, col=1)
+    fig.add_trace(go.Bar(x=exps,
+                         y=source_values,
+                         name=source_team_name,
+                         marker=dict(color='blue'),
+                         legendgroup=idx + 1
+                         ), row=idx + 1, col=1)
 
+    fig.add_trace(go.Bar(x=exps,
+                         y=target_values,
+                         name=target_team_name,
+                         marker=dict(color='red'),
+                         legendgroup=idx + 1
+                         ), row=idx + 1, col=1)
+
+yaxis_titles = {
+    f'yaxis{idx if idx > 1 else ""}_title': task2metric[task]
+    for idx, setting in enumerate(settings, 1)
+    for task in task2metric
+    if task in setting
+}
 
 fig.update_layout(
-    title_text="Comparison for two settings",
+    title_text="Comparison for two evaluation submissions",
     barmode='group',
-    height=300*len(all_settings)
+    height=300 * len(settings),
+    legend_tracegroupgap=257,
+    **yaxis_titles
 )
 
 fig.show()
-
