@@ -20,12 +20,6 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
-def find_all_csv_files_in_directory(directory):
-    return [os.path.join(root, file)
-            for root, dirs, files in os.walk(directory)
-            for file in files if file.endswith('.csv')]
-
-
 def matches_model_directory(csv_file, task, shot):
     csv_name = os.path.basename(csv_file)
     expected_csv_name = f"{task}_{shot}-shot_submission.csv"
@@ -160,30 +154,8 @@ if __name__ == "__main__":  # Important when using multiprocessing
         f"| {task}/{shot}-shot/exp{extract_exp_number(model.split(os.sep)[-1])}\t{model.split(os.sep)[-1]}"
         for task, shot, model_list in results if model_list for model in model_list
     ]
+
     report_entries = sorted(report_entries, key=sort_key)
-
-    misplaced_csv_dir = "./submissions/evaluation"
-    all_csv_files = find_all_csv_files_in_directory(misplaced_csv_dir)
-
-    for model_dir in model_dirs:
-        # Extract task, shot, and model_dir_name from the model_dir path
-        model_dir_split = model_dir.split("work_dirs/")[1].split(os.sep)
-        print(model_dir_split)
-        task = model_dir_split[0]
-        shot = model_dir_split[1].split('-')[0]
-        exp = extract_exp_number(model_dir_split[2])
-
-        print(task, shot, exp)
-        exit()
-
-        for csv_file in all_csv_files:
-
-            if matches_model_directory(csv_file, task, shot):
-                correct_csv_path = os.path.join(model_dir, os.path.basename(csv_file))
-
-                shutil.copy(csv_file, correct_csv_path)
-                print(f"Copied {csv_file} to {correct_csv_path}")
-                break  # Break once a match is found to avoid unnecessary further checking
 
     report = [
         "\n---------------------------------------------------------------------------------------------------------------",
