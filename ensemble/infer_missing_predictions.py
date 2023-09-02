@@ -68,7 +68,6 @@ def get_model_dirs_without_prediction(task, shot):
         return None
 
     for model_dir in setting_model_dirs:
-        print(setting_model_dirs)
         print(f"Checking {task}/{shot}-shot/{model_dir}")
         model_dir = os.path.join(setting_directory, model_dir)
 
