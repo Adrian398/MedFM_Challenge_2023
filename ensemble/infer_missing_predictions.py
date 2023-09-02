@@ -11,11 +11,17 @@ Example:                        chest_10-shot_submission.csv
 """
 import os
 import re
+import sys
 from multiprocessing import Pool
 from functools import lru_cache
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
 EXP_PATTERN = re.compile(r'exp(\d+)')
+
+
+def my_print(message):
+    sys.stdout.write(message + '\n')
+    sys.stdout.flush()
 
 
 def process_task_shot_combination(args):
@@ -36,7 +42,7 @@ def contains_csv_file(task, shot, model_dir):
     except FileNotFoundError:
         pass
     except PermissionError as permission_error:
-        print(f"Permission Error encountered: {permission_error}")
+        my_print(f"Permission Error encountered: {permission_error}")
         return False
 
     return False
@@ -74,7 +80,7 @@ def get_model_dirs_without_prediction(task, shot):
         return None
 
     for model_dir in setting_model_dirs:
-        print(f"Checking {task}/{shot}-shot/{model_dir}")
+        my_print(f"Checking {task}/{shot}-shot/{model_dir}")
         model_dir = os.path.join(setting_directory, model_dir)
 
         # Skip/Delete if no event file
@@ -135,3 +141,6 @@ if __name__ == "__main__":  # Important when using multiprocessing
         *report_entries,
         "---------------------------------------------------------------------------------------------------------------"
     ]
+
+    for line in report:
+        print(line)
