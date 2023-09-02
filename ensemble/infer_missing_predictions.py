@@ -131,7 +131,11 @@ report = [
 if __name__ == "__main__":  # Important when using multiprocessing
     with Pool() as pool:
         combinations = [(task, shot) for task in tasks for shot in shots]
-        results = pool.map(process_task_shot_combination, combinations)
+
+        # Use imap_unordered and directly iterate over the results
+        results = []
+        for result in pool.imap_unordered(process_task_shot_combination, combinations):
+            results.append(result)
 
     model_dirs = []
     for task, shot, model_list in results:
