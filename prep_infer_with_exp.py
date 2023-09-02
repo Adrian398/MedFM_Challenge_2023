@@ -29,8 +29,8 @@ def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
         gpus = ['rtx3090']
     elif gpu == '8a':
         gpus = ['rtx2080ti']
-    elif gpu is None:
-        gpus = ['rtx4090', 'rtx3090', 'rtx3090']
+    elif gpu is 'all':
+        gpus = ['rtx4090', 'rtx3090', 'rtx4090', 'rtx3090']
     else:
         raise ValueError(f'Invalid gpu type {gpu}.')
 
