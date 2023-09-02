@@ -69,6 +69,7 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
             os.makedirs(log_dir)
 
         slurm_cmd = f'sbatch -p ls6 --nodelist={gpu} --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
+        print(slurm_cmd)
 
         task_counter[task] += 1
 
