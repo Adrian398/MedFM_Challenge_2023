@@ -258,7 +258,6 @@ for task in tasks:
             os.makedirs(os.path.join(submission_dir, "tmp", task, f"{shot}-shot", f"exp{exp}"), exist_ok=True)
 
 scratch_repo_path = os.path.join("/scratch", "medfm", "medfm-challenge")
-os.makedirs(submission_dir)
 
 with open(os.path.join(submission_dir, "report.txt"), "w") as file:
     file.write("\n".join(report))
