@@ -41,8 +41,6 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
     }
 
     for command in commands:
-        print(command)
-        exit()
         task = command.split("/")[6]
 
         if task not in task_gpu_map:
@@ -54,7 +52,7 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
 
         gpu = task_gpu_map[task]
 
-        cfg_path = command.split(" ")[2]
+        cfg_path = command.split(" ")[3]
 
         log_dir = cfg_path.rsplit("/", 1)[0]
         log_file_name = f"performance_slurm-%j"
