@@ -120,6 +120,8 @@ def get_auc_class_values(event_file):
     event_acc.Reload()
     scalar_tags = event_acc.Tags()['scalars']
     agg_values = event_acc.Scalars('Aggregate')
+    print(type(agg_values[0]))
+    # agg_values = [item.value for item in event_acc.Scalars('Aggregate')]
     max_index = agg_values.index(max(agg_values))
     auc_class_values = []
     auc_class_tags = [tag for tag in scalar_tags if tag.startswith('AUC/AUC_class')]
