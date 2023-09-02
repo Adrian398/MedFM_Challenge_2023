@@ -11,10 +11,16 @@ Example:                        chest_10-shot_submission.csv
 """
 import os
 import re
+from multiprocessing import Pool
 from functools import lru_cache
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
 EXP_PATTERN = re.compile(r'exp(\d+)')
+
+
+def process_task_shot_combination(args):
+    task, shot = args
+    return task, shot, get_model_dirs_without_prediction(task=task, shot=shot)
 
 
 def extract_exp_number(string):
@@ -38,15 +44,11 @@ def contains_csv_file(task, shot, model_dir):
 
 @lru_cache(maxsize=None)
 def is_metric_in_event_file(file_path, metric):
-    event_acc = EventAccumulator(file_path)
+    event_acc = EventAccumulator(file_path, size_guidance={'scalars': 0})  # 0 means load none, just check tags
     event_acc.Reload()
     scalar_tags = event_acc.Tags()['scalars']
 
-    # skip no map
-    if metric in scalar_tags:
-        return True
-    else:
-        return False
+    return metric in scalar_tags
 
 
 @lru_cache(maxsize=None)
@@ -111,21 +113,25 @@ report = [
     f"| Valid Models without an existing prediction CSV file:",
     "---------------------------------------------------------------------------------------------------------------"]
 
-model_dirs = []
+if __name__ == "__main__":  # Important when using multiprocessing
+    with Pool() as pool:
+        combinations = [(task, shot) for task in tasks for shot in shots]
+        results = pool.map(process_task_shot_combination, combinations)
 
-for task in tasks:
-    for shot in shots:
-        model_list = get_model_dirs_without_prediction(task=task, shot=shot)
+    model_dirs = []
+    for task, shot, model_list in results:
+        if model_list:
+            model_dirs.extend(model_list)
 
-        if model_list is not None:
-            model_dirs.append(model_list)
+    report_entries = [
+        f"| {task}/{shot}-shot/exp{extract_exp_number(model.split(os.sep)[-1])}\t{model.split(os.sep)[-1]}"
+        for task, shot, model_list in results if model_list for model in model_list
+    ]
 
-            for model in model_list:
-                model_path_to_print = model.split(os.sep)[-1]
-                exp = extract_exp_number(model_path_to_print)
-                report.append(f"| {task}/{shot}-shot/exp{exp}\t{model_path_to_print}")
-
-report.append(
-    "---------------------------------------------------------------------------------------------------------------")
-for line in report:
-    print(line)
+    report = [
+        "\n---------------------------------------------------------------------------------------------------------------",
+        f"| Valid Models without an existing prediction CSV file:",
+        "---------------------------------------------------------------------------------------------------------------",
+        *report_entries,
+        "---------------------------------------------------------------------------------------------------------------"
+    ]
