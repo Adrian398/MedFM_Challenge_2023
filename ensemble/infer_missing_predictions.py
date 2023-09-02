@@ -68,15 +68,15 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
+        #slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
+        slurm_cmd = f'sbatch -p ls6 --nodelist=gpuc --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
         print(slurm_cmd)
 
         # Increment the counter for the task
         task_counter[task] += 1
 
-        # Uncomment the following lines if you want to actually run the commands
-        # subprocess.run(slurm_cmd, shell=True)
-        # time.sleep(delay_seconds)
+        subprocess.run(slurm_cmd, shell=True)
+        time.sleep(delay_seconds)
 
 
 def get_file_from_directory(directory, extension, contains_string=None):
