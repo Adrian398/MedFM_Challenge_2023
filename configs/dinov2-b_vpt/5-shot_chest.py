@@ -8,7 +8,7 @@ _base_ = [
 lr = 5e-3
 vpl = 1
 dataset = 'chest'
-exp_num = 2
+exp_num = 1
 nshot = 5
 
 run_name = f'dinov2-b_{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}_exp{exp_num}'
