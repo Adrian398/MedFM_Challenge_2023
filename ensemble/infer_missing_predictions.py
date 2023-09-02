@@ -89,7 +89,7 @@ def get_model_dirs_without_prediction(task, shot):
             continue
 
         model_dirs.append(model_dir)
-        return model_dirs
+    return model_dirs
 
 
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
