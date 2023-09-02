@@ -3,9 +3,10 @@ from datetime import datetime
 
 import pandas as pd
 
+
 """
-Aligns all .csv files in the results folder, such that the image IDs are in the correct order, corresponding to 
-chest_val.csv / colon_val.csv / endo_val.csv
+This script merges predictions from multiple models by weighting them by their AUC scores.
+The AUC scores are read from the auc_scores.txt file in each model directory.
 """
 
 tasks = ["endo", "chest", "colon"]
