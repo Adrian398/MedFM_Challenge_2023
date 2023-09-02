@@ -1,12 +1,14 @@
 import math
-import torch
-from typing import List, Optional, Sequence, Union
+from typing import List, Optional, Sequence
+
 import numpy as np
-from mmpretrain.structures import label_to_onehot
-from sklearn import metrics
+import torch
 from mmengine.evaluator import BaseMetric
 from mmpretrain.registry import METRICS
+from mmpretrain.structures import label_to_onehot
+from sklearn import metrics
 from sklearn.metrics import average_precision_score
+
 
 def compute_auc(cls_scores, cls_labels):
     cls_aucs = []
@@ -43,6 +45,7 @@ def cal_auc_per_class(target, cosine_scores):
     cls_aucs = compute_auc(cls_scores, gt_labels)
     return cls_aucs
 
+
 def cal_metrics_multilabel(target, cosine_scores):
     """Calculate mean AUC with given dataset information and cosine scores."""
 
@@ -67,7 +70,6 @@ def cal_metrics_multilabel(target, cosine_scores):
 
 
 def cal_metrics_multiclass(target, cosine_scores):
-
     sample_num = target.shape[0]
     cls_num = cosine_scores.shape[1]
 
@@ -115,7 +117,6 @@ class AUC(BaseMetric):
                  prefix: Optional[str] = None) -> None:
         super().__init__(collect_device=collect_device, prefix=prefix)
         self.multilabel = multilabel
-
 
     def process(self, data_batch, data_samples: Sequence[dict]):
         """Process one batch of data samples.
@@ -169,9 +170,8 @@ class AUC(BaseMetric):
 
         aucs_per_class = cal_auc_per_class(target, pred)
         for i in range(len(aucs_per_class)):
-            result_metrics[f'AUC_class{i+1}'] = aucs_per_class[i]
+            result_metrics[f'AUC_class{i + 1}'] = aucs_per_class[i]
         return result_metrics
-
 
 
 def AUC_multiclass(pred, target):
@@ -214,6 +214,7 @@ def AUC_multilabel(pred, target):
     mean_auc = np.mean(cls_aucs)
     return mean_auc
 
+
 @METRICS.register_module()
 class Aggregate(BaseMetric):
     r"""AUC.
@@ -237,7 +238,6 @@ class Aggregate(BaseMetric):
                  prefix: Optional[str] = None) -> None:
         super().__init__(collect_device=collect_device, prefix=prefix)
         self.multilabel = multilabel
-
 
     def process(self, data_batch, data_samples: Sequence[dict]):
         """Process one batch of data samples.
@@ -280,10 +280,13 @@ class Aggregate(BaseMetric):
 
         auc = cal_metrics_multilabel(target, pred)
         map = average_precision_score(target.numpy(), pred.numpy()) * 100
-        agg = float((auc + map) / 2)
+        map_per_class = average_precision_score(target.numpy(), pred.numpy(), average=None)
 
         result_metrics = dict()
+        for i in range(len(map_per_class)):
+            result_metrics[f'MAP_class{i + 1}'] = map_per_class[i]
+
+        agg = float((auc + map) / 2)
+
         result_metrics['Aggregate'] = agg
         return result_metrics
-
-
