@@ -6,6 +6,7 @@ This script does the following steps:
 - generate the testing commands
 - batch all commands on the corresponding gpus, whereas each gpu is dedicated for a specific task
 """
+import itertools
 import os
 import re
 import subprocess
@@ -19,7 +20,7 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
-def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
+def run_commands_on_cluster(commands, gpu='all', delay_seconds=1):
     """
     Runs the generated commands on the cluster.
     Tasks are allocated to GPUs based on the task type:
@@ -27,6 +28,19 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
     - chest: rtx3090 (gpub)
     - endo: rtx3090 (gpua)
     """
+
+    if gpu == 'c':
+        gpus = ['rtx4090']
+    elif gpu == 'ab':
+        gpus = ['rtx3090']
+    elif gpu == '8a':
+        gpus = ['rtx2080ti']
+    elif gpu == 'all':
+        gpus = ['rtx4090', 'rtx3090', 'rtx4090', 'rtx3090']
+    else:
+        raise ValueError(f'Invalid gpu type {gpu}.')
+
+    gpu_cycle = itertools.cycle(gpus)
 
     task_gpu_map = {
         'colon': 'gpu1c',
@@ -41,6 +55,8 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
     }
 
     for command in commands:
+        gpu = next(gpu_cycle)
+
         task = command.split("/")[6]
 
         if task not in task_gpu_map:
@@ -50,7 +66,7 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
         if task_counter[task] >= num_commands:
             continue
 
-        gpu = task_gpu_map[task]
+        #gpu = task_gpu_map[task]
 
         cfg_path = command.split(" ")[3]
 
@@ -61,7 +77,7 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        slurm_cmd = f'sbatch -p ls6 --mem-per-gpu=8G --nodelist={gpu} --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
+        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
         print(slurm_cmd)
 
         task_counter[task] += 1
