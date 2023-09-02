@@ -14,7 +14,15 @@ def find_pth_files(directory="."):
     return matching_files
 
 
-files = find_pth_files(directory="/scratch/medfm/medfm-challenge/work_dirs")
+files_to_delete = find_pth_files(directory="/scratch/medfm/medfm-challenge/work_dirs")
 print("-----------------------------")
-print(f"Found {len(files)} files.")
-print(files)
+print(f"Found {len(files_to_delete)} files.")
+print(files_to_delete)
+
+user_input = input("Type 'yes' to confirm deletion: ")
+if user_input.lower() == 'yes':
+    for file in files_to_delete:
+        print("Removing", file)
+        os.remove(file)
+else:
+    print("Deletion aborted.")
