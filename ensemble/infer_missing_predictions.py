@@ -21,7 +21,7 @@ EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
 def print_report(model_infos):
-    model_dirs = [model["model_path"] for model in model_infos.values()]
+    model_dirs = [model["path"] for model in model_infos.values()]
     report = [
         "\n---------------------------------------------------------------------------------------------------------------",
         f"| Valid Models without an existing prediction CSV file:",
@@ -179,7 +179,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
         shot = model['shot']
         exp_num = model['exp_num']
         model_path = model['path']
-        model_name = model['model_name']
+        model_name = model['name']
 
         print(task,shot,exp_num,model_path,model_name)
         exit()
