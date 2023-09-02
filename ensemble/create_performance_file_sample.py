@@ -10,10 +10,13 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint_path", type=str, required=True, help="Path to the model checkpoint.")
     parser.add_argument("--config_path", type=str, required=True, help="Path to the model configuration.")
     parser.add_argument("--output_path", type=str, default="performance.json", help="Path to save the output metrics. Default is 'performance.json'.")
+    parser.add_argument("--batch_size", type=int, default=32, help="Batch size of the test dataloader.")
 
     args = parser.parse_args()
 
     cfg = Config.fromfile(args.config_path)
+    cfg.test_dataloader.batch_size = args.batch_size
+
     cfg.load_from = args.checkpoint_path
     runner = Runner.from_cfg(cfg)
     metrics = runner.test()
