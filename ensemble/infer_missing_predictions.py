@@ -69,9 +69,7 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
             os.makedirs(log_dir)
 
         slurm_cmd = f'sbatch -p ls6 --nodelist={gpu} --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
-        print(slurm_cmd)
 
-        # Increment the counter for the task
         task_counter[task] += 1
 
         subprocess.run(slurm_cmd, shell=True)
@@ -253,7 +251,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
         checkpoint_filepath = get_file_from_directory(model_path, ".pth", "best")
 
         # Image Path
-        images_path = os.path.join(work_dir_path, "data", "MedFMC_test", task, "images")
+        images_path = os.path.join("/scratch", "medfm", "medfm-challenge", "data", "MedFMC_test", task, "images")
 
         # Destination Path
         out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_submission.csv")
