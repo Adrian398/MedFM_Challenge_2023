@@ -2,7 +2,6 @@ import argparse
 import itertools
 import os
 import re
-import shutil
 import subprocess
 import time
 from datetime import datetime
@@ -53,34 +52,38 @@ def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
         time.sleep(delay_seconds)
 
 
-def get_max_metric_from_event_file(file_path, metric):
+def get_map_and_class_scores(file_path):
     event_acc = EventAccumulator(file_path)
     event_acc.Reload()
     scalar_tags = event_acc.Tags()['scalars']
-
-    # skip, no auc
-    if metric_tags["auc"] not in scalar_tags and metric_tags["aucl"] not in scalar_tags:
-        return -1
 
     # skip no map
     if metric_tags["map"] not in scalar_tags:
         return -1
 
-    # determine auc type
-    auc_tag = metric_tags["auc"] if metric_tags["auc"] in scalar_tags else metric_tags["aucl"]
-
-    if metric.__contains__("AUC"):
-        metric = auc_tag
-
-    if metric == "Aggregate" and metric not in scalar_tags:
-        map_values = [item.value for item in event_acc.Scalars(metric_tags["map"])]
-        auc_values = [item.value for item in event_acc.Scalars(auc_tag)]
-        max_index = map_values.index(max(map_values))
-        return float((map_values[max_index] + auc_values[max_index]) / 2)
-
     # Extract relevant values
-    values = event_acc.Scalars(metric)
-    return max([item.value for item in values])
+    map_scalar = event_acc.Scalars(metric_tags["map"])
+    map_values = [item.value for item in map_scalar]
+    max_map = max(map_values)
+    max_map_index = map_values.index(max_map)
+
+    # Check if MAP values for classes are available
+    use_map_for_class_scores = False
+    for tag in scalar_tags:
+        if tag.startswith("MAP_class"):
+            use_map_for_class_scores = True
+            break
+
+    if use_map_for_class_scores:
+        class_tags = [tag for tag in scalar_tags if tag.startswith('MAP_class')]
+    else:
+        class_tags = [tag for tag in scalar_tags if tag.startswith('AUC/AUC_class')]
+    class_tags.sort()
+    class_values = []
+    for class_tag in class_tags:
+        class_values.append(event_acc.Scalars(class_tag)[max_map_index].value)
+
+    return max_map, class_values
 
 
 def get_ckpt_file_from_run_dir(run_dir):
@@ -115,21 +118,7 @@ def filter_directories_by_exp(directories, exp_number):
     return filtered_dirs
 
 
-def get_auc_class_values(event_file):
-    event_acc = EventAccumulator(event_file)
-    event_acc.Reload()
-    scalar_tags = event_acc.Tags()['scalars']
-    agg_values = [item.value for item in event_acc.Scalars('Aggregate')]
-    max_index = agg_values.index(max(agg_values))
-    auc_class_values = []
-    auc_class_tags = [tag for tag in scalar_tags if tag.startswith('AUC/AUC_class')]
-    auc_class_tags.sort()
-    for auc_class_tag in auc_class_tags:
-        auc_class_values.append(event_acc.Scalars(auc_class_tag)[max_index].value)
-    return auc_class_values
-
-
-def get_N_best_exp_run_dirs(task, shot, exp, metric):
+def get_N_best_exp_run_dirs(task, shot, exp):
     setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
     # a setting is a combination of task and shot, e.g. colon/1-shot
     # within such a setting we then also have different experiments -> colon/1-shot/...exp1...
@@ -149,18 +138,14 @@ def get_N_best_exp_run_dirs(task, shot, exp, metric):
         # skip if no event file
         event_file = get_event_file_from_run_dir(run_dir_path)
         if event_file is None:
+            print("Skip, no event file")
             continue
 
-        # skip if metric not in event file
-        score = get_max_metric_from_event_file(event_file, metric)
+        score, class_values = get_map_and_class_scores(event_file)
+
         if score == -1:
+            print("Skip, no map")
             continue
-
-        auc_class_values = []
-        if task != 'colon':
-            auc_class_values = get_auc_class_values(event_file)
-            if len(auc_class_values) == 0:
-                continue
 
         run_score_list.append((run_dir_path, score, auc_class_values))
 
@@ -184,15 +169,13 @@ def run_on_bash(commands):
     os.chmod("infer.sh", 0o755)
 
 
-parser = argparse.ArgumentParser(description='Choose by which metric the best runs should be picked: map / auc / agg)')
-parser.add_argument('--metric', type=str, default='agg', help='Metric type, default is agg')
+parser = argparse.ArgumentParser(description='Prepares the inference for the ensemble model.')
 parser.add_argument('--exclude', type=str, default='', help='Comma separated model names to exclude')
 parser.add_argument('--n_best', type=int, default=1, help='Returns the N best models per setting')
 parser.add_argument('--bs', type=int, default=4, help='The batch size for inference')
 parser.add_argument("--gpu", type=str, default='c', help="GPU type: 'c'=rtx4090, '8a'=rtx2070ti or 'ab'=rtx3090")
 args = parser.parse_args()
 
-metric = args.metric
 gpu_type = args.gpu
 batch_size = args.bs
 
@@ -206,17 +189,15 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
                "map": "multi-label/mAP",
                "agg": "Aggregate"}
 
-metric = metric_tags[metric]
-
 N_best = args.n_best
 tasks = ["endo", "colon", "chest"]
 shots = ["1", "5", "10"]
-exps = [1, 2, 3, 4, 5]
+experiments = [1, 2, 3, 4, 5]
 model_soup = False
 
 report = [
     "\n---------------------------------------------------------------------------------------------------------------",
-    f"| Best runs for each setting, ranked by {metric}:",
+    f"| Best runs for each setting, ranked by MAP:",
     "---------------------------------------------------------------------------------------------------------------"]
 
 best_settings = {}
@@ -227,8 +208,8 @@ for task in tasks:
     for shot in shots:
         best_settings[task][shot] = {}
 
-        for exp in exps:
-            best_runs = get_N_best_exp_run_dirs(task=task, shot=shot, exp=exp, metric=metric)
+        for exp in experiments:
+            best_runs = get_N_best_exp_run_dirs(task=task, shot=shot, exp=exp)
             best_settings[task][shot][exp] = best_runs
             if N_best > 1:
                 report.append(
@@ -236,7 +217,7 @@ for task in tasks:
 
             for run in best_settings[task][shot][exp]:
                 run_path_to_print = run[0].split(os.sep)[-1]
-                report.append(f"| {task}/{shot}-shot/exp{exp}\t{metric}: {run[1]:.2f}\t{run_path_to_print}")
+                report.append(f"| {task}/{shot}-shot/exp{exp}\tMAP: {run[1]:.2f}\t{run_path_to_print}")
             if len(best_runs) < N_best:
                 for i in range(N_best - len(best_runs)):
                     report.append(f"| {task}/{shot}-shot/exp{exp}\tNo run found")
@@ -255,33 +236,25 @@ if not data_complete:
     print(colored(f"Could not find {N_best} runs for every setting, aborting...", 'red'))
     exit()
 
-if N_best > 1:
-    model_soup = True
-    print(f"The {colored(N_best, 'red')} best experiments for each setting have been selected.")
-    user_input = input(f"\nDo you want to continue with {colored('Model Soup', 'blue')}? (yes/no): ")
-    if user_input.strip().lower() == 'no':
-        exit()
-
-if model_soup:
-    print(colored("Model Soup not implemented yet!", 'red'))
-    exit()
-
 # Prompt the user
-user_input = input(f"\nDo you want to generate the inference commands? (yes/no): ")
+user_input = input(f"\nDo you want to generate the inference commands? This step will already set up a sub"
+                   f"mission directory (yes/no): ")
 
 if user_input.strip().lower() == 'no':
     exit()
 
+'''
+----------------------------------------Set up directory structure below
+'''
+
 # create dir for submission and config
 date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
-
 submission_dir = os.path.join("submissions", "evaluation", date_pattern)
 os.makedirs(submission_dir)
 
-# set up directory structure (tasks, shots, exps)
 for task in tasks:
     for shot in shots:
-        for exp in exps:
+        for exp in experiments:
             os.makedirs(os.path.join(submission_dir, "tmp", task, f"{shot}-shot", f"exp{exp}"), exist_ok=True)
 
 scratch_repo_path = os.path.join("/scratch", "medfm", "medfm-challenge")
@@ -293,7 +266,7 @@ with open(os.path.join(submission_dir, "report.txt"), "w") as file:
 best_runs = []
 for task in tasks:
     for shot in shots:
-        for exp in exps:
+        for exp in experiments:
             for run_info in best_settings[task][shot][exp]:
                 best_runs.append(run_info)
 
