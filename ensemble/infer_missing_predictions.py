@@ -166,7 +166,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
 
     for model_dir in model_dirs:
         # Extract task, shot, and model_dir_name from the model_dir path
-        _, task, shot_with_suffix, _ = model_dir.split(os.sep)
+        task, shot_with_suffix, _ = model_dir.split(os.sep, 2)
         shot = shot_with_suffix.split('-')[0]
 
         for csv_file in all_csv_files:
