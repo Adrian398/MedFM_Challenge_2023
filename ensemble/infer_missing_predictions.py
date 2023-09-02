@@ -157,7 +157,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
     model_infos = {}
     for task, shot, model_list in results:
         for model_name in model_list:
-            model_path = os.path.join(task, f"{shot}-shot", model_name)
+            model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
             exp_num = extract_exp_number(model_name)
             model_infos[model_name] = {
                 "task": task,
