@@ -19,6 +19,15 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
+def sort_key(entry):
+    # Extract task, shot, and experiment number from the entry
+    parts = entry.split('/')
+    task = parts[0]
+    shot = int(parts[1].split('-')[0])
+    exp_number = extract_exp_number(parts[2])
+    return task, shot, exp_number
+
+
 def my_print(message):
     sys.stdout.write(message + '\n')
     sys.stdout.flush()
@@ -133,6 +142,8 @@ if __name__ == "__main__":  # Important when using multiprocessing
         f"| {task}/{shot}-shot/exp{extract_exp_number(model.split(os.sep)[-1])}\t{model.split(os.sep)[-1]}"
         for task, shot, model_list in results if model_list for model in model_list
     ]
+
+    report_entries = sorted(report_entries, key=sort_key)
 
     report = [
         "\n---------------------------------------------------------------------------------------------------------------",
