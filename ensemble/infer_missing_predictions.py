@@ -46,7 +46,7 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
     }
 
     for command in commands:
-        task = command.split("/")[5]
+        task = command.split("/")[6]
 
         if task not in task_gpu_map:
             raise ValueError(f'Invalid task {task} in command {command}.')
