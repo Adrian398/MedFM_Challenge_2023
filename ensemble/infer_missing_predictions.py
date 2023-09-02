@@ -103,7 +103,6 @@ def get_model_dirs_without_prediction(task, shot):
         # Skip/Delete if no event file
         event_file = get_event_file_from_model_dir(model_dir)
         if event_file is None:
-            # TODO Delete if no event file!
             #print("No event file found, skipping..")
             continue
 
@@ -131,10 +130,6 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
                "map": "multi-label/mAP",
                "agg": "Aggregate"}
 
-report = [
-    "\n---------------------------------------------------------------------------------------------------------------",
-    f"| Valid Models without an existing prediction CSV file:",
-    "---------------------------------------------------------------------------------------------------------------"]
 
 if __name__ == "__main__":  # Important when using multiprocessing
     with Pool() as pool:
@@ -151,7 +146,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
             model_dirs.extend(model_list)
 
     report_entries = [
-        f"| {task}/{shot}-shot/exp{extract_exp_number(model.split(os.sep)[-1])}\t{model.split(os.sep)[-1]}"
+        f"{work_dir_path}/{task}/{shot}-shot/{model.split(os.sep)[-1]}"
         for task, shot, model_list in results if model_list for model in model_list
     ]
 
@@ -167,3 +162,13 @@ if __name__ == "__main__":  # Important when using multiprocessing
 
     for line in report:
         print(line)
+
+    user_input = input(f"\nDo you want to generate the inference commands? (yes/no): ")
+    if user_input.strip().lower() == 'no':
+        exit()
+
+    print("\nGenerate Commands:\n")
+    N_per_task = 10
+    commands = []
+    for model_dir in report_entries:
+        print(model_dir)
