@@ -34,9 +34,9 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
     """
 
     task_gpu_map = {
-        'colon': 'rtx4090',
-        'chest': 'rtx3090',
-        'endo': 'rtx3090'
+        'colon': 'gpu1c',
+        'chest': 'gpu1b',
+        'endo': 'gpu1a'
     }
 
     task_counter = {
@@ -68,8 +68,7 @@ def run_commands_on_cluster(commands, num_commands, delay_seconds=1):
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        #slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
-        slurm_cmd = f'sbatch -p ls6 --nodelist=gpuc --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
+        slurm_cmd = f'sbatch -p ls6 --nodelist={gpu} --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
         print(slurm_cmd)
 
         # Increment the counter for the task
