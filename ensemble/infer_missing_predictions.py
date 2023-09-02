@@ -30,9 +30,9 @@ def matches_model_directory(csv_file, task, shot):
 def sort_key(entry):
     # Extract task, shot, and experiment number from the entry
     parts = entry.split('/')
-    task = parts[0]
-    shot = int(parts[1].split('-')[0])
-    exp_number = extract_exp_number(parts[2])
+    task = parts[5]
+    shot = int(parts[6].split('-')[0])
+    exp_number = extract_exp_number(parts[-1])
     return task, shot, exp_number
 
 
@@ -146,11 +146,8 @@ if __name__ == "__main__":  # Important when using multiprocessing
             model_path = os.path.join(task, f"{shot}-shot", model_name)
             model_dirs.append(model_path)
 
-    report_entries = [
-        f"| {model_dir}" for model_dir in model_dirs
-    ]
-
-    #report_entries = sorted(report_entries, key=sort_key)
+    report_entries = [model_dir for model_dir in model_dirs]
+    report_entries = sorted(report_entries, key=sort_key)
 
     report = [
         "\n---------------------------------------------------------------------------------------------------------------",
