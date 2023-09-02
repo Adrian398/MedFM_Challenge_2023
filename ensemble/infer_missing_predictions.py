@@ -20,6 +20,19 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
+def print_report(model_infos):
+    model_dirs = [model["model_path"] for model in model_infos.values()]
+    report = [
+        "\n---------------------------------------------------------------------------------------------------------------",
+        f"| Valid Models without an existing prediction CSV file:",
+        "---------------------------------------------------------------------------------------------------------------",
+        sorted([model_dir for model_dir in model_dirs], key=sort_key),
+        "---------------------------------------------------------------------------------------------------------------"
+    ]
+    for line in report:
+        print(line)
+
+
 def matches_model_directory(csv_file, task, shot):
     csv_name = os.path.basename(csv_file)
     expected_csv_name = f"{task}_{shot}-shot_submission.csv"
@@ -140,25 +153,20 @@ if __name__ == "__main__":  # Important when using multiprocessing
         for result in pool.imap_unordered(process_task_shot_combination, combinations):
             results.append(result)
 
-    model_dirs = []
+    model_infos = {}
     for task, shot, model_list in results:
         for model_name in model_list:
             model_path = os.path.join(task, f"{shot}-shot", model_name)
-            model_dirs.append(model_path)
+            exp_num = extract_exp_number(model_name)
+            model_infos[model_name] = {
+                "task": task,
+                "shot": shot,
+                "exp_num": exp_num,
+                "path": model_path,
+                "name": model_name
+            }
 
-    report_entries = [model_dir for model_dir in model_dirs]
-    report_entries = sorted(report_entries, key=sort_key)
-
-    report = [
-        "\n---------------------------------------------------------------------------------------------------------------",
-        f"| Valid Models without an existing prediction CSV file:",
-        "---------------------------------------------------------------------------------------------------------------",
-        *report_entries,
-        "---------------------------------------------------------------------------------------------------------------"
-    ]
-
-    for line in report:
-        print(line)
+    print_report(model_infos)
 
     user_input = input(f"\nDo you want to generate the inference commands? (yes/no): ")
     if user_input.strip().lower() == 'no':
@@ -166,6 +174,28 @@ if __name__ == "__main__":  # Important when using multiprocessing
 
     N_per_task = 10
     commands = []
+    for model in model_infos.values():
+        task = model['task']
+        shot = model['shot']
+        exp_num = model['exp_num']
+        model_path = model['path']
+        model_name = model['model_name']
 
-    for model_dir in model_dirs:
-        pass
+        print(task,shot,exp_num,model_path,model_name)
+        exit()
+
+        # Config Path
+        config_filename = [file for file in os.listdir(model_path) if file.endswith(".py")][0]
+        config_path = os.path.join(model_path, config_filename)
+
+        # Checkpoint Path
+        best_ckpt_filename = [file for file in os.listdir(model_path) if file.endswith(".pth")
+                              and file.__contains__("best")][0]
+        best_ckpt_path = os.path.join(model_path, best_ckpt_filename)
+
+        # Image Path
+        images_path = os.path.join(work_dir_path, "data", "MedFMC_test", task, "images")
+
+        # Destination Path
+        pred_csv_filename = f"{task}_{shot}_submission.csv"
+        pred_dest_path = os.path.join(model_path, f"exp{exp_num}", pred_csv_filename)
