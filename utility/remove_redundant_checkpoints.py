@@ -23,6 +23,9 @@ user_input = input("Type 'yes' to confirm deletion: ")
 if user_input.lower() == 'yes':
     for file in files_to_delete:
         print("Removing", file)
-        os.remove(file)
+        try:
+            os.remove(file)
+        except PermissionError as e:
+            print("Failed to remove", file)
 else:
     print("Deletion aborted.")
