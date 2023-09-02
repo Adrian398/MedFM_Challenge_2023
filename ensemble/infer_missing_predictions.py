@@ -29,6 +29,7 @@ def find_all_csv_files_in_directory(directory):
 def matches_model_directory(csv_file, task, shot):
     csv_name = os.path.basename(csv_file)
     expected_csv_name = f"{task}_{shot}-shot_submission.csv"
+    print("Is:",csv_name, "Expected:", expected_csv_name)
     return csv_name == expected_csv_name
 
 
