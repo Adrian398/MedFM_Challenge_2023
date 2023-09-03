@@ -87,17 +87,14 @@ def get_file_from_directory(directory, extension, contains_string=None):
 def print_report(model_infos):
     model_dirs = [model["path"] for model in model_infos.values()]
     sorted_report_entries = sorted([model_dir for model_dir in model_dirs], key=sort_key)
-    report = [
-        "\n---------------------------------------------------------------------------------------------------------------",
-        f"| Valid Models without an existing performance JSON file:",
-        "---------------------------------------------------------------------------------------------------------------",
-        *sorted_report_entries,
-        "---------------------------------------------------------------------------------------------------------------",
-        f"| Found {len(model_dirs)} model runs in total.",
-        "---------------------------------------------------------------------------------------------------------------",
-    ]
-    for line in report:
-        print(line)
+    print("\n---------------------------------------------------------------------------------------------------------------")
+    print("| Valid Models without an existing performance JSON file:")
+    print("---------------------------------------------------------------------------------------------------------------")
+    for entry in sorted_report_entries:
+        print(f"| {entry}")
+    print("---------------------------------------------------------------------------------------------------------------")
+    print(f"| Found {len(model_dirs)} model runs in total.")
+    print("---------------------------------------------------------------------------------------------------------------")
 
 
 def sort_key(entry):
