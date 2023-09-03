@@ -12,11 +12,16 @@ def extract_exp_number(string):
 
 exp_dirs = {}
 # Traverse through the main categories
-for category in ['colon', 'endo', 'chest']:
+for task in ['colon', 'endo', 'chest']:
     # Traverse through 1-shot, 5-shot, 10-shot
+    exp_dirs[task] = {}
     for shot in ['1-shot', '5-shot', '10-shot']:
+        exp_dirs[task][shot] = {}
+        for exp in ['exp1', 'exp2', 'exp3', 'exp4', 'exp5']:
+            exp_dirs[task][shot][exp] = []
+
         # Construct the path pattern for glob
-        path_pattern = os.path.join(root_dir, category, shot, '*exp[1-5]*')
+        path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
         # Get all run directories that match the pattern
         for run_dir in glob.glob(path_pattern):
             print("Checking run directory", run_dir)
@@ -26,9 +31,7 @@ for category in ['colon', 'endo', 'chest']:
             if csv_files and json_files:
                 exp_num = extract_exp_number(run_dir)
                 if exp_num != 0:
-                    if exp_num not in exp_dirs:
-                        exp_dirs[exp_num] = []
-                    exp_dirs[exp_num].append((csv_files[0], json_files[0]))
+                    exp_dirs[task][shot][f"exp{exp_num}"].append({'csv': csv_files[0], 'json': json_files[0]})
 
 # Now, exp_dirs will have the desired output
 for exp_num, file_tuples in exp_dirs.items():
