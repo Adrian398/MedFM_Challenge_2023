@@ -7,6 +7,7 @@ This script does the following steps:
 - batch all commands on the corresponding gpus, whereas each gpu is dedicated for a specific task
 """
 import itertools
+import json
 import os
 import re
 import subprocess
@@ -125,7 +126,12 @@ def contains_json_file(model_dir):
     expected_filename = "performance.json"
 
     try:
-        return os.path.exists(os.path.join(model_dir, expected_filename))
+        json_filepath = os.path.join(model_dir, expected_filename)
+        json_file_exists = os.path.exists(json_filepath)
+        if json_file_exists:
+            with open(json_filepath, 'r') as file:
+                data = json.load(file)
+                return True if "MAP_Class1" in data else False
     except FileNotFoundError:
         pass
     except PermissionError as permission_error:
