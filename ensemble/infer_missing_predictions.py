@@ -92,15 +92,14 @@ def get_file_from_directory(directory, extension, contains_string=None):
 def print_report(model_infos):
     model_dirs = [model["path"] for model in model_infos.values()]
     sorted_report_entries = sorted([model_dir for model_dir in model_dirs], key=sort_key)
-    report = [
-        "\n---------------------------------------------------------------------------------------------------------------",
-        f"| Valid Models without an existing prediction CSV file:",
-        "---------------------------------------------------------------------------------------------------------------",
-        *sorted_report_entries,
-        "---------------------------------------------------------------------------------------------------------------"
-    ]
-    for line in report:
-        print(line)
+    print("\n---------------------------------------------------------------------------------------------------------------")
+    print("| Valid Models without an existing performance JSON file:")
+    print("---------------------------------------------------------------------------------------------------------------")
+    for entry in sorted_report_entries:
+        print(f"| {entry}")
+    print("---------------------------------------------------------------------------------------------------------------")
+    print(f"| Found {len(model_dirs)} model runs in total.")
+    print("---------------------------------------------------------------------------------------------------------------")
 
 
 def sort_key(entry):
@@ -178,19 +177,14 @@ def get_model_dirs_without_prediction(task, shot):
         # Skip if no best checkpoint file
         checkpoint_path = get_file_from_directory(abs_model_dir, ".pth", "best")
         if checkpoint_path is None:
-            print("No best checkpoint path..")
+            print("No best checkpoint file found")
             continue
 
         # Skip/Delete if no event file
         event_file = get_event_file_from_model_dir(abs_model_dir)
         if event_file is None:
-            print("No event file found, skipping..")
+            print("No event file found")
             continue
-
-        # Skip if metric not in event file
-        # if not is_metric_in_event_file(event_file, metric_tags['map']):
-        #     print("Metric map not present, skipping..")
-        #     continue
 
         # Skip if prediction csv file is present
         if contains_csv_file(task, shot, abs_model_dir):
@@ -264,9 +258,9 @@ if __name__ == "__main__":  # Important when using multiprocessing
         command = (f"python tools/infer.py {config_filepath} {checkpoint_filepath} {images_path} --batch-size {batch_size} --out {out_filepath}")
         commands.append(command)
 
-    print("Generated Infer Commands:")
-    for command in commands:
-        print(command)
+    # print("Generated Infer Commands:")
+    # for command in commands:
+    #     print(command)
 
     task_counts = Counter(model["task"] for model in model_infos.values())
 
@@ -275,7 +269,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
         print(f"{task.capitalize()}: {count}")
 
     while True:
-        user_input = input("\nHow many inference commands per task do you want to generate? ").strip().lower()
+        user_input = input("\nHow many inference commands per task do you want to generate?\n").strip().lower()
 
         if user_input == 'no':
             exit()
