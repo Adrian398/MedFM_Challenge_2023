@@ -127,7 +127,10 @@ def contains_json_file(model_dir):
 
     try:
         json_filepath = os.path.join(model_dir, expected_filename)
+        print(json_filepath)
         json_file_exists = os.path.exists(json_filepath)
+        print(json_file_exists)
+
         if json_file_exists:
             with open(json_filepath, 'r') as file:
                 data = json.load(file)
