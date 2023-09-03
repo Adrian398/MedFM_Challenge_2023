@@ -31,6 +31,7 @@ def merge_results_expert_model_strategy(run_dicts, task, shot, exp, out_path):
             print(type(run))
         print("-------------------------------------------------------------------")
         best_run = max(run_dicts, key=lambda x: x['metrics'][f'MAP_class{i + 1}'])
+        print(f"returning {type(best_run)}")
         best_run_index = run_dicts.index(best_run)
         merged_df[i + 1] = best_run["prediction"][i + 1]
         print(f"Merged df after adding run {best_run_index} {best_run['name']}")
