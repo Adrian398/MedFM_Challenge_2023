@@ -136,21 +136,19 @@ def get_non_valid_model_dirs(task, shot):
         return None
 
     for model_dir in setting_model_dirs:
-        valid_model_dir = True
+        invalid_model = False
         my_print(f"Checking {task}/{shot}-shot/{model_dir}")
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
         checkpoint_path = get_file_from_directory(abs_model_dir, ".pth", "best")
         if checkpoint_path is None:
-            valid_model_dir = False
-            continue
+            invalid_model = True
 
         event_file = get_event_file_from_model_dir(abs_model_dir)
         if event_file is None:
-            valid_model_dir = False
-            continue
+            invalid_model = True
 
-        if not valid_model_dir:
+        if invalid_model:
             model_dirs.append(model_dir)
     return model_dirs
 
