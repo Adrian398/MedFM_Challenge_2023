@@ -67,3 +67,13 @@ val_evaluator = [
     dict(type='AUC', multilabel=True),
     dict(type='Aggregate', multilabel=True)]
 test_evaluator = val_evaluator
+
+default_hooks = dict(
+    checkpoint=dict(
+        type='CheckpointHook',
+        interval=250,
+        max_keep_ckpts=1,
+        save_best="AveragePrecision", rule="greater"
+    ),
+    logger=dict(interval=10),
+)

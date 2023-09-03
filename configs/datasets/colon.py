@@ -56,9 +56,21 @@ test_dataloader = dict(
 
 train_evaluator = [
     dict(type='AveragePrecision'),
+    dict(type='Accuracy', topk=(1, 5)),
+    dict(type='SingleLabelMetric', items=['precision', 'recall']),
     dict(type='Aggregate'),
     dict(type='AUC')
 ]
 
 val_evaluator = train_evaluator
 test_evaluator = train_evaluator
+
+default_hooks = dict(
+    checkpoint=dict(
+        type='CheckpointHook',
+        interval=250,
+        max_keep_ckpts=1,
+        save_best="Aggregate", rule="greater"
+    ),
+    logger=dict(interval=10),
+)
