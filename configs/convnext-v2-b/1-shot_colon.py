@@ -80,3 +80,9 @@ train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
 custom_hooks = [dict(type='EMAHook', momentum=1e-4, priority='ABOVE_NORMAL')]
 
 randomness = dict(seed=0)
+
+default_hooks = dict(
+    checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
+    logger=dict(interval=10),
+)
+
