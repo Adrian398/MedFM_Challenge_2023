@@ -12,6 +12,7 @@ for category in ['colon', 'endo', 'chest']:
         path_pattern = os.path.join(root_dir, category, shot, '*exp[1-5]*')
         # Get all run directories that match the pattern
         for run_dir in glob.glob(path_pattern):
+            print("Checking run directory", run_dir)
             # Check if both csv and json files exist in the run directory
             csv_files = glob.glob(os.path.join(run_dir, "*.csv"))
             json_files = glob.glob(os.path.join(run_dir, "*.json"))
