@@ -103,7 +103,7 @@ def print_report(model_infos):
         for entry in sorted_report_entries:
             print(f"| {entry}")
         print("---------------------------------------------------------------------------------------------------------------")
-        print(f"| Found {colored(str(len(model_dirs)) + ' model runs', 'blue')} without existing prediction CSV for {colored(csv_suffix, 'blue')}.")
+        print(f"| Found {colored(str(len(model_dirs)) + ' model runs', 'blue')} without existing prediction CSV for {colored(csv_suffix_choice, 'blue')}.")
         print("---------------------------------------------------------------------------------------------------------------")
 
 
@@ -238,8 +238,7 @@ csv_suffix_list = ["submission", "validation"]
 
 if __name__ == "__main__":  # Important when using multiprocessing
     csv_suffix_choice = get_csv_suffix_choice()
-    print(f"\nSelected CSV suffix: {colored(csv_suffix_choice, 'blue')}"
-          f"\nProceeding with prediction\n")
+    print(f"\nSelected CSV suffix: {colored(csv_suffix_choice, 'blue')}\n")
 
     time.sleep(1)
 
