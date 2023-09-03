@@ -141,7 +141,10 @@ if __name__ == "__main__":
     USER_OVERRIDE = config.OVERRIDE
 
     # Extract additional settings
-    exp_suffix = config.SETTINGS['exp_suffix']
+    try:
+        exp_suffix = config.SETTINGS['exp_suffix']
+    except:
+        exp_suffix = None
     log_level = config.SETTINGS['log_level']
 
     logging.getLogger().setLevel(log_level)
