@@ -11,13 +11,16 @@ def extract_exp_number(string):
 
 
 exp_dirs = {}
+tasks = ['colon', 'endo', 'chest']
+shots = ['1-shot', '5-shot', '10-shot']
+exps = ['exp1', 'exp2', 'exp3', 'exp4', 'exp5']
 # Traverse through the main categories
-for task in ['colon', 'endo', 'chest']:
+for task in tasks:
     # Traverse through 1-shot, 5-shot, 10-shot
     exp_dirs[task] = {}
-    for shot in ['1-shot', '5-shot', '10-shot']:
+    for shot in shots:
         exp_dirs[task][shot] = {}
-        for exp in ['exp1', 'exp2', 'exp3', 'exp4', 'exp5']:
+        for exp in exps:
             exp_dirs[task][shot][exp] = []
 
         # Construct the path pattern for glob
@@ -34,8 +37,9 @@ for task in ['colon', 'endo', 'chest']:
                     exp_dirs[task][shot][f"exp{exp_num}"].append({'csv': csv_files[0], 'json': json_files[0]})
 
 # Now, exp_dirs will have the desired output
-for exp_num, file_tuples in exp_dirs.items():
-    print(f"For exp{exp_num}:")
-    for csv, json in file_tuples:
-        print(f"CSV: {csv}, JSON: {json}")
-    print("---------")
+for task in tasks:
+    for shot in shots:
+        for exp in exps:
+            print(f"For {task} {shot} {exp}")
+            for file_dict in exp_dirs[task][shot][exp]:
+                print(f"CSV: {file_dict['csv']}, JSON: {file_dict['json']}")
