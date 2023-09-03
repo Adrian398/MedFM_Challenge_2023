@@ -132,7 +132,7 @@ def extract_exp_number(string):
 
 
 def contains_csv_file(task, shot, model_dir):
-    expected_filename = f"{task}_{shot}-shot_submission.csv"
+    expected_filename = f"{task}_{shot}-shot_{csv_suffix}.csv"
 
     try:
         return os.path.exists(os.path.join(model_dir, expected_filename))
@@ -209,6 +209,7 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
                "aucl": "AUC/AUC_multilabe",
                "map": "multi-label/mAP",
                "agg": "Aggregate"}
+csv_suffix = "validation"
 # ========================================================================================
 
 
@@ -262,10 +263,6 @@ if __name__ == "__main__":  # Important when using multiprocessing
 
         command = (f"python tools/infer.py {config_filepath} {checkpoint_filepath} {images_path} --batch-size {batch_size} --out {out_filepath}")
         commands.append(command)
-
-    # print("Generated Infer Commands:")
-    # for command in commands:
-    #     print(command)
 
     task_counts = Counter(model["task"] for model in model_infos.values())
 
