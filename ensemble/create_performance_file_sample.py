@@ -16,6 +16,7 @@ if __name__ == "__main__":
 
     cfg = Config.fromfile(args.config_path)
     cfg.test_dataloader.batch_size = args.batch_size
+    cfg.test_dataloader.dataset.data_prefix = f'/scratch/medfm/data/MedFMC_test/{cfg.dataset}/images'
 
     cfg.load_from = args.checkpoint_path
     runner = Runner.from_cfg(cfg)
