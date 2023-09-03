@@ -220,8 +220,7 @@ def get_model_dirs_without_performance(task, shot):
         if find_and_validate_json_files(abs_model_dir):
             print("Performance JSON present")
             continue
-
-
+        print(f"adding {model_dir}")
         model_dirs.append(model_dir)
     return model_dirs
 
