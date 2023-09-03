@@ -14,7 +14,7 @@ def extract_exp_number(string):
 
 
 exp_dirs = {}
-tasks = ['colon', 'endo', 'chest']
+tasks = ['endo', 'colon', 'chest']
 shots = ['1-shot', '5-shot', '10-shot']
 exps = ['exp1', 'exp2', 'exp3', 'exp4', 'exp5']
 # Traverse through the main categories
