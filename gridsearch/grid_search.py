@@ -83,7 +83,7 @@ def check_pythonpath_from_cwd():
         sys.exit(1)
 
 
-def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
+def run_commands_on_cluster(commands, gpu=None):
     """
     Runs the generated commands on the cluster.
     If no GPU is specified, the commands are queued on the cluster in the following scheme:
@@ -119,8 +119,6 @@ def run_commands_on_cluster(commands, gpu=None, delay_seconds=1):
         -o "{log_dir}/slurm-%j.out"'
 
         subprocess.run(slurm_cmd, shell=True)
-
-        time.sleep(delay_seconds)
 
 
 if __name__ == "__main__":
