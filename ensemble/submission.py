@@ -61,7 +61,7 @@ def check_run_dir(run_dir, exp_dirs, task, shot):
 # Setup
 root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 exp_dirs = {}
-tasks = ['chest', 'endo', 'colon']
+tasks = ['endo', 'chest', 'colon']
 shots = ['1-shot', '5-shot', '10-shot']
 experiments = ['exp1', 'exp2', 'exp3', 'exp4', 'exp5']
 class_counts = {"colon": 2, "endo": 4, "chest": 19}
