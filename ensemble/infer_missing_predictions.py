@@ -188,9 +188,9 @@ def get_model_dirs_without_prediction(task, shot):
             continue
 
         # Skip if metric not in event file
-        if not is_metric_in_event_file(event_file, metric_tags['map']):
-            print("Metric map not present, skipping..")
-            continue
+        # if not is_metric_in_event_file(event_file, metric_tags['map']):
+        #     print("Metric map not present, skipping..")
+        #     continue
 
         # Skip if prediction csv file is present
         if contains_csv_file(task, shot, abs_model_dir):
