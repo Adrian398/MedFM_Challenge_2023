@@ -93,10 +93,28 @@ for task in tasks:
             # check if run dir has json + csv, if yes, add info to exp_dirs dict
             check_run_dir(run_dir, exp_dirs, task, shot)
 
+# Count
+total_models = 0
+least_models = 100000
+most_models = -1
+most_setting = ""
+least_setting = ""
 for task in tasks:
     for shot in shots:
         for exp in experiments:
-            print(f"{task} {shot} {exp} {len(exp_dirs[task][shot][exp])}")
+            models_for_setting = len(exp_dirs[task][shot][exp])
+            print(f"{task} {shot} {exp} {models_for_setting}")
+            total_models += models_for_setting
+            if models_for_setting > most_models:
+                most_models = models_for_setting
+                most_setting = f"{task} {shot} {exp}"
+            if models_for_setting < least_models:
+                least_models = models_for_setting
+                least_setting = f"{task} {shot} {exp}"
+
+print(f"Total models: {total_models}")
+print(f"Most models: {most_models} {most_setting}")
+print(f"Least models: {least_models} {least_setting}")
 
 start = input("Continue? (y/n)")
 if start != "y":
