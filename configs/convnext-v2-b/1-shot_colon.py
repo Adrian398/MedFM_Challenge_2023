@@ -1,7 +1,7 @@
 _base_ = [
     'mmpretrain::_base_/models/convnext_v2/base.py',
     '../datasets/colon.py',
-    'mmpretrain::_base_/schedules/imagenet_bs1024_adamw_swin.py',
+    '../schedules/adamw_inverted_cosine_lr.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
 ]
@@ -50,26 +50,6 @@ test_dataloader = dict(
     batch_size=8,
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
 )
-
-# schedule setting
-optim_wrapper = dict(
-    optimizer=dict(lr=lr),
-    clip_grad=None,
-)
-
-# learning policy
-param_scheduler = [
-    # warm up learning rate scheduler
-    dict(
-        type='LinearLR',
-        start_factor=1e-3,
-        by_epoch=True,
-        end=20,
-        # update by iter
-        convert_to_iter_based=True),
-    # main learning rate scheduler
-    dict(type='CosineAnnealingLR', eta_min=1e-5, by_epoch=True, begin=20)
-]
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
