@@ -79,5 +79,8 @@ def extract_data_tuples(run_list):
 for task in tasks:
     for shot in shots:
         for exp in exps:
+            if len(exp_dirs[task][shot][exp]) < class_lengths[task]:
+                print("not enough runs")
+                continue
             data_list = extract_data_tuples(exp_dirs[task][shot][exp])
             merge_results_expert_model_strategy(data_list, task, shot, exp)
