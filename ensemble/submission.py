@@ -16,6 +16,19 @@ def merge_results_weighted_average_strategy(run_dicts, task, shot, exp):
     pass
 
 
+# Find the run with the best MAP for a given class, within a list of runs
+def find_best_run(run_list, metric):
+    best_run_index = 0
+    best_run = run_list[0]
+    best_run_score = run_list[0]['metrics'][metric]
+    for index, run in enumerate(run_list[1:]):
+        if run['metrics'][metric] > best_run_score:
+            best_run_index = index + 1
+            best_run = run
+            best_run_score = run['metrics'][metric]
+    return best_run, best_run_index
+
+
 def merge_results_expert_model_strategy(run_dicts, task, shot, exp, out_path):
     print("merging results for task", task, shot, exp)
     num_classes = class_counts[task]
@@ -25,14 +38,7 @@ def merge_results_expert_model_strategy(run_dicts, task, shot, exp, out_path):
     print(merged_df)
     # Find run with best MAP for each class
     for i in range(num_classes):
-        print("-------------------------------------------------------------------type run dicts")
-        print(type(run_dicts))
-        for run in run_dicts:
-            print(type(run))
-        print("-------------------------------------------------------------------")
-        best_run = max(run_dicts, key=lambda x: x['metrics'][f'MAP_class{i + 1}'])
-        print(f"returning {type(best_run)}")
-        best_run_index = run_dicts.index(best_run)
+        best_run, best_run_index = find_best_run(run_dicts, f'MAP_class{i + 1}')
         merged_df[i + 1] = best_run["prediction"][i + 1]
         print(f"Merged df after adding run {best_run_index} {best_run['name']}")
     print(f"Saving merged_df to {out_path}")
