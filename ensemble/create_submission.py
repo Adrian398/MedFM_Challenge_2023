@@ -1,6 +1,9 @@
 import glob
+import json
 import os
 import re
+
+import pandas as pd
 
 root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 
@@ -37,8 +40,44 @@ for task in tasks:
                     # exp_dirs[task][shot][f"exp{exp_num}"].append({'csv': csv_files[0], 'json': json_files[0]})
                     exp_dirs[task][shot][f"exp{exp_num}"].append({'csv': csv_files[0]})
 
-# Now, exp_dirs will have the desired output
+class_lengths = {"colon": 2, "endo": 4, "chest": 19}
+
+
+def merge_results_weighted_average_strategy(run_dicts, task, shot, exp):
+    pass
+
+
+def merge_results_expert_model_strategy(run_dicts, task, shot, exp):
+    print("merging results for task", task, "shot", shot, "exp", exp)
+    num_classes = class_lengths[task]
+    # initialize dataframe with image_ids
+    merged_df = run_dicts[0][:, 0:1]
+    print("Merged df before")
+    print(merged_df)
+    # Find run with best MAP for each class
+    for i in range(num_classes):
+        best_run = max(run_dicts, key=lambda x: x['metrics'][f'MAP_class{i+1}'])
+        merged_df[i+1] = best_run["prediction"][i+1]
+        print("Merged df after adding")
+        print(merged_df)
+    exit()
+    # Merge predictions using class columns from best runs, taking into account first column is image name, no prediction
+    # for that column
+
+
+
+
+def extract_data_tuples(run_list):
+    data_list = []
+    for run in run_list:
+        prediction = pd.read_csv(run['csv'], header=None)
+        metrics = json.load(open(run['json'], 'r'))
+        data_list.append({"prediction": prediction, "metrics": metrics})
+    return data_list
+
+
 for task in tasks:
     for shot in shots:
         for exp in exps:
-            print(f"For {task} {shot} {exp}: {len(exp_dirs[task][shot][exp])}")
+            data_list = extract_data_tuples(exp_dirs[task][shot][exp])
+            merge_results_expert_model_strategy(data_list, task, shot, exp)
