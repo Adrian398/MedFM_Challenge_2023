@@ -1,14 +1,19 @@
 For colon:
-1 log ACCURACY
-2 save best ACCURACY
+When training new models:
+    1 log ACCURACY
+    2 save best ACCURACY
 
 For chest / endo:
-1 Save best MAP in all configs!
-2 Train more? So we get per class MAP
-
+When training new models:
+    1 log mAP
+    2 Save best MAP
 
 In general:
-1 Add copying of configs to run_out_dir in prep_infer_with_ensemble
-2 Optimize prep_infer_with_ensemble, don't do inferences we already did
-3 Create ensemble submission, weighted by AUC Scores (using prep_infer_with_ensemble and merge_predictions)
-4 Train more with per class map scores and create
+1 Add copying of used configs to come directory in the submission directory (or add a report summarizing used models)
+2 Local validation:
+    - download annotations for validation data
+    - make inferences on validation data => 2 csvs per run script
+    - make sure infer_missing_predictions is adjusted, so it checks for the correct csv (not just any)
+    - adapt ensemble/submission to use inferences on validation data to create ensemble result =>
+        - Write custom evaluation of these results (can't use Runner / test script, cause that requires one model,
+        we have csvs from multiple models)
