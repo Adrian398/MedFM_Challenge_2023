@@ -42,8 +42,6 @@ def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=0.5
         raise ValueError(f'Invalid gpu type {gpu}.')
 
     gpus.extend(['rtx2080ti' for _ in range(6)])
-    print(gpus)
-    exit()
 
     gpu_cycle = itertools.cycle(gpus)
 
@@ -72,7 +70,7 @@ def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=0.5
             os.makedirs(log_dir)
 
         slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
-        print(f"Submitting Model: {log_dir}")
+        print(slurm_cmd + "\n")
 
         task_counter[task] += 1
 
