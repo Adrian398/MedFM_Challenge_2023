@@ -234,7 +234,6 @@ def get_model_dirs_without_performance(task, shot):
 
         # Skip if performance json file is present
         if find_and_validate_json_files(abs_model_dir):
-            print("Performance JSON present")
             continue
 
         model_dirs.append(model_dir)
