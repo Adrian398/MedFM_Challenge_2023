@@ -43,7 +43,6 @@ def merge_results_expert_model_strategy(run_dicts, task, shot, exp, out_path):
         print(f"Merged df after adding run {best_run_index} {best_run['name']}")
     print(f"Saving merged_df to {out_path}")
     merged_df.to_csv(out_path, index=False, header=False)
-    exit()
     # Merge predictions using class columns from best runs, taking into account first column is image name, no prediction
     # for that column
 
