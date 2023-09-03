@@ -319,6 +319,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
     for task, count in task_counts.items():
         print(f"{task.capitalize()}: {count}")
 
+    print(clear_dict)
     for key, entries in clear_dict.items():
         print(f"{key.capitalize()}: {len(entries)}")
 
