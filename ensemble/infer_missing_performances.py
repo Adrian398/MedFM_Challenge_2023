@@ -290,9 +290,9 @@ if __name__ == "__main__":  # Important when using multiprocessing
                    f"--output_path {out_filepath}")
         commands.append(command)
 
-    print("Generated Testing Commands:")
-    for command in commands:
-        print(command)
+    # print("Generated Testing Commands:")
+    # for command in commands:
+    #     print(command)
 
     task_counts = Counter(model["task"] for model in model_infos.values())
 
