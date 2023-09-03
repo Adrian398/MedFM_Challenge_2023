@@ -44,9 +44,6 @@ def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=0.5
     else:
         raise ValueError(f'Invalid gpu type {gpu}.')
 
-    gpus.append('rtx2080ti' for _ in range(6))
-    print(gpus)
-    exit()
     gpu_cycle = itertools.cycle(gpus)
 
     task_counter = {

@@ -21,7 +21,7 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
-def run_commands_on_cluster(commands, num_commands, gpu='8a', delay_seconds=0.5):
+def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=0.5):
     """
     Runs the generated commands on the cluster.
     Tasks are allocated to GPUs based on the task type:
@@ -40,6 +40,10 @@ def run_commands_on_cluster(commands, num_commands, gpu='8a', delay_seconds=0.5)
         gpus = ['rtx4090', 'rtx3090', 'rtx4090', 'rtx3090']
     else:
         raise ValueError(f'Invalid gpu type {gpu}.')
+
+    gpus.append('rtx2080ti' for _ in range(6))
+    print(gpus)
+    exit()
 
     gpu_cycle = itertools.cycle(gpus)
 
