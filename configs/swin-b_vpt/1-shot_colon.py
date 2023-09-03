@@ -64,3 +64,8 @@ train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
 auto_scale_lr = dict(base_batch_size=1024)
 
 randomness = dict(seed=0)
+
+default_hooks = dict(
+    checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="Accuracy", rule="greater"),
+    logger=dict(interval=10),
+)

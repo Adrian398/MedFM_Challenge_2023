@@ -61,6 +61,5 @@ train_evaluator = [
     dict(type='Aggregate'),
     dict(type='AUC')
 ]
-
 val_evaluator = train_evaluator
 test_evaluator = train_evaluator

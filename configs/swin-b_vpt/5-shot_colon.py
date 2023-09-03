@@ -57,5 +57,7 @@ visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBack
 
 train_cfg = dict(by_epoch=True, val_interval=15, max_epochs=250)
 
-
-
+default_hooks = dict(
+    checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="Accuracy", rule="greater"),
+    logger=dict(interval=10),
+)

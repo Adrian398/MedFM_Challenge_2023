@@ -60,20 +60,11 @@ test_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False),
 )
 
-val_evaluator = [
+train_evaluator = [
     dict(type='AveragePrecision'),
     dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
     dict(type='MultiLabelMetric', average='micro'),  # overall mean
     dict(type='AUC', multilabel=True),
     dict(type='Aggregate', multilabel=True)]
-test_evaluator = val_evaluator
-
-default_hooks = dict(
-    checkpoint=dict(
-        type='CheckpointHook',
-        interval=250,
-        max_keep_ckpts=1,
-        save_best="AveragePrecision", rule="greater"
-    ),
-    logger=dict(interval=10),
-)
+val_evaluator = train_evaluator
+test_evaluator = train_evaluator
