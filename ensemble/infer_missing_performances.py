@@ -140,7 +140,7 @@ def find_and_validate_json_files(model_dir):
                         performance_json_count += 1
 
                         if "MAP_class1" not in data:
-                            print(f"Found 'performance.json' but 'MAP_class1' missing")
+                            print(f"Found 'performance.json' but mAP per class (e.g. 'MAP_class1') missing")
                             return False
 
                 except json.JSONDecodeError:
