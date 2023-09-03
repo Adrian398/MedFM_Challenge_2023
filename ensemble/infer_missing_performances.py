@@ -122,29 +122,32 @@ def extract_exp_number(string):
     return int(match.group(1)) if match else 0
 
 
-def contains_json_file(model_dir):
-    expected_filename = "performance.json"
+def find_and_validate_json_files(model_dir):
+    for dirpath, dirnames, filenames in os.walk(model_dir):
+        for filename in filenames:
+            if filename.endswith('.json'):
+                filepath = os.path.join(dirpath, filename)
 
-    try:
-        json_filepath = os.path.join(model_dir, expected_filename)
-        #my_print(json_filepath)
-        json_file_exists = os.path.exists(json_filepath)
-        #my_print(json_file_exists)
+                try:
+                    with open(filepath, 'r') as file:
+                        data = json.load(file)
 
-        # if json_file_exists:
-        #     return True
-        #     with open(json_filepath, 'r') as file:
-        #         data = json.load(file)
-        #         map_present = True if "MAP_Class1" in data else False
-        #         if not map_present:
-        #             my_print("Found JSON but MAP per Class missing")
-        #         return map_present
-    except FileNotFoundError:
-        pass
-    except PermissionError as permission_error:
-        my_print(f"Permission Error encountered: {permission_error}")
-        return False
-    return False
+                    # If filename is "performance.json", further check for "MAP_Class1"
+                    if filename == "performance.json" and "MAP_Class1" not in data:
+                        print(f"Found 'performance.json' but MAP per Class missing in: {filepath}")
+                        return False
+
+                except json.JSONDecodeError:
+                    print(f"Cannot load JSON from: {filepath}")
+                    os.remove(filepath)  # Deleting the corrupted JSON file
+                    return False
+                except PermissionError as permission_error:
+                    print(f"Permission Error encountered for {filepath}: {permission_error}")
+                    return False
+                except Exception as e:
+                    print(f"Error encountered for {filepath}: {e}")
+                    return False
+    return True
 
 
 def find_corrupted_json_files(directory):
@@ -212,11 +215,12 @@ def get_model_dirs_without_performance(task, shot):
             #print("No event file found, skipping..")
             continue
 
+        find_corrupted_json_files(abs_model_dir)
+
         # Skip if performance json file is present
-        if contains_json_file(abs_model_dir):
+        if find_and_validate_json_files(abs_model_dir):
             continue
 
-        find_corrupted_json_files(abs_model_dir)
 
         model_dirs.append(model_dir)
     return model_dirs
