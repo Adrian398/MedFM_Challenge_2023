@@ -112,9 +112,11 @@ for task in tasks:
                 least_models = models_for_setting
                 least_setting = f"{task} {shot} {exp}"
 
-print(f"Total models: {total_models}")
-print(f"Most models: {most_models} {most_setting}")
-print(f"Least models: {least_models} {least_setting}")
+print("--------------------------------------")
+print(f"| Total models: {total_models}")
+print(f"| Most models: {most_models} {most_setting}")
+print(f"| Least models: {least_models} {least_setting}")
+print("--------------------------------------")
 
 start = input("Continue? (y/n)")
 if start != "y":
