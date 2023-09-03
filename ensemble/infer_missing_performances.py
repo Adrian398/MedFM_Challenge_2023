@@ -132,12 +132,13 @@ def contains_json_file(model_dir):
         my_print(json_file_exists)
 
         if json_file_exists:
-            with open(json_filepath, 'r') as file:
-                data = json.load(file)
-                map_present = True if "MAP_Class1" in data else False
-                if not map_present:
-                    my_print("Found JSON but MAP per Class missing")
-                return map_present
+            return True
+            # with open(json_filepath, 'r') as file:
+            #     data = json.load(file)
+            #     map_present = True if "MAP_Class1" in data else False
+            #     if not map_present:
+            #         my_print("Found JSON but MAP per Class missing")
+            #     return map_present
     except FileNotFoundError:
         pass
     except PermissionError as permission_error:
