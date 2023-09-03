@@ -122,6 +122,7 @@ def extract_exp_number(string):
 
 
 def find_and_validate_json_files(model_dir):
+    print("Validating JSON File")
     for dirpath, dirnames, filenames in os.walk(model_dir):
         for filename in filenames:
             if filename.endswith('.json'):
