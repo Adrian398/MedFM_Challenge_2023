@@ -77,13 +77,6 @@ shots = ['1-shot', '5-shot', '10-shot']
 experiments = ['exp1', 'exp2', 'exp3', 'exp4', 'exp5']
 class_counts = {"colon": 2, "endo": 4, "chest": 19}
 
-# Create submission directory
-date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
-submission_dir = os.path.join("submissions", "evaluation", date_pattern)
-print(f"Creating submission directory {submission_dir}")
-os.makedirs(submission_dir)
-for exp in experiments:
-    os.makedirs(os.path.join(submission_dir, "result", f"exp{exp}"), exist_ok=True)
 
 # For each task / shot / experiment combination, find all directories that contain both a csv and json file, and
 # add them to the exp_dirs dictionary with keys csv and json
@@ -100,6 +93,23 @@ for task in tasks:
             # check if run dir has json + csv, if yes, add info to exp_dirs dict
             check_run_dir(run_dir, exp_dirs, task, shot)
 
+for task in tasks:
+    for shot in shots:
+        for exp in experiments:
+            print(f"{task} {shot} {exp} {len(exp_dirs[task][shot][exp])}")
+
+start = input("Continue? (y/n)")
+if start != "y":
+    exit()
+
+# Create submission directory
+date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
+submission_dir = os.path.join("submissions", "evaluation", date_pattern)
+print(f"Creating submission directory {submission_dir}")
+os.makedirs(submission_dir)
+for exp in experiments:
+    os.makedirs(os.path.join(submission_dir, "result", f"exp{exp}"), exist_ok=True)
+
 # iterate over exp_dirs_dict, for each task / shot / exp combination, merge results
 for task in tasks:
     for shot in shots:
@@ -107,6 +117,6 @@ for task in tasks:
             if len(exp_dirs[task][shot][exp]) < 2:
                 print("not enough runs")
                 continue
-            out_path = os.path.join(submission_dir, "result", f"exp{exp}", f"{task}_{shot}_submission.csv")
+            out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_submission.csv")
             data_list = extract_data_tuples(exp_dirs[task][shot][exp])
             merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
