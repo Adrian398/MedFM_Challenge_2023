@@ -14,7 +14,7 @@ def extract_exp_number(string):
 
 
 exp_dirs = {}
-tasks = ['endo', 'colon', 'chest']
+tasks = ['chest', 'endo', 'colon']
 shots = ['1-shot', '5-shot', '10-shot']
 exps = ['exp1', 'exp2', 'exp3', 'exp4', 'exp5']
 # Traverse through the main categories
@@ -58,8 +58,9 @@ def merge_results_expert_model_strategy(run_dicts, task, shot, exp):
     # Find run with best MAP for each class
     for i in range(num_classes):
         best_run = max(run_dicts, key=lambda x: x['metrics'][f'MAP_class{i + 1}'])
+        best_run_index = run_dicts.index(best_run)
         merged_df[i + 1] = best_run["prediction"][i + 1]
-        print(f"Merged df after adding {best_run['name']}")
+        print(f"Merged df after adding run {best_run_index} {best_run['name']}")
         print(merged_df)
     exit()
     # Merge predictions using class columns from best runs, taking into account first column is image name, no prediction
@@ -78,7 +79,7 @@ def extract_data_tuples(run_list):
 for task in tasks:
     for shot in shots:
         for exp in exps:
-            if len(exp_dirs[task][shot][exp]) < class_lengths[task]:
+            if len(exp_dirs[task][shot][exp]) < 2:
                 print("not enough runs")
                 continue
             data_list = extract_data_tuples(exp_dirs[task][shot][exp])
