@@ -18,6 +18,13 @@ if __name__ == "__main__":
     cfg.test_dataloader.batch_size = args.batch_size
     cfg.test_dataloader.dataset.data_prefix = f'/scratch/medfm/medfm-challenge/data/MedFMC_train/{cfg.dataset}/images'
 
+    cfg.test_evaluator = [
+        dict(type='AveragePrecision'),
+        dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
+        dict(type='MultiLabelMetric', average='micro'),  # overall mean
+        dict(type='AUC', multilabel=True),
+        dict(type='Aggregate', multilabel=True)]
+
     cfg.load_from = args.checkpoint_path
     runner = Runner.from_cfg(cfg)
     metrics = runner.test()

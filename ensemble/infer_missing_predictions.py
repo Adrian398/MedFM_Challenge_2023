@@ -146,7 +146,6 @@ def is_metric_in_event_file(file_path, metric):
     event_acc = EventAccumulator(file_path, size_guidance={'scalars': 0})  # 0 means load none, just check tags
     event_acc.Reload()
     scalar_tags = event_acc.Tags()['scalars']
-
     return metric in scalar_tags
 
 
@@ -179,18 +178,19 @@ def get_model_dirs_without_prediction(task, shot):
         # Skip if no best checkpoint file
         checkpoint_path = get_file_from_directory(abs_model_dir, ".pth", "best")
         if checkpoint_path is None:
+            print("No best checkpoint path..")
             continue
 
         # Skip/Delete if no event file
         event_file = get_event_file_from_model_dir(abs_model_dir)
         if event_file is None:
-            #print("No event file found, skipping..")
+            print("No event file found, skipping..")
             continue
 
         # Skip if metric not in event file
-        if not is_metric_in_event_file(event_file, metric_tags['map']):
-            #print("Metric map not present, skipping..")
-            continue
+        # if not is_metric_in_event_file(event_file, metric_tags['map']):
+        #     print("Metric map not present, skipping..")
+        #     continue
 
         # Skip if prediction csv file is present
         if contains_csv_file(task, shot, abs_model_dir):

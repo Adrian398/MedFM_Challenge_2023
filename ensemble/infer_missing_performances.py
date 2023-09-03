@@ -7,6 +7,7 @@ This script does the following steps:
 - batch all commands on the corresponding gpus, whereas each gpu is dedicated for a specific task
 """
 import itertools
+import json
 import os
 import re
 import subprocess
@@ -20,7 +21,7 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
-def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=1):
+def run_commands_on_cluster(commands, num_commands, gpu='8a', delay_seconds=0.5):
     """
     Runs the generated commands on the cluster.
     Tasks are allocated to GPUs based on the task type:
@@ -107,7 +108,7 @@ def sort_key(entry):
 
 
 def my_print(message):
-    sys.stdout.write(message + '\n')
+    sys.stdout.write(str(message) + '\n')
     sys.stdout.flush()
 
 
@@ -125,13 +126,44 @@ def contains_json_file(model_dir):
     expected_filename = "performance.json"
 
     try:
-        return os.path.exists(os.path.join(model_dir, expected_filename))
+        json_filepath = os.path.join(model_dir, expected_filename)
+        #my_print(json_filepath)
+        json_file_exists = os.path.exists(json_filepath)
+        #my_print(json_file_exists)
+
+        # if json_file_exists:
+        #     return True
+        #     with open(json_filepath, 'r') as file:
+        #         data = json.load(file)
+        #         map_present = True if "MAP_Class1" in data else False
+        #         if not map_present:
+        #             my_print("Found JSON but MAP per Class missing")
+        #         return map_present
     except FileNotFoundError:
         pass
     except PermissionError as permission_error:
         my_print(f"Permission Error encountered: {permission_error}")
         return False
     return False
+
+
+def find_corrupted_json_files(directory):
+    # Walk through each directory and file recursively
+    for dirpath, dirnames, filenames in os.walk(directory):
+        for filename in filenames:
+            # Check if the file is a JSON file
+            if filename.endswith('.json'):
+                filepath = os.path.join(dirpath, filename)
+
+                try:
+                    with open(filepath, 'r') as file:
+                        data = json.load(file)
+                except json.JSONDecodeError:
+                    # If there's an error loading the JSON, print the filepath
+                    print(f"Cannot load JSON from: {filepath}")
+                except Exception as e:
+                    # Handle any other exceptions that may arise
+                    print(f"Error encountered for {filepath}: {e}")
 
 
 @lru_cache(maxsize=None)
@@ -183,6 +215,8 @@ def get_model_dirs_without_performance(task, shot):
         # Skip if performance json file is present
         if contains_json_file(abs_model_dir):
             continue
+
+        find_corrupted_json_files(abs_model_dir)
 
         model_dirs.append(model_dir)
     return model_dirs
