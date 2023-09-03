@@ -8,7 +8,7 @@ _base_ = [
 
 lr = 2.5e-3
 train_bs = 8
-val_bs = 32
+val_bs = 96
 dataset = 'colon'
 model_name = 'convnext-v2-b'
 exp_num = 1
