@@ -27,6 +27,8 @@ def merge_results_expert_model_strategy(run_dicts, task, shot, exp, out_path):
     for i in range(num_classes):
         print("-------------------------------------------------------------------type run dicts")
         print(type(run_dicts))
+        for run in run_dicts:
+            print(type(run))
         print("-------------------------------------------------------------------")
         best_run = max(run_dicts, key=lambda x: x['metrics'][f'MAP_class{i + 1}'])
         best_run_index = run_dicts.index(best_run)
