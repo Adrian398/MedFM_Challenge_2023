@@ -145,11 +145,11 @@ def get_non_valid_model_dirs(task, shot):
         if checkpoint and event:
             continue
         elif checkpoint and event is None:
-            print(colored("No event file found.", 'blue'))
+            print(colored("No event file found.", 'light_red'))
         elif checkpoint is None and event:
-            print(colored("No checkpoint file found", 'yellow'))
+            print(colored("No checkpoint file found", 'light_red'))
         elif checkpoint is None and event is None:
-            print(colored("No checkpoint and event file found", 'cyan'))
+            print(colored("No checkpoint and event file found", 'red'))
         model_dirs.append(model_dir)
     return model_dirs
 
