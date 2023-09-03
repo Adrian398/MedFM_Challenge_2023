@@ -240,7 +240,6 @@ if __name__ == "__main__":  # Important when using multiprocessing
     csv_suffix_choice = get_csv_suffix_choice()
     print(f"\nSelected CSV suffix: {colored(csv_suffix_choice, 'blue')}\n")
 
-
     with Pool() as pool:
         combinations = [(task, shot) for task in tasks for shot in shots]
 
