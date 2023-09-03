@@ -10,9 +10,12 @@ lr = 2.5e-3
 train_bs = 8
 val_bs = 32
 dataset = 'colon'
-model_name = 'swinv2'
+model_name = 'convnext-v2-b'
 exp_num = 1
 nshot = 1
+
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
+work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
 
 # dataset setting
 train_dataloader = dict(
