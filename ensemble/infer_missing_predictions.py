@@ -239,7 +239,7 @@ csv_suffix_list = ["submission", "validation"]
 if __name__ == "__main__":  # Important when using multiprocessing
     csv_suffix_choice = get_csv_suffix_choice()
     print(f"\nSelected CSV suffix: {colored(csv_suffix_choice, 'blue')}"
-          f"Proceeding with prediction\n")
+          f"\nProceeding with prediction\n")
 
     time.sleep(1)
 
