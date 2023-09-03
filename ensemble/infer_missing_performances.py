@@ -20,7 +20,7 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
-def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=1):
+def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=0.5):
     """
     Runs the generated commands on the cluster.
     Tasks are allocated to GPUs based on the task type:
