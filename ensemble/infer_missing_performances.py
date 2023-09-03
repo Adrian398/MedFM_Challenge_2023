@@ -68,12 +68,12 @@ def run_commands_on_cluster(commands, num_commands, gpu='8a', delay_seconds=0.5)
             os.makedirs(log_dir)
 
         slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
-        print(slurm_cmd)
+        print(f"Submitting Model: {log_dir}")
 
         task_counter[task] += 1
 
         subprocess.run(slurm_cmd, shell=True)
-        time.sleep(delay_seconds)
+        #time.sleep(delay_seconds)
 
 
 def get_file_from_directory(directory, extension, contains_string=None):
