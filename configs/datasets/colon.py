@@ -56,8 +56,7 @@ test_dataloader = dict(
 
 train_evaluator = [
     dict(type='AveragePrecision'),
-    dict(type='Accuracy'),
-    dict(type='SingleLabelMetric', items=['precision', 'recall']),
+    dict(type='Accuracy', topk=(1,)),
     dict(type='Aggregate'),
     dict(type='AUC')
 ]
