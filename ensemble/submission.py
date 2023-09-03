@@ -50,7 +50,7 @@ def merge_results_expert_model_strategy(run_dicts, task, shot, exp):
     print("merging results for task", task, "shot", shot, "exp", exp)
     num_classes = class_lengths[task]
     # initialize dataframe with image_ids
-    merged_df = run_dicts['prediction'][:, 0:1]
+    merged_df = run_dicts[0]['prediction'][:, 0:1]
     print("Merged df before")
     print(merged_df)
     # Find run with best MAP for each class
@@ -71,7 +71,7 @@ def extract_data_tuples(run_list):
     for run in run_list:
         prediction = pd.read_csv(run['csv'], header=None)
         metrics = json.load(open(run['json'], 'r'))
-        data_list.append({"prediction": prediction, "metrics": metrics})
+        data_list.append({'prediction': prediction, 'metrics': metrics})
     return data_list
 
 
