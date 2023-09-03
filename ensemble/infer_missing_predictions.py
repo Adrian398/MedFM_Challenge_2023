@@ -14,8 +14,6 @@ import os
 import re
 import subprocess
 import sys
-import shutil
-import time
 from collections import Counter
 from multiprocessing import Pool
 from functools import lru_cache
@@ -25,7 +23,7 @@ from termcolor import colored
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
-def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=0.5):
+def run_commands_on_cluster(commands, num_commands, gpu='all'):
     """
     Runs the generated commands on the cluster.
     Tasks are allocated to GPUs based on the task type:
@@ -41,7 +39,7 @@ def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=0.5
     elif gpu == '8a':
         gpus = ['rtx2080ti']
     elif gpu == 'all':
-        gpus = ['rtx4090', 'rtx3090', 'rtx4090', 'rtx3090']
+        gpus = ['rtx4090', 'rtx3090', 'rtx3090', 'rtx4090']
     else:
         raise ValueError(f'Invalid gpu type {gpu}.')
 
@@ -79,7 +77,6 @@ def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=0.5
         task_counter[task] += 1
 
         subprocess.run(slurm_cmd, shell=True)
-        time.sleep(delay_seconds)
 
 
 def get_file_from_directory(directory, extension, contains_string=None):
