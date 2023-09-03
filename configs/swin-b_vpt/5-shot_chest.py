@@ -1,6 +1,6 @@
 _base_ = [
     '../datasets/chest.py',
-    '../schedules/chest.py',
+    '../schedules/adamw_inverted_cosine_lr.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
 ]
@@ -11,8 +11,6 @@ vpl = 5
 dataset = 'chest'
 exp_num = 1
 nshot = 5
-seed = 2049
-randomness = dict(seed=seed)
 
 run_name = f'in21k-swin-b_vpt-{vpl}_bs4_lr{lr}_{nshot}-shot_{dataset}_exp{exp_num}'
 work_dir = f'work_dirs/chest/{nshot}-shot/{run_name}'
@@ -54,14 +52,8 @@ test_dataloader = dict(
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
 )
 
-optim_wrapper = dict(optimizer=dict(lr=lr))
-
-default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=10, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
-    logger=dict(interval=10),
-)
-
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=500)
+train_cfg = dict(by_epoch=True, val_interval=15, max_epochs=250)
 
+randomness = dict(seed=0)

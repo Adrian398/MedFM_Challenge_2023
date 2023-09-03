@@ -1,6 +1,6 @@
 _base_ = [
     '../datasets/endoscopy.py',
-    '../swin_schedule.py',
+    '../schedules/adamw_inverted_cosine_lr.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
 ]
@@ -51,18 +51,8 @@ test_dataloader = dict(
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
 )
 
-val_evaluator = [
-    dict(type='Aggregate'),
-    dict(type='AveragePrecision'),
-    dict(type='AUC')
-]
-test_evaluator = val_evaluator
-
-default_hooks = dict(
-    checkpoint = dict(type='CheckpointHook', interval=50, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
-    logger=dict(interval=10),
-)
-
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=20, max_epochs=400)
+train_cfg = dict(by_epoch=True, val_interval=15, max_epochs=250)
+
+randomness = dict(seed=0)
