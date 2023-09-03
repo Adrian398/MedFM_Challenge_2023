@@ -4,8 +4,8 @@ OVERRIDE = {
     'shot': [1],
     'exp_num': [1],
     'lr': [1e-6],  # Start learning rate that increases up to 1e-5 (until max_epochs) with cosine annealing
-    #'train_bs': [32],
-    'seed': [0]
+    'train_bs': [1, 2],
+    'seed': [0, 1, 2, 3]
 }
 
 SETTINGS = {
