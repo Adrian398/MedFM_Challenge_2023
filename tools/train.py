@@ -208,6 +208,7 @@ def merge_custom_args(cfg, args):
 def main():
     args = parse_args()
 
+    print(args.config)
     # load config
     cfg = Config.fromfile(args.config)
 
