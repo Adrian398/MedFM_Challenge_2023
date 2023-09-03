@@ -173,6 +173,9 @@ def get_model_dirs_without_prediction(task, shot):
         return None
 
     for model_dir in setting_model_dirs:
+        if model_dir == "swinv2_bs8_lr1e-06e-06_exp5__eval-submission_20230828-201325":
+            print("FOUND")
+
         my_print(f"Checking {task}/{shot}-shot/{model_dir}")
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
