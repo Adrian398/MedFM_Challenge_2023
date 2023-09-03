@@ -43,7 +43,6 @@ def merge_results_expert_model_strategy(run_dicts, task, shot, exp, out_path):
         print(f"Merged df after adding run {best_run_index} {best_run['name']}")
     print(f"Saving merged_df to {out_path}")
     merged_df.to_csv(out_path, index=False, header=False)
-    exit()
     # Merge predictions using class columns from best runs, taking into account first column is image name, no prediction
     # for that column
 
@@ -128,7 +127,7 @@ submission_dir = os.path.join("submissions", "evaluation", date_pattern)
 print(f"Creating submission directory {submission_dir}")
 os.makedirs(submission_dir)
 for exp in experiments:
-    os.makedirs(os.path.join(submission_dir, "result", f"exp{exp}"), exist_ok=True)
+    os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
 
 # iterate over exp_dirs_dict, for each task / shot / exp combination, merge results
 for task in tasks:
