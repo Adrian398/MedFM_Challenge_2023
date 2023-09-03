@@ -30,7 +30,7 @@ def get_file_from_directory(directory, extension, contains_string=None):
 
 def print_report(invalid_model_dirs):
     if len(invalid_model_dirs) == 0:
-        print(colored(f"\nAll models have a checkpoint and an event file!\n", 'green'))
+        print(colored(f"\nAll models have a checkpoint file!\n", 'green'))
         exit()
     else:
         sorted_report_entries = sorted([model_dir for model_dir in invalid_model_dirs], key=sort_key)
