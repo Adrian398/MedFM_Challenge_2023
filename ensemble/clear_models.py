@@ -140,7 +140,7 @@ def get_non_valid_model_dirs(task, shot):
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
         checkpoint = get_file_from_directory(abs_model_dir, ".pth", "best")
-
+        print(f"Checkpoint found for {abs_model_dir}")
         if checkpoint is None:
             print(colored("No checkpoint file found", 'light_red'))
             model_dirs.append(model_dir)
