@@ -108,7 +108,7 @@ def sort_key(entry):
 
 
 def my_print(message):
-    sys.stdout.write(message + '\n')
+    sys.stdout.write(str(message) + '\n')
     sys.stdout.flush()
 
 
