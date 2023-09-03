@@ -33,12 +33,11 @@ for task in tasks:
             print("Checking run directory", run_dir)
             # Check if both csv and json files exist in the run directory
             csv_files = glob.glob(os.path.join(run_dir, "*.csv"))
-            # json_files = glob.glob(os.path.join(run_dir, "*.json"))
-            if csv_files:
+            json_files = glob.glob(os.path.join(run_dir, "*.json"))
+            if csv_files and json_files:
                 exp_num = extract_exp_number(run_dir)
                 if exp_num != 0:
-                    # exp_dirs[task][shot][f"exp{exp_num}"].append({'csv': csv_files[0], 'json': json_files[0]})
-                    exp_dirs[task][shot][f"exp{exp_num}"].append({'csv': csv_files[0]})
+                    exp_dirs[task][shot][f"exp{exp_num}"].append({'csv': csv_files[0], 'json': json_files[0]})
 
 class_lengths = {"colon": 2, "endo": 4, "chest": 19}
 
@@ -51,7 +50,7 @@ def merge_results_expert_model_strategy(run_dicts, task, shot, exp):
     print("merging results for task", task, "shot", shot, "exp", exp)
     num_classes = class_lengths[task]
     # initialize dataframe with image_ids
-    merged_df = run_dicts[0][:, 0:1]
+    merged_df = run_dicts['prediction'][:, 0:1]
     print("Merged df before")
     print(merged_df)
     # Find run with best MAP for each class
