@@ -223,7 +223,7 @@ def get_model_dirs_without_performance(task, shot):
         # Skip if no best checkpoint file
         checkpoint_path = get_file_from_directory(abs_model_dir, ".pth", "best")
         if checkpoint_path is None:
-            print("No best chekpoint file found")
+            print("No best checkpoint file found")
             continue
 
         # Skip/Delete if no event file
