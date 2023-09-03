@@ -238,11 +238,10 @@ csv_suffix_list = ["submission", "validation"]
 
 if __name__ == "__main__":  # Important when using multiprocessing
     csv_suffix_choice = get_csv_suffix_choice()
-    print(f"Selected CSV suffix: {colored(csv_suffix_choice, 'blue')}")
+    print(f"\nSelected CSV suffix: {colored(csv_suffix_choice, 'blue')}"
+          f"Proceeding with prediction\n")
 
-    sleep_time = 5
-    print(f"Proceeding in {sleep_time} seconds..")
-    time.sleep(sleep_time)
+    time.sleep(1)
 
     with Pool() as pool:
         combinations = [(task, shot) for task in tasks for shot in shots]
