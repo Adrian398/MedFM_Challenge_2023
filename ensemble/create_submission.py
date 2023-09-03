@@ -1,52 +1,32 @@
-import glob
 import os
+import glob
 
-work_dir_path = "/scratch/medfm/medfm-challenge/work_dirs"
+root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 
-categories = ["colon", "endo", "chest"]
-shots = ["1-shot", "5-shot", "10-shot"]
+exp_dirs = {}
+# Traverse through the main categories
+for category in ['colon', 'endo', 'chest']:
+    # Traverse through 1-shot, 5-shot, 10-shot
+    for shot in ['1-shot', '5-shot', '10-shot']:
+        # Construct the path pattern for glob
+        path_pattern = os.path.join(root_dir, category, shot, '*exp[1-5]*')
+        # Get all run directories that match the pattern
+        for run_dir in glob.glob(path_pattern):
+            # Check if both csv and json files exist in the run directory
+            csv_files = glob.glob(os.path.join(run_dir, "*.csv"))
+            json_files = glob.glob(os.path.join(run_dir, "*.json"))
+            if csv_files and json_files:
+                exp_num = next(filter(lambda x: x.startswith("exp"), run_dir.split(os.sep)), None)
+                if exp_num:
+                    exp_num = exp_num[3:]  # Get the number after "exp"
+                    if exp_num not in exp_dirs:
+                        exp_dirs[exp_num] = []
+                    for csv_file, json_file in zip(csv_files, json_files):
+                        exp_dirs[exp_num].append((csv_file, json_file))
 
-
-def find_run_dirs(category, shot):
-    """Generator that yields run directories with 'exp' in their name."""
-    run_dirs_pattern = os.path.join(work_dir_path, category, shot, "*exp*")
-    for run_dir in glob.glob(run_dirs_pattern):
-        yield run_dir
-
-
-def get_csv_json_pair(run_dir):
-    """Returns tuple containing matched .csv and .json files."""
-    csv_file = glob.glob(os.path.join(run_dir, "*.csv"))
-    json_file = glob.glob(os.path.join(run_dir, "*.json"))
-
-    # If both a .csv and a .json file are found, return them as a tuple
-    if csv_file and json_file:
-        return (csv_file[0], json_file[0])
-    return None
-
-
-def group_by_exp(category, shot):
-    """Groups (csv, json) pairs by their exp number."""
-    exp_dict = {}
-    for run_dir in find_run_dirs(category, shot):
-        pair = get_csv_json_pair(run_dir)
-        if pair:
-            exp_num = next((s[3:] for s in run_dir.split("/") if "exp" in s), None)
-            if exp_num:
-                exp_dict.setdefault(exp_num, []).append(pair)
-    return exp_dict
-
-
-def main():
-    for category in categories:
-        for shot in shots:
-            exp_grouped_pairs = group_by_exp(category, shot)
-            for exp, pairs in exp_grouped_pairs.items():
-                print(f"For {category}/{shot} in exp{exp}:")
-                for csv, json in pairs:
-                    # Your processing code here
-                    print(csv, json)
-
-
-if __name__ == "__main__":
-    main()
+# Now, exp_dirs will have the desired output
+for exp_num, file_tuples in exp_dirs.items():
+    print(f"For exp{exp_num}:")
+    for csv, json in file_tuples:
+        print(f"CSV: {csv}, JSON: {json}")
+    print("---------")
