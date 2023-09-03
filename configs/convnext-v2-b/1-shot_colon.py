@@ -1,0 +1,61 @@
+_base_ = [
+    'mmpretrain::_base_/models/convnext_v2/base.py',
+    '../datasets/colon.py',
+    'mmpretrain::_base_/schedules/imagenet_bs1024_adamw_swin.py',
+    'mmpretrain::_base_/default_runtime.py',
+    '../custom_imports.py',
+]
+
+lr = 2.5e-3
+train_bs = 8
+val_bs = 32
+dataset = 'colon'
+model_name = 'swinv2'
+exp_num = 1
+nshot = 1
+
+# dataset setting
+train_dataloader = dict(
+    batch_size=train_bs,
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
+)
+
+val_dataloader = dict(
+    batch_size=val_bs,
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
+)
+
+test_dataloader = dict(
+    batch_size=8,
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
+)
+
+# schedule setting
+optim_wrapper = dict(
+    optimizer=dict(lr=lr),
+    clip_grad=None,
+)
+
+# learning policy
+param_scheduler = [
+    # warm up learning rate scheduler
+    dict(
+        type='LinearLR',
+        start_factor=1e-3,
+        by_epoch=True,
+        end=20,
+        # update by iter
+        convert_to_iter_based=True),
+    # main learning rate scheduler
+    dict(type='CosineAnnealingLR', eta_min=1e-5, by_epoch=True, begin=20)
+]
+
+visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
+
+# train, val, test setting
+train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
+
+# runtime setting
+custom_hooks = [dict(type='EMAHook', momentum=1e-4, priority='ABOVE_NORMAL')]
+
+randomness = dict(seed=0)
