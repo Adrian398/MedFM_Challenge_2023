@@ -242,8 +242,6 @@ if __name__ == "__main__":  # Important when using multiprocessing
     csv_suffix_choice = get_csv_suffix_choice()
     print(f"\nSelected CSV suffix: {colored(csv_suffix_choice, 'blue')}\n")
 
-    print(csv_suffix_2_img_suffix)
-
     with Pool() as pool:
         combinations = [(task, shot) for task in tasks for shot in shots]
 
@@ -289,7 +287,6 @@ if __name__ == "__main__":  # Important when using multiprocessing
         img_suffix_choice = csv_suffix_2_img_suffix.get(csv_suffix_choice, "test")  # defaults to 'test'
         images_path = os.path.join("/scratch", "medfm", "medfm-challenge", "data", f"MedFMC_{img_suffix_choice}", task,
                                    "images")
-        exit()
 
         # Destination Path
         out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_submission.csv")
