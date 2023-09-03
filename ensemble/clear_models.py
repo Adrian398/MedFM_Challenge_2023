@@ -142,10 +142,12 @@ def get_non_valid_model_dirs(task, shot):
 
         checkpoint_path = get_file_from_directory(abs_model_dir, ".pth", "best")
         if checkpoint_path is None:
+            print(colored("No checkpoint file found", 'red'))
             invalid_model = True
 
         event_file = get_event_file_from_model_dir(abs_model_dir)
         if event_file is None:
+            print(colored("No event file found.", 'red'))
             invalid_model = True
 
         if invalid_model:
