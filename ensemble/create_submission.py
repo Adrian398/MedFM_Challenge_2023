@@ -37,16 +37,11 @@ for task in tasks:
                     exp_dirs[task][shot][f"exp{exp_num}"].append({'csv': csv_files[0], 'json': json_files[0]})
 
 # Now, exp_dirs will have the desired output
-# for task in tasks:
-#     for shot in shots:
-#         for exp in exps:
-#             print(f"For {task} {shot} {exp}")
-
-# print jsons and csvs for each exp in the exp_dirs, using list comprehension:
 for task in tasks:
     for shot in shots:
         for exp in exps:
             print(f"For {task} {shot} {exp}")
-            print(exp_dirs[task][shot][exp])
-            print("")
+            for run_dict in exp_dirs[task][shot][exp]:
+                print(run_dict)
+
 
