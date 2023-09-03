@@ -269,7 +269,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
         print(f"{task.capitalize()}: {count}")
 
     while True:
-        user_input = input("\nHow many inference commands per task do you want to generate?\n").strip().lower()
+        user_input = input("\nHow many inference commands per task do you want to generate? ").strip().lower()
 
         if user_input == 'no':
             exit()
