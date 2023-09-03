@@ -27,7 +27,7 @@ def create_command(params, exp_suffix):
 
     for key, value in params.items():
         # only add params as command arg if required
-        if key not in ['model', 'shot', 'dataset', 'train_bs']:
+        if key not in ['model', 'shot', 'dataset']:
             command.extend([f"--{key}", str(value)])
 
     if exp_suffix:
