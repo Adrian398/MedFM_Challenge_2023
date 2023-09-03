@@ -17,7 +17,7 @@ def merge_results_weighted_average_strategy(run_dicts, task, shot, exp):
 
 
 def merge_results_expert_model_strategy(run_dicts, task, shot, exp, out_path):
-    print("merging results for task", task, "shot", shot, "exp", exp)
+    print("merging results for task", task, shot, exp)
     num_classes = class_counts[task]
     # initialize dataframe with image_ids
     merged_df = run_dicts[0]['prediction'].iloc[:, 0:1]
@@ -25,13 +25,13 @@ def merge_results_expert_model_strategy(run_dicts, task, shot, exp, out_path):
     print(merged_df)
     # Find run with best MAP for each class
     for i in range(num_classes):
+        print("-------------------------------------------------------------------type run dicts")
         print(type(run_dicts))
-        print(run_dicts)
+        print("-------------------------------------------------------------------")
         best_run = max(run_dicts, key=lambda x: x['metrics'][f'MAP_class{i + 1}'])
         best_run_index = run_dicts.index(best_run)
         merged_df[i + 1] = best_run["prediction"][i + 1]
         print(f"Merged df after adding run {best_run_index} {best_run['name']}")
-        print(merged_df)
     print(f"Saving merged_df to {out_path}")
     merged_df.to_csv(out_path, index=False, header=False)
     exit()
