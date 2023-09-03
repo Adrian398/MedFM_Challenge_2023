@@ -40,8 +40,4 @@ for task in tasks:
 for task in tasks:
     for shot in shots:
         for exp in exps:
-            print(f"For {task} {shot} {exp}")
-            for run_dict in exp_dirs[task][shot][exp]:
-                print(run_dict)
-
-
+            print(f"For {task} {shot} {exp}: {len(exp_dirs[task][shot][exp])}")
