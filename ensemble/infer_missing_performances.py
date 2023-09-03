@@ -68,12 +68,12 @@ def run_commands_on_cluster(commands, num_commands, gpu='8a', delay_seconds=0.5)
             os.makedirs(log_dir)
 
         slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
-        print(slurm_cmd)
+        print(f"Submitting Model: {log_dir}")
 
         task_counter[task] += 1
 
         subprocess.run(slurm_cmd, shell=True)
-        time.sleep(delay_seconds)
+        #time.sleep(delay_seconds)
 
 
 def get_file_from_directory(directory, extension, contains_string=None):
@@ -207,15 +207,14 @@ def get_model_dirs_without_performance(task, shot):
         # Skip if no best checkpoint file
         checkpoint_path = get_file_from_directory(abs_model_dir, ".pth", "best")
         if checkpoint_path is None:
+            print("No best chekpoint file found")
             continue
 
         # Skip/Delete if no event file
         event_file = get_event_file_from_model_dir(abs_model_dir)
         if event_file is None:
-            #print("No event file found, skipping..")
+            print("No event file found")
             continue
-
-        find_corrupted_json_files(abs_model_dir)
 
         # Skip if performance json file is present
         if find_and_validate_json_files(abs_model_dir):
@@ -290,9 +289,9 @@ if __name__ == "__main__":  # Important when using multiprocessing
                    f"--output_path {out_filepath}")
         commands.append(command)
 
-    print("Generated Testing Commands:")
-    for command in commands:
-        print(command)
+    # print("Generated Testing Commands:")
+    # for command in commands:
+    #     print(command)
 
     task_counts = Counter(model["task"] for model in model_infos.values())
 
@@ -301,7 +300,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
         print(f"{task.capitalize()}: {count}")
 
     while True:
-        user_input = input("\nHow many testing commands per task do you want to generate?").strip().lower()
+        user_input = input("\nHow many testing commands per task do you want to generate?\n").strip().lower()
 
         if user_input == 'no':
             exit()
