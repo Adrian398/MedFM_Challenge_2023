@@ -66,6 +66,6 @@ auto_scale_lr = dict(base_batch_size=1024)
 randomness = dict(seed=0)
 
 default_hooks = dict(
-    checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="Accuracy", rule="greater"),
+    checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="accuracy/top1", rule="greater"),
     logger=dict(interval=10),
 )

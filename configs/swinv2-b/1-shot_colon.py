@@ -66,6 +66,6 @@ train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
 randomness = dict(seed=0)
 
 default_hooks = dict(
-    checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
+    checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="accuracy/top1", rule="greater"),
     logger=dict(interval=10),
 )
