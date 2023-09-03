@@ -134,7 +134,7 @@ def find_and_validate_json_files(model_dir):
 
                     # If filename is "performance.json", further check for "MAP_Class1"
                     if filename == "performance.json" and "MAP_class1" not in data:
-                        print(f"Found 'performance.json' but MAP per Class missing in: {filepath}")
+                        print(f"Found 'performance.json' but MAP per Class missing")
                         return False
 
                 except json.JSONDecodeError:
@@ -143,10 +143,10 @@ def find_and_validate_json_files(model_dir):
                     os.remove(filepath)  # Deleting the corrupted JSON file
                     return False
                 except PermissionError as permission_error:
-                    print(f"Permission Error encountered for {filepath}: {permission_error}")
+                    print(f"Permission Error encountered: {permission_error}")
                     return False
                 except Exception as e:
-                    print(f"Error encountered for {filepath}: {e}")
+                    print(f"Error encountered: {e}")
                     return False
     return True
 
