@@ -18,14 +18,20 @@ run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
 work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
 
 model = dict(
+    type='ImageClassifier',
     backbone=dict(
+        type='ConvNeXt',
+        arch='base',
         init_cfg=dict(
+            prefix='backbone',
+            type='Pretrained',
             checkpoint='https://download.openmmlab.com/mmclassification/v0/convnext-v2/convnext-v2-base_fcmae-in21k-pre_3rdparty_in1k-384px_20230104-379425cc.pth'
         )
     ),
     head=dict(
         in_channels=1000,
-        num_classes=2
+        num_classes=2,
+        type='LinearClsHead'
     )
 )
 
