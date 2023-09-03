@@ -33,12 +33,11 @@ for task in tasks:
             print("Checking run directory", run_dir)
             # Check if both csv and json files exist in the run directory
             csv_files = glob.glob(os.path.join(run_dir, "*.csv"))
-            # json_files = glob.glob(os.path.join(run_dir, "*.json"))
-            if csv_files:
+            json_files = glob.glob(os.path.join(run_dir, "*.json"))
+            if csv_files and json_files:
                 exp_num = extract_exp_number(run_dir)
                 if exp_num != 0:
-                    # exp_dirs[task][shot][f"exp{exp_num}"].append({'csv': csv_files[0], 'json': json_files[0]})
-                    exp_dirs[task][shot][f"exp{exp_num}"].append({'csv': csv_files[0]})
+                    exp_dirs[task][shot][f"exp{exp_num}"].append({'csv': csv_files[0], 'json': json_files[0]})
 
 class_lengths = {"colon": 2, "endo": 4, "chest": 19}
 
