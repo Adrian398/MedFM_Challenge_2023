@@ -233,6 +233,8 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
                "map": "multi-label/mAP",
                "agg": "Aggregate"}
 csv_suffix_list = ["submission", "validation"]
+img_suffix_list = ["test", "val"]
+csv_suffix_2_img_suffix = dict(zip(csv_suffix_list, img_suffix_list))
 # ========================================================================================
 
 
@@ -282,7 +284,11 @@ if __name__ == "__main__":  # Important when using multiprocessing
         checkpoint_filepath = get_file_from_directory(model_path, ".pth", "best")
 
         # Image Path
-        images_path = os.path.join("/scratch", "medfm", "medfm-challenge", "data", "MedFMC_test", task, "images")
+        img_suffix_choice = csv_suffix_2_img_suffix.get(csv_suffix_choice, "test")  # defaults to 'test'
+        print(img_suffix_choice)
+        exit()
+        images_path = os.path.join("/scratch", "medfm", "medfm-challenge", "data", f"MedFMC_{img_suffix_choice}", task,
+                                   "images")
 
         # Destination Path
         out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_submission.csv")
