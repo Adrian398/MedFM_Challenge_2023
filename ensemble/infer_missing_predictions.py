@@ -146,7 +146,9 @@ def is_metric_in_event_file(file_path, metric):
     event_acc = EventAccumulator(file_path, size_guidance={'scalars': 0})  # 0 means load none, just check tags
     event_acc.Reload()
     scalar_tags = event_acc.Tags()['scalars']
-
+    if file_path == "/scratch/medfm/medfm-challenge/work_dirs/chest/10-shot/swinv2_bs8_lr1e-06e-06_exp5__eval-submission_20230828-201325/20230828_201325/vis_data/events.out.tfevents.1693253606.gpu1b.164256.0":
+        print("BLABLA")
+        print(scalar_tags)
     return metric in scalar_tags
 
 
@@ -173,9 +175,6 @@ def get_model_dirs_without_prediction(task, shot):
         return None
 
     for model_dir in setting_model_dirs:
-        if model_dir == "swinv2_bs8_lr1e-06e-06_exp5__eval-submission_20230828-201325":
-            print("FOUND")
-
         my_print(f"Checking {task}/{shot}-shot/{model_dir}")
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
