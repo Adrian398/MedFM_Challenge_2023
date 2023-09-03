@@ -28,7 +28,6 @@ def get_file_from_directory(directory, extension, contains_string=None):
             return os.path.join(directory, file)
     return None
 
-
 def print_report(invalid_model_dirs):
     if len(invalid_model_dirs) == 0:
         print(colored(f"\nAll models have a checkpoint and an event file!\n", 'green'))
@@ -69,63 +68,6 @@ def extract_exp_number(string):
     return int(match.group(1)) if match else 0
 
 
-def find_and_validate_json_files(model_dir):
-    json_files_found = False  # To track if we found any JSON files
-    performance_json_count = 0  # To track the number of "performance.json" files found
-
-    for dirpath, dirnames, filenames in os.walk(model_dir):
-        for filename in filenames:
-            if filename.endswith('.json'):
-                json_files_found = True
-                filepath = os.path.join(dirpath, filename)
-
-                try:
-                    with open(filepath, 'r') as file:
-                        data = json.load(file)
-
-                    # If filename is "performance.json", further check for "MAP_Class1"
-                    if filename == "performance.json":
-                        performance_json_count += 1
-
-                        if "MAP_class1" not in data:
-                            print(f"Found 'performance.json' but mAP per class (e.g. 'MAP_class1') missing")
-                            return False
-
-                except json.JSONDecodeError:
-                    print(f"Cannot load JSON from: {filepath}")
-                    print(f"Deleting {filepath}")
-                    os.remove(filepath)  # Deleting the corrupted JSON file
-                    return False
-                except PermissionError as permission_error:
-                    print(f"Permission Error encountered: {permission_error}")
-                    return False
-                except Exception as e:
-                    print(f"Error encountered: {e}")
-                    return False
-
-    if not json_files_found:
-        print("No JSON files found.")
-        return False
-
-    if performance_json_count != 1:
-        print(f"Multiple 'performance.json' found: {performance_json_count}")
-        return False
-
-    return True
-
-@lru_cache(maxsize=None)
-def get_event_file_from_model_dir(model_dir):
-    try:
-        for entry in os.listdir(model_dir):
-            full_path = os.path.join(model_dir, entry)
-            if os.path.isdir(full_path):
-                full_path = os.path.join(full_path, "vis_data")
-                event_file = os.listdir(full_path)[0]
-                return os.path.join(full_path, event_file)
-    except Exception:
-        return None
-
-
 def get_non_valid_model_dirs(task, shot):
     model_dirs = []
     setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
@@ -140,10 +82,11 @@ def get_non_valid_model_dirs(task, shot):
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
         checkpoint = get_file_from_directory(abs_model_dir, ".pth", "best")
-        print(f"Checkpoint found for {abs_model_dir}")
         if checkpoint is None:
-            print(colored("No checkpoint file found", 'light_red'))
+            print(colored(f"No 'best' checkpoint file found for {abs_model_dir}", 'light_red'))
             model_dirs.append(model_dir)
+        else:
+            print(f"Checkpoint found for {abs_model_dir}")
     return model_dirs
 
 
