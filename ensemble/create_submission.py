@@ -1,7 +1,14 @@
-import os
 import glob
+import os
+import re
 
 root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
+
+
+def extract_exp_number(string):
+    match = re.search(r'exp(\d+)', string)
+    return int(match.group(1)) if match else 0
+
 
 exp_dirs = {}
 # Traverse through the main categories
@@ -17,13 +24,11 @@ for category in ['colon', 'endo', 'chest']:
             csv_files = glob.glob(os.path.join(run_dir, "*.csv"))
             json_files = glob.glob(os.path.join(run_dir, "*.json"))
             if csv_files and json_files:
-                exp_num = next(filter(lambda x: x.startswith("exp"), run_dir.split(os.sep)), None)
-                if exp_num:
-                    exp_num = exp_num[3:]  # Get the number after "exp"
+                exp_num = extract_exp_number(run_dir)
+                if exp_num != 0:
                     if exp_num not in exp_dirs:
                         exp_dirs[exp_num] = []
-                    for csv_file, json_file in zip(csv_files, json_files):
-                        exp_dirs[exp_num].append((csv_file, json_file))
+                    exp_dirs[exp_num].append((csv_files[0], json_files[0]))
 
 # Now, exp_dirs will have the desired output
 for exp_num, file_tuples in exp_dirs.items():
