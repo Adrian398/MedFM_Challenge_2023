@@ -103,7 +103,7 @@ def print_report(model_infos):
         for entry in sorted_report_entries:
             print(f"| {entry}")
         print("---------------------------------------------------------------------------------------------------------------")
-        print(f"| Found {len(model_dirs)} model runs without existing prediction CSV for {colored(csv_suffix, 'blue')}.")
+        print(f"| Found {colored(str(len(model_dirs)) + 'model runs', 'blue')} without existing prediction CSV for {colored(csv_suffix, 'blue')}.")
         print("---------------------------------------------------------------------------------------------------------------")
 
 
