@@ -127,7 +127,7 @@ submission_dir = os.path.join("submissions", "evaluation", date_pattern)
 print(f"Creating submission directory {submission_dir}")
 os.makedirs(submission_dir)
 for exp in experiments:
-    os.makedirs(os.path.join(submission_dir, "result", f"exp{exp}"), exist_ok=True)
+    os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
 
 # iterate over exp_dirs_dict, for each task / shot / exp combination, merge results
 for task in tasks:
