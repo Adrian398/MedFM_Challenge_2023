@@ -9,7 +9,7 @@ When training new models:
     2 Save best MAP
 
 In general:
-1 Add copying of used configs to come directory in the submission directory (or add a report summarizing used models)
+1 Add copying of used configs to some directory in the submission directory (or add a report summarizing used models)
 2 Local validation:
     - download annotations for validation data
     - make inferences on validation data => 2 csvs per run script
