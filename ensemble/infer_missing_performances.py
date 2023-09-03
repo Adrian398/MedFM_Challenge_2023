@@ -139,6 +139,7 @@ def find_and_validate_json_files(model_dir):
 
                 except json.JSONDecodeError:
                     print(f"Cannot load JSON from: {filepath}")
+                    print(f"Deleting {filepath}")
                     os.remove(filepath)  # Deleting the corrupted JSON file
                     return False
                 except PermissionError as permission_error:
