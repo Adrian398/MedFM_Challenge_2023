@@ -263,7 +263,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
                 "path": model_path,
             }
 
-    #print_report(model_infos)
+    print_report(model_infos)
 
     user_input = input(f"\nDo you want to generate the inference commands? (yes/no): ")
     if user_input.strip().lower() == 'no':
