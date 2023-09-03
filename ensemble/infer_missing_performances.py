@@ -90,7 +90,7 @@ def get_file_from_directory(directory, extension, contains_string=None):
 def print_report(model_infos):
     model_dirs = [model["path"] for model in model_infos.values()]
     if len(model_dirs) == 0:
-        print(colored(f"All valid models have an existing performance JSON.", 'green'))
+        print(colored(f"\nAll valid models have an existing performance JSON!\n", 'green'))
         exit()
     else:
         sorted_report_entries = sorted([model_dir for model_dir in model_dirs], key=sort_key)
