@@ -29,7 +29,7 @@ model = dict(
         )
     ),
     head=dict(
-        in_channels=1000,
+        in_channels=1024,
         num_classes=2,
         type='LinearClsHead'
     )
