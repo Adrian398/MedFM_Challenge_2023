@@ -113,35 +113,6 @@ def find_and_validate_json_files(model_dir):
 
     return True
 
-
-def find_corrupted_json_files(directory):
-    # Walk through each directory and file recursively
-    for dirpath, dirnames, filenames in os.walk(directory):
-        for filename in filenames:
-            # Check if the file is a JSON file
-            if filename.endswith('.json'):
-                filepath = os.path.join(dirpath, filename)
-
-                try:
-                    with open(filepath, 'r') as file:
-                        data = json.load(file)
-                except json.JSONDecodeError:
-                    # If there's an error loading the JSON, print the filepath
-                    print(f"Cannot load JSON from: {filepath}")
-                except Exception as e:
-                    # Handle any other exceptions that may arise
-                    print(f"Error encountered for {filepath}: {e}")
-
-
-@lru_cache(maxsize=None)
-def is_metric_in_event_file(file_path, metric):
-    event_acc = EventAccumulator(file_path, size_guidance={'scalars': 0})  # 0 means load none, just check tags
-    event_acc.Reload()
-    scalar_tags = event_acc.Tags()['scalars']
-
-    return metric in scalar_tags
-
-
 @lru_cache(maxsize=None)
 def get_event_file_from_model_dir(model_dir):
     try:
@@ -165,22 +136,22 @@ def get_non_valid_model_dirs(task, shot):
         return None
 
     for model_dir in setting_model_dirs:
+        valid_model_dir = True
         my_print(f"Checking {task}/{shot}-shot/{model_dir}")
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
-        # Skip if best checkpoint file found
         checkpoint_path = get_file_from_directory(abs_model_dir, ".pth", "best")
-        if checkpoint_path:
-            print("Best checkpoint file found")
+        if checkpoint_path is None:
+            valid_model_dir = False
             continue
 
-        # Skip if event file found
         event_file = get_event_file_from_model_dir(abs_model_dir)
-        if event_file:
-            print("Event file found")
+        if event_file is None:
+            valid_model_dir = False
             continue
 
-        model_dirs.append(model_dir)
+        if not valid_model_dir:
+            model_dirs.append(model_dir)
     return model_dirs
 
 
