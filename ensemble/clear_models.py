@@ -85,8 +85,6 @@ def get_non_valid_model_dirs(task, shot):
         if checkpoint is None:
             print(colored(f"No 'best' checkpoint file found for {abs_model_dir}", 'light_red'))
             model_dirs.append(model_dir)
-        else:
-            print(f"Checkpoint found for {abs_model_dir}")
     return model_dirs
 
 
