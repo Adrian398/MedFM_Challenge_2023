@@ -226,12 +226,14 @@ def get_model_dirs_without_performance(task, shot):
         checkpoint_path = get_file_from_directory(abs_model_dir, ".pth", "best")
         if checkpoint_path is None:
             print("No best checkpoint file found")
+            clear_dict['files_without_ckpt'].append(abs_model_dir)
             continue
 
         # Skip/Delete if no event file
         event_file = get_event_file_from_model_dir(abs_model_dir)
         if event_file is None:
             print("No event file found")
+            clear_dict['files_without_event'].append(abs_model_dir)
             continue
 
         # Skip if performance json file is present
@@ -252,6 +254,7 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
                "aucl": "AUC/AUC_multilabe",
                "map": "multi-label/mAP",
                "agg": "Aggregate"}
+clear_dict = {'files_without_ckpt': [], 'files_without_event': []}
 # ========================================================================================
 
 
@@ -315,6 +318,9 @@ if __name__ == "__main__":  # Important when using multiprocessing
     print("Task Counts:")
     for task, count in task_counts.items():
         print(f"{task.capitalize()}: {count}")
+
+    for key, entries in clear_dict.items():
+        print(f"{key.capitalize()}: {len(entries)}")
 
     while True:
         user_input = input("\nHow many testing commands per task do you want to generate?\n").strip().lower()
