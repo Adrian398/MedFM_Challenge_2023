@@ -123,9 +123,14 @@ def extract_exp_number(string):
 
 def find_and_validate_json_files(model_dir):
     print("Validating JSON File")
+
+    json_files_found = False  # To track if we found any JSON files
+    performance_json_count = 0  # To track the number of "performance.json" files found
+
     for dirpath, dirnames, filenames in os.walk(model_dir):
         for filename in filenames:
             if filename.endswith('.json'):
+                json_files_found = True
                 filepath = os.path.join(dirpath, filename)
 
                 try:
@@ -133,9 +138,12 @@ def find_and_validate_json_files(model_dir):
                         data = json.load(file)
 
                     # If filename is "performance.json", further check for "MAP_Class1"
-                    if filename == "performance.json" and "MAP_class1" not in data:
-                        print(f"Found 'performance.json' but MAP per Class missing")
-                        return False
+                    if filename == "performance.json":
+                        performance_json_count += 1
+
+                        if "MAP_class1" not in data:
+                            print(f"Found 'performance.json' but 'MAP_class1' missing")
+                            return False
 
                 except json.JSONDecodeError:
                     print(f"Cannot load JSON from: {filepath}")
@@ -148,6 +156,15 @@ def find_and_validate_json_files(model_dir):
                 except Exception as e:
                     print(f"Error encountered: {e}")
                     return False
+
+    if not json_files_found:
+        print("No JSON files found.")
+        return False
+
+    if performance_json_count != 1:
+        print(f"Expected exactly one 'performance.json' but found {performance_json_count}.")
+        return False
+
     return True
 
 
