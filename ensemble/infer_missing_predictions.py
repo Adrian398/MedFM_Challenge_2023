@@ -76,7 +76,7 @@ def run_commands_on_cluster(commands, num_commands, gpu='all'):
 
         task_counter[task] += 1
 
-        subprocess.run(slurm_cmd, shell=True)
+        #subprocess.run(slurm_cmd, shell=True)
 
 
 def get_file_from_directory(directory, extension, contains_string=None):
@@ -286,7 +286,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
                                    "images")
 
         # Destination Path
-        out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_submission.csv")
+        out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_{csv_suffix_choice}.csv")
 
         command = (f"python tools/infer.py {config_filepath} {checkpoint_filepath} {images_path} --batch-size {batch_size} --out {out_filepath}")
         commands.append(command)
