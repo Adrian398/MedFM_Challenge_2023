@@ -51,7 +51,6 @@ def merge_results_expert_model_strategy(run_dicts, task, shot, exp):
     print("merging results for task", task, "shot", shot, "exp", exp)
     num_classes = class_lengths[task]
     # initialize dataframe with image_ids
-    print(run_dicts[0]['prediction'])
     merged_df = run_dicts[0]['prediction'].iloc[:, 0:1]
     print("Merged df before")
     print(merged_df)
