@@ -133,7 +133,7 @@ def find_and_validate_json_files(model_dir):
                         data = json.load(file)
 
                     # If filename is "performance.json", further check for "MAP_Class1"
-                    if filename == "performance.json" and "MAP_Class1" not in data:
+                    if filename == "performance.json" and "MAP_class1" not in data:
                         print(f"Found 'performance.json' but MAP per Class missing in: {filepath}")
                         return False
 
