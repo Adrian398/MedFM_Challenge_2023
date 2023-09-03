@@ -59,11 +59,6 @@ test_dataloader = dict(
     dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
 )
 
-default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
-    logger=dict(interval=10),
-)
-
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
 train_cfg = dict(by_epoch=True, val_interval=15, max_epochs=250)

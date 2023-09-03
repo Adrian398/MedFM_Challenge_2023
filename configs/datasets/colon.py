@@ -47,7 +47,6 @@ test_dataloader = dict(
     batch_size=4,
     num_workers=2,
     dataset=dict(
-        # replace `data/val` with `data/test` for standard test
         type=dataset_type,
         data_prefix='/scratch/medfm/medfm-challenge/data/MedFMC_train/colon/images',
         ann_file='data_anns/MedFMC/colon/test_WithLabel.txt',
@@ -56,9 +55,10 @@ test_dataloader = dict(
 )
 
 train_evaluator = [
-    dict(type='Aggregate'),
     dict(type='AveragePrecision'),
+    dict(type='Aggregate'),
     dict(type='AUC')
 ]
+
 val_evaluator = train_evaluator
 test_evaluator = train_evaluator
