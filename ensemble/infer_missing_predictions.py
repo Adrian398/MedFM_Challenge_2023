@@ -103,7 +103,7 @@ def print_report(model_infos):
         for entry in sorted_report_entries:
             print(f"| {entry}")
         print("---------------------------------------------------------------------------------------------------------------")
-        print(f"| Found {colored(str(len(model_dirs)) + 'model runs', 'blue')} without existing prediction CSV for {colored(csv_suffix, 'blue')}.")
+        print(f"| Found {colored(str(len(model_dirs)) + ' model runs', 'blue')} without existing prediction CSV for {colored(csv_suffix, 'blue')}.")
         print("---------------------------------------------------------------------------------------------------------------")
 
 
@@ -199,6 +199,29 @@ def get_model_dirs_without_prediction(task, shot):
     return model_dirs
 
 
+def get_csv_suffix_choice():
+    """Prompt the user to select a CSV suffix and return the chosen suffix."""
+
+    csv_suffix = csv_suffix_list
+
+    print("Please select a CSV suffix:")
+    for idx, suffix in enumerate(csv_suffix, 1):
+        print(f"{idx}. {suffix}")
+
+    choice = "submission"
+
+    try:
+        user_choice = int(input(f"Enter your choice (1-{len(csv_suffix)}) [Default: 1]: ") or "1")
+        if 1 <= user_choice <= len(csv_suffix):
+            choice = csv_suffix[user_choice - 1]
+        else:
+            print(f"Invalid choice! Defaulting to {choice}.")
+    except ValueError:
+        print(f"Invalid input! Defaulting to {choice}.")
+
+    return choice
+
+
 # ========================================================================================
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
 tasks = ["colon", "endo", "chest"]
@@ -209,11 +232,18 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
                "aucl": "AUC/AUC_multilabe",
                "map": "multi-label/mAP",
                "agg": "Aggregate"}
-csv_suffix = "validation"
+csv_suffix_list = ["submission", "validation"]
 # ========================================================================================
 
 
 if __name__ == "__main__":  # Important when using multiprocessing
+    csv_suffix_choice = get_csv_suffix_choice()
+    print(f"Selected CSV suffix: {colored(csv_suffix_choice, 'blue')}")
+
+    sleep_time = 5
+    print(f"Proceeding in {sleep_time} seconds..")
+    time.sleep(sleep_time)
+
     with Pool() as pool:
         combinations = [(task, shot) for task in tasks for shot in shots]
 
