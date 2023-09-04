@@ -197,7 +197,7 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
                "agg": "Aggregate"}
 SCORE_INTERVAL = 0.7  # Assuming you want to keep models that achieved at least 90% of the best score
 task_specific_metrics = {
-    "colon": "accuracy/top1",
+    "colon": "Aggregate",
     "endo": "Aggregate",
     "chest": "Aggregate"
 }
