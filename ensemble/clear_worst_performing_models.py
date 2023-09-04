@@ -36,6 +36,11 @@ def print_report(invalid_model_dirs, best_scores, model_performance):
         print("---------------------------------------------------------------------------------------------------------------")
 
 
+def extract_model_config(string):
+    # This will remove the exp number from the model string, allowing us to sort by model config
+    return EXP_PATTERN.sub('', string)
+
+
 def extract_exp_number(string):
     match = EXP_PATTERN.search(string)
     return int(match.group(1)) if match else 0
@@ -47,8 +52,9 @@ def sort_key(entry):
     task = parts[5]
     shot = int(parts[6].split('-')[0])
     exp_number = extract_exp_number(parts[-1])
+    model_config = extract_model_config(parts[-1])
     score = model_performance.get(entry, float('-inf'))  # If no score is found, default to negative infinity
-    return task, shot, exp_number, -score  # We negate the score for descending sort
+    return task, shot, model_config, exp_number, -score  # We negate the score for descending sort
 
 
 def my_print(message):
