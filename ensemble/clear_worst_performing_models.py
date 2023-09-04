@@ -168,7 +168,7 @@ def get_worst_performing_model_dirs(task, shot):
             exp_grouped_scores[exp_num] = []
         exp_grouped_scores[exp_num].append((model_dir, score))
 
-    print(exp_grouped_scores)
+    print(exp_grouped_scores.items())
     exit()
 
     for _, scores in exp_grouped_scores.items():
