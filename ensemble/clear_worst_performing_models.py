@@ -30,15 +30,10 @@ def print_report(invalid_model_dirs, best_scores, model_performance):
             best_score_for_task_shot = best_scores.get((task, shot))
             metric_for_task = task_specific_metrics.get(task, "Aggregate")
             score_for_model = model_performance.get(entry)
-            print(f"| {relative_path[:54]} | {metric_for_task[:9]} | {score_for_model:.2f} | {best_score_for_task_shot:.2f}      |")
+            print(f"| {relative_path:54} | {metric_for_task:9} | {score_for_model:6.2f} | {best_score_for_task_shot:10.2f} |")
         print("---------------------------------------------------------------------------------------------------------------")
         print(f"| Found {len(invalid_model_dirs)} bad model runs.")
         print("---------------------------------------------------------------------------------------------------------------")
-
-
-def extract_model_config(string):
-    # This will remove the exp number from the model string, allowing us to sort by model config
-    return EXP_PATTERN.sub('', string)
 
 
 def extract_exp_number(string):
@@ -47,14 +42,12 @@ def extract_exp_number(string):
 
 
 def sort_key(entry):
-    # Extract task, shot, and experiment number from the entry
+    # Extract task, shot from the entry
     parts = entry.split('/')
     task = parts[5]
     shot = int(parts[6].split('-')[0])
-    exp_number = extract_exp_number(parts[-1])
-    model_config = extract_model_config(parts[-1])
     score = model_performance.get(entry, float('-inf'))  # If no score is found, default to negative infinity
-    return task, shot, model_config, exp_number, -score  # We negate the score for descending sort
+    return task, shot, -score  # We negate the score for descending sort
 
 
 def my_print(message):
