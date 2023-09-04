@@ -127,7 +127,7 @@ def extract_exp_number(string):
     return int(match.group(1)) if match else 0
 
 
-def find_and_validate_json_files(model_dir):
+def find_and_validate_json_files(model_dir, task):
     json_files_found = False  # To track if we found any JSON files
     performance_json_count = 0  # To track the number of "performance.json" files found
 
@@ -243,7 +243,7 @@ def get_model_dirs_without_performance(task, shot):
             continue
 
         # Skip if performance json file is present
-        if find_and_validate_json_files(abs_model_dir):
+        if find_and_validate_json_files(abs_model_dir, task):
             continue
 
         model_dirs.append(model_dir)
