@@ -19,11 +19,11 @@ def print_report(invalid_model_dirs, best_scores, model_performance):
     else:
         # Find the maximum path length to adjust the table formatting dynamically
         max_path_length = max([len(entry.split("/work_dirs/")[-1]) for entry in invalid_model_dirs])
-
+        padding = 38
         sorted_report_entries = sorted([model_dir for model_dir in invalid_model_dirs], key=sort_key)
-        print("\n" + "-" * (max_path_length + 32))
+        print("\n" + "-" * (max_path_length + padding))
         print(f"| Models that were found with a {SCORE_INTERVAL}x worse score than the best:")
-        print("-" * (max_path_length + 32))
+        print("-" * (max_path_length + padding))
         print(f"| {'Path':<{max_path_length}} | Metric    | Score  | Best Score |")
         print(f"| {'-' * max_path_length} |-----------|--------|------------|")
         for entry in sorted_report_entries:
@@ -36,9 +36,9 @@ def print_report(invalid_model_dirs, best_scores, model_performance):
             score_for_model = model_performance.get(entry)
             print(
                 f"| {relative_path:<{max_path_length}} | {metric_for_task:9} | {score_for_model:6.2f} | {best_score_for_task_shot:10.2f} |")
-        print("-" * (max_path_length + 32))
+        print("-" * (max_path_length + padding))
         print(f"| Found {len(invalid_model_dirs)} bad model runs.")
-        print("-" * (max_path_length + 32))
+        print("-" * (max_path_length + padding))
 
 
 def extract_exp_number(string):
