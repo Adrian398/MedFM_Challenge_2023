@@ -176,25 +176,6 @@ def find_and_validate_json_files(model_dir, task):
     return True
 
 
-def find_corrupted_json_files(directory):
-    # Walk through each directory and file recursively
-    for dirpath, dirnames, filenames in os.walk(directory):
-        for filename in filenames:
-            # Check if the file is a JSON file
-            if filename.endswith('.json'):
-                filepath = os.path.join(dirpath, filename)
-
-                try:
-                    with open(filepath, 'r') as file:
-                        data = json.load(file)
-                except json.JSONDecodeError:
-                    # If there's an error loading the JSON, print the filepath
-                    print(f"Cannot load JSON from: {filepath}")
-                except Exception as e:
-                    # Handle any other exceptions that may arise
-                    print(f"Error encountered for {filepath}: {e}")
-
-
 @lru_cache(maxsize=None)
 def is_metric_in_event_file(file_path, metric):
     event_acc = EventAccumulator(file_path, size_guidance={'scalars': 0})  # 0 means load none, just check tags
