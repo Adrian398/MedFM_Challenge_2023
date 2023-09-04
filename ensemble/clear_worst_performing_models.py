@@ -161,6 +161,8 @@ def get_worst_performing_model_dirs(task, shot):
 
 
 def get_score_interval(model_performance):
+    if not model_performance:
+        return None
     best_score = max(model_performance.values())
     threshold_score = SCORE_INTERVAL * best_score
     return threshold_score
