@@ -21,13 +21,14 @@ def print_report(invalid_model_dirs, best_scores, model_performance):
         print(f"| Models that were found with a {SCORE_INTERVAL}x worse score than the best:")
         print("---------------------------------------------------------------------------------------------------------------")
         for entry in sorted_report_entries:
+            relative_path = entry.split("/work_dirs/")[-1]
             parts = entry.split('/')
             task = parts[5]
             shot = parts[6].split('-')[0]
             best_score_for_task_shot = best_scores.get((task, shot))
             metric_for_task = task_specific_metrics.get(task, "Aggregate")
             score_for_model = model_performance.get(entry)
-            print(f"| {entry} - Metric: {metric_for_task} - Score: {score_for_model} - Compared to Best Score: {best_score_for_task_shot}")
+            print(f"| {relative_path} - Metric: {metric_for_task} - Score: {score_for_model:.2f} - Compared to Best Score: {best_score_for_task_shot:.2f}")
         print("---------------------------------------------------------------------------------------------------------------")
         print(f"| Found {len(invalid_model_dirs)} bad model runs.")
         print("---------------------------------------------------------------------------------------------------------------")
@@ -198,15 +199,22 @@ task_specific_metrics = {
     "endo": "Aggregate",
     "chest": "Aggregate"
 }
+best_scores = {}
+model_performance = {}
 # ========================================================================================
 
-best_scores = {}
+
 if __name__ == "__main__":
+    try:
+        SCORE_INTERVAL = float(input("Enter the threshold (e.g., 0.7): "))
+    except ValueError:
+        print("Invalid threshold. Using default value of 0.7.")
+        SCORE_INTERVAL = 0.7
+
     with Pool() as pool:
         combinations = [(task, shot) for task in tasks for shot in shots]
         results_worst = list(pool.imap_unordered(process_task_shot_combination_for_worst_models, combinations))
 
-    model_performance = {}
     worst_model_dirs = []
     for task, shot, model_list, best_score in results_worst:
         best_scores[(task, shot)] = best_score
