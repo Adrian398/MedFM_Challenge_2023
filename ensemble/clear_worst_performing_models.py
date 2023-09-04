@@ -20,6 +20,8 @@ def print_report(invalid_model_dirs, best_scores, model_performance):
         print("\n---------------------------------------------------------------------------------------------------------------")
         print(f"| Models that were found with a {SCORE_INTERVAL}x worse score than the best:")
         print("---------------------------------------------------------------------------------------------------------------")
+        print("| Path                                                   | Metric    | Score  | Best Score |")
+        print("|--------------------------------------------------------|-----------|--------|------------|")
         for entry in sorted_report_entries:
             relative_path = entry.split("/work_dirs/")[-1]
             parts = entry.split('/')
@@ -28,7 +30,7 @@ def print_report(invalid_model_dirs, best_scores, model_performance):
             best_score_for_task_shot = best_scores.get((task, shot))
             metric_for_task = task_specific_metrics.get(task, "Aggregate")
             score_for_model = model_performance.get(entry)
-            print(f"| {relative_path} - Metric: {metric_for_task} - Score: {score_for_model:.2f} - Compared to Best Score: {best_score_for_task_shot:.2f}")
+            print(f"| {relative_path[:54]} | {metric_for_task[:9]} | {score_for_model:.2f} | {best_score_for_task_shot:.2f}      |")
         print("---------------------------------------------------------------------------------------------------------------")
         print(f"| Found {len(invalid_model_dirs)} bad model runs.")
         print("---------------------------------------------------------------------------------------------------------------")
