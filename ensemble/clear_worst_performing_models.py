@@ -13,15 +13,19 @@ EXP_PATTERN = re.compile(r'exp(\d+)')
 
 def print_report(invalid_model_dirs, best_scores, model_performance):
     if len(invalid_model_dirs) == 0:
-        print(colored(f"\nNo models found that are at least {SCORE_INTERVAL}x worse than the BEST_SCORE found!\n", 'green'))
+        print(colored(f"\nNo models found that are at least {SCORE_INTERVAL}x worse than the BEST_SCORE found!\n",
+                      'green'))
         exit()
     else:
+        # Find the maximum path length to adjust the table formatting dynamically
+        max_path_length = max([len(entry.split("/work_dirs/")[-1]) for entry in invalid_model_dirs])
+
         sorted_report_entries = sorted([model_dir for model_dir in invalid_model_dirs], key=sort_key)
-        print("\n---------------------------------------------------------------------------------------------------------------")
+        print("\n" + "-" * (max_path_length + 62))
         print(f"| Models that were found with a {SCORE_INTERVAL}x worse score than the best:")
-        print("---------------------------------------------------------------------------------------------------------------")
-        print("| Path                                                   | Metric    | Score  | Best Score |")
-        print("|--------------------------------------------------------|-----------|--------|------------|")
+        print("-" * (max_path_length + 62))
+        print(f"| {'Path':<{max_path_length}} | Metric    | Score  | Best Score |")
+        print(f"| {'-' * max_path_length} |-----------|--------|------------|")
         for entry in sorted_report_entries:
             relative_path = entry.split("/work_dirs/")[-1]
             parts = entry.split('/')
@@ -30,10 +34,11 @@ def print_report(invalid_model_dirs, best_scores, model_performance):
             best_score_for_task_shot = best_scores.get((task, shot))
             metric_for_task = task_specific_metrics.get(task, "Aggregate")
             score_for_model = model_performance.get(entry)
-            print(f"| {relative_path:54} | {metric_for_task:9} | {score_for_model:6.2f} | {best_score_for_task_shot:10.2f} |")
-        print("---------------------------------------------------------------------------------------------------------------")
+            print(
+                f"| {relative_path:<{max_path_length}} | {metric_for_task:9} | {score_for_model:6.2f} | {best_score_for_task_shot:10.2f} |")
+        print("-" * (max_path_length + 62))
         print(f"| Found {len(invalid_model_dirs)} bad model runs.")
-        print("---------------------------------------------------------------------------------------------------------------")
+        print("-" * (max_path_length + 62))
 
 
 def extract_exp_number(string):
@@ -47,7 +52,7 @@ def sort_key(entry):
     task = parts[5]
     shot = int(parts[6].split('-')[0])
     score = model_performance.get(entry, float('-inf'))  # If no score is found, default to negative infinity
-    return task, shot, -score  # We negate the score for descending sort
+    return task, shot, score
 
 
 def my_print(message):
