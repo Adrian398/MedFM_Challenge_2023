@@ -11,7 +11,7 @@ from termcolor import colored
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
-def print_report(invalid_model_dirs):
+def print_report(invalid_model_dirs, best_scores, model_performance):
     if len(invalid_model_dirs) == 0:
         print(colored(f"\nNo models found that are at least {SCORE_INTERVAL}x worse than the BEST_SCORE found!\n", 'green'))
         exit()
@@ -21,7 +21,13 @@ def print_report(invalid_model_dirs):
         print(f"| Models that were found with a {SCORE_INTERVAL}x worse score than the best:")
         print("---------------------------------------------------------------------------------------------------------------")
         for entry in sorted_report_entries:
-            print(f"| {entry}")
+            parts = entry.split('/')
+            task = parts[5]
+            shot = parts[6].split('-')[0]
+            best_score_for_task_shot = best_scores.get((task, shot))
+            metric_for_task = task_specific_metrics.get(task, "Aggregate")
+            score_for_model = model_performance.get(entry)
+            print(f"| {entry} - Metric: {metric_for_task} - Score: {score_for_model} - Compared to Best Score: {best_score_for_task_shot}")
         print("---------------------------------------------------------------------------------------------------------------")
         print(f"| Found {len(invalid_model_dirs)} bad model runs.")
         print("---------------------------------------------------------------------------------------------------------------")
@@ -138,7 +144,7 @@ def get_worst_performing_model_dirs(task, shot):
     try:
         setting_model_dirs = os.listdir(setting_directory)
     except Exception:
-        return None
+        return None, None
 
     for model_dir in setting_model_dirs:
         my_print(f"Checking {task}/{shot}-shot/{model_dir}")
@@ -148,7 +154,7 @@ def get_worst_performing_model_dirs(task, shot):
         if find_and_validate_json_files(abs_model_dir, task):
             aggregate_metric = extract_metric_from_performance_json(abs_model_dir, task)
             if aggregate_metric is not None:
-                model_performance[model_dir] = aggregate_metric
+                model_performance[abs_model_dir] = aggregate_metric
 
     threshold_score = get_score_interval(model_performance)
 
@@ -157,7 +163,9 @@ def get_worst_performing_model_dirs(task, shot):
         if score < threshold_score:
             model_dirs.append(model_dir)
 
-    return model_dirs
+    best_score = max(model_performance.values()) if model_performance else None
+
+    return model_dirs, best_score
 
 
 def get_score_interval(model_performance):
@@ -170,7 +178,8 @@ def get_score_interval(model_performance):
 
 def process_task_shot_combination_for_worst_models(args):
     task, shot = args
-    return task, shot, get_worst_performing_model_dirs(task=task, shot=shot)
+    model_dirs, best_score = get_worst_performing_model_dirs(task=task, shot=shot)
+    return task, shot, model_dirs, best_score
 
 
 # ========================================================================================
@@ -191,14 +200,15 @@ task_specific_metrics = {
 }
 # ========================================================================================
 
-
+best_scores = {}
 if __name__ == "__main__":
     with Pool() as pool:
         combinations = [(task, shot) for task in tasks for shot in shots]
         results_worst = list(pool.imap_unordered(process_task_shot_combination_for_worst_models, combinations))
 
     worst_model_dirs = []
-    for task, shot, model_list in results_worst:
+    for task, shot, model_list, best_score in results_worst:
+        best_scores[(task, shot)] = best_score
         for model_name in model_list:
             model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
             worst_model_dirs.append(model_path)
