@@ -160,24 +160,30 @@ def get_worst_performing_model_dirs(task, shot):
             if aggregate_metric is not None:
                 model_performance[abs_model_dir] = aggregate_metric
 
-    threshold_score = get_score_interval(model_performance)
-
-    # Consider for deletion the models with scores below the threshold
+    # Group by exp number
+    exp_grouped_scores = {}
     for model_dir, score in model_performance.items():
-        if score < threshold_score:
-            model_dirs.append(model_dir)
+        exp_num = extract_exp_number(model_dir)
+        if exp_num not in exp_grouped_scores:
+            exp_grouped_scores[exp_num] = []
+        exp_grouped_scores[exp_num].append((model_dir, score))
+
+    for _, scores in exp_grouped_scores.items():
+        best_score_for_exp = max(score for _, score in scores)
+        threshold_score = get_score_interval_for_exp(best_score_for_exp)
+
+        # Consider for deletion the models with scores below the threshold for each exp
+        for model_dir, score in scores:
+            if score < threshold_score:
+                model_dirs.append(model_dir)
 
     best_score = max(model_performance.values()) if model_performance else None
 
     return model_dirs, best_score
 
 
-def get_score_interval(model_performance):
-    if not model_performance:
-        return None
-    best_score = max(model_performance.values())
-    threshold_score = SCORE_INTERVAL * best_score
-    return threshold_score
+def get_score_interval_for_exp(best_score_for_exp):
+    return SCORE_INTERVAL * best_score_for_exp
 
 
 def process_task_shot_combination_for_worst_models(args):
