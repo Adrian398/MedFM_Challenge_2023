@@ -13,17 +13,17 @@ EXP_PATTERN = re.compile(r'exp(\d+)')
 
 def print_report(invalid_model_dirs):
     if len(invalid_model_dirs) == 0:
-        print(colored(f"\nAll models have a checkpoint file!\n", 'green'))
+        print(colored(f"\nNo models found that are at least {SCORE_INTERVAL}x worse than the BEST_SCORE found!\n", 'green'))
         exit()
     else:
         sorted_report_entries = sorted([model_dir for model_dir in invalid_model_dirs], key=sort_key)
         print("\n---------------------------------------------------------------------------------------------------------------")
-        print("| Invalid Models with missing checkpoint or event file:")
+        print(f"| Models that were found with a {SCORE_INTERVAL}x worse score than the best:")
         print("---------------------------------------------------------------------------------------------------------------")
         for entry in sorted_report_entries:
             print(f"| {entry}")
         print("---------------------------------------------------------------------------------------------------------------")
-        print(f"| Found {len(invalid_model_dirs)} invalid model runs.")
+        print(f"| Found {len(invalid_model_dirs)} bad model runs.")
         print("---------------------------------------------------------------------------------------------------------------")
 
 
@@ -183,7 +183,7 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
                "aucl": "AUC/AUC_multilabe",
                "map": "multi-label/mAP",
                "agg": "Aggregate"}
-SCORE_INTERVAL = 0.5  # Assuming you want to keep models that achieved at least 90% of the best score
+SCORE_INTERVAL = 0.7  # Assuming you want to keep models that achieved at least 90% of the best score
 task_specific_metrics = {
     "colon": "accuracy/top1",
     "endo": "Aggregate",
