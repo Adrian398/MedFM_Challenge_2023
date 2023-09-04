@@ -206,14 +206,17 @@ if __name__ == "__main__":
         combinations = [(task, shot) for task in tasks for shot in shots]
         results_worst = list(pool.imap_unordered(process_task_shot_combination_for_worst_models, combinations))
 
+    model_performance = {}
     worst_model_dirs = []
     for task, shot, model_list, best_score in results_worst:
         best_scores[(task, shot)] = best_score
+        local_model_performance = {model: extract_metric_from_performance_json(model, task) for model in model_list}
+        model_performance.update(local_model_performance)
         for model_name in model_list:
             model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
             worst_model_dirs.append(model_path)
 
-    print_report(worst_model_dirs)
+    print_report(worst_model_dirs, best_scores, model_performance)
 
     # user_input = input(f"\nDo you want to delete the worst-performing model runs? (yes/no): ")
     # if user_input.strip().lower() == 'yes':
