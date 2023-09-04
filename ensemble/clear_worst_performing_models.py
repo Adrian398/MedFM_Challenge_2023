@@ -49,12 +49,13 @@ def extract_exp_number(string):
 
 
 def sort_key(entry):
-    # Extract task, shot from the entry
+    # Extract task, shot, and exp number from the entry
     parts = entry.split('/')
     task = parts[5]
     shot = int(parts[6].split('-')[0])
+    exp_num = extract_exp_number(entry)  # Extracting the exp number from the model directory path
     score = model_performance.get(entry, float('-inf'))  # If no score is found, default to negative infinity
-    return task, shot, score
+    return task, shot, exp_num, score
 
 
 def my_print(message):
