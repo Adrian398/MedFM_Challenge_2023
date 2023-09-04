@@ -24,8 +24,8 @@ batch_sizes=(1 2 4 8)
 
 for config in "${configs[@]}"; do
   for batch_size in "${batch_sizes[@]}"; do
-    sbatch -p ls6 --gres=gpu:rtrx3090:1 --wrap="python tools/train.py $config --train_bs=$batch_size --seed=$seed --exp_num=$exp_num --exp_suffix=$exp_suffix" -o $log_output
+    sbatch -p ls6 --gres=gpu:rtx3090:1 --wrap="python tools/train.py $config --train_bs=$batch_size --seed=$seed --exp_num=$exp_num --exp_suffix=$exp_suffix" -o $log_output
   done
 done
 
-sbatch -p ls6 --gres=gpu:rtrx3090:1 --wrap="python tools/train.py $config --train_bs=$batch_size --seed=$seed --exp_num=$exp_num --exp_suffix=$exp_suffix" -o $log_output
+sbatch -p ls6 --gres=gpu:rtx3090:1 --wrap="python tools/train.py $config --train_bs=$batch_size --seed=$seed --exp_num=$exp_num --exp_suffix=$exp_suffix" -o $log_output
