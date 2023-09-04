@@ -47,7 +47,8 @@ def sort_key(entry):
     task = parts[5]
     shot = int(parts[6].split('-')[0])
     exp_number = extract_exp_number(parts[-1])
-    return task, shot, exp_number
+    score = model_performance.get(entry, float('-inf'))  # If no score is found, default to negative infinity
+    return task, shot, exp_number, -score  # We negate the score for descending sort
 
 
 def my_print(message):
