@@ -15,15 +15,25 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     cfg = Config.fromfile(args.config_path)
+    task = cfg.dataset
     cfg.test_dataloader.batch_size = args.batch_size
-    cfg.test_dataloader.dataset.data_prefix = f'/scratch/medfm/medfm-challenge/data/MedFMC_train/{cfg.dataset}/images'
+    cfg.test_dataloader.dataset.data_prefix = f'/scratch/medfm/medfm-challenge/data/MedFMC_train/{task}/images'
 
-    cfg.test_evaluator = [
-        dict(type='AveragePrecision'),
-        dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
-        dict(type='MultiLabelMetric', average='micro'),  # overall mean
-        dict(type='AUC', multilabel=True),
-        dict(type='Aggregate', multilabel=True)]
+    if task == "colon":
+        cfg.test_evaluator = [
+            dict(type='AveragePrecision'),
+            dict(type='Accuracy', topk=(1,)),
+            dict(type='SingleLabelMetric', items=['precision', 'recall']),
+            dict(type='Aggregate'),
+            dict(type='AUC')
+        ]
+    else:
+        cfg.test_evaluator = [
+            dict(type='AveragePrecision'),
+            dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
+            dict(type='MultiLabelMetric', average='micro'),  # overall mean
+            dict(type='AUC', multilabel=True),
+            dict(type='Aggregate', multilabel=True)]
 
     cfg.load_from = args.checkpoint_path
     runner = Runner.from_cfg(cfg)

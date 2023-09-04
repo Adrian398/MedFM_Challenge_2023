@@ -149,6 +149,10 @@ def find_and_validate_json_files(model_dir):
                             print(f"Found 'performance.json' but mAP per class (e.g. 'MAP_class1') missing")
                             return False
 
+                        if task == "colon" and "accuracy/top1" not in data:
+                            print(f"Found 'performance.json' but accuracy/top1 missing")
+                            return False
+
                 except json.JSONDecodeError:
                     print(f"Cannot load JSON from: {filepath}")
                     print(f"Deleting {filepath}")
