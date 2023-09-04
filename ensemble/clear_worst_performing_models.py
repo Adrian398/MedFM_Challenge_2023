@@ -168,6 +168,9 @@ def get_worst_performing_model_dirs(task, shot):
             exp_grouped_scores[exp_num] = []
         exp_grouped_scores[exp_num].append((model_dir, score))
 
+    print(exp_grouped_scores)
+    exit()
+
     for _, scores in exp_grouped_scores.items():
         best_score_for_exp = max(score for _, score in scores)
         threshold_score = get_score_interval_for_exp(best_score_for_exp)
@@ -232,8 +235,6 @@ if __name__ == "__main__":
         for model_name in model_list:
             model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
             worst_model_dirs.append(model_path)
-
-    print(best_scores)
 
     print_report(worst_model_dirs, best_scores, model_performance)
 
