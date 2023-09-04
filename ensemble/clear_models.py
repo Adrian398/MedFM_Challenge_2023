@@ -1,11 +1,8 @@
-import json
 import os
 import re
 import shutil
 import sys
 from multiprocessing import Pool
-from functools import lru_cache
-from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from termcolor import colored
 
 EXP_PATTERN = re.compile(r'exp(\d+)')
@@ -104,14 +101,10 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
 if __name__ == "__main__":  # Important when using multiprocessing
     with Pool() as pool:
         combinations = [(task, shot) for task in tasks for shot in shots]
-
-        # Use imap_unordered and directly iterate over the results
-        results = []
-        for result in pool.imap_unordered(process_task_shot_combination, combinations):
-            results.append(result)
+        results_invalid = list(pool.imap_unordered(process_task_shot_combination, combinations))
 
     invalid_model_dirs = []
-    for task, shot, model_list in results:
+    for task, shot, model_list in results_invalid:
         for model_name in model_list:
             model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
             invalid_model_dirs.append(model_path)
