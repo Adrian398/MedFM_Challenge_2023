@@ -17,7 +17,7 @@ if __name__ == "__main__":
     cfg = Config.fromfile(args.config_path)
     task = cfg.dataset
     cfg.test_dataloader.batch_size = args.batch_size
-    cfg.test_dataloader.dataset.data_prefix = f'/scratch/medfm/medfm-challenge/data/MedFMC_train/{task}/images'
+    cfg.test_dataloader.dataset.data_prefix = f'/scratch/medfm/medfm-challenge/data/MedFMC_val/{task}/images'
 
     if task == "colon":
         cfg.test_evaluator = [
