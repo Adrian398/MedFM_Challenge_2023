@@ -226,7 +226,10 @@ if __name__ == "__main__":
             model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
             worst_model_dirs.append(model_path)
 
-    print_report(worst_model_dirs, best_scores, model_performance)
+    print(model_performance)
+    print(best_scores)
+
+    #print_report(worst_model_dirs, best_scores, model_performance)
 
     # user_input = input(f"\nDo you want to delete the worst-performing model runs? (yes/no): ")
     # if user_input.strip().lower() == 'yes':
