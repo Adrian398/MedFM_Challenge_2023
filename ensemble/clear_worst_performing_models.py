@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import sys
@@ -57,21 +58,76 @@ def get_event_file_from_run_dir(run_dir):
         return None
 
 
-def extract_aggregate_metric_from_tensorboard(model_dir):
-    event_file = get_event_file_from_run_dir(model_dir)
-    if not event_file:
-        return None
-    try:
-        event_acc = EventAccumulator(event_file)
-        event_acc.Reload()
-        aggregate_metric_values = event_acc.Scalars(metric_tags["agg"])
-        if aggregate_metric_values:
-            # Assuming the last value is the final aggregate metric value
-            return aggregate_metric_values[-1].value
-        return None
-    except Exception as e:
-        print(f"Error reading tensorboard event file for {model_dir}: {e}")
-        return None
+def extract_metric_from_performance_json(model_dir, task):
+    for dirpath, _, filenames in os.walk(model_dir):
+        for filename in filenames:
+            if filename == "performance.json":
+                filepath = os.path.join(dirpath, filename)
+                try:
+                    with open(filepath, 'r') as file:
+                        data = json.load(file)
+
+                    metric_tag = task_specific_metrics.get(task, "Aggregate")
+                    if metric_tag not in data:
+                        print(f"Metric '{metric_tag}' not found in {filepath}")
+                        return None
+                    return data[metric_tag]
+                except json.JSONDecodeError:
+                    print(f"Cannot load JSON from: {filepath}")
+                    return None
+                except Exception as e:
+                    print(f"Error encountered: {e}")
+                    return None
+    return None
+
+
+def find_and_validate_json_files(model_dir, task):
+    json_files_found = False  # To track if we found any JSON files
+    performance_json_count = 0  # To track the number of "performance.json" files found
+
+    for dirpath, dirnames, filenames in os.walk(model_dir):
+        for filename in filenames:
+            if filename.endswith('.json'):
+                json_files_found = True
+                filepath = os.path.join(dirpath, filename)
+
+                try:
+                    with open(filepath, 'r') as file:
+                        data = json.load(file)
+
+                    # If filename is "performance.json", further check for "MAP_Class1"
+                    if filename == "performance.json":
+                        performance_json_count += 1
+
+                        if "MAP_class1" not in data:
+                            print(f"Found 'performance.json' but mAP per class (e.g. 'MAP_class1') missing")
+                            return False
+
+                        if task == "colon" and "accuracy/top1" not in data:
+                            print(f"Found 'performance.json' but accuracy/top1 missing")
+                            return False
+
+                except json.JSONDecodeError:
+                    print(f"Cannot load JSON from: {filepath}")
+                    print(f"Deleting {filepath}")
+                    os.remove(filepath)  # Deleting the corrupted JSON file
+                    return False
+                except PermissionError as permission_error:
+                    print(f"Permission Error encountered: {permission_error}")
+                    return False
+                except Exception as e:
+                    print(f"Error encountered: {e}")
+                    return False
+
+    if not json_files_found:
+        print("No JSON files found.")
+        return False
+
+    if performance_json_count != 1:
+        print(f"Multiple 'performance.json' found: {performance_json_count}")
+        return False
+
+    return True
 
 
 def get_worst_performing_model_dirs(task, shot):
@@ -88,9 +144,11 @@ def get_worst_performing_model_dirs(task, shot):
         my_print(f"Checking {task}/{shot}-shot/{model_dir}")
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
-        aggregate_metric = extract_aggregate_metric_from_tensorboard(abs_model_dir)
-        if aggregate_metric is not None:
-            model_performance[model_dir] = aggregate_metric
+        # Only consider model directories with a performance.json file
+        if find_and_validate_json_files(abs_model_dir, task):
+            aggregate_metric = extract_metric_from_performance_json(abs_model_dir, task)
+            if aggregate_metric is not None:
+                model_performance[model_dir] = aggregate_metric
 
     threshold_score = get_score_interval(model_performance)
 
@@ -124,6 +182,11 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
                "map": "multi-label/mAP",
                "agg": "Aggregate"}
 SCORE_INTERVAL = 0.9  # Assuming you want to keep models that achieved at least 90% of the best score
+task_specific_metrics = {
+    "colon": "accuracy/top1",
+    "endo": "Aggregate",
+    "chest": "Aggregate"
+}
 # ========================================================================================
 
 
