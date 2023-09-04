@@ -31,14 +31,16 @@ def print_report(invalid_model_dirs, best_scores, model_performance):
             parts = entry.split('/')
             task = parts[5]
             shot = parts[6].split('-')[0]
-            best_score_for_task_shot = best_scores.get((task, shot))
+            exp_num = extract_exp_number(entry)  # Extracting the exp number from the model directory path
+            best_score_for_task_shot_exp = best_scores.get((task, shot, exp_num))
             metric_for_task = task_specific_metrics.get(task, "Aggregate")
             score_for_model = model_performance.get(entry)
             print(
-                f"| {relative_path:<{max_path_length}} | {metric_for_task:9} | {score_for_model:6.2f} | {best_score_for_task_shot:10.2f} |")
+                f"| {relative_path:<{max_path_length}} | {metric_for_task:9} | {score_for_model:6.2f} | {best_score_for_task_shot_exp:10.2f} |")
         print("-" * (max_path_length + padding))
         print(f"| Found {len(invalid_model_dirs)} bad model runs.")
         print("-" * (max_path_length + padding))
+
 
 
 def extract_exp_number(string):
@@ -141,8 +143,9 @@ def find_and_validate_json_files(model_dir, task):
 
 
 def get_worst_performing_model_dirs(task, shot):
-    model_dirs = []
-    model_performance = {}
+    bad_performing_models = []
+    best_scores_for_each_setting = {}
+
     setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
 
     try:
@@ -150,6 +153,7 @@ def get_worst_performing_model_dirs(task, shot):
     except Exception:
         return None, None
 
+    model_performance = {}
     for model_dir in setting_model_dirs:
         my_print(f"Checking {task}/{shot}-shot/{model_dir}")
         abs_model_dir = os.path.join(setting_directory, model_dir)
@@ -168,31 +172,23 @@ def get_worst_performing_model_dirs(task, shot):
             exp_grouped_scores[exp_num] = []
         exp_grouped_scores[exp_num].append((model_dir, score))
 
-    print(exp_grouped_scores.items()[0])
-    exit()
-
-    for _, scores in exp_grouped_scores.items():
-        best_score_for_exp = max(score for _, score in scores)
-        threshold_score = get_score_interval_for_exp(best_score_for_exp)
+    for exp_num, scores in exp_grouped_scores.items():
+        best_score_for_exp_group = max(score for exp_num, score in scores)
+        best_scores_for_each_setting[(task, shot, exp_num)] = best_score_for_exp_group
+        threshold_score = SCORE_INTERVAL * best_score_for_exp_group
 
         # Consider for deletion the models with scores below the threshold for each exp
-        for model_dir, score in scores:
-            if score < threshold_score:
-                model_dirs.append(model_dir)
+        for model_dir, model_score in scores:
+            if model_score < threshold_score:
+                bad_performing_models.append(model_dir)
 
-    best_score = max(model_performance.values()) if model_performance else None
-
-    return model_dirs, best_score
-
-
-def get_score_interval_for_exp(best_score_for_exp):
-    return SCORE_INTERVAL * best_score_for_exp
+    return bad_performing_models, best_scores_for_each_setting
 
 
 def process_task_shot_combination_for_worst_models(args):
     task, shot = args
-    model_dirs, best_score = get_worst_performing_model_dirs(task=task, shot=shot)
-    return task, shot, model_dirs, best_score
+    bad_performing_models, best_scores_for_each_setting = get_worst_performing_model_dirs(task=task, shot=shot)
+    return task, shot, bad_performing_models, best_scores_for_each_setting
 
 
 # ========================================================================================
@@ -228,10 +224,13 @@ if __name__ == "__main__":
         results_worst = list(pool.imap_unordered(process_task_shot_combination_for_worst_models, combinations))
 
     worst_model_dirs = []
-    for task, shot, model_list, best_score in results_worst:
-        best_scores[(task, shot)] = best_score
+    for task, shot, model_list, best_scores_for_setting in results_worst:
+        for (task_key, shot_key, exp_num), best_score in best_scores_for_setting.items():
+            best_scores[(task_key, shot_key, exp_num)] = best_score
+
         local_model_performance = {model: extract_metric_from_performance_json(model, task) for model in model_list}
         model_performance.update(local_model_performance)
+
         for model_name in model_list:
             model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
             worst_model_dirs.append(model_path)
