@@ -5,6 +5,7 @@ import re
 def construct_model_paths(report):
     model_paths = []
     for line in report:
+        print(line)
         task, shot = line.split('/')[0:2]
         model_name = line.strip().split()[-1]
 
