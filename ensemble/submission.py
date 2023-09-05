@@ -58,7 +58,8 @@ def extract_data_tuples(run_list):
 
 
 def check_run_dir(run_dir, exp_dirs, task, shot):
-    print("Checking run directory", run_dir)
+    model_path = run_dir.split('work_dirs/')[1]
+    print("Checking run directory", model_path)
     csv_files = glob.glob(os.path.join(run_dir, "*.csv"))
     json_files = glob.glob(os.path.join(run_dir, "*.json"))
 
@@ -136,6 +137,10 @@ def print_metric_report_for_task(model_list, task, metric):
     model_view = []
     for model_info in model_list:
         model_path_rel = model_info['name'].split('work_dirs/')[1]
+
+        if metric not in model_info['metrics']:
+            continue
+
         metric_value = model_info['metrics'][metric]
         model_view.append((model_path_rel, metric_value))
 
