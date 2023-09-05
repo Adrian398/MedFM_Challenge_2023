@@ -58,7 +58,7 @@ def run_commands_on_cluster(commands, num_commands, gpu='all'):
         task = command.split("/")[6]
 
         # Check if we have already run the desired number of commands for this task
-        if task_counter[task] >= num_commands:
+        if task_counter[task] >= num_commands or task != "colon":
             continue
 
         cfg_path = command.split(" ")[3]
