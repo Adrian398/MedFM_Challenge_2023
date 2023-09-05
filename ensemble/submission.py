@@ -168,7 +168,7 @@ def print_metric_report_for_task(model_list, task):
             model_view.append((model_path_rel, agg_name, agg_val))
 
     model_view.sort(key=lambda x: x[1])
-    max_char_length = max(len(path) for path, _ in model_view)
+    max_char_length = max(len(path) for path, _, _ in model_view)
 
     for model_path_rel, agg_name, agg_val in model_view:
         print(f"Model: {model_path_rel:{max_char_length}}  {agg_name}: {agg_val:.4f}")
