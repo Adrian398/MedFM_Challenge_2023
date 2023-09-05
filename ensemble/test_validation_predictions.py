@@ -6,7 +6,7 @@ import os
 import numpy as np
 import pandas as pd
 from sklearn import metrics
-from sklearn.metrics import average_precision_score
+from sklearn.metrics import average_precision_score, roc_auc_score
 
 
 def generate_json(results):
@@ -133,7 +133,7 @@ def compute_auc(cls_scores, cls_labels):
         scores_per_class = cls_scores[:, i]
         labels_per_class = cls_labels[:, i]
         try:
-            auc_per_class = metrics.roc_auc_score(labels_per_class,
+            auc_per_class = roc_auc_score(labels_per_class,
                                                   scores_per_class)
             # print('class {} auc = {:.2f}'.format(i + 1, auc_per_class * 100))
         except ValueError:
