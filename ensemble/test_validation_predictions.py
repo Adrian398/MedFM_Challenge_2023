@@ -127,8 +127,11 @@ def compute_task_specific_metrics(pred_path, gt_path, task):
 
     # Check for necessary columns and equal lengths
     for column_name in ['label', 'score']:
-        if column_name not in predictions.columns or column_name not in ground_truth.columns:
-            print(f"Missing '{column_name}' column in CSV files.")
+        if column_name not in predictions.columns:
+            print(f"Missing '{column_name}' column in the predictions CSV file: {pred_path}.")
+            return
+        if column_name not in ground_truth.columns:
+            print(f"Missing '{column_name}' column in the ground truth CSV file: {gt_path}.")
             return
 
     if len(predictions) != len(ground_truth):
