@@ -25,7 +25,7 @@ EVAL_REPORT_PATH = os.path.join(EVAL_FOLDER_PATH, 'report.txt')
 
 with open(EVAL_REPORT_PATH, 'r') as f:
     report_content = f.readlines()
-
+print(report_content)
 model_paths = construct_model_paths(report_content)
 
 
