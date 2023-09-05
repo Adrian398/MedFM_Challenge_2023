@@ -138,4 +138,5 @@ for task in tasks:
                 continue
             out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_submission.csv")
             data_list = extract_data_tuples(exp_dirs[task][shot][exp])
-            merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
+            print(data_list)
+            #merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
