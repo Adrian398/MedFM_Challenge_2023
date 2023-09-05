@@ -46,7 +46,7 @@ for path in model_infos:
     print(path)
 
 for model in model_infos:
-    for name, task, shot, exp in model.values():
+    for name, task, shot, exp in model:
         # Search for validation prediction csv and validate it
         file_name = f"{task}_{shot}_validation.csv"
         source_path = os.path.join(SCRATCH_BASE_PATH, 'work_dirs', task, shot, name, file_name)
