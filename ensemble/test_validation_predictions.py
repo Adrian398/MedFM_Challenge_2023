@@ -1,15 +1,12 @@
 import glob
 import json
-import math
 import os
 
 import numpy as np
 import pandas as pd
-from numpy import ndarray
-from sklearn import metrics
-from sklearn.metrics import average_precision_score, roc_auc_score
+from sklearn.metrics import average_precision_score
 
-from medfmc.evaluation.metrics.auc import cal_metrics_multilabel, compute_auc, cal_metrics_multiclass
+from medfmc.evaluation.metrics.auc import cal_metrics_multilabel, cal_metrics_multiclass
 
 
 def generate_json(results):
@@ -180,7 +177,8 @@ def compute_task_specific_metrics(pred_path, gt_path, task):
 
 
 # ==========================================================================================
-PREDICTION_DIR = "ensemble/validation/05-09_14-17-34/result"
+#PREDICTION_DIR = "ensemble/validation/05-09_14-17-34/result"
+PREDICTION_DIR = "ensemble/validation/02-09_00-32-41/result"
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 shots = ['1-shot', '5-shot', '10-shot']
 tasks = ["colon", "endo", "chest"]
