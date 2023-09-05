@@ -131,30 +131,48 @@ os.makedirs(submission_dir)
 for exp in experiments:
     os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
 
-def print_metric_report_for_task(model_list, task, metric):
+
+def get_aggregate(model_metrics, task):
+    # Dictionary mapping tasks to lambda functions for aggregate calculation
+    aggregate_calculations = {
+        "colon": lambda metrics: ("AUC-Acc", float((metrics["AUC/AUC_multiclass"] + metrics[
+            "accuracy/top1"]) / 2)) if "AUC/AUC_multiclass" in metrics and "accuracy/top1" in metrics else (None, None),
+        "chest": lambda metrics: ("AUC-mAP", float((metrics["AUC/AUC_multilabe"] + metrics[
+            "multi-label/mAP"]) / 2)) if "AUC/AUC_multilabe" in metrics and "multi-label/mAP" in metrics else (
+        None, None),
+        "endo": lambda metrics: ("AUC-mAP", float((metrics["AUC/AUC_multilabe"] + metrics[
+            "multi-label/mAP"]) / 2)) if "AUC/AUC_multilabe" in metrics and "multi-label/mAP" in metrics else (
+        None, None),
+    }
+
+    # Get the appropriate aggregate calculation for the task
+    calculation = aggregate_calculations.get(task)
+
+    # If there's no calculation for the task, return None for both metric name and value
+    if not calculation:
+        return (None, None)
+
+    # Calculate and return the aggregate name and value
+    return calculation(model_metrics)
+
+
+def print_metric_report_for_task(model_list, task):
     print("Report for:", colored(os.path.join(task.capitalize(), shot, exp), 'blue'))
 
     model_view = []
     for model_info in model_list:
         model_path_rel = model_info['name'].split('work_dirs/')[1]
 
-        if metric not in model_info['metrics']:
-            continue
-
-        metric_value = model_info['metrics'][metric]
-        model_view.append((model_path_rel, metric_value))
+        agg_name, agg_val = get_aggregate(model_metrics=model_info['metrics'], task=task)
+        if agg_val is not None:
+            model_view.append((model_path_rel, agg_name, agg_val))
 
     model_view.sort(key=lambda x: x[1])
     max_char_length = max(len(path) for path, _ in model_view)
 
-    for model_path_rel, metric_value in model_view:
-        print(f"Model: {model_path_rel:{max_char_length}}  {metric}: {metric_value:.4f}")
+    for model_path_rel, agg_name, agg_val in model_view:
+        print(f"Model: {model_path_rel:{max_char_length}}  {agg_name}: {agg_val:.4f}")
 
-metric_for_task = {
-    'colon': 'accuracy/top1',
-    'chest': 'Aggregate',
-    'endo': 'Aggregate'
-}
 
 # iterate over exp_dirs_dict, for each task / shot / exp combination, merge results
 for task in tasks:
@@ -166,6 +184,6 @@ for task in tasks:
             out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_submission.csv")
             data_list = extract_data_tuples(exp_dirs[task][shot][exp])
 
-            print_metric_report_for_task(model_list=data_list, task=task, metric=metric_for_task.get(task, 'Aggregate'))
+            print_metric_report_for_task(model_list=data_list, task=task)
 
             #merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
