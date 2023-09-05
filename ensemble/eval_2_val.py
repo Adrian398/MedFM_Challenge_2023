@@ -5,14 +5,18 @@ from termcolor import colored
 
 
 def is_valid_submission(directory_path):
-    """Check if the directory contains a validation.csv for every setting."""
-    required_files = [f"{task}_{shot}_validation.csv" for task in TASKS for shot in SHOTS]
-    existing_files = os.listdir(directory_path)
-    print("existing:", existing_files)
-    print("required:", required_files)
-    print()
+    """Check if the directory contains a validation.csv for every setting in each exp folder."""
+    required_files = [f"{task}_{shot}_validation.csv" for task in TASKS for shot in ["1-shot", "5-shot", "10-shot"]]
 
-    return all(file in existing_files for file in required_files)
+    # Check for each exp directory
+    for exp in EXPS:
+        exp_dir = os.path.join(directory_path, "result", exp)
+        if not os.path.exists(exp_dir):
+            return False
+        existing_files = os.listdir(exp_dir)
+        if not all(file in existing_files for file in required_files):
+            return False
+    return True
 
 
 def is_valid_csv(path):
@@ -54,6 +58,7 @@ VAL_TARGET_PATH = 'ensemble/validation'
 EVAL_BASE_PATH = 'submissions/evaluation'
 TASKS = ["colon", "endo", "chest"]
 SHOTS = ["1-shot", "5-shot", "10-shot"]
+EXPS = [f"exp{i}" for i in range(1, 6)]
 # ================================================================================
 
 # Read all timestamps (folder names) at runtime from EVAL_BASE_PATH
