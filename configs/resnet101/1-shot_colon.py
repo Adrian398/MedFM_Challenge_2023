@@ -10,7 +10,7 @@ checkpoint = 'https://download.openmmlab.com/mmclassification/v0/resnet/resnet10
 
 lr = 1e-6
 train_bs = 16
-val_bs = 2
+val_bs = 32
 dataset = 'colon'
 model_name = 'resnet101'
 exp_num = 1
