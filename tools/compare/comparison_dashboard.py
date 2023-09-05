@@ -48,8 +48,8 @@ def compare_results(team1, team2):
     return comparison_result
 
 
-source_team_name = "uniwue"
-target_team_name = "uniwue_greedy_on_val"
+source_team_name = "uniwue_validation_greedy"
+target_team_name = "uniwue_validation_expert_ensemble"
 
 tasks, shots, exps, metrics, settings = init_settings()
 
