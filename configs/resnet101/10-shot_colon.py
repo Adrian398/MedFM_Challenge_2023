@@ -77,7 +77,7 @@ test_dataloader = dict(
 )
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="accuracy/top1", rule="greater"),
     logger=dict(interval=10),
 )
 
