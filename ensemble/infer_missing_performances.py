@@ -156,23 +156,23 @@ def find_and_validate_json_files(model_dir, task):
                             print(colored(f"Accuracy found in colon: {dirpath}", 'blue'))
 
                 except json.JSONDecodeError:
-                    print(f"Cannot load JSON from: {filepath}")
-                    print(f"Deleting {filepath}")
+                    my_print(f"Cannot load JSON from: {filepath}")
+                    my_print(f"Deleting {filepath}")
                     os.remove(filepath)  # Deleting the corrupted JSON file
                     return False
                 except PermissionError as permission_error:
-                    print(f"Permission Error encountered: {permission_error}")
+                    my_print(f"Permission Error encountered: {permission_error}")
                     return False
                 except Exception as e:
-                    print(f"Error encountered: {e}")
+                    my_print(f"Error encountered: {e}")
                     return False
 
     if not json_files_found:
-        print("No JSON files found.")
+        my_print("No JSON files found.")
         return False
 
     if performance_json_count != 1:
-        print(f"Multiple 'performance.json' found: {performance_json_count}")
+        my_print(f"Multiple 'performance.json' found: {performance_json_count}")
         return False
 
     return True
@@ -216,13 +216,13 @@ def get_model_dirs_without_performance(task, shot):
         # Skip if no best checkpoint file
         checkpoint_path = get_file_from_directory(abs_model_dir, ".pth", "best")
         if checkpoint_path is None:
-            print("No best checkpoint file found")
+            my_print("No best checkpoint file found")
             continue
 
         # Skip/Delete if no event file
         event_file = get_event_file_from_model_dir(abs_model_dir)
         if event_file is None:
-            print("No event file found")
+            my_print("No event file found")
             continue
 
         # Skip if performance json file is present
@@ -297,15 +297,11 @@ if __name__ == "__main__":  # Important when using multiprocessing
                    f"--output_path {out_filepath}")
         commands.append(command)
 
-    # print("Generated Testing Commands:")
-    # for command in commands:
-    #     print(command)
-
     task_counts = Counter(model["task"] for model in model_infos.values())
 
-    print("Task Counts:")
+    my_print("Task Counts:")
     for task, count in task_counts.items():
-        print(f"{task.capitalize()}: {count}")
+        my_print(f"{task.capitalize()}: {count}")
 
     while True:
         user_input = input("\nHow many testing commands per task do you want to generate? ").strip().lower()
@@ -317,6 +313,6 @@ if __name__ == "__main__":  # Important when using multiprocessing
             num_commands = int(user_input)
             break
         except ValueError:
-            print("Invalid input. Please enter a number or 'no' to exit.")
+            my_print("Invalid input. Please enter a number or 'no' to exit.")
 
     run_commands_on_cluster(commands, num_commands)
