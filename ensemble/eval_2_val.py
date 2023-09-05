@@ -45,14 +45,15 @@ model_infos = construct_model_paths(report_content)
 for path in model_infos:
     print(path)
 
-for name, task, shot, exp in model_infos:
-    # Search for validation prediction csv and validate it
-    file_name = f"{task}_{shot}_validation.csv"
-    source_path = os.path.join(SCRATCH_BASE_PATH, 'work_dirs', task, shot, name, file_name)
-    print(source_path)
+for model in model_infos:
+    for name, task, shot, exp in model.values():
+        # Search for validation prediction csv and validate it
+        file_name = f"{task}_{shot}_validation.csv"
+        source_path = os.path.join(SCRATCH_BASE_PATH, 'work_dirs', task, shot, name, file_name)
+        print(source_path)
 
-    # Construct target path and ensure that the directory exists
-    target_path = os.path.join(VAL_TARGET_PATH, TIMESTAMP, 'result', exp)
-    os.makedirs(target_path, exist_ok=True)
-    print(target_path)
-    exit()
+        # Construct target path and ensure that the directory exists
+        target_path = os.path.join(VAL_TARGET_PATH, TIMESTAMP, 'result', exp)
+        os.makedirs(target_path, exist_ok=True)
+        print(target_path)
+        exit()
