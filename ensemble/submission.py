@@ -167,7 +167,7 @@ def print_metric_report_for_task(model_list, task):
         if agg_val is not None:
             model_view.append((model_path_rel, agg_name, agg_val))
 
-    model_view.sort(key=lambda x: x[1])
+    model_view.sort(key=lambda x: x[2])
     max_char_length = max(len(path) for path, _, _ in model_view)
 
     for model_path_rel, agg_name, agg_val in model_view:
