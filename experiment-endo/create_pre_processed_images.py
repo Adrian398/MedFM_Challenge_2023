@@ -76,7 +76,23 @@ def remove_file(file_path):
         print(f"An error occurred: {e}")
 
 
+def rename_file(original_path, new_path):
+    try:
+        os.rename(original_path, new_path)
+        print(f"File '{original_path}' renamed to '{new_path}' successfully!")
+    except FileNotFoundError:
+        print(f"File '{original_path}' not found.")
+    except PermissionError:
+        print(f"Permission denied: Cannot rename '{original_path}'.")
+    except FileExistsError:
+        print(f"A file with the name '{new_path}' already exists.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+
 for filename in tqdm(image_files, desc="Processing images"):
     #process_image(input_directory, output_directory, filename)
-    img_path = os.path.join(output_directory, f'original_{filename}')
-    remove_file(img_path)
+    img_path = os.path.join(output_directory, f'masked_{filename}')
+    img_path_new = os.path.join(output_directory, filename)
+    rename_file(img_path, img_path_new)
