@@ -1,4 +1,5 @@
 import os
+import shutil
 
 
 def is_valid_csv(path):
@@ -57,13 +58,15 @@ for path in model_infos:
 for name, task, shot, exp in model_infos:
     # Search for validation prediction csv and validate it
     file_name = f"{task}_{shot}_validation.csv"
-    source_path = os.path.join(SCRATCH_BASE_PATH, 'work_dirs', task, shot, name, file_name)
+    source_file_path = os.path.join(SCRATCH_BASE_PATH, 'work_dirs', task, shot, name, file_name)
 
-    if not is_valid_csv(source_path):
+    if not is_valid_csv(source_file_path):
         continue
 
     # Construct target path and ensure that the directory exists
     target_path = os.path.join(VAL_TARGET_PATH, TIMESTAMP, 'result', exp)
     os.makedirs(target_path, exist_ok=True)
-    print(target_path)
-    exit()
+
+    target_file_path = os.path.join(target_path, file_name)
+    shutil.copy(source_file_path, target_file_path)
+    print(f"Copied from {source_file_path} to {source_file_path}")
