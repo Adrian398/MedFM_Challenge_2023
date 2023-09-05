@@ -71,7 +71,7 @@ def compute_task_specific_metrics(pred_path, gt_path, task):
 
 
 # Directory paths
-PREDICTION_DIR = "ensemble/validation/"
+PREDICTION_DIR = "ensemble/validation/05-09_14-17-34"
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 
 # Iterate over experiments and tasks
