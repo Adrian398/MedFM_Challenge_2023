@@ -5,6 +5,7 @@ import os
 import re
 
 import pandas as pd
+from termcolor import colored
 
 
 def extract_exp_number(string):
@@ -129,6 +130,22 @@ os.makedirs(submission_dir)
 for exp in experiments:
     os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
 
+def print_metric_report_for_task(model_list, task, metric):
+    print("Report for:", colored(os.path.join(task.capitalize(), shot, exp), 'blue'))
+
+    model_view = []
+    for model_info in model_list:
+        model_path_rel = model_info['name'].split('work_dirs/')[1]
+        metric_value = model_info['metrics'][metric]
+        model_view.append((model_path_rel, metric_value))
+
+    model_view.sort(key=lambda x: x[1])
+    max_char_length = max(len(path) for path, _ in model_view)
+
+    for model_path_rel, metric_value in model_view:
+        print(f"Model: {model_path_rel:{max_char_length}}  {metric}: {metric_value:.4f}")
+
+
 # iterate over exp_dirs_dict, for each task / shot / exp combination, merge results
 for task in tasks:
     for shot in shots:
@@ -138,21 +155,7 @@ for task in tasks:
                 continue
             out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_submission.csv")
             data_list = extract_data_tuples(exp_dirs[task][shot][exp])
-            if task == "chest" and shot == "10-shot":
-                print(task, shot, exp)
 
-                results = []
-                for model in data_list:
-                    model_path_rel = model['name'].split('work_dirs/')[1]
-                    aggregate = model['metrics']['Aggregate']
-                    results.append((model_path_rel, aggregate))
-
-                results.sort(key=lambda x: x[1])
-                # Determine max model path name length
-                max_path_length = max(len(model_path_rel) for model_path_rel, _ in results)
-
-                for model_path_rel, aggregate in results:
-                    # Using f-string with dynamic width for model_path_rel
-                    print(f"Model: {model_path_rel:{max_path_length}}  Aggregate: {aggregate:.4f}")
+            print_metric_report_for_task(model_list=data_list, task=task, metric='Aggregate')
 
             #merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
