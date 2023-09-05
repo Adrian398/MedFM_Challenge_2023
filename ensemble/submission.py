@@ -1,8 +1,8 @@
 import glob
-from datetime import datetime
 import json
 import os
 import re
+from datetime import datetime
 
 import pandas as pd
 from termcolor import colored
@@ -15,6 +15,69 @@ def extract_exp_number(string):
 
 def merge_results_weighted_average_strategy(run_dicts, task, shot, exp):
     pass
+
+
+def print_metric_report_for_task(model_list, task):
+    print("Report for:", colored(os.path.join(task.capitalize(), shot, exp), 'blue'))
+
+    model_view = []
+    for model_info in model_list:
+        model_path_rel = model_info['name'].split('work_dirs/')[1]
+
+        agg_name, agg_val = get_aggregate(model_metrics=model_info['metrics'], task=task)
+        if agg_val is not None:
+            model_view.append((model_path_rel, agg_name, agg_val))
+
+    model_view.sort(key=lambda x: x[2])
+    max_char_length = max(len(path) for path, _, _ in model_view)
+
+    for model_path_rel, agg_name, agg_val in model_view:
+        print(f"Model: {model_path_rel:{max_char_length}}  {agg_name}: {agg_val:.4f}")
+
+
+def get_aggregate(model_metrics, task):
+    # Dictionary mapping tasks to lambda functions for aggregate calculation
+    aggregate_calculations = {
+        "colon": lambda metrics: ("AUC-Acc", float((metrics["AUC/AUC_multiclass"] + metrics[
+            "accuracy/top1"]) / 2)) if "AUC/AUC_multiclass" in metrics and "accuracy/top1" in metrics else (None, None),
+        "chest": lambda metrics: ("AUC-mAP", float((metrics["AUC/AUC_multilabe"] + metrics[
+            "multi-label/mAP"]) / 2)) if "AUC/AUC_multilabe" in metrics and "multi-label/mAP" in metrics else (
+            None, None),
+        "endo": lambda metrics: ("AUC-mAP", float((metrics["AUC/AUC_multilabe"] + metrics[
+            "multi-label/mAP"]) / 2)) if "AUC/AUC_multilabe" in metrics and "multi-label/mAP" in metrics else (
+            None, None),
+    }
+
+    # Get the appropriate aggregate calculation for the task
+    calculation = aggregate_calculations.get(task)
+
+    # If there's no calculation for the task, return None for both metric name and value
+    if not calculation:
+        return (None, None)
+
+    # Calculate and return the aggregate name and value
+    return calculation(model_metrics)
+
+
+def get_submission_dir(submission_dir_list):
+    """Prompt the user to select a CSV suffix and return the chosen suffix."""
+
+    print("Please select a Submission Directory:")
+    for idx, dir in enumerate(submission_dir_list, 1):
+        print(f"{idx}. {dir}")
+
+    choice = "submission"
+
+    try:
+        user_choice = int(input(f"Enter your choice (1-{len(submission_dir_list)}) [Default: 1]: ") or "1")
+        if 1 <= user_choice <= len(submission_dir_list):
+            choice = submission_dir_list[user_choice - 1]
+        else:
+            print(f"Invalid choice! Defaulting to {choice}.")
+    except ValueError:
+        print(f"Invalid input! Defaulting to {choice}.")
+
+    return choice
 
 
 # Find the run with the best MAP for a given class, within a list of runs
@@ -57,10 +120,10 @@ def extract_data_tuples(run_list):
     return data_list
 
 
-def check_run_dir(run_dir, exp_dirs, task, shot):
+def check_run_dir(run_dir, exp_dirs, task, shot, submission_dir):
     model_path = run_dir.split('work_dirs/')[1]
     print("Checking run directory", model_path)
-    csv_files = glob.glob(os.path.join(run_dir, "*.csv"))
+    csv_files = glob.glob(os.path.join(run_dir, f"{task}_{shot}_{submission_dir}.csv"))
     json_files = glob.glob(os.path.join(run_dir, "*.json"))
 
     if csv_files and json_files:
@@ -78,6 +141,9 @@ shots = ['1-shot', '5-shot', '10-shot']
 experiments = ['exp1', 'exp2', 'exp3', 'exp4', 'exp5']
 class_counts = {"colon": 2, "endo": 4, "chest": 19}
 
+submission_dir_list = ["submission", "validation"]
+submission_dir = get_submission_dir(submission_dir_list)
+print(f"\nSelected Submission Directory: {colored(submission_dir, 'blue')}\n")
 
 # For each task / shot / experiment combination, find all directories that contain both a csv and json file, and
 # add them to the exp_dirs dictionary with keys csv and json
@@ -92,8 +158,13 @@ for task in tasks:
         # Get all run directories that match the pattern
         for run_dir in glob.glob(path_pattern):
             # check if run dir has json + csv, if yes, add info to exp_dirs dict
-            check_run_dir(run_dir, exp_dirs, task, shot)
+            check_run_dir(run_dir=run_dir,
+                          exp_dirs=exp_dirs,
+                          task=task,
+                          shot=shot,
+                          submission_dir=submission_dir)
 
+exit()
 # Count
 total_models = 0
 least_models = 100000
@@ -131,49 +202,6 @@ os.makedirs(submission_dir)
 for exp in experiments:
     os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
 
-
-def get_aggregate(model_metrics, task):
-    # Dictionary mapping tasks to lambda functions for aggregate calculation
-    aggregate_calculations = {
-        "colon": lambda metrics: ("AUC-Acc", float((metrics["AUC/AUC_multiclass"] + metrics[
-            "accuracy/top1"]) / 2)) if "AUC/AUC_multiclass" in metrics and "accuracy/top1" in metrics else (None, None),
-        "chest": lambda metrics: ("AUC-mAP", float((metrics["AUC/AUC_multilabe"] + metrics[
-            "multi-label/mAP"]) / 2)) if "AUC/AUC_multilabe" in metrics and "multi-label/mAP" in metrics else (
-        None, None),
-        "endo": lambda metrics: ("AUC-mAP", float((metrics["AUC/AUC_multilabe"] + metrics[
-            "multi-label/mAP"]) / 2)) if "AUC/AUC_multilabe" in metrics and "multi-label/mAP" in metrics else (
-        None, None),
-    }
-
-    # Get the appropriate aggregate calculation for the task
-    calculation = aggregate_calculations.get(task)
-
-    # If there's no calculation for the task, return None for both metric name and value
-    if not calculation:
-        return (None, None)
-
-    # Calculate and return the aggregate name and value
-    return calculation(model_metrics)
-
-
-def print_metric_report_for_task(model_list, task):
-    print("Report for:", colored(os.path.join(task.capitalize(), shot, exp), 'blue'))
-
-    model_view = []
-    for model_info in model_list:
-        model_path_rel = model_info['name'].split('work_dirs/')[1]
-
-        agg_name, agg_val = get_aggregate(model_metrics=model_info['metrics'], task=task)
-        if agg_val is not None:
-            model_view.append((model_path_rel, agg_name, agg_val))
-
-    model_view.sort(key=lambda x: x[2])
-    max_char_length = max(len(path) for path, _, _ in model_view)
-
-    for model_path_rel, agg_name, agg_val in model_view:
-        print(f"Model: {model_path_rel:{max_char_length}}  {agg_name}: {agg_val:.4f}")
-
-
 # iterate over exp_dirs_dict, for each task / shot / exp combination, merge results
 for task in tasks:
     for shot in shots:
@@ -186,4 +214,4 @@ for task in tasks:
 
             print_metric_report_for_task(model_list=data_list, task=task)
 
-            #merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
+            # merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
