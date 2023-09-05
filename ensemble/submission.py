@@ -213,7 +213,7 @@ for task in tasks:
             if len(exp_dirs[task][shot][exp]) < 2:
                 print("not enough runs")
                 continue
-            out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_submission.csv")
+            out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{submission_type}.csv")
             data_list = extract_data_tuples(exp_dirs[task][shot][exp])
 
             print_metric_report_for_task(model_list=data_list, task=task)
