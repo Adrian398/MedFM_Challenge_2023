@@ -38,11 +38,6 @@ with open(EVAL_REPORT_PATH, 'r') as f:
 print(report_content)
 model_paths = construct_model_paths(report_content)
 
-
-# Extracting the necessary details from the report content using regex
-pattern = re.compile(r"\| (\w+)/(\d+-shot)/\w+     Aggregate: [\d.]+        (\w+)")
-matches = pattern.findall(report_content)
-
 for path in model_paths:
     print(path)
 
