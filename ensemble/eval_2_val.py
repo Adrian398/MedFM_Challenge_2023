@@ -3,8 +3,11 @@ import re
 
 
 def construct_model_paths(report):
+    # Filter out the lines containing model information
+    lines = [line for line in report if "| " in line]
+
     model_paths = []
-    for line in report:
+    for line in lines:
         print(line)
         task, shot = line.split('/')[0:2]
         model_name = line.strip().split()[-1]
