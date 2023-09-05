@@ -1,6 +1,20 @@
 import os
 
 
+def is_valid_csv(path):
+    # 1. Check if file exists
+    if not os.path.exists(path):
+        print(f"File does not exist: {path}")
+        return False
+
+    # 2. Check if file is not empty
+    if os.path.getsize(path) == 0:
+        print(f"File is empty.: {path}")
+        return False
+
+    return True
+
+
 def construct_model_paths(report):
     lines = [line for line in report if any(t in line for t in TASKS)]
 
@@ -44,7 +58,9 @@ for name, task, shot, exp in model_infos:
     # Search for validation prediction csv and validate it
     file_name = f"{task}_{shot}_validation.csv"
     source_path = os.path.join(SCRATCH_BASE_PATH, 'work_dirs', task, shot, name, file_name)
-    print(source_path)
+
+    if not is_valid_csv(source_path):
+        continue
 
     # Construct target path and ensure that the directory exists
     target_path = os.path.join(VAL_TARGET_PATH, TIMESTAMP, 'result', exp)
