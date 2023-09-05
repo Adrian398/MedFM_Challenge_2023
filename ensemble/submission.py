@@ -59,25 +59,20 @@ def get_aggregate(model_metrics, task):
     return calculation(model_metrics)
 
 
-def get_submission_dir(submission_dir_list):
-    """Prompt the user to select a CSV suffix and return the chosen suffix."""
+def choose_evaluation_type():
+    """Prompt the user to select between evaluation or validation.
+    Returns True for Evaluation and False for Validation."""
 
-    print("Please select a Submission Directory:")
-    for idx, dir in enumerate(submission_dir_list, 1):
-        print(f"{idx}. {dir}")
+    print(f"Do you want {colored('Evaluation', 'red')} or {colored('Validation', 'blue')}?")
+    user_input = input(f"Enter 'e' for Evaluation or 'v' for Validation. [Default=e]: ").lower() or 'e'
 
-    choice = "submission"
-
-    try:
-        user_choice = int(input(f"Enter your choice (1-{len(submission_dir_list)}) [Default: 1]: ") or "1")
-        if 1 <= user_choice <= len(submission_dir_list):
-            choice = submission_dir_list[user_choice - 1]
-        else:
-            print(f"Invalid choice! Defaulting to {choice}.")
-    except ValueError:
-        print(f"Invalid input! Defaulting to {choice}.")
-
-    return choice
+    if user_input == 'e':
+        return True
+    elif user_input == 'v':
+        return False
+    else:
+        print(f"Invalid choice! Defaulting to Evaluation.")
+        return True
 
 
 # Find the run with the best MAP for a given class, within a list of runs
@@ -120,10 +115,10 @@ def extract_data_tuples(run_list):
     return data_list
 
 
-def check_run_dir(run_dir, exp_dirs, task, shot, submission_dir):
+def check_run_dir(run_dir, exp_dirs, task, shot, submission_type):
     model_path = run_dir.split('work_dirs/')[1]
     print("Checking run directory", model_path)
-    csv_files = glob.glob(os.path.join(run_dir, f"{task}_{shot}_{submission_dir}.csv"))
+    csv_files = glob.glob(os.path.join(run_dir, f"{task}_{shot}_{submission_type}.csv"))
     json_files = glob.glob(os.path.join(run_dir, "*.json"))
 
     if csv_files and json_files:
@@ -141,9 +136,13 @@ shots = ['1-shot', '5-shot', '10-shot']
 experiments = ['exp1', 'exp2', 'exp3', 'exp4', 'exp5']
 class_counts = {"colon": 2, "endo": 4, "chest": 19}
 
-submission_dir_list = ["submission", "validation"]
-submission_dir = get_submission_dir(submission_dir_list)
-print(f"\nSelected Submission Directory: {colored(submission_dir, 'blue')}\n")
+is_evaluation = choose_evaluation_type()
+submission_type = 'evaluation'
+if is_evaluation:
+    print(f"\nSelected {colored(submission_type.capitalize(), 'red')}\n")
+else:
+    submission_type = 'validation'
+    print(f"\nSelected {colored(submission_type.capitalize(), 'blue')}\n")
 
 # For each task / shot / experiment combination, find all directories that contain both a csv and json file, and
 # add them to the exp_dirs dictionary with keys csv and json
@@ -162,7 +161,7 @@ for task in tasks:
                           exp_dirs=exp_dirs,
                           task=task,
                           shot=shot,
-                          submission_dir=submission_dir)
+                          submission_type=submission_type)
 
 # Count
 total_models = 0
@@ -196,7 +195,12 @@ if start != "y":
 # Create submission directory
 date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
 submission_dir = os.path.join("submissions", "evaluation", date_pattern)
-print(f"Creating submission directory {submission_dir}")
+if not is_evaluation:
+    submission_dir = os.path.join("ensemble", f"{submission_type}", date_pattern)
+    print(f"Creating {submission_type} directory {submission_dir}")
+else:
+    print(f"Creating submission directory {submission_dir}")
+
 os.makedirs(submission_dir)
 for exp in experiments:
     os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
