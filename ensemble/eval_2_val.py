@@ -28,7 +28,7 @@ def construct_model_paths(report):
 # ================================================================================
 SCRATCH_BASE_PATH = '/scratch/medfm/medfm-challenge'
 VAL_TARGET_PATH = 'ensemble/validation'
-EVAL_BASE_PATH = 'submission/evaluation'
+EVAL_BASE_PATH = 'submissions/evaluation'
 TASKS = ["colon", "endo", "chest"]
 # ================================================================================
 
