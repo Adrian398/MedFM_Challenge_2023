@@ -1,5 +1,5 @@
 _base_ = [
-    '../datasets/endoscopy.py',
+    '../datasets/endoscopy_pre_processed.py',
     '../schedules/adamw_inverted_cosine_lr.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
