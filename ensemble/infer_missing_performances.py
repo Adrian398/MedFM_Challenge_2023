@@ -23,13 +23,9 @@ from termcolor import colored
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
-def run_commands_on_cluster(commands, num_commands, gpu='8a'):
+def run_commands_on_cluster(commands, num_commands, gpu='all'):
     """
     Runs the generated commands on the cluster.
-    Tasks are allocated to GPUs based on the task type:
-    - colon: rtx4090 (gpuc)
-    - chest: rtx3090 (gpub)
-    - endo: rtx3090 (gpua)
     """
 
     if gpu == 'c':
@@ -42,8 +38,6 @@ def run_commands_on_cluster(commands, num_commands, gpu='8a'):
         gpus = ['rtx4090', 'rtx3090', 'rtx4090', 'rtx3090']
     else:
         raise ValueError(f'Invalid gpu type {gpu}.')
-
-    #gpus.extend(['rtx2080ti' for _ in range(6)])
 
     gpu_cycle = itertools.cycle(gpus)
 
@@ -59,13 +53,15 @@ def run_commands_on_cluster(commands, num_commands, gpu='8a'):
         task = command.split("/")[6]
 
         # Check if we have already run the desired number of commands for this task
-        if task_counter[task] >= num_commands or task != "colon":
+        if task_counter[task] >= num_commands:
             continue
 
         cfg_path = command.split(" ")[3]
+        cfg_path_split = cfg_path.split("/")
+        shot, exp = cfg_path_split[6], extract_exp_number(cfg_path_split[7])
 
         log_dir = cfg_path.rsplit("/", 1)[0]
-        log_file_name = f"performance_slurm-%j"
+        log_file_name = f"{task}_{shot}_exp{exp}_performance_slurm-%j"
 
         # Ensure the log directory exists
         if not os.path.exists(log_dir):

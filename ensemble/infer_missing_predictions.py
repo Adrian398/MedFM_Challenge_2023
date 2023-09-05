@@ -9,6 +9,7 @@ This script does the following steps:
 Prediction File Naming Scheme:  TASK_N-shot_submission.csv
 Example:                        chest_10-shot_submission.csv
 """
+import argparse
 import itertools
 import os
 import re
@@ -26,10 +27,6 @@ EXP_PATTERN = re.compile(r'exp(\d+)')
 def run_commands_on_cluster(commands, num_commands, gpu='all'):
     """
     Runs the generated commands on the cluster.
-    Tasks are allocated to GPUs based on the task type:
-    - colon: rtx4090 (gpuc)
-    - chest: rtx3090 (gpub)
-    - endo: rtx3090 (gpua)
     """
 
     if gpu == 'c':
@@ -39,7 +36,7 @@ def run_commands_on_cluster(commands, num_commands, gpu='all'):
     elif gpu == '8a':
         gpus = ['rtx2080ti']
     elif gpu == 'all':
-        gpus = ['rtx4090', 'rtx3090', 'rtx3090']
+        gpus = ['rtx4090', 'rtx3090', 'rtx4090', 'rtx3090']
     else:
         raise ValueError(f'Invalid gpu type {gpu}.')
 
@@ -65,12 +62,13 @@ def run_commands_on_cluster(commands, num_commands, gpu='all'):
         shot, exp = cfg_path_split[6], extract_exp_number(cfg_path_split[7])
 
         log_dir = cfg_path.rsplit("/", 1)[0]
-        log_file_name = f"{task}_{shot}_exp{exp}_slurm-%j"
+        log_file_name = f"{task}_{shot}_exp{exp}_prediction_slurm-%j"
 
         # Ensure the log directory exists
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
+        print("\n")
         slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
         print(slurm_cmd)
 
@@ -221,7 +219,7 @@ def get_csv_suffix_choice():
 
 # ========================================================================================
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
-tasks = ["colon", "endo", "chest"]
+task_choices = ["colon", "endo", "chest"]
 shots = ["1", "5", "10"]
 N_inferences_per_task = 10
 batch_size = 4
@@ -236,6 +234,20 @@ csv_suffix_2_img_suffix = dict(zip(csv_suffix_list, img_suffix_list))
 
 
 if __name__ == "__main__":  # Important when using multiprocessing
+    parser = argparse.ArgumentParser(description='Infers missing predictions from model runs on the test set.')
+    parser.add_argument("--gpu", type=str, default='all',
+                        help="GPU type: \n- 'c'=rtx4090,\n- '8a'=rtx2070ti\n"
+                             "- 'ab'=rtx3090\n- 'all'=rtx4090, rtx3090 cyclic")
+    parser.add_argument("--task", type=str, nargs='*', default=["colon", "endo", "chest"],
+                        choices=task_choices,
+                        help="Task type: 'colon', 'chest', or 'endo'. "
+                             "Multiple tasks can be provided separated with a whitespace. "
+                             "Default is all tasks.")
+    args = parser.parse_args()
+
+    gpu_type = args.gpu
+    tasks = args.task
+
     csv_suffix_choice = get_csv_suffix_choice()
     print(f"\nSelected CSV suffix: {colored(csv_suffix_choice, 'blue')}\n")
 
