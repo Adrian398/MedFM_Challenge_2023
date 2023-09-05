@@ -140,7 +140,19 @@ for task in tasks:
             data_list = extract_data_tuples(exp_dirs[task][shot][exp])
             if task == "chest" and shot == "10-shot":
                 print(task, shot, exp)
+
+                results = []
                 for model in data_list:
                     model_path_rel = model['name'].split('work_dirs/')[1]
-                    print("Model:", model_path_rel, "Aggregate:", model['metrics']['Aggregate'])
+                    aggregate = model['metrics']['Aggregate']
+                    results.append((model_path_rel, aggregate))
+
+                results.sort(key=lambda x: x[1])
+                # Determine max model path name length
+                max_path_length = max(len(model_path_rel) for model_path_rel, _ in results)
+
+                for model_path_rel, aggregate in results:
+                    # Using f-string with dynamic width for model_path_rel
+                    print(f"Model: {model_path_rel:{max_path_length}}  Aggregate: {aggregate:.4f}")
+
             #merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
