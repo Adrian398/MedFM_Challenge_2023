@@ -20,9 +20,9 @@ In general:
         we have csvs from multiple models)
 
 
-1) Adjust submission.py so that a report is written for all the models used in the ensemble -> output to validation folder
-2) Adjust submission.py so that the user can choose between "evaluation" and "validation" submission -> save results in a different folder
-3) Write a script that takes the submission csvs and compares them with the downloaded labelled validation data to compare scores (per exp, setting and overall)
+[X] 1) Adjust submission.py so that the user can choose between "evaluation" and "validation" submission -> save results in a different folder
+[ ] 2) Adjust submission.py so that a report is written for all the models used in the ensemble -> output to validation folder
+[ ] 3) Write a script that takes the submission csvs and compares them with the downloaded labelled validation data to compare scores (per exp, setting and overall)
     - Input is path to the validation submission dir and path to the annotation file
     - We have prediction probabilities and labels -> calculate mAP and AUC (metrics)
-4) In submission.py implement different "ensemble strategies" and assess those with the previously written script
+[ ] 4) In submission.py implement different "ensemble strategies" and assess those with the previously written script

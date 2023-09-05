@@ -63,8 +63,7 @@ def choose_evaluation_type():
     """Prompt the user to select between evaluation or validation.
     Returns True for Evaluation and False for Validation."""
 
-    print()
-    user_input = input(f"{colored('Evaluation', 'red')} or {colored('Validation', 'blue')}? (e/v) ").lower() or 'e'
+    user_input = input(f"{colored('Evaluation (e)', 'red')} or {colored('Validation (v)', 'blue')}? (Default = e) ").lower() or 'e'
 
     if user_input == 'e':
         return True
