@@ -174,7 +174,7 @@ def compute_colon_metrics(merged_df, score_cols):
     metrics = {'AUC': cal_metrics_multilabel(target, pred_scores)}
     pred_labels = (pred_scores[:, 1] >= 0.5).astype(int)  # Convert scores to labels using a threshold of 0.5
     correct_predictions = sum(pred_labels == target.ravel())
-    metrics['ACC'] = correct_predictions / len(pred_labels)
+    metrics['ACC'] = (correct_predictions / len(pred_labels)) * 100
 
     return metrics
 
