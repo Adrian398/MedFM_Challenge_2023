@@ -13,8 +13,7 @@ tasks = ["endo", "colon", "chest"]
 n_shots = ["1", "5", "10"]
 images_dir = "data/MedFMC_test/"
 
-#path = os.path.join('submissions', 'evaluation')
-path = os.path.join('ensemble', 'validation')
+path = os.path.join('submissions', 'evaluation')
 
 # Get newest submission
 directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
