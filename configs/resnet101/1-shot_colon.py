@@ -10,7 +10,7 @@ checkpoint = 'https://download.openmmlab.com/mmclassification/v0/resnet/resnet10
 
 lr = 1e-6
 train_bs = 16
-val_bs = 32
+val_bs = 128
 dataset = 'colon'
 model_name = 'resnet101'
 exp_num = 1
@@ -102,7 +102,7 @@ param_scheduler = [
     dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
 ]
 
-train_cfg = dict(by_epoch=True, val_interval=50, max_epochs=500)
+train_cfg = dict(by_epoch=True, val_interval=15, max_epochs=500)
 val_cfg = dict()
 test_cfg = dict()
 

@@ -106,4 +106,4 @@ train_cfg = dict(by_epoch=True, val_interval=15, max_epochs=250)
 val_cfg = dict()
 test_cfg = dict()
 
-randomness = dict(seed=12)
+randomness = dict(seed=0)
