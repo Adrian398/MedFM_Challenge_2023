@@ -1,16 +1,18 @@
 import os
 import shutil
 
+from termcolor import colored
+
 
 def is_valid_csv(path):
     # 1. Check if file exists
     if not os.path.exists(path):
-        print(f"File does not exist: {path}")
+        print(colored(f"File does not exist: {path}", 'red'))
         return False
 
     # 2. Check if file is not empty
     if os.path.getsize(path) == 0:
-        print(f"File is empty.: {path}")
+        print(colored(f"File is empty.: {path}", 'red'))
         return False
 
     return True
@@ -42,10 +44,22 @@ EVAL_BASE_PATH = 'submissions/evaluation'
 TASKS = ["colon", "endo", "chest"]
 # ================================================================================
 
-# TODO: Read TIMESTAMP during runtime
-TIMESTAMP = '02-09_00-32-41'
-EVAL_REPORT_PATH = os.path.join(EVAL_BASE_PATH, TIMESTAMP, 'report.txt')
+timestamps = [d for d in os.listdir(EVAL_BASE_PATH) if os.path.isdir(os.path.join(EVAL_BASE_PATH, d))]
 
+# Print available timestamps and ask user to select one
+print("Available timestamps:")
+for idx, timestamp in enumerate(timestamps, 1):
+    print(f"{idx}. {timestamp}")
+
+while True:
+    choice = input("Select a timestamp (enter the number): ")
+    if choice.isdigit() and 0 < int(choice) <= len(timestamps):
+        TIMESTAMP = timestamps[int(choice) - 1]
+        break
+    else:
+        print(colored("Invalid choice. Please enter a number from the list.", 'red'))
+
+EVAL_REPORT_PATH = os.path.join(EVAL_BASE_PATH, TIMESTAMP, 'report.txt')
 
 with open(EVAL_REPORT_PATH, 'r') as f:
     report_content = f.readlines()
@@ -61,7 +75,7 @@ for name, task, shot, exp in model_infos:
     source_file_path = os.path.join(SCRATCH_BASE_PATH, 'work_dirs', task, shot, name, file_name)
 
     if not is_valid_csv(source_file_path):
-        continue
+        exit()
 
     # Construct target path and ensure that the directory exists
     target_path = os.path.join(VAL_TARGET_PATH, TIMESTAMP, 'result', exp)
