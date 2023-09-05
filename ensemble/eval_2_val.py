@@ -34,7 +34,7 @@ TASKS = ["colon", "endo", "chest"]
 
 # TODO: Read TIMESTAMP during runtime
 TIMESTAMP = '02-09_00-32-41'
-EVAL_REPORT_PATH = os.path.join(EVAL_BASE_PATH, TIMESTAMP, 'report.txt')
+EVAL_REPORT_PATH = os.path.join(EVAL_BASE_PATH, TIMESTAMP, 'predictions', 'report.txt')
 
 
 with open(EVAL_REPORT_PATH, 'r') as f:
