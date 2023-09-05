@@ -20,21 +20,15 @@ run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
 work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
 
 model = dict(
-    type='ImageClassifier',
     backbone=dict(
-        type='DenseNet',
-        depth=121,
-        num_stages=4,
-        out_indices=(3, ),
-        style='pytorch',
-        init_cfg=dict(
-            type='Pretrained', checkpoint=checkpoint, prefix='backbone')),
-    neck='GlobalAveragePooling',
+        init_cfg=dict(type='Pretrained', checkpoint=checkpoint, prefix='backbone')
+    ),
+    neck=None,
     head=dict(
         type='CSRAClsHead',
-        num_classes=2,
-        in_channels=2048,
-        num_heads=1,
+        num_classes=19,
+        in_channels=1024,
+        num_heads=2,
         lam=0.1,
         loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)))
 
