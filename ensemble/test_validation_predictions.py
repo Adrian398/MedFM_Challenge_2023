@@ -179,20 +179,17 @@ def compute_task_specific_metrics(pred_path, gt_path, task):
         raise ValueError(f"Invalid task: {task}")
 
 
-# Directory paths
+# ==========================================================================================
 PREDICTION_DIR = "ensemble/validation/05-09_14-17-34/result"
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
-
 shots = ['1-shot', '5-shot', '10-shot']
 tasks = ["colon", "endo", "chest"]
 exps = ["exp1", "exp2", "exp3", "exp4", "exp5"]
-
 TASK_2_CLASS_COUNT = {
     'colon': 2,  # Binary classification
     'chest': 19,  # 19-class multi-label classification
     'endo': 4  # 4-class multi-label classification
 }
-
 TASK_2_CLASS_NAMES = {
     'colon': ['tumor'],
     'chest': ['pleural_effusion', 'nodule', 'pneumonia', 'cardiomegaly', 'hilar_enlargement', 'fracture_old',
@@ -202,16 +199,18 @@ TASK_2_CLASS_NAMES = {
               'consolidation'],
     'endo': ['ulcer', 'erosion', 'polyp', 'tumor']
 }
+# ==========================================================================================
 
-# Iterate over experiments, tasks and shots
-results = {exp: {} for exp in exps}
 
-for exp in exps:
-    for task in tasks:
-        for shot in shots:
-            metrics = process_experiment(exp=exp, task=task, shot=shot)
-            if metrics:
-                results[exp][f"{task}_{shot}"] = metrics
+if __name__ == "__main__":
+    results = {exp: {} for exp in exps}
 
-json_result = generate_json(results=results)
-print(json_result)
+    for exp in exps:
+        for task in tasks:
+            for shot in shots:
+                metrics = process_experiment(exp=exp, task=task, shot=shot)
+                if metrics:
+                    results[exp][f"{task}_{shot}"] = metrics
+
+    json_result = generate_json(results=results)
+    print(json_result)
