@@ -66,8 +66,12 @@ while True:
 
 EVAL_REPORT_PATH = os.path.join(EVAL_BASE_PATH, TIMESTAMP, 'report.txt')
 
-with open(EVAL_REPORT_PATH, 'r') as f:
-    report_content = f.readlines()
+try:
+    with open(EVAL_REPORT_PATH, 'r') as f:
+        report_content = f.readlines()
+except FileNotFoundError:
+    print(colored(f"No report.txt found in: {EVAL_REPORT_PATH}", 'red'))
+    exit()
 
 model_infos = construct_model_paths(report_content)
 
