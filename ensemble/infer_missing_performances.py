@@ -6,6 +6,7 @@ This script does the following steps:
 - generate the testing commands
 - batch all commands on the corresponding gpus, whereas each gpu is dedicated for a specific task
 """
+import argparse
 import itertools
 import json
 import os
@@ -70,8 +71,9 @@ def run_commands_on_cluster(commands, num_commands, gpu='8a'):
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
+        print("\n")
         slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
-        print(slurm_cmd + "\n")
+        print(slurm_cmd)
 
         task_counter[task] += 1
 
@@ -236,7 +238,7 @@ def get_model_dirs_without_performance(task, shot):
 
 # ========================================================================================
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
-tasks = ["colon", "endo", "chest"]
+task_choices = ["colon", "endo", "chest"]
 shots = ["1", "5", "10"]
 N_inferences_per_task = 10
 batch_size = 4
@@ -247,7 +249,22 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
 # ========================================================================================
 
 
-if __name__ == "__main__":  # Important when using multiprocessing
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description='Infers missing performances from model runs on the test set.')
+    parser.add_argument("--gpu", type=str, default='all',
+                        help="GPU type: \n- 'c'=rtx4090,\n- '8a'=rtx2070ti\n"
+                             "- 'ab'=rtx3090\n- 'all'=rtx4090, rtx3090 cyclic")
+    parser.add_argument("--task", type=str, nargs='*', default=["colon", "endo", "chest"],
+                        choices=task_choices,
+                        help="Task type: 'colon', 'chest', or 'endo'. "
+                             "Multiple tasks can be provided separated with a whitespace."
+                             "Default is all tasks.")
+    args = parser.parse_args()
+
+    gpu_type = args.gpu
+    tasks = args.task
+
     with Pool() as pool:
         combinations = [(task, shot) for task in tasks for shot in shots]
 
@@ -316,4 +333,4 @@ if __name__ == "__main__":  # Important when using multiprocessing
         except ValueError:
             my_print("Invalid input. Please enter a number or 'no' to exit.")
 
-    run_commands_on_cluster(commands, num_commands)
+    run_commands_on_cluster(commands, num_commands, gpu=gpu_type)
