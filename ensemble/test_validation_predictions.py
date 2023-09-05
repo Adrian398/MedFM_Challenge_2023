@@ -45,13 +45,14 @@ def get_file_by_keyword(directory, keyword, file_extension=None):
     - str/None: The path of the unique file, or None if there's no such file or if multiple such files exist.
     """
 
-    # Build the search pattern based on the presence of a file_extension
-    search_pattern = os.path.join(directory, f"*{keyword}*")
-    if file_extension:
-        search_pattern += f".{file_extension}"
+    # Search pattern only based on the file extension (if present)
+    search_pattern = os.path.join(directory, f"*.{file_extension}" if file_extension else "*")
 
-    # Using glob to fetch all files in the directory that match the pattern (case-insensitive)
-    matching_files = [f for f in glob.glob(search_pattern, recursive=True) if keyword.lower() in f.lower()]
+    # Fetch all files in the directory that match the pattern
+    all_files = glob.glob(search_pattern)
+
+    # Filter files based on case-insensitive presence of the keyword
+    matching_files = [f for f in all_files if keyword.lower() in os.path.basename(f).lower()]
 
     # Results handling
     if len(matching_files) == 1:
