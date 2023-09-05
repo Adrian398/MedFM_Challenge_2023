@@ -1,12 +1,54 @@
 import glob
+import json
+import math
 import os
 
-import pandas as pd
-import math
 import numpy as np
-import torch
+import pandas as pd
 from sklearn import metrics
 from sklearn.metrics import average_precision_score
+
+
+def generate_json(results):
+    """Generate a refined JSON object with aggregates."""
+
+    # Define expected metrics for each task type
+    expected_metrics = {
+        'colon': ['ACC', 'AUC'],
+        'chest': ['AUC', 'mAP'],
+        'endo': ['AUC', 'mAP']
+    }
+
+    json_results = {"task": {}}
+    total_sum = 0
+    total_metrics_count = 0
+
+    # Helper function to safely get metric value
+    def get_metric_value(metrics, metric_name):
+        return metrics.get(metric_name, None)
+
+    # Iterate over experiments
+    for exp, task_data in results.items():
+        json_results["task"][exp] = {}
+
+        # For each combination of task and shot
+        for task_shot, metrics in task_data.items():
+            task_type = task_shot.split('_')[0]
+            json_results["task"][exp][task_shot] = {}
+
+            # Ensure expected metrics are present
+            for metric_name in expected_metrics[task_type]:
+                metric_value = get_metric_value(metrics, metric_name)
+                if metric_value is not None:
+                    total_sum += metric_value
+                    total_metrics_count += 1
+                json_results["task"][exp][task_shot][f"{metric_name}_metric"] = str(metric_value)
+
+    # Calculate the aggregate value
+    aggregate_value = total_sum / total_metrics_count if total_metrics_count > 0 else 0
+    json_results["aggregates"] = str(aggregate_value)
+
+    return json.dumps(json_results, indent=2)
 
 
 def process_experiment(exp, task, shot):
@@ -20,7 +62,7 @@ def process_experiment(exp, task, shot):
         print(f"Prediction file for {exp} and task {task} with shot {shot} not found.")
         return None
 
-    return compute_task_specific_metrics(pred_path, gt_path, task)
+    return compute_task_specific_metrics(pred_path=pred_path, gt_path=gt_path, task=task)
 
 
 def get_gt_csv_filepath(task):
@@ -66,6 +108,25 @@ def get_file_by_keyword(directory, keyword, file_extension=None):
     return None
 
 
+def read_and_validate_files(pred_path, gt_path, task):
+    """Read prediction and ground truth files, then validate the necessary columns."""
+    try:
+        pred_df = pd.read_csv(pred_path)
+        gt_df = pd.read_csv(gt_path)
+    except Exception as e:
+        raise ValueError(f"Error reading CSV files: {e}")
+
+    score_cols = [f'score_{i}' for i in range(TASK_2_CLASS_COUNT.get(task, 2))]
+    pred_df.columns = ['img_id'] + score_cols
+
+    # Validate columns in prediction
+    missing_cols = [col for col in ['img_id'] + score_cols if col not in pred_df.columns]
+    if missing_cols:
+        raise ValueError(f"Missing columns in the predictions: {missing_cols}")
+
+    return pred_df, gt_df, score_cols
+
+
 def compute_auc(cls_scores, cls_labels):
     cls_aucs = []
     for i in range(cls_scores.shape[1]):
@@ -105,53 +166,48 @@ def cal_metrics_multilabel(target, cosine_scores):
     return mean_auc
 
 
-def compute_task_specific_metrics(pred_path, gt_path, task):
-    """
-    Compute metrics based on the provided task.
+def compute_colon_metrics(merged_df, score_cols):
+    """Compute metrics for the 'colon' task."""
+    target = merged_df[['tumor']].values
+    pred_scores = merged_df[score_cols].values
 
-    Args:
-    - pred_path: Path to the predictions CSV.
-    - gt_path: Path to the ground truth CSV.
-    - task: Name of the task.
-
-    Returns:
-    - metrics: Dictionary containing the computed metrics.
-    """
-
-    try:
-        predictions = pd.read_csv(pred_path)
-        ground_truth = pd.read_csv(gt_path)
-    except Exception as e:
-        print(f"Error reading CSV files: {e}")
-        return
-
-    # Check for necessary columns and equal lengths
-    for column_name in ['label', 'score']:
-        if column_name not in predictions.columns:
-            print(f"Missing '{column_name}' column in the predictions CSV file: {pred_path}.")
-            return
-        if column_name not in ground_truth.columns:
-            print(f"Missing '{column_name}' column in the ground truth CSV file: {gt_path}.")
-            return
-
-    if len(predictions) != len(ground_truth):
-        print("Predictions and Ground Truth have different lengths.")
-        return
-
-    # Compute metrics
-    target = torch.tensor(ground_truth['label'].values)
-    pred = torch.tensor(predictions['score'].values)
-
-    metrics = {'AUC': cal_metrics_multilabel(target, pred)}
-
-    if task in ['chest', 'endo']:
-        metrics['mAP'] = average_precision_score(target.numpy(), pred.numpy()) * 100
-
-    if task == 'colon':
-        correct_predictions = sum(predictions['label'] == ground_truth['label'])
-        metrics['ACC'] = correct_predictions / len(predictions)
+    metrics = {'AUC': cal_metrics_multilabel(target, pred_scores)}
+    pred_labels = (pred_scores[:, 1] >= 0.5).astype(int)  # Convert scores to labels using a threshold of 0.5
+    correct_predictions = sum(pred_labels == target.ravel())
+    metrics['ACC'] = correct_predictions / len(pred_labels)
 
     return metrics
+
+
+def compute_multilabel_metrics(merged_df, target_columns, score_cols, num_classes):
+    """Compute metrics for multi-label tasks ('chest' and 'endo')."""
+    target = merged_df[target_columns].values
+    pred_scores = merged_df[score_cols].values
+
+    metrics = {'AUC': cal_metrics_multilabel(target, pred_scores)}
+
+    # Compute mAP for each label and then average them
+    AP_scores = [average_precision_score(target[:, i], pred_scores[:, i]) for i in range(num_classes)]
+    metrics['mAP'] = np.mean(AP_scores) * 100
+
+    return metrics
+
+
+def compute_task_specific_metrics(pred_path, gt_path, task):
+    pred_df, gt_df, score_cols = read_and_validate_files(pred_path, gt_path, task)
+
+    target_columns = TASK_2_CLASS_NAMES.get(task, [])
+
+    # Merge predictions and ground truth based on img_id
+    merged_df = pd.merge(pred_df, gt_df, on='img_id', how='inner')
+
+    if task == 'colon':
+        return compute_colon_metrics(merged_df, score_cols)
+    elif task in ['chest', 'endo']:
+        num_classes = TASK_2_CLASS_COUNT.get(task, 2)
+        return compute_multilabel_metrics(merged_df, target_columns, score_cols, num_classes)
+    else:
+        raise ValueError(f"Invalid task: {task}")
 
 
 # Directory paths
@@ -161,6 +217,22 @@ GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 shots = ['1-shot', '5-shot', '10-shot']
 tasks = ["colon", "endo", "chest"]
 exps = ["exp1", "exp2", "exp3", "exp4", "exp5"]
+
+TASK_2_CLASS_COUNT = {
+    'colon': 2,  # Binary classification
+    'chest': 19,  # 19-class multi-label classification
+    'endo': 4  # 4-class multi-label classification
+}
+
+TASK_2_CLASS_NAMES = {
+    'colon': ['tumor'],
+    'chest': ['pleural_effusion', 'nodule', 'pneumonia', 'cardiomegaly', 'hilar_enlargement', 'fracture_old',
+              'fibrosis',
+              'aortic_calcification', 'tortuous_aorta', 'thickened_pleura', 'TB', 'pneumothorax', 'emphysema',
+              'atelectasis', 'calcification', 'pulmonary_edema', 'increased_lung_markings', 'elevated_diaphragm',
+              'consolidation'],
+    'endo': ['ulcer', 'erosion', 'polyp', 'tumor']
+}
 
 # Iterate over experiments, tasks and shots
 results = {exp: {} for exp in exps}
@@ -172,10 +244,5 @@ for exp in exps:
             if metrics:
                 results[exp][f"{task}_{shot}"] = metrics
 
-# Display the results
-# for exp, metrics in results.items():
-#     print(f"Experiment: {exp}")
-#     for task, task_metrics in metrics.items():
-#         print(f"\tTask: {task}")
-#         for metric_name, metric_value in task_metrics.items():
-#             print(f"\t\t{metric_name}: {metric_value}")
+json_result = generate_json(results=results)
+print(json_result)
