@@ -80,7 +80,7 @@ results = {}
 experiments = ["exp1", "exp2", "exp3", "exp4", "exp5"]
 
 for exp in experiments:
-    exp_dir = os.path.join(PREDICTION_DIR, exp)
+    exp_dir = os.path.join(PREDICTION_DIR, "result", exp)
     print(exp_dir)
     tasks = [task.split('_')[0] for task in os.listdir(exp_dir) if task.endswith('_validation.csv')]
     print(tasks)
