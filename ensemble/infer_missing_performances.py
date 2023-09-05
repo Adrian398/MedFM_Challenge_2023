@@ -152,7 +152,7 @@ def find_and_validate_json_files(model_dir, task):
                             print(f"Found 'performance.json' but accuracy/top1 missing")
                             return False
 
-                        if task == "colon" and "accuracy/top1" not in data:
+                        if task == "colon" and "accuracy/top1" in data:
                             print(colored(f"Accuracy found in colon: {dirpath}", 'blue'))
 
                 except json.JSONDecodeError:
