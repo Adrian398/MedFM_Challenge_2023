@@ -5,8 +5,11 @@ import os
 
 import numpy as np
 import pandas as pd
+from numpy import ndarray
 from sklearn import metrics
 from sklearn.metrics import average_precision_score, roc_auc_score
+
+from medfmc.evaluation.metrics.auc import cal_metrics_multilabel, compute_auc, cal_metrics_multiclass
 
 
 def generate_json(results):
@@ -127,56 +130,22 @@ def read_and_validate_files(pred_path, gt_path, task):
     return pred_df, gt_df, score_cols
 
 
-def compute_auc(cls_scores, cls_labels):
-    cls_aucs = []
-    for i in range(cls_scores.shape[1]):
-        scores_per_class = cls_scores[:, i]
-        labels_per_class = cls_labels[:, i]
-        try:
-            auc_per_class = roc_auc_score(labels_per_class,
-                                                  scores_per_class)
-            # print('class {} auc = {:.2f}'.format(i + 1, auc_per_class * 100))
-        except ValueError:
-            pass
-        cls_aucs.append(auc_per_class * 100)
+def compute_colon_metrics(df, score_cols):
+    """
+    Compute metrics for the 'colon' task.
+    """
+    target = df['tumor'].values
+    pred_scores = df[score_cols].values
 
-    return cls_aucs
+    # Calculate AUC using multiclass method
+    metrics_dict = {'AUC': cal_metrics_multiclass(target, pred_scores)}
 
+    # Calculate ACC (accuracy)
+    pred_labels = np.argmax(pred_scores, axis=1)  # Get the predicted class (0 or 1)
+    correct_predictions = sum(pred_labels == target)
+    metrics_dict['ACC'] = correct_predictions / len(pred_labels) * 100  # Express accuracy as a percentage
 
-def cal_metrics_multilabel(target, cosine_scores):
-    """Calculate mean AUC with given dataset information and cosine scores."""
-
-    sample_num = target.shape[0]
-    cls_num = cosine_scores.shape[1]
-
-    gt_labels = np.zeros((sample_num, cls_num))
-    for k in range(target.shape[0]):
-        label = target[k]
-        gt_labels[k, :] = label
-
-    cls_scores = np.zeros((sample_num, cls_num))
-    for k in range(target.shape[0]):
-        cos_score = cosine_scores[k]
-        norm_scores = [1 / (1 + math.exp(-1 * v)) for v in cos_score]
-        cls_scores[k, :] = np.array(norm_scores)
-
-    cls_aucs = compute_auc(cls_scores, gt_labels)
-    mean_auc = np.mean(cls_aucs)
-
-    return mean_auc
-
-
-def compute_colon_metrics(merged_df, score_cols):
-    """Compute metrics for the 'colon' task."""
-    target = merged_df[['tumor']].values
-    pred_scores = merged_df[score_cols].values
-
-    metrics = {'AUC': cal_metrics_multilabel(target, pred_scores)}
-    pred_labels = (pred_scores[:, 1] >= 0.5).astype(int)  # Convert scores to labels using a threshold of 0.5
-    correct_predictions = sum(pred_labels == target.ravel())
-    metrics['ACC'] = (correct_predictions / len(pred_labels)) * 100
-
-    return metrics
+    return metrics_dict
 
 
 def compute_multilabel_metrics(merged_df, target_columns, score_cols, num_classes):
@@ -184,13 +153,13 @@ def compute_multilabel_metrics(merged_df, target_columns, score_cols, num_classe
     target = merged_df[target_columns].values
     pred_scores = merged_df[score_cols].values
 
-    metrics = {'AUC': cal_metrics_multilabel(target, pred_scores)}
+    metrics_dict = {'AUC': cal_metrics_multilabel(target, pred_scores)}
 
     # Compute mAP for each label and then average them
-    AP_scores = [average_precision_score(target[:, i], pred_scores[:, i]) for i in range(num_classes)]
-    metrics['mAP'] = np.mean(AP_scores) * 100
+    ap_scores = [average_precision_score(target[:, i], pred_scores[:, i]) for i in range(num_classes)]
+    metrics_dict['mAP'] = np.mean(ap_scores) * 100
 
-    return metrics
+    return metrics_dict
 
 
 def compute_task_specific_metrics(pred_path, gt_path, task):
