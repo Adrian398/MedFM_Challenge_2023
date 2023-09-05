@@ -18,3 +18,11 @@ In general:
     - adapt ensemble/submission to use inferences on validation data to create ensemble result =>
         - Write custom evaluation of these results (can't use Runner / test script, cause that requires one model,
         we have csvs from multiple models)
+
+
+[X] 1) Adjust submission.py so that the user can choose between "evaluation" and "validation" submission -> save results in a different folder
+[X] 2) Adjust submission.py so that a report is written for all the models used in the ensemble -> output to validation folder
+[ ] 3) Write a script that takes the submission csvs and compares them with the downloaded labelled validation data to compare scores (per exp, setting and overall)
+    - Input is path to the validation submission dir and path to the annotation file
+    - We have prediction probabilities and labels -> calculate mAP and AUC (metrics)
+[ ] 4) In submission.py implement different "ensemble strategies" and assess those with the previously written script
