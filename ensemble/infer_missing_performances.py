@@ -22,7 +22,7 @@ from termcolor import colored
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
-def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=0.5):
+def run_commands_on_cluster(commands, num_commands, gpu='all'):
     """
     Runs the generated commands on the cluster.
     Tasks are allocated to GPUs based on the task type:
@@ -76,7 +76,6 @@ def run_commands_on_cluster(commands, num_commands, gpu='all', delay_seconds=0.5
         task_counter[task] += 1
 
         subprocess.run(slurm_cmd, shell=True)
-        #time.sleep(delay_seconds)
 
 
 def get_file_from_directory(directory, extension, contains_string=None):
@@ -152,6 +151,9 @@ def find_and_validate_json_files(model_dir, task):
                         if task == "colon" and "accuracy/top1" not in data:
                             print(f"Found 'performance.json' but accuracy/top1 missing")
                             return False
+
+                        if task == "colon" and "accuracy/top1" not in data:
+                            print(colored(f"Accuracy found in colon: {dirpath}", 'blue'))
 
                 except json.JSONDecodeError:
                     print(f"Cannot load JSON from: {filepath}")
