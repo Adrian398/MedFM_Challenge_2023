@@ -1,10 +1,8 @@
 import os
-import re
 
 
 def construct_model_paths(report):
-    # Filter out the lines containing model information
-    lines = [line for line in report_content if any(task in line for task in TASKS)]
+    lines = [line for line in report if any(task in line for task in TASKS)]
 
     model_paths = []
     for line in lines:
@@ -21,6 +19,7 @@ def construct_model_paths(report):
         # Constructing the path
         path = os.path.join(EVAL_BASE_PATH, "work_dirs", task, shot, model_name)
         model_paths.append(path)
+    return model_paths
 
 
 # ================================================================================
@@ -35,7 +34,7 @@ TASKS = ["colon", "endo", "chest"]
 
 with open(EVAL_REPORT_PATH, 'r') as f:
     report_content = f.readlines()
-print(report_content)
+
 model_paths = construct_model_paths(report_content)
 
 for path in model_paths:
