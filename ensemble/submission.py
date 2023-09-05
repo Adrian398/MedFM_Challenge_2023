@@ -203,6 +203,8 @@ else:
 os.makedirs(submission_dir)
 for exp in experiments:
     os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
+print(os.path.isdir(os.path.join(submission_dir, 'result', experiments[0])))
+exit()
 
 # iterate over exp_dirs_dict, for each task / shot / exp combination, merge results
 for task in tasks:
