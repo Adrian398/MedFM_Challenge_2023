@@ -1,3 +1,4 @@
+import glob
 import os
 
 import pandas as pd
@@ -6,6 +7,64 @@ import numpy as np
 import torch
 from sklearn import metrics
 from sklearn.metrics import average_precision_score
+
+
+def process_experiment(exp, task, shot):
+    gt_path = get_gt_csv_filepath(task=task)
+    if not gt_path:
+        print(f"Ground truth file for task {task} not found.")
+        return None
+
+    pred_path = get_pred_csv_filepath(exp=exp, task=task, shot=shot)
+    if not pred_path:
+        print(f"Prediction file for {exp} and task {task} with shot {shot} not found.")
+        return None
+    return None
+    #return compute_task_specific_metrics(pred_path, gt_path, task)
+
+
+def get_gt_csv_filepath(task):
+    return get_file_by_keyword(directory=GT_DIR, keyword=task, file_extension='csv')
+
+
+def get_pred_csv_filepath(exp, task, shot):
+    pred_dir = os.path.join(PREDICTION_DIR, exp)
+    file_name = f"{task}_{shot}_validation"
+    return get_file_by_keyword(directory=pred_dir, keyword=file_name, file_extension='csv')
+
+
+def get_file_by_keyword(directory, keyword, file_extension=None):
+    """Get the path of a unique file in the specified directory that contains the given keyword in its name.
+
+    Args:
+    - directory (str): The directory to search in.
+    - keyword (str): The keyword to look for in file names.
+    - file_extension (str, optional): The desired file extension (e.g., 'csv'). If None, any extension is considered.
+
+    Returns:
+    - str/None: The path of the unique file, or None if there's no such file or if multiple such files exist.
+    """
+
+    # Build the search pattern based on the presence of a file_extension
+    if file_extension:
+        search_pattern = os.path.join(directory, f"*{keyword}*.{file_extension}")
+    else:
+        search_pattern = os.path.join(directory, f"*{keyword}*")
+
+    # Using glob to fetch all files in the directory that match the pattern
+    matching_files = glob.glob(search_pattern)
+
+    # If there's only one such file, return its path
+    if len(matching_files) == 1:
+        return matching_files[0]
+    elif len(matching_files) > 1:
+        print(
+            f"More than one file found in {directory} containing the keyword '{keyword}' with the specified extension.")
+        return None
+    else:
+        print(f"No file found in {directory} containing the keyword '{keyword}' with the specified extension.")
+        return None
+
 
 def compute_auc(cls_scores, cls_labels):
     cls_aucs = []
@@ -45,27 +104,50 @@ def cal_metrics_multilabel(target, cosine_scores):
 
     return mean_auc
 
-def compute_task_specific_metrics(pred_path, gt_path, task):
-    predictions = pd.read_csv(pred_path)
-    ground_truth = pd.read_csv(gt_path)
 
+def compute_task_specific_metrics(pred_path, gt_path, task):
+    """
+    Compute metrics based on the provided task.
+
+    Args:
+    - pred_path: Path to the predictions CSV.
+    - gt_path: Path to the ground truth CSV.
+    - task: Name of the task.
+
+    Returns:
+    - metrics: Dictionary containing the computed metrics.
+    """
+
+    # Read CSVs
+    try:
+        predictions = pd.read_csv(pred_path)
+        ground_truth = pd.read_csv(gt_path)
+    except Exception as e:
+        print(f"Error reading CSV files: {e}")
+        return
+
+    # Check for necessary columns and equal lengths
+    for column_name in ['label', 'score']:
+        if column_name not in predictions.columns or column_name not in ground_truth.columns:
+            print(f"Missing '{column_name}' column in CSV files.")
+            return
+
+    if len(predictions) != len(ground_truth):
+        print("Predictions and Ground Truth have different lengths.")
+        return
+
+    # Compute metrics
     target = torch.tensor(ground_truth['label'].values)
     pred = torch.tensor(predictions['score'].values)
 
-    auc = cal_metrics_multilabel(target, pred)
-
-    metrics = {
-        'AUC': auc
-    }
+    metrics = {'AUC': cal_metrics_multilabel(target, pred)}
 
     if task in ['chest', 'endo']:
-        map_value = average_precision_score(target.numpy(), pred.numpy()) * 100
-        metrics['mAP'] = map_value
+        metrics['mAP'] = average_precision_score(target.numpy(), pred.numpy()) * 100
 
     if task == 'colon':
         correct_predictions = sum(predictions['label'] == ground_truth['label'])
-        acc = correct_predictions / len(predictions)
-        metrics['ACC'] = acc
+        metrics['ACC'] = correct_predictions / len(predictions)
 
     return metrics
 
@@ -76,28 +158,22 @@ GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 
 shots = ['1-shot', '5-shot', '10-shot']
 tasks = ["colon", "endo", "chest"]
-experiments = ["exp1", "exp2", "exp3", "exp4", "exp5"]
+exps = ["exp1", "exp2", "exp3", "exp4", "exp5"]
 
 # Iterate over experiments, tasks and shots
-results = {}
-for exp in experiments:
-    exp_dir = os.path.join(PREDICTION_DIR, exp)
-    results[exp] = {}
+results = {exp: {} for exp in exps}
 
+for exp in exps:
     for task in tasks:
         for shot in shots:
-            pred_path = os.path.join(exp_dir, f"{task}_{shot}_validation.csv")
-            gt_path = os.path.join(GT_DIR, task, "trainval.txt")
-            print("task:", task)
-            print("pred_path:", pred_path)
-            print("gt_path:", gt_path)
-            #metrics = compute_task_specific_metrics(pred_path, gt_path, task)
-            #results[exp][task][shot] = metrics
+            metrics = process_experiment(exp=exp, task=task, shot=shot)
+            if metrics:
+                results[exp][f"{task}_{shot}"] = metrics
 
 # Display the results
-for exp, metrics in results.items():
-    print(f"Experiment: {exp}")
-    for task, task_metrics in metrics.items():
-        print(f"\tTask: {task}")
-        for metric_name, metric_value in task_metrics.items():
-            print(f"\t\t{metric_name}: {metric_value}")
+# for exp, metrics in results.items():
+#     print(f"Experiment: {exp}")
+#     for task, task_metrics in metrics.items():
+#         print(f"\tTask: {task}")
+#         for metric_name, metric_value in task_metrics.items():
+#             print(f"\t\t{metric_name}: {metric_value}")
