@@ -145,6 +145,11 @@ def print_metric_report_for_task(model_list, task, metric):
     for model_path_rel, metric_value in model_view:
         print(f"Model: {model_path_rel:{max_char_length}}  {metric}: {metric_value:.4f}")
 
+metric_for_task = {
+    'colon': 'accuracy/top1',
+    'chest': 'Aggregate',
+    'endo': 'Aggregate'
+}
 
 # iterate over exp_dirs_dict, for each task / shot / exp combination, merge results
 for task in tasks:
@@ -156,6 +161,6 @@ for task in tasks:
             out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_submission.csv")
             data_list = extract_data_tuples(exp_dirs[task][shot][exp])
 
-            print_metric_report_for_task(model_list=data_list, task=task, metric='Aggregate')
+            print_metric_report_for_task(model_list=data_list, task=task, metric=metric_for_task.get(task, 'Aggregate'))
 
             #merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
