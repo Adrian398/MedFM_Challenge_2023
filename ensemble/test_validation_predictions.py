@@ -71,31 +71,28 @@ def compute_task_specific_metrics(pred_path, gt_path, task):
 
 
 # Directory paths
-PREDICTION_DIR = "ensemble/validation/05-09_14-17-34"
+PREDICTION_DIR = "ensemble/validation/05-09_14-17-34/result"
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 
-# Iterate over experiments and tasks
-results = {}
-
+shots = ['1-shot', '5-shot', '10-shot']
+tasks = ["colon", "endo", "chest"]
 experiments = ["exp1", "exp2", "exp3", "exp4", "exp5"]
 
+# Iterate over experiments, tasks and shots
+results = {}
 for exp in experiments:
-    exp_dir = os.path.join(PREDICTION_DIR, "result", exp)
-    print(exp_dir)
-    tasks = [task.split('_')[0] for task in os.listdir(exp_dir) if task.endswith('_validation.csv')]
-    print(tasks)
+    exp_dir = os.path.join(PREDICTION_DIR, exp)
     results[exp] = {}
-    print("for exp in exps")
+
     for task in tasks:
-        print("for task in tasks")
-        pred_path = os.path.join(exp_dir, f"{task}_*shot_validation.csv")
-        gt_path = os.path.join(GT_DIR, f"{task}_trainval.txt")
-        print("task:",task)
-        print("pred_path:", pred_path)
-        print("gt_path:", gt_path)
-        exit()
-        metrics = compute_task_specific_metrics(pred_path, gt_path, task)
-        results[exp][task] = metrics
+        for shot in shots:
+            pred_path = os.path.join(exp_dir, f"{task}_{shot}_validation.csv")
+            gt_path = os.path.join(GT_DIR, task, "trainval.txt")
+            print("task:", task)
+            print("pred_path:", pred_path)
+            print("gt_path:", gt_path)
+            #metrics = compute_task_specific_metrics(pred_path, gt_path, task)
+            #results[exp][task][shot] = metrics
 
 # Display the results
 for exp, metrics in results.items():
