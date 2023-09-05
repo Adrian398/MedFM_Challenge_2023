@@ -19,8 +19,8 @@ def process_experiment(exp, task, shot):
     if not pred_path:
         print(f"Prediction file for {exp} and task {task} with shot {shot} not found.")
         return None
-    return None
-    #return compute_task_specific_metrics(pred_path, gt_path, task)
+
+    return compute_task_specific_metrics(pred_path, gt_path, task)
 
 
 def get_gt_csv_filepath(task):
@@ -118,7 +118,6 @@ def compute_task_specific_metrics(pred_path, gt_path, task):
     - metrics: Dictionary containing the computed metrics.
     """
 
-    # Read CSVs
     try:
         predictions = pd.read_csv(pred_path)
         ground_truth = pd.read_csv(gt_path)
