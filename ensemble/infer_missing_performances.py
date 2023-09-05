@@ -22,7 +22,7 @@ from termcolor import colored
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
-def run_commands_on_cluster(commands, num_commands, gpu='all'):
+def run_commands_on_cluster(commands, num_commands, gpu='8a'):
     """
     Runs the generated commands on the cluster.
     Tasks are allocated to GPUs based on the task type:
