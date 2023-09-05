@@ -2,7 +2,7 @@ import os
 
 
 def construct_model_paths(report):
-    lines = [line for line in report if any(task in line for task in TASKS)]
+    lines = [line for line in report if any(t in line for t in TASKS)]
 
     model_infos = []
     for line in lines:
@@ -12,15 +12,15 @@ def construct_model_paths(report):
         task_shot_exp = parts[0].split("/")
 
         # Extract task, shot, and exp number
-        task = task_shot_exp[0].strip('| ').strip()
-        shot = task_shot_exp[1].strip()
-        exp = task_shot_exp[2].strip()
+        model_task = task_shot_exp[0].strip('| ').strip()
+        model_shot = task_shot_exp[1].strip()
+        model_exp = task_shot_exp[2].strip()
 
         model_infos.append({
             'model_name': model_name,
-            'task': task,
-            'shot': shot,
-            'exp': exp,
+            'task': model_task,
+            'shot': model_shot,
+            'exp': model_exp,
         })
     return model_infos
 
@@ -45,10 +45,10 @@ model_infos = construct_model_paths(report_content)
 for path in model_infos:
     print(path)
 
-for model_name, task, shot, exp in model_infos:
+for name, task, shot, exp in model_infos:
     # Search for validation prediction csv and validate it
     file_name = f"{task}_{shot}_validation.csv"
-    source_path = os.path.join(SCRATCH_BASE_PATH, 'work_dirs', task, shot, model_name, file_name)
+    source_path = os.path.join(SCRATCH_BASE_PATH, 'work_dirs', task, shot, name, file_name)
     print(source_path)
 
     # Construct target path and ensure that the directory exists
