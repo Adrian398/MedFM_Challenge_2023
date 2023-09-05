@@ -59,8 +59,8 @@ def process_image(input_directory, output_directory, filename):
 
 
 
-input_directory = '/scratch/medfm/medfm-challenge/data/MedFMC/endo/images'
-output_directory = '/scratch/medfm/medfm-challenge/data/MedFMC/endo/pre_processed_images'
+input_directory = '/scratch/medfm/medfm-challenge/data/MedFMC_val/endo/images'
+output_directory = '/scratch/medfm/medfm-challenge/data/MedFMC_val/endo/pre_processed_images'
 
 image_files = [f for f in os.listdir(input_directory) if f.endswith(('.jpg', '.png'))]
 
