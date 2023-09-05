@@ -140,5 +140,7 @@ for task in tasks:
             data_list = extract_data_tuples(exp_dirs[task][shot][exp])
             if task == "chest" and shot == "10-shot":
                 print(task, shot, exp)
-                print(data_list)
+                for model in data_list:
+                    model_path_rel = model['name'].split('work_dirs/')[1]
+                    print("Model:", model_path_rel, "Aggregate:", model['metrics']['Aggregate'])
             #merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
