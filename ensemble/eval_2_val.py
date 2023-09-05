@@ -4,17 +4,25 @@ import re
 
 def construct_model_paths(report):
     # Filter out the lines containing model information
-    lines = [line for line in report if "| " in line]
-
+    lines = [line for line in report_content if any(task in line for task in TASKS)]
+    print(lines)
+    exit()
     model_paths = []
     for line in lines:
-        print(line)
-        task, shot = line.split('/')[0:2]
-        model_name = line.strip().split()[-1]
+        parts = line.split("\t")
+        task_shot_exp = parts[0].split("/")
 
-        model_path = os.path.join(SCRATCH_BASE_PATH, "work_dirs", task, shot, model_name)
-        model_paths.append(model_path)
-    return model_paths
+        # Extract task, shot, and exp number
+        task = task_shot_exp[0].strip('| ').strip()
+        shot = task_shot_exp[1].strip()
+        exp = task_shot_exp[2].split("exp")[1].strip()  # extract the number after "exp"
+
+        # Extract model name
+        model_name = parts[2].strip()
+
+        # Constructing the path
+        path = os.path.join(EVAL_BASE_PATH, "work_dirs", task, shot, model_name)
+        model_paths.append(path)
 
 
 # ================================================================================
@@ -23,6 +31,7 @@ SCRATCH_BASE_PATH = '/scratch/medfm/medfm-challenge'
 EVAL_BASE_PATH = 'submissions/evaluation'
 EVAL_FOLDER_PATH = os.path.join(EVAL_BASE_PATH, TIMESTAMP)
 EVAL_REPORT_PATH = os.path.join(EVAL_FOLDER_PATH, 'report.txt')
+TASKS = ["colon", "endo", "chest"]
 # ================================================================================
 
 
