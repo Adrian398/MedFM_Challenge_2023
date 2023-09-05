@@ -4,6 +4,14 @@ import shutil
 from termcolor import colored
 
 
+def is_valid_submission(directory_path):
+    """Check if the directory contains a validation.csv for every setting."""
+    required_files = [f"{task}_{shot}_validation.csv" for task in TASKS for shot in ["1-shot", "5-shot", "10-shot"]]
+    existing_files = os.listdir(directory_path)
+
+    return all(file in existing_files for file in required_files)
+
+
 def is_valid_csv(path):
     # 1. Check if file exists
     if not os.path.exists(path):
@@ -44,7 +52,11 @@ EVAL_BASE_PATH = 'submissions/evaluation'
 TASKS = ["colon", "endo", "chest"]
 # ================================================================================
 
+# Read all timestamps (folder names) at runtime from EVAL_BASE_PATH
 timestamps = [d for d in os.listdir(EVAL_BASE_PATH) if os.path.isdir(os.path.join(EVAL_BASE_PATH, d))]
+
+# Filter out invalid timestamp directories
+timestamps = [timestamp for timestamp in timestamps if is_valid_submission(os.path.join(EVAL_BASE_PATH, timestamp))]
 
 # Print available timestamps and ask user to select one
 print("Available timestamps:")
@@ -52,12 +64,15 @@ for idx, timestamp in enumerate(timestamps, 1):
     print(f"{idx}. {timestamp}")
 
 while True:
-    choice = input("Select a timestamp (enter the number): ")
-    if choice.isdigit() and 0 < int(choice) <= len(timestamps):
+    choice = input("Select a timestamp (enter the number) or type 'no' to exit: ")
+    if choice.lower() == 'no':
+        print("Exiting...")
+        exit()
+    elif choice.isdigit() and 0 < int(choice) <= len(timestamps):
         TIMESTAMP = timestamps[int(choice) - 1]
         break
     else:
-        print(colored("Invalid choice. Please enter a number from the list.", 'red'))
+        print(colored("Invalid choice. Please enter a number from the list or 'no' to exit.", 'red'))
 
 EVAL_REPORT_PATH = os.path.join(EVAL_BASE_PATH, TIMESTAMP, 'report.txt')
 
