@@ -64,7 +64,19 @@ output_directory = '/scratch/medfm/medfm-challenge/data/MedFMC_val/endo/pre_proc
 
 image_files = [f for f in os.listdir(input_directory) if f.endswith(('.jpg', '.png'))]
 
+def remove_file(file_path):
+    try:
+        os.remove(file_path)
+        print(f"File '{file_path}' removed successfully!")
+    except FileNotFoundError:
+        print(f"File '{file_path}' not found.")
+    except PermissionError:
+        print(f"Permission denied: Cannot remove '{file_path}'.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
 for filename in tqdm(image_files, desc="Processing images"):
-    process_image(input_directory, output_directory, filename)
-
-
+    #process_image(input_directory, output_directory, filename)
+    img_path = os.path.join(output_directory, f'original_{filename}')
+    remove_file(img_path)
