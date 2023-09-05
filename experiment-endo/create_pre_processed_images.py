@@ -54,45 +54,17 @@ def process_image(input_directory, output_directory, filename):
     output_img = draw_black_on_mask(img, highlight_mask)
 
     # Save the original and masked images to the output directory
-    cv2.imwrite(os.path.join(output_directory, f'original_{filename}'), img * 255.0)
-    cv2.imwrite(os.path.join(output_directory, f'masked_{filename}'), output_img * 255.0)
+    #cv2.imwrite(os.path.join(output_directory, f'original_{filename}'), img * 255.0)
+    cv2.imwrite(os.path.join(output_directory, filename), output_img * 255.0)
 
 
 
-input_directory = '/scratch/medfm/medfm-challenge/data/MedFMC_val/endo/images'
-output_directory = '/scratch/medfm/medfm-challenge/data/MedFMC_val/endo/pre_processed_images'
+input_directory = '/scratch/medfm/medfm-challenge/data/MedFMC_train/endo/images'
+output_directory = '/scratch/medfm/medfm-challenge/data/MedFMC_train/endo/pre_processed_images'
 
 image_files = [f for f in os.listdir(input_directory) if f.endswith(('.jpg', '.png'))]
 
-def remove_file(file_path):
-    try:
-        os.remove(file_path)
-        print(f"File '{file_path}' removed successfully!")
-    except FileNotFoundError:
-        print(f"File '{file_path}' not found.")
-    except PermissionError:
-        print(f"Permission denied: Cannot remove '{file_path}'.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-
-def rename_file(original_path, new_path):
-    try:
-        os.rename(original_path, new_path)
-        print(f"File '{original_path}' renamed to '{new_path}' successfully!")
-    except FileNotFoundError:
-        print(f"File '{original_path}' not found.")
-    except PermissionError:
-        print(f"Permission denied: Cannot rename '{original_path}'.")
-    except FileExistsError:
-        print(f"A file with the name '{new_path}' already exists.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-
-
 for filename in tqdm(image_files, desc="Processing images"):
-    #process_image(input_directory, output_directory, filename)
-    img_path = os.path.join(output_directory, f'masked_{filename}')
-    img_path_new = os.path.join(output_directory, filename)
-    rename_file(img_path, img_path_new)
+    process_image(input_directory, output_directory, filename)
+
+
