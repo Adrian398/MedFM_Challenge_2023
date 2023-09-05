@@ -4,24 +4,6 @@ import shutil
 from termcolor import colored
 
 
-def is_valid_submission(directory_path):
-    """Check if the directory contains a validation.csv for every setting in each exp folder."""
-    required_files = [f"{task}_{shot}_validation.csv" for task in TASKS for shot in ["1-shot", "5-shot", "10-shot"]]
-
-    # Check for each exp directory
-    for exp in EXPS:
-        exp_dir = os.path.join(directory_path, "result", exp)
-        if not os.path.exists(exp_dir):
-            return False
-        existing_files = os.listdir(exp_dir)
-        print("exist", existing_files)
-        print("req", required_files)
-        print()
-        if not all(file in existing_files for file in required_files):
-            return False
-    return True
-
-
 def is_valid_csv(path):
     # 1. Check if file exists
     if not os.path.exists(path):
@@ -61,14 +43,10 @@ VAL_TARGET_PATH = 'ensemble/validation'
 EVAL_BASE_PATH = 'submissions/evaluation'
 TASKS = ["colon", "endo", "chest"]
 SHOTS = ["1-shot", "5-shot", "10-shot"]
-EXPS = [f"exp{i}" for i in range(1, 6)]
 # ================================================================================
 
 # Read all timestamps (folder names) at runtime from EVAL_BASE_PATH
 timestamps = [d for d in os.listdir(EVAL_BASE_PATH) if os.path.isdir(os.path.join(EVAL_BASE_PATH, d))]
-
-# Filter out invalid timestamp directories
-timestamps = [timestamp for timestamp in timestamps if is_valid_submission(os.path.join(EVAL_BASE_PATH, timestamp))]
 
 # Print available timestamps and ask user to select one
 print("Available timestamps:")
