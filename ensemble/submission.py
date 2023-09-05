@@ -196,7 +196,6 @@ if start != "y":
 date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
 submission_dir = os.path.join("submissions", "evaluation", date_pattern)
 if not is_evaluation:
-    os.makedirs("ensemble")
     submission_dir = os.path.join("ensemble", f"{submission_type}", date_pattern)
     print(f"Creating {submission_type} directory {submission_dir}")
 else:
