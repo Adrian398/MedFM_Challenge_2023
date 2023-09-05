@@ -14,6 +14,9 @@ def is_valid_submission(directory_path):
         if not os.path.exists(exp_dir):
             return False
         existing_files = os.listdir(exp_dir)
+        print("exist", existing_files)
+        print("req", required_files)
+        print()
         if not all(file in existing_files for file in required_files):
             return False
     return True
