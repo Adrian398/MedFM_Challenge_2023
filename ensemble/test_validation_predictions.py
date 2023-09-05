@@ -46,24 +46,23 @@ def get_file_by_keyword(directory, keyword, file_extension=None):
     """
 
     # Build the search pattern based on the presence of a file_extension
+    search_pattern = os.path.join(directory, f"*{keyword}*")
     if file_extension:
-        search_pattern = os.path.join(directory, f"*{keyword}*.{file_extension}")
-    else:
-        search_pattern = os.path.join(directory, f"*{keyword}*")
+        search_pattern += f".{file_extension}"
 
-    # Using glob to fetch all files in the directory that match the pattern
-    matching_files = glob.glob(search_pattern)
+    # Using glob to fetch all files in the directory that match the pattern (case-insensitive)
+    matching_files = [f for f in glob.glob(search_pattern, recursive=True) if keyword.lower() in f.lower()]
 
-    # If there's only one such file, return its path
+    # Results handling
     if len(matching_files) == 1:
         return matching_files[0]
     elif len(matching_files) > 1:
         print(
             f"More than one file found in {directory} containing the keyword '{keyword}' with the specified extension.")
-        return None
     else:
         print(f"No file found in {directory} containing the keyword '{keyword}' with the specified extension.")
-        return None
+
+    return None
 
 
 def compute_auc(cls_scores, cls_labels):
