@@ -1,0 +1,195 @@
+{
+  "task": {
+    "exp1": {
+      "colon_1-shot": {
+        "ACC_metric": "72.39320165365181",
+        "AUC_metric": "92.15101596207563"
+      },
+      "colon_5-shot": {
+        "ACC_metric": "90.26182820395039",
+        "AUC_metric": "98.70068240177838"
+      },
+      "colon_10-shot": {
+        "ACC_metric": "94.92420762517226",
+        "AUC_metric": "99.1958445998257"
+      },
+      "endo_1-shot": {
+        "AUC_metric": "67.83217420436432",
+        "mAP_metric": "20.875320346021812"
+      },
+      "endo_5-shot": {
+        "AUC_metric": "69.06727147470065",
+        "mAP_metric": "23.545051772592316"
+      },
+      "endo_10-shot": {
+        "AUC_metric": "75.72842875845708",
+        "mAP_metric": "30.644633756589613"
+      },
+      "chest_1-shot": {
+        "AUC_metric": "59.93735401390093",
+        "mAP_metric": "14.664444010585811"
+      },
+      "chest_5-shot": {
+        "AUC_metric": "67.81231335329778",
+        "mAP_metric": "18.63658365593418"
+      },
+      "chest_10-shot": {
+        "AUC_metric": "69.98418472231886",
+        "mAP_metric": "19.879762017144074"
+      }
+    },
+    "exp2": {
+      "colon_1-shot": {
+        "ACC_metric": "68.1212677997244",
+        "AUC_metric": "76.65337113510573"
+      },
+      "colon_5-shot": {
+        "ACC_metric": "93.40836012861736",
+        "AUC_metric": "98.28925117465648"
+      },
+      "colon_10-shot": {
+        "ACC_metric": "96.48598989435003",
+        "AUC_metric": "99.47031990640161"
+      },
+      "endo_1-shot": {
+        "AUC_metric": "63.74936089074744",
+        "mAP_metric": "19.26230872978106"
+      },
+      "endo_5-shot": {
+        "AUC_metric": "69.43226672579021",
+        "mAP_metric": "31.781078851531774"
+      },
+      "endo_10-shot": {
+        "AUC_metric": "73.0454663800406",
+        "mAP_metric": "31.182433430433846"
+      },
+      "chest_1-shot": {
+        "AUC_metric": "62.796397668304415",
+        "mAP_metric": "14.518845958281586"
+      },
+      "chest_5-shot": {
+        "AUC_metric": "67.8999902464958",
+        "mAP_metric": "18.188145736024182"
+      },
+      "chest_10-shot": {
+        "AUC_metric": "69.58393589444627",
+        "mAP_metric": "19.23391051558801"
+      }
+    },
+    "exp3": {
+      "colon_1-shot": {
+        "ACC_metric": "83.41754708314194",
+        "AUC_metric": "90.14584515202186"
+      },
+      "colon_5-shot": {
+        "ACC_metric": "88.37850252641249",
+        "AUC_metric": "96.5624548523281"
+      },
+      "colon_10-shot": {
+        "ACC_metric": "92.14515388148828",
+        "AUC_metric": "97.94283259508086"
+      },
+      "endo_1-shot": {
+        "AUC_metric": "60.471294117351626",
+        "mAP_metric": "16.636526306239908"
+      },
+      "endo_5-shot": {
+        "AUC_metric": "67.09897012177188",
+        "mAP_metric": "20.2840053000476"
+      },
+      "endo_10-shot": {
+        "AUC_metric": "73.04741539479267",
+        "mAP_metric": "42.02532752371692"
+      },
+      "chest_1-shot": {
+        "AUC_metric": "60.39594602289807",
+        "mAP_metric": "12.151864336255795"
+      },
+      "chest_5-shot": {
+        "AUC_metric": "68.67945078536934",
+        "mAP_metric": "18.829938575645063"
+      },
+      "chest_10-shot": {
+        "AUC_metric": "70.60652743407775",
+        "mAP_metric": "19.641218550418813"
+      }
+    },
+    "exp4": {
+      "colon_1-shot": {
+        "ACC_metric": "82.75149288011025",
+        "AUC_metric": "92.91081535934786"
+      },
+      "colon_5-shot": {
+        "ACC_metric": "93.56913183279742",
+        "AUC_metric": "99.07172442300572"
+      },
+      "colon_10-shot": {
+        "ACC_metric": "93.82177308222325",
+        "AUC_metric": "99.12446479231"
+      },
+      "endo_1-shot": {
+        "AUC_metric": "59.35350988743093",
+        "mAP_metric": "18.339018220814097"
+      },
+      "endo_5-shot": {
+        "AUC_metric": "68.37597438522783",
+        "mAP_metric": "28.009521706411846"
+      },
+      "endo_10-shot": {
+        "AUC_metric": "77.20698579730957",
+        "mAP_metric": "34.9286208701247"
+      },
+      "chest_1-shot": {
+        "AUC_metric": "59.02378703978387",
+        "mAP_metric": "12.508801516393689"
+      },
+      "chest_5-shot": {
+        "AUC_metric": "66.48214665535694",
+        "mAP_metric": "17.95966475306544"
+      },
+      "chest_10-shot": {
+        "AUC_metric": "69.6750143030887",
+        "mAP_metric": "19.815980873633723"
+      }
+    },
+    "exp5": {
+      "colon_1-shot": {
+        "ACC_metric": "89.15939366100137",
+        "AUC_metric": "95.7008935886418"
+      },
+      "colon_5-shot": {
+        "ACC_metric": "92.90307762976573",
+        "AUC_metric": "98.00476872108436"
+      },
+      "colon_10-shot": {
+        "ACC_metric": "94.05144694533763",
+        "AUC_metric": "99.04986196222572"
+      },
+      "endo_1-shot": {
+        "AUC_metric": "54.90491309302477",
+        "mAP_metric": "16.958125415339946"
+      },
+      "endo_5-shot": {
+        "AUC_metric": "68.10704957315619",
+        "mAP_metric": "25.73260560798426"
+      },
+      "endo_10-shot": {
+        "AUC_metric": "77.6787015657132",
+        "mAP_metric": "44.03512333054608"
+      },
+      "chest_1-shot": {
+        "AUC_metric": "61.43866126818634",
+        "mAP_metric": "14.482075582982631"
+      },
+      "chest_5-shot": {
+        "AUC_metric": "69.73740653037444",
+        "mAP_metric": "19.069374957652606"
+      },
+      "chest_10-shot": {
+        "AUC_metric": "69.5061099047143",
+        "mAP_metric": "20.43837201268877"
+      }
+    }
+  },
+  "aggregates": "60.4631579320733"
+}
