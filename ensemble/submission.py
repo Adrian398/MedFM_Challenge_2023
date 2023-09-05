@@ -203,7 +203,6 @@ else:
 os.makedirs(submission_dir)
 for exp in experiments:
     os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
-#print(os.path.isdir(os.path.join(submission_dir, 'result', experiments[0])))
 
 # iterate over exp_dirs_dict, for each task / shot / exp combination, merge results
 for task in tasks:
@@ -217,4 +216,5 @@ for task in tasks:
 
             print_metric_report_for_task(model_list=data_list, task=task)
 
+            # Insert ensemble strategy here
             merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
