@@ -77,12 +77,13 @@ GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 # Iterate over experiments and tasks
 results = {}
 
-experiments = [folder for folder in os.listdir(PREDICTION_DIR) if folder.startswith('exp')]
-print(experiments)
+experiments = ["exp1", "exp2", "exp3", "exp4", "exp5"]
+
 for exp in experiments:
     exp_dir = os.path.join(PREDICTION_DIR, exp)
+    print(exp_dir)
     tasks = [task.split('_')[0] for task in os.listdir(exp_dir) if task.endswith('_validation.csv')]
-
+    print(tasks)
     results[exp] = {}
     print("for exp in exps")
     for task in tasks:
