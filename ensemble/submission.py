@@ -63,8 +63,8 @@ def choose_evaluation_type():
     """Prompt the user to select between evaluation or validation.
     Returns True for Evaluation and False for Validation."""
 
-    print(f"Do you want {colored('Evaluation', 'red')} or {colored('Validation', 'blue')}?")
-    user_input = input(f"Enter 'e' for Evaluation or 'v' for Validation. [Default=e]: ").lower() or 'e'
+    print()
+    user_input = input(f"{colored('Evaluation', 'red')} or {colored('Validation', 'blue')}? (e/v) ").lower() or 'e'
 
     if user_input == 'e':
         return True
@@ -196,6 +196,7 @@ if start != "y":
 date_pattern = datetime.now().strftime("%d-%m_%H-%M-%S")
 submission_dir = os.path.join("submissions", "evaluation", date_pattern)
 if not is_evaluation:
+    os.makedirs("ensemble")
     submission_dir = os.path.join("ensemble", f"{submission_type}", date_pattern)
     print(f"Creating {submission_type} directory {submission_dir}")
 else:
@@ -217,4 +218,4 @@ for task in tasks:
 
             print_metric_report_for_task(model_list=data_list, task=task)
 
-            # merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
+            merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
