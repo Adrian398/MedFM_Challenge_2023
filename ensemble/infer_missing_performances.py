@@ -258,14 +258,12 @@ if __name__ == "__main__":
     parser.add_argument("--task", type=str, nargs='*', default=["colon", "endo", "chest"],
                         choices=task_choices,
                         help="Task type: 'colon', 'chest', or 'endo'. "
-                             "Multiple tasks can be provided separated with a whitespace."
+                             "Multiple tasks can be provided separated with a whitespace. "
                              "Default is all tasks.")
     args = parser.parse_args()
 
     gpu_type = args.gpu
     tasks = args.task
-    print(tasks)
-    exit()
 
     with Pool() as pool:
         combinations = [(task, shot) for task in tasks for shot in shots]
