@@ -264,6 +264,8 @@ if __name__ == "__main__":
 
     gpu_type = args.gpu
     tasks = args.task
+    print(tasks)
+    exit()
 
     with Pool() as pool:
         combinations = [(task, shot) for task in tasks for shot in shots]
