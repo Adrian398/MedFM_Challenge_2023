@@ -49,7 +49,7 @@ def compare_results(team1, team2):
 
 
 source_team_name = "uniwue"
-target_team_name = "uniwue_on_val"
+target_team_name = "uniwue_greedy_on_val"
 
 tasks, shots, exps, metrics, settings = init_settings()
 
