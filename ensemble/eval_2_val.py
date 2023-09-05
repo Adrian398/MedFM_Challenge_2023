@@ -6,8 +6,11 @@ from termcolor import colored
 
 def is_valid_submission(directory_path):
     """Check if the directory contains a validation.csv for every setting."""
-    required_files = [f"{task}_{shot}_validation.csv" for task in TASKS for shot in ["1-shot", "5-shot", "10-shot"]]
+    required_files = [f"{task}_{shot}_validation.csv" for task in TASKS for shot in SHOTS]
     existing_files = os.listdir(directory_path)
+    print("existing:", existing_files)
+    print("required:", required_files)
+    print()
 
     return all(file in existing_files for file in required_files)
 
@@ -50,6 +53,7 @@ SCRATCH_BASE_PATH = '/scratch/medfm/medfm-challenge'
 VAL_TARGET_PATH = 'ensemble/validation'
 EVAL_BASE_PATH = 'submissions/evaluation'
 TASKS = ["colon", "endo", "chest"]
+SHOTS = ["1-shot", "5-shot", "10-shot"]
 # ================================================================================
 
 # Read all timestamps (folder names) at runtime from EVAL_BASE_PATH
