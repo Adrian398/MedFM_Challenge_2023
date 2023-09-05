@@ -164,6 +164,7 @@ for task in tasks:
                           shot=shot,
                           submission_dir=submission_dir)
 
+print()
 exit()
 # Count
 total_models = 0
