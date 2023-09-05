@@ -9,6 +9,6 @@ OVERRIDE = {
 }
 
 SETTINGS = {
-    'exp_suffix': "bs_test_no_jitter",
+    'exp_suffix': "bs_test_with_jitter",
     'log_level': "INFO"
 }
