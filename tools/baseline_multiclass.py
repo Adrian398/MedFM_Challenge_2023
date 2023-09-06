@@ -412,7 +412,7 @@ if __name__ == '__main__':
         effi_model_checkpoint = cfg['model_cfg']['effi_model_checkpoint']
         effi_model = init_model(
             effi_model_config, effi_model_checkpoint, device=DEVICE)
-        print('load efficientnet model success ...')
+        print('load efficientnetb6 model success ...')
         time_effi_model_load = time.time() - start_time
         print('time_effi_model_load = ', time_effi_model_load)
 
@@ -507,7 +507,7 @@ if __name__ == '__main__':
                 swin_accs.append(acc)
                 swin_aucs.append(auc)
 
-            # model 2: efficientnet model
+            # model 2: efficientnetb6 model
             if effi_model is not None:
                 print('run efficient-b4 model now ...')
                 start_time = time.time()

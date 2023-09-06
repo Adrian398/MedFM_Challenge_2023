@@ -1,41 +1,63 @@
 _base_ = [
-    '../datasets/chest.py',
-    '../schedules/chest.py',
+    '../../datasets/chest.py',
+    '../../schedules/chest.py',
     'mmpretrain::_base_/default_runtime.py',
-    'mmpretrain::_base_/models/densenet/densenet121.py',
-    '../custom_imports.py',
+    'mmpretrain::_base_/models/efficientnet_v2/efficientnetv2_s.py',
+    '../../custom_imports.py',
 ]
 
 # Pre-trained Checkpoint Path
-checkpoint = 'https://download.openmmlab.com/mmclassification/v0/densenet/densenet121_4xb256_in1k_20220426-07450f99.pth'  # noqa
+checkpoints = {
+    "s": "https://download.openmmlab.com/mmclassification/v0/efficientnetv2/efficientnetv2-s_in21k-pre-3rdparty_in1k_20221220-7a7c8475.pth",
+    "m": "https://download.openmmlab.com/mmclassification/v0/efficientnetv2/efficientnetv2-m_in21k-pre-3rdparty_in1k_20221220-a1013a04.pth",
+    "l": "https://download.openmmlab.com/mmclassification/v0/efficientnetv2/efficientnetv2-l_in21k-pre-3rdparty_in1k_20221220-63df0efd.pth",
+    "xl": "https://download.openmmlab.com/mmclassification/v0/efficientnetv2/efficientnetv2-xl_in21k-pre-3rdparty_in1k_20221220-583ac18b.pth"
+}
+
+train_scales = {
+    "s": 300,
+    "m": 384,
+    "l": 384,
+    "xl": 384
+}
+
+test_scales = {
+    "s": 384,
+    "m": 480,
+    "l": 480,
+    "xl": 512
+}
 
 lr = 1e-4
-train_bs = 4
-val_bs = 128
+train_bs = 8
+val_bs = 64
 dataset = 'chest'
-model_name = 'densenet121'
+model_name = 'efficientnetv2'
+arch = 'm'
 exp_num = 1
-nshot = 1
+nshot = 5
 
-run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}'
+run_name = f'{model_name}_{arch}_bs{train_bs}_lr{lr}_exp{exp_num}'
 work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
 
 model = dict(
     backbone=dict(
-        init_cfg=dict(type='Pretrained', checkpoint=checkpoint, prefix='backbone')
+        arch=arch,
+        init_cfg=dict(type='Pretrained', checkpoint=checkpoints[arch], prefix='backbone')
     ),
     neck=None,
     head=dict(
         type='CSRAClsHead',
         num_classes=19,
-        in_channels=1024,
+        in_channels=1280,
         num_heads=1,
         lam=0.1,
-        loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)))
+        loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        topk=None))
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='RandomResizedCrop', scale=256, crop_ratio_range=(0.7, 1.0)),
+    dict(type='EfficientNetRandomCrop', scale=train_scales[arch], crop_ratio_range=(0.7, 1.0)),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
@@ -43,13 +65,8 @@ train_pipeline = [
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='Resize', scale=256),
-    dict(
-        type='PackInputs',
-        # `gt_label_difficult` is needed for VOC evaluation
-        meta_keys=('sample_idx', 'img_path', 'ori_shape', 'img_shape',
-                   'scale_factor', 'flip', 'flip_direction',
-                   'gt_label_difficult')),
+    dict(type='EfficientNetCenterCrop', crop_size=test_scales[arch], crop_padding=0),
+    dict(type='PackInputs'),
 ]
 
 train_dataloader = dict(

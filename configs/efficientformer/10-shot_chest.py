@@ -2,27 +2,34 @@ _base_ = [
     '../datasets/chest.py',
     '../schedules/chest.py',
     'mmpretrain::_base_/default_runtime.py',
-    'mmpretrain::_base_/models/densenet/densenet121.py',
+    'mmpretrain::_base_/models/efficientnet_v2/efficientnet_v2.py',
     '../custom_imports.py',
 ]
 
 # Pre-trained Checkpoint Path
-checkpoint = 'https://download.openmmlab.com/mmclassification/v0/densenet/densenet121_4xb256_in1k_20220426-07450f99.pth'  # noqa
+checkpoints = {
+    "s": "https://download.openmmlab.com/mmclassification/v0/efficientnetv2/efficientnetv2-s_3rdparty_in21k_20221220-c0572b56.pth",
+    "m": "https://download.openmmlab.com/mmclassification/v0/efficientnetv2/efficientnetv2-m_3rdparty_in21k_20221220-073e944c.pth",
+    "l": "https://download.openmmlab.com/mmclassification/v0/efficientnetv2/efficientnetv2-l_3rdparty_in21k_20221220-f28f91e1.pth",
+    "xl": "https://download.openmmlab.com/mmclassification/v0/efficientnetv2/efficientnetv2-xl_3rdparty_in21k_20221220-b2c9329c.pth"
+}
 
-lr = 5e-3
-train_bs = 8
+lr = 1e-6
+train_bs = 16
 val_bs = 128
 dataset = 'chest'
-model_name = 'densenet121'
+model_name = 'efficientnetv2'
+arch = 'm'
 exp_num = 1
 nshot = 10
 
-run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}'
+run_name = f'{model_name}_{arch}_bs{train_bs}_lr{lr}_exp{exp_num}'
 work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
 
 model = dict(
     backbone=dict(
-        init_cfg=dict(type='Pretrained', checkpoint=checkpoint, prefix='backbone')
+        arch=arch,
+        init_cfg=dict(type='Pretrained', checkpoint=checkpoints[arch], prefix='backbone')
     ),
     neck=None,
     head=dict(
@@ -31,11 +38,11 @@ model = dict(
         in_channels=1024,
         num_heads=1,
         lam=0.1,
-        loss=dict(type='CrossEntropyLoss', loss_weight=1.0)))
+        loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)))
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='RandomResizedCrop', scale=256, crop_ratio_range=(0.7, 1.0)),
+    dict(type='EfficientNet', scale=224, crop_ratio_range=(0.7, 1.0)),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
@@ -43,7 +50,7 @@ train_pipeline = [
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='Resize', scale=256),
+    dict(type='Resize', scale=224),
     dict(
         type='PackInputs',
         # `gt_label_difficult` is needed for VOC evaluation
@@ -75,7 +82,24 @@ default_hooks = dict(
     logger=dict(interval=10),
 )
 
-optimizer = dict(lr=lr)
+optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=lr, type='AdamW', weight_decay=0.05)
+
+optim_wrapper = dict(
+    optimizer=optimizer,
+    paramwise_cfg=dict(
+        norm_decay_mult=0.0,
+        bias_decay_mult=0.0,
+        flat_decay_mult=0.0,
+        custom_keys={
+            '.absolute_pos_embed': dict(decay_mult=0.0),
+            '.relative_position_bias_table': dict(decay_mult=0.0)
+        }),
+)
+
+param_scheduler = [
+    dict(by_epoch=True, end=1, start_factor=1, type='LinearLR'),
+    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
+]
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 

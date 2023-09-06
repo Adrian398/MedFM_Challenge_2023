@@ -31,7 +31,7 @@ model = dict(
         in_channels=1024,
         num_heads=1,
         lam=0.1,
-        loss=dict(type='CrossEntropyLoss', loss_weight=1.0)))
+        loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)))
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
@@ -75,7 +75,7 @@ default_hooks = dict(
     logger=dict(interval=10),
 )
 
-optimizer = dict(lr=lr)
+optim_wrapper = dict(optimizer=dict(lr=lr))
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
