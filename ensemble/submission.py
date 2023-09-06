@@ -231,7 +231,7 @@ experiments = ['exp1', 'exp2', 'exp3', 'exp4', 'exp5']
 class_counts = {"colon": 2, "endo": 4, "chest": 19}
 
 # Ensemble Variables
-TOP_K_ENSEMBLE_MODELS = 3
+TOP_K_ENSEMBLE_MODELS = 7
 ENSEMBLE_STRATEGY = "weighted"
 
 is_evaluation = choose_evaluation_type()
