@@ -72,7 +72,7 @@ def merge_results_weighted_model_strategy(run_dicts, task, shot, exp, out_path, 
         # Record the selected models for the report and update the model_occurrences
         selected_models_for_class = []
         for model, weight in top_n_models:
-            model_name = model['name']
+            model_name = model['name'].split('work_dirs/')[1]
             selected_models_for_class.append(f"Class {i + 1}: {model_name} (Weight: {weight:.4f})")
 
             if model_name in model_occurrences:
@@ -192,7 +192,7 @@ def merge_results_expert_model_strategy(run_dicts, task, shot, exp, out_path):
             model_occurrences[model_name] = 1
 
         print(f"Merged dataframe after adding model run {best_run_index} {best_run['name']}")
-        selected_models_for_classes.append(f"Class {i + 1}: {best_run['name']}")
+        selected_models_for_classes.append(f"Class {i + 1}: {best_run['name'].split('work_dirs/')[1]}")
 
     print(f"Saving merged prediction to {out_path}")
     merged_df.to_csv(out_path, index=False, header=False)
