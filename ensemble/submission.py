@@ -8,6 +8,30 @@ import pandas as pd
 from termcolor import colored
 
 
+def write_ensemble_report(task, shot, exp, selected_models_for_classes, root_report_dir):
+    """
+    Write the ensemble report for a given task, shot, and experiment.
+
+    Args:
+        task (str): The task name.
+        shot (str): The shot name.
+        exp (str): The experiment name.
+        selected_models_for_classes (list): List containing the selected models for each class.
+        root_report_dir (str): Root directory where the report.txt should be saved.
+    """
+
+    # Determine the path for the report.txt file
+    report_path = os.path.join(root_report_dir, "report.txt")
+
+    # Append the information to the report.txt file
+    with open(report_path, "a") as report_file:
+        report_file.write(f"Task: {task}, Shot: {shot}, Experiment: {exp}\n")
+        for item in selected_models_for_classes:
+            report_file.write(item + "\n")
+        report_file.write("\n")
+
+
+
 def extract_exp_number(string):
     match = re.search(r'exp(\d+)', string)
     return int(match.group(1)) if match else 0
@@ -90,19 +114,23 @@ def find_best_run(run_list, metric):
 def merge_results_expert_model_strategy(run_dicts, task, shot, exp, out_path):
     print("merging results for task", task, shot, exp)
     num_classes = class_counts[task]
-    # initialize dataframe with image_ids
     merged_df = run_dicts[0]['prediction'].iloc[:, 0:1]
-    print("Merged df before")
-    print(merged_df)
+
+    # List to store which model was selected for each class
+    selected_models_for_classes = []
+
     # Find run with best MAP for each class
     for i in range(num_classes):
         best_run, best_run_index = find_best_run(run_dicts, f'MAP_class{i + 1}')
         merged_df[i + 1] = best_run["prediction"][i + 1]
         print(f"Merged df after adding run {best_run_index} {best_run['name']}")
+        selected_models_for_classes.append(f"Class {i + 1}: {best_run['name']}")
+
     print(f"Saving merged_df to {out_path}")
     merged_df.to_csv(out_path, index=False, header=False)
     # Merge predictions using class columns from best runs, taking into account first column is image name, no prediction
     # for that column
+    return selected_models_for_classes
 
 
 def extract_data_tuples(run_list):
@@ -217,4 +245,6 @@ for task in tasks:
             print_metric_report_for_task(model_list=data_list, task=task)
 
             # Insert ensemble strategy here
-            merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
+            selected_models = merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
+
+            write_ensemble_report(task, shot, exp, selected_models, submission_dir)
