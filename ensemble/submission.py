@@ -49,7 +49,7 @@ def merge_results_weighted_model_strategy(run_dicts, task, shot, exp, out_path, 
     """
     print("Merging results for task", task, shot, exp)
     num_classes = class_counts[task]
-    merged_df = run_dicts[0]['prediction'].iloc[:, 0:1]
+    merged_df = run_dicts[0]['prediction'].iloc[:, 0:1].copy()
 
     # List to store which models were selected for each class
     selected_models_for_classes = []
@@ -99,7 +99,7 @@ def merge_results_weighted_model_strategy(run_dicts, task, shot, exp, out_path, 
 
 
 def print_metric_report_for_task(model_list, task):
-    print("Report for:", colored(os.path.join(task.capitalize(), shot, exp), 'blue'))
+    print("\nReport for:", colored(os.path.join(task.capitalize(), shot, exp), 'blue'))
 
     model_view = []
     for model_info in model_list:
@@ -308,7 +308,7 @@ for task in tasks:
             data_lists[task][shot][exp] = data_list
             print_metric_report_for_task(model_list=data_list, task=task)
 
-start = input("Continue with creating the submission directory? (y/n) ")
+start = input("\nContinue with creating the submission directory? (y/n) ")
 if start != "y":
     exit()
 
@@ -334,8 +334,6 @@ for task in tasks:
                 print("not enough runs")
                 continue
             out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{submission_type}.csv")
-
-            print_metric_report_for_task(model_list=saved_data_list, task=task)
 
             # Ensemble strategy (default = "expert")
             if ENSEMBLE_STRATEGY == "weighted":
