@@ -71,31 +71,14 @@ test_dataloader = dict(
 )
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="auto", rule="greater"),
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
     logger=dict(interval=10),
 )
 
-optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=lr, type='AdamW', weight_decay=0.05)
-
-optim_wrapper = dict(
-    optimizer=optimizer,
-    paramwise_cfg=dict(
-        norm_decay_mult=0.0,
-        bias_decay_mult=0.0,
-        flat_decay_mult=0.0,
-        custom_keys={
-            '.absolute_pos_embed': dict(decay_mult=0.0),
-            '.relative_position_bias_table': dict(decay_mult=0.0)
-        }),
-)
-
-param_scheduler = [
-    dict(by_epoch=True, end=1, start_factor=1, type='LinearLR'),
-    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
-]
+optim_wrapper = dict(optimizer=dict(lr=lr))
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=1000)
+train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
 
 randomness = dict(seed=0)

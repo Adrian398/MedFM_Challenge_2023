@@ -75,7 +75,7 @@ default_hooks = dict(
     logger=dict(interval=10),
 )
 
-optimizer = dict(lr=lr)
+optim_wrapper = dict(optimizer=dict(lr=lr))
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
