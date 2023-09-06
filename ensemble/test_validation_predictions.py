@@ -177,8 +177,9 @@ def compute_task_specific_metrics(pred_path, gt_path, task):
 
 
 # ==========================================================================================
-PREDICTION_DIR = "ensemble/validation/05-09_14-17-34/result"
-#PREDICTION_DIR = "ensemble/validation/02-09_00-32-41/result"
+PREDICTION_DIR = "ensemble/validation/06-09_21-07-17/result"  # Weighted Sum Model Ensemble
+#PREDICTION_DIR = "ensemble/validation/05-09_14-17-34/result"  # Expert per Class Model Ensemble
+#PREDICTION_DIR = "ensemble/validation/02-09_00-32-41/result"  # Expert
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 shots = ['1-shot', '5-shot', '10-shot']
 tasks = ["colon", "endo", "chest"]
