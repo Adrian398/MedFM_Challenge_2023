@@ -68,3 +68,22 @@ Metric pro Klasse optimieren:
  - Bei Patienten mit wenig bei colon testen
 
 
+
+
+
+
+
+Final results:
+
+Allgemein
+- Performance auf testset machen
+- Ensemble prüfen (validation machen)
+- convnext testen (test set performance ansehen)
+- dataaugmentation resnet (Amar nochmal ansehen)
+
+Endo:
+- mit den preprocessing testen
+
+Chest:
+- Efficient net
+- 

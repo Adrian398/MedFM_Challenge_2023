@@ -61,7 +61,7 @@ test_dataloader = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
+train_cfg = dict(by_epoch=True, val_interval=15, max_epochs=500)
 
 randomness = dict(seed=0)
 

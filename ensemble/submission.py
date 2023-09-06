@@ -8,17 +8,98 @@ import pandas as pd
 from termcolor import colored
 
 
+def write_ensemble_report(task, shot, exp, selected_models_for_classes, model_occurrences, root_report_dir):
+    """
+    Write the ensemble report for a given task, shot, and experiment.
+
+    Args:
+        task (str): The task name.
+        shot (str): The shot name.
+        exp (str): The experiment name.
+        selected_models_for_classes (list): List containing the selected models for each class.
+        root_report_dir (str): Root directory where the report.txt should be saved.
+    """
+
+    # Determine the path for the report.txt file
+    report_path = os.path.join(root_report_dir, "report.txt")
+
+    # Append the information to the report.txt file
+    with open(report_path, "a") as report_file:
+        report_file.write(f"Task: {task}, Shot: {shot}, Experiment: {exp}\n")
+        for item in selected_models_for_classes:
+            report_file.write(item + "\n")
+        report_file.write("\n")
+
+        # Writing model occurrences
+        report_file.write("\nModel Summary:\n")
+        for model_path, occurrence in model_occurrences.items():
+            if occurrence > 1:
+                report_file.write(f"{model_path} used {occurrence} times\n")
+        report_file.write("\n")
+
+
 def extract_exp_number(string):
     match = re.search(r'exp(\d+)', string)
     return int(match.group(1)) if match else 0
 
 
-def merge_results_weighted_average_strategy(run_dicts, task, shot, exp):
-    pass
+def merge_results_weighted_model_strategy(run_dicts, task, shot, exp, out_path, N=3):
+    """
+    Merges model runs using a weighted sum approach based on the N best model runs for each class.
+    """
+    print("Merging results for task", task, shot, exp)
+    num_classes = class_counts[task]
+    merged_df = run_dicts[0]['prediction'].iloc[:, 0:1].copy()
+
+    # List to store which models were selected for each class
+    selected_models_for_classes = []
+
+    # Dict to keep track of model occurrences
+    model_occurrences = {}
+
+    # For each class, get the N best performing model runs based on the aggregate metric
+    for i in range(num_classes):
+        class_models = []
+        for run in run_dicts:
+            _, aggregate_value = get_aggregate(run['metrics'], task)
+            if aggregate_value is not None:
+                class_models.append((run, aggregate_value))
+
+        # Sort the models based on aggregate value and take the top N models
+        class_models.sort(key=lambda x: x[1], reverse=True)
+        top_n_models = class_models[:N]
+
+        # Record the selected models for the report and update the model_occurrences
+        selected_models_for_class = []
+        for model, weight in top_n_models:
+            model_name = model['name'].split('work_dirs/')[1]
+            selected_models_for_class.append(f"Class {i + 1}: {model_name} (Weight: {weight:.4f})")
+
+            if model_name in model_occurrences:
+                model_occurrences[model_name] += 1
+            else:
+                model_occurrences[model_name] = 1
+
+        selected_models_for_classes.extend(selected_models_for_class)
+
+        # Calculate the sum of weights (aggregate values) for normalization
+        sum_weights = sum([weight for _, weight in top_n_models])
+
+        # Compute the weighted sum for this class
+        weighted_sum_column = pd.Series(0, index=merged_df.index)
+        for model, weight in top_n_models:
+            weighted_sum_column += (model['prediction'].iloc[:, i + 1] * weight) / sum_weights
+
+        merged_df.loc[:, i + 1] = weighted_sum_column
+
+    print(f"Saving merged prediction to {out_path}")
+    merged_df.to_csv(out_path, index=False, header=False)
+
+    return selected_models_for_classes, model_occurrences
 
 
 def print_metric_report_for_task(model_list, task):
-    print("Report for:", colored(os.path.join(task.capitalize(), shot, exp), 'blue'))
+    print("\nReport for:", colored(os.path.join(task.capitalize(), shot, exp), 'blue'))
 
     model_view = []
     for model_info in model_list:
@@ -55,7 +136,6 @@ def get_aggregate(model_metrics, task):
     if not calculation:
         return (None, None)
 
-    # Calculate and return the aggregate name and value
     return calculation(model_metrics)
 
 
@@ -88,21 +168,35 @@ def find_best_run(run_list, metric):
 
 
 def merge_results_expert_model_strategy(run_dicts, task, shot, exp, out_path):
-    print("merging results for task", task, shot, exp)
+    print("Merging results for task", task, shot, exp)
     num_classes = class_counts[task]
-    # initialize dataframe with image_ids
     merged_df = run_dicts[0]['prediction'].iloc[:, 0:1]
-    print("Merged df before")
-    print(merged_df)
+
+    # List to store which model was selected for each class
+    selected_models_for_classes = []
+
+    # Dict to keep track of model occurrences
+    model_occurrences = {}
+
     # Find run with best MAP for each class
     for i in range(num_classes):
         best_run, best_run_index = find_best_run(run_dicts, f'MAP_class{i + 1}')
         merged_df[i + 1] = best_run["prediction"][i + 1]
-        print(f"Merged df after adding run {best_run_index} {best_run['name']}")
-    print(f"Saving merged_df to {out_path}")
+
+        # Keeping track of the model used for each class
+        model_name = best_run['name'].split('work_dirs/')[1]
+        if model_name in model_occurrences:
+            model_occurrences[model_name] += 1
+        else:
+            model_occurrences[model_name] = 1
+
+        print(f"Merged dataframe after adding model run {best_run_index} {model_name}")
+        selected_models_for_classes.append(f"Class {i + 1}: {model_name}")
+
+    print(f"Saving merged prediction to {out_path}")
     merged_df.to_csv(out_path, index=False, header=False)
-    # Merge predictions using class columns from best runs, taking into account first column is image name, no prediction
-    # for that column
+
+    return selected_models_for_classes, model_occurrences
 
 
 def extract_data_tuples(run_list):
@@ -114,10 +208,11 @@ def extract_data_tuples(run_list):
     return data_list
 
 
-def check_run_dir(run_dir, exp_dirs, task, shot, submission_type):
+def check_run_dir(run_dir, exp_dirs, task, shot, subm_type):
     model_path = run_dir.split('work_dirs/')[1]
     print("Checking run directory", model_path)
-    csv_files = glob.glob(os.path.join(run_dir, f"{task}_{shot}_{submission_type}.csv"))
+    csv_path = os.path.join(run_dir, f"{task}_{shot}_{subm_type}.csv")
+    csv_files = glob.glob(csv_path)
     json_files = glob.glob(os.path.join(run_dir, "*.json"))
 
     if csv_files and json_files:
@@ -135,8 +230,12 @@ shots = ['1-shot', '5-shot', '10-shot']
 experiments = ['exp1', 'exp2', 'exp3', 'exp4', 'exp5']
 class_counts = {"colon": 2, "endo": 4, "chest": 19}
 
+# Ensemble Variables
+TOP_K_ENSEMBLE_MODELS = 3
+ENSEMBLE_STRATEGY = "weighted"
+
 is_evaluation = choose_evaluation_type()
-submission_type = 'evaluation'
+submission_type = 'submission'
 if is_evaluation:
     print(f"\nSelected {colored(submission_type.capitalize(), 'red')}\n")
 else:
@@ -160,7 +259,7 @@ for task in tasks:
                           exp_dirs=exp_dirs,
                           task=task,
                           shot=shot,
-                          submission_type=submission_type)
+                          subm_type=submission_type)
 
 # Count
 total_models = 0
@@ -187,7 +286,26 @@ print(f"| Most models: {most_models} {most_setting}")
 print(f"| Least models: {least_models} {least_setting}")
 print("--------------------------------------")
 
-start = input("Continue? (y/n)")
+start = input("Next an ascending report for the best ranked models is printed ('no' = exit): ")
+if start.lower() == "no":
+    exit()
+
+# Print a report for the best ranking model runs for each setting
+data_lists = {}
+for task in tasks:
+    if task not in data_lists:
+        data_lists[task] = {}
+
+    for shot in shots:
+        if shot not in data_lists[task]:
+            data_lists[task][shot] = {}
+
+        for exp in experiments:
+            data_list = extract_data_tuples(exp_dirs[task][shot][exp])
+            data_lists[task][shot][exp] = data_list
+            print_metric_report_for_task(model_list=data_list, task=task)
+
+start = input("\nContinue with creating the submission directory? (y/n) ")
 if start != "y":
     exit()
 
@@ -204,17 +322,20 @@ os.makedirs(submission_dir)
 for exp in experiments:
     os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
 
-# iterate over exp_dirs_dict, for each task / shot / exp combination, merge results
+# Iterate over all settings and apply selected ensemble method
 for task in tasks:
     for shot in shots:
         for exp in experiments:
+            saved_data_list = data_lists[task][shot][exp]
             if len(exp_dirs[task][shot][exp]) < 2:
                 print("not enough runs")
                 continue
             out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{submission_type}.csv")
-            data_list = extract_data_tuples(exp_dirs[task][shot][exp])
 
-            print_metric_report_for_task(model_list=data_list, task=task)
+            # Ensemble strategy (default = "expert")
+            if ENSEMBLE_STRATEGY == "weighted":
+                selected_models, model_occurrences = merge_results_weighted_model_strategy(saved_data_list, task, shot, exp, out_path, N=TOP_K_ENSEMBLE_MODELS)
+            else:
+                selected_models, model_occurrences = merge_results_expert_model_strategy(saved_data_list, task, shot, exp, out_path)
 
-            # Insert ensemble strategy here
-            merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
+            write_ensemble_report(task, shot, exp, selected_models, model_occurrences, submission_dir)

@@ -1,5 +1,5 @@
 _base_ = [
-    '../datasets/colon.py',
+    '../datasets/endoscopy_pre_processed.py',
     '../schedules/adamw_inverted_cosine_lr.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
@@ -9,11 +9,11 @@ _base_ = [
 checkpoint = 'https://download.openmmlab.com/mmclassification/v0/resnet/resnet101_8xb32_in1k_20210831-539c63f8.pth'  # noqa
 
 lr = 1e-6
-train_bs = 16
-val_bs = 128
-dataset = 'colon'
-model_name = 'resnet101'
-exp_num = 1
+train_bs = 8
+val_bs = 8
+dataset = 'endo'
+model_name = 'pre_processed_resnet'
+exp_num = 3
 nshot = 1
 
 run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
@@ -32,7 +32,7 @@ model = dict(
     neck=None,
     head=dict(
         type='CSRAClsHead',
-        num_classes=2,
+        num_classes=4,
         in_channels=2048,
         num_heads=1,
         lam=0.1,
@@ -41,7 +41,6 @@ model = dict(
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='RandomResizedCrop', scale=448, crop_ratio_range=(0.7, 1.0)),
-    #dict(type='ColorJitter', hue=0.3, brightness=0.4, contrast=0.4, saturation=0.4),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
@@ -77,33 +76,12 @@ test_dataloader = dict(
 )
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="accuracy/top1", rule="greater"),
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
     logger=dict(interval=10),
 )
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=lr, type='AdamW', weight_decay=0.05)
-
-optim_wrapper = dict(
-    optimizer=optimizer,
-    paramwise_cfg=dict(
-        norm_decay_mult=0.0,
-        bias_decay_mult=0.0,
-        flat_decay_mult=0.0,
-        custom_keys={
-            '.absolute_pos_embed': dict(decay_mult=0.0),
-            '.relative_position_bias_table': dict(decay_mult=0.0)
-        }),
-)
-
-param_scheduler = [
-    dict(by_epoch=True, end=1, start_factor=1, type='LinearLR'),
-    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
-]
-
-train_cfg = dict(by_epoch=True, val_interval=15, max_epochs=500)
-val_cfg = dict()
-test_cfg = dict()
+train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
 
 randomness = dict(seed=0)
