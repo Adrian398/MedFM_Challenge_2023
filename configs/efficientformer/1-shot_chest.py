@@ -35,7 +35,7 @@ model = dict(
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='RandomResizedCrop', scale=256, crop_ratio_range=(0.7, 1.0)),
+    dict(type='EfficientNetRandomCrop', scale=224, crop_ratio_range=(0.7, 1.0)),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
@@ -43,7 +43,7 @@ train_pipeline = [
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='Resize', scale=256),
+    dict(type='Resize', scale=224),
     dict(
         type='PackInputs',
         # `gt_label_difficult` is needed for VOC evaluation

@@ -2,27 +2,42 @@ _base_ = [
     '../datasets/chest.py',
     '../schedules/chest.py',
     'mmpretrain::_base_/default_runtime.py',
-    'mmpretrain::_base_/models/densenet/densenet121.py',
+    'mmpretrain::_base_/models/efficientnet_v2/efficientnet_v2.py',
     '../custom_imports.py',
 ]
 
 # Pre-trained Checkpoint Path
-checkpoint = 'https://download.openmmlab.com/mmclassification/v0/densenet/densenet121_4xb256_in1k_20220426-07450f99.pth'  # noqa
+checkpoints = {
+    "s": "https://download.openmmlab.com/mmclassification/v0/efficientnetv2/efficientnetv2-s_3rdparty_in21k_20221220-c0572b56.pth"
+}
 
-lr = 1e-4
+train_scales = {
+    "s": 224,
+    "m":
+}
+
+test_scales = {
+    "m":
+}
+
+lr = 1e-6
 train_bs = 4
 val_bs = 128
 dataset = 'chest'
-model_name = 'densenet121'
+model_name = 'efficientnetv2'
+arch = 'm'
 exp_num = 1
 nshot = 1
 
-run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}'
+run_name = f'{model_name}_{arch}_bs{train_bs}_lr{lr}_exp{exp_num}'
 work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
+
+
 
 model = dict(
     backbone=dict(
-        init_cfg=dict(type='Pretrained', checkpoint=checkpoint, prefix='backbone')
+        arch=arch,
+        init_cfg=dict(type='Pretrained', checkpoint=checkpoints[arch], prefix='backbone')
     ),
     neck=None,
     head=dict(
@@ -31,11 +46,11 @@ model = dict(
         in_channels=1024,
         num_heads=1,
         lam=0.1,
-        loss=dict(type='CrossEntropyLoss', loss_weight=1.0)))
+        loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)))
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='RandomResizedCrop', scale=256, crop_ratio_range=(0.7, 1.0)),
+    dict(type='EfficientNet', scale=train_scales[arch], crop_ratio_range=(0.7, 1.0)),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
@@ -43,7 +58,7 @@ train_pipeline = [
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='Resize', scale=256),
+    dict(type='Resize', scale=test_scales[arch]),
     dict(
         type='PackInputs',
         # `gt_label_difficult` is needed for VOC evaluation
