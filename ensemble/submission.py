@@ -148,6 +148,8 @@ def check_run_dir(run_dir, exp_dirs, task, shot, submission_type):
     csv_files = glob.glob(os.path.join(run_dir, f"{task}_{shot}_{submission_type}.csv"))
     json_files = glob.glob(os.path.join(run_dir, "*.json"))
 
+    print("CSV Files:", csv_files)
+    print("JSON Files:", json_files)
     if csv_files and json_files:
         print("Found csv and json")
         exp_num = extract_exp_number(run_dir)
