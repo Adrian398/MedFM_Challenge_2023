@@ -141,10 +141,10 @@ def merge_results_expert_model_strategy(run_dicts, task, shot, exp, out_path):
         else:
             model_occurrences[model_name] = 1
 
-        print(f"Merged df after adding run {best_run_index} {best_run['name']}")
+        print(f"Merged dataframe after adding model run {best_run_index} {best_run['name']}")
         selected_models_for_classes.append(f"Class {i + 1}: {best_run['name']}")
 
-    print(f"Saving merged_df to {out_path}")
+    print(f"Saving merged prediction to {out_path}")
     merged_df.to_csv(out_path, index=False, header=False)
     # Merge predictions using class columns from best runs, taking into account first column is image name, no prediction
     # for that column
@@ -164,14 +164,10 @@ def check_run_dir(run_dir, exp_dirs, task, shot, subm_type):
     model_path = run_dir.split('work_dirs/')[1]
     print("Checking run directory", model_path)
     csv_path = os.path.join(run_dir, f"{task}_{shot}_{subm_type}.csv")
-    print(csv_path)
     csv_files = glob.glob(csv_path)
     json_files = glob.glob(os.path.join(run_dir, "*.json"))
 
-    print("CSV Files:", csv_files)
-    print("JSON Files:", json_files)
     if csv_files and json_files:
-        print("Found csv and json")
         exp_num = extract_exp_number(run_dir)
         if exp_num != 0:
             print(f"Adding run: {run_dir}")
