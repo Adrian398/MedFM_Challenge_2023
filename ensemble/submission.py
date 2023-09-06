@@ -142,10 +142,11 @@ def extract_data_tuples(run_list):
     return data_list
 
 
-def check_run_dir(run_dir, exp_dirs, task, shot, submission_type):
+def check_run_dir(run_dir, exp_dirs, task, shot, subm_type):
     model_path = run_dir.split('work_dirs/')[1]
     print("Checking run directory", model_path)
-    csv_files = glob.glob(os.path.join(run_dir, f"{task}_{shot}_{submission_type}.csv"))
+    csv_path = os.path.join(run_dir, f"{task}_{shot}_{subm_type}.csv")
+    csv_files = glob.glob(csv_path)
     json_files = glob.glob(os.path.join(run_dir, "*.json"))
 
     print("CSV Files:", csv_files)
@@ -192,7 +193,7 @@ for task in tasks:
                           exp_dirs=exp_dirs,
                           task=task,
                           shot=shot,
-                          submission_type=submission_type)
+                          subm_type=submission_type)
 
 # Count
 total_models = 0
