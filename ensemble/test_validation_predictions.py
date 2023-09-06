@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import average_precision_score
 
-from medfmc.evaluation.metrics.auc import cal_metrics_multilabel, cal_metrics_multiclass
+from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_multilabel
 
 
 def generate_json(results):
@@ -177,7 +177,7 @@ def compute_task_specific_metrics(pred_path, gt_path, task):
 
 
 # ==========================================================================================
-PREDICTION_DIR = "ensemble/validation/06-09_21-07-17/result"  # Weighted Sum Model Ensemble
+PREDICTION_DIR = "ensemble/validation/06-09_21-14-47/result"  # Weighted Sum Model Ensemble
 #PREDICTION_DIR = "ensemble/validation/05-09_14-17-34/result"  # Expert per Class Model Ensemble
 #PREDICTION_DIR = "ensemble/validation/02-09_00-32-41/result"  # Expert
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
