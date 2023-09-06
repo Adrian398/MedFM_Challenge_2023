@@ -90,7 +90,7 @@ def merge_results_weighted_model_strategy(run_dicts, task, shot, exp, out_path, 
         for model, weight in top_n_models:
             weighted_sum_column += (model['prediction'].iloc[:, i + 1] * weight) / sum_weights
 
-        merged_df[i + 1] = weighted_sum_column
+        merged_df.loc[:, i + 1] = weighted_sum_column
 
     print(f"Saving merged prediction to {out_path}")
     merged_df.to_csv(out_path, index=False, header=False)
@@ -289,7 +289,26 @@ print(f"| Most models: {most_models} {most_setting}")
 print(f"| Least models: {least_models} {least_setting}")
 print("--------------------------------------")
 
-start = input("Continue? (y/n) ")
+start = input("Next an ascending report for the best ranked models is printed ('no' = exit): ")
+if start.lower() == "no":
+    exit()
+
+# Print a report for the best ranking model runs for each setting
+data_lists = {}
+for task in tasks:
+    if task not in data_lists:
+        data_lists[task] = {}
+
+    for shot in shots:
+        if shot not in data_lists[task]:
+            data_lists[task][shot] = {}
+
+        for exp in experiments:
+            data_list = extract_data_tuples(exp_dirs[task][shot][exp])
+            data_lists[task][shot][exp] = data_list
+            print_metric_report_for_task(model_list=data_list, task=task)
+
+start = input("Continue with creating the submission directory? (y/n) ")
 if start != "y":
     exit()
 
@@ -306,22 +325,22 @@ os.makedirs(submission_dir)
 for exp in experiments:
     os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
 
-# iterate over exp_dirs_dict, for each task / shot / exp combination, merge results
+# Iterate over all settings and apply selected ensemble method
 for task in tasks:
     for shot in shots:
         for exp in experiments:
+            saved_data_list = data_lists[task][shot][exp]
             if len(exp_dirs[task][shot][exp]) < 2:
                 print("not enough runs")
                 continue
             out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{submission_type}.csv")
-            data_list = extract_data_tuples(exp_dirs[task][shot][exp])
 
-            print_metric_report_for_task(model_list=data_list, task=task)
+            print_metric_report_for_task(model_list=saved_data_list, task=task)
 
             # Ensemble strategy (default = "expert")
             if ENSEMBLE_STRATEGY == "weighted":
-                selected_models, model_occurrences = merge_results_weighted_model_strategy(data_list, task, shot, exp, out_path, N=TOP_K_ENSEMBLE_MODELS)
+                selected_models, model_occurrences = merge_results_weighted_model_strategy(saved_data_list, task, shot, exp, out_path, N=TOP_K_ENSEMBLE_MODELS)
             else:
-                selected_models, model_occurrences = merge_results_expert_model_strategy(data_list, task, shot, exp, out_path)
+                selected_models, model_occurrences = merge_results_expert_model_strategy(saved_data_list, task, shot, exp, out_path)
 
             write_ensemble_report(task, shot, exp, selected_models, model_occurrences, submission_dir)
