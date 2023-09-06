@@ -221,7 +221,7 @@ print(f"| Most models: {most_models} {most_setting}")
 print(f"| Least models: {least_models} {least_setting}")
 print("--------------------------------------")
 
-start = input("Continue? (y/n)")
+start = input("Continue? (y/n) ")
 if start != "y":
     exit()
 
