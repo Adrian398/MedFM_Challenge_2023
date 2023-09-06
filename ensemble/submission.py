@@ -136,7 +136,6 @@ def get_aggregate(model_metrics, task):
     if not calculation:
         return (None, None)
 
-    # Calculate and return the aggregate name and value
     return calculation(model_metrics)
 
 
@@ -185,19 +184,18 @@ def merge_results_expert_model_strategy(run_dicts, task, shot, exp, out_path):
         merged_df[i + 1] = best_run["prediction"][i + 1]
 
         # Keeping track of the model used for each class
-        model_name = best_run['name']
+        model_name = best_run['name'].split('work_dirs/')[1]
         if model_name in model_occurrences:
             model_occurrences[model_name] += 1
         else:
             model_occurrences[model_name] = 1
 
-        print(f"Merged dataframe after adding model run {best_run_index} {best_run['name']}")
-        selected_models_for_classes.append(f"Class {i + 1}: {best_run['name'].split('work_dirs/')[1]}")
+        print(f"Merged dataframe after adding model run {best_run_index} {model_name}")
+        selected_models_for_classes.append(f"Class {i + 1}: {model_name}")
 
     print(f"Saving merged prediction to {out_path}")
     merged_df.to_csv(out_path, index=False, header=False)
-    # Merge predictions using class columns from best runs, taking into account first column is image name, no prediction
-    # for that column
+
     return selected_models_for_classes, model_occurrences
 
 
