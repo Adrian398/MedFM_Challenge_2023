@@ -170,7 +170,7 @@ experiments = ['exp1', 'exp2', 'exp3', 'exp4', 'exp5']
 class_counts = {"colon": 2, "endo": 4, "chest": 19}
 
 is_evaluation = choose_evaluation_type()
-submission_type = 'evaluation'
+submission_type = 'submission'
 if is_evaluation:
     print(f"\nSelected {colored(submission_type.capitalize(), 'red')}\n")
 else:
