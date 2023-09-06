@@ -146,6 +146,7 @@ def check_run_dir(run_dir, exp_dirs, task, shot, subm_type):
     model_path = run_dir.split('work_dirs/')[1]
     print("Checking run directory", model_path)
     csv_path = os.path.join(run_dir, f"{task}_{shot}_{subm_type}.csv")
+    print(csv_path)
     csv_files = glob.glob(csv_path)
     json_files = glob.glob(os.path.join(run_dir, "*.json"))
 
