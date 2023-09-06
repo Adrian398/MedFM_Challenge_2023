@@ -1,28 +1,37 @@
 _base_ = [
-    '../datasets/chest.py',
-    '../schedules/chest.py',
+    '../../datasets/chest.py',
+    '../../schedules/chest.py',
     'mmpretrain::_base_/default_runtime.py',
-    'mmpretrain::_base_/models/efficientnet_v2/efficientnet_v2.py',
-    '../custom_imports.py',
+    'mmpretrain::_base_/models/efficientnet_v2/efficientnetv2_s.py',
+    '../../custom_imports.py',
 ]
+
 
 # Pre-trained Checkpoint Path
 checkpoints = {
-    "s": "https://download.openmmlab.com/mmclassification/v0/efficientnetv2/efficientnetv2-s_3rdparty_in21k_20221220-c0572b56.pth"
+    "s": "https://download.openmmlab.com/mmclassification/v0/efficientnetv2/efficientnetv2-s_in21k-pre-3rdparty_in1k_20221220-7a7c8475.pth",
+    "m": "https://download.openmmlab.com/mmclassification/v0/efficientnetv2/efficientnetv2-m_in21k-pre-3rdparty_in1k_20221220-a1013a04.pth",
+    "l": "https://download.openmmlab.com/mmclassification/v0/efficientnetv2/efficientnetv2-l_in21k-pre-3rdparty_in1k_20221220-63df0efd.pth",
+    "xl": "https://download.openmmlab.com/mmclassification/v0/efficientnetv2/efficientnetv2-xl_in21k-pre-3rdparty_in1k_20221220-583ac18b.pth"
 }
 
 train_scales = {
-    "s": 224,
-    "m":
+    "s": 300,
+    "m": 384,
+    "l": 384,
+    "xl": 384
 }
 
 test_scales = {
-    "m":
+    "s": 384,
+    "m": 480,
+    "l": 480,
+    "xl": 512
 }
 
-lr = 1e-6
-train_bs = 4
-val_bs = 128
+lr = 1e-4
+train_bs = 8
+val_bs = 64
 dataset = 'chest'
 model_name = 'efficientnetv2'
 arch = 'm'
@@ -31,8 +40,6 @@ nshot = 1
 
 run_name = f'{model_name}_{arch}_bs{train_bs}_lr{lr}_exp{exp_num}'
 work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
-
-
 
 model = dict(
     backbone=dict(
@@ -43,14 +50,15 @@ model = dict(
     head=dict(
         type='CSRAClsHead',
         num_classes=19,
-        in_channels=1024,
+        in_channels=1280,
         num_heads=1,
         lam=0.1,
-        loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)))
+        loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        topk=None))
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='EfficientNet', scale=train_scales[arch], crop_ratio_range=(0.7, 1.0)),
+    dict(type='EfficientNetRandomCrop', scale=train_scales[arch], crop_ratio_range=(0.7, 1.0)),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
@@ -58,13 +66,8 @@ train_pipeline = [
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='Resize', scale=test_scales[arch]),
-    dict(
-        type='PackInputs',
-        # `gt_label_difficult` is needed for VOC evaluation
-        meta_keys=('sample_idx', 'img_path', 'ori_shape', 'img_shape',
-                   'scale_factor', 'flip', 'flip_direction',
-                   'gt_label_difficult')),
+    dict(type='EfficientNetCenterCrop', crop_size=test_scales[arch], crop_padding=0),
+    dict(type='PackInputs'),
 ]
 
 train_dataloader = dict(
@@ -86,31 +89,14 @@ test_dataloader = dict(
 )
 
 default_hooks = dict(
-    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="auto", rule="greater"),
+    checkpoint=dict(type='CheckpointHook', interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
     logger=dict(interval=10),
 )
 
-optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=lr, type='AdamW', weight_decay=0.05)
-
-optim_wrapper = dict(
-    optimizer=optimizer,
-    paramwise_cfg=dict(
-        norm_decay_mult=0.0,
-        bias_decay_mult=0.0,
-        flat_decay_mult=0.0,
-        custom_keys={
-            '.absolute_pos_embed': dict(decay_mult=0.0),
-            '.relative_position_bias_table': dict(decay_mult=0.0)
-        }),
-)
-
-param_scheduler = [
-    dict(by_epoch=True, end=1, start_factor=1, type='LinearLR'),
-    dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
-]
+optim_wrapper = dict(optimizer=dict(lr=lr))
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=1000)
+train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
 
 randomness = dict(seed=0)
