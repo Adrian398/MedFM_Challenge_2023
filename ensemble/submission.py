@@ -30,12 +30,12 @@ def write_ensemble_report(task, shot, exp, selected_models_for_classes, model_oc
             report_file.write(item + "\n")
         report_file.write("\n")
 
-    # Writing model occurrences
-    report_file.write("\nModel Summary:\n")
-    for model_path, occurrence in model_occurrences.items():
-        if occurrence > 1:
-            report_file.write(f"{model_path} used {occurrence} times\n")
-    report_file.write("\n")
+        # Writing model occurrences
+        report_file.write("\nModel Summary:\n")
+        for model_path, occurrence in model_occurrences.items():
+            if occurrence > 1:
+                report_file.write(f"{model_path} used {occurrence} times\n")
+        report_file.write("\n")
 
 
 
