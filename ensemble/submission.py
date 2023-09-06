@@ -218,7 +218,6 @@ def check_run_dir(run_dir, exp_dirs, task, shot, subm_type):
     if csv_files and json_files:
         exp_num = extract_exp_number(run_dir)
         if exp_num != 0:
-            print(f"Adding run: {run_dir}")
             exp_dirs[task][shot][f"exp{exp_num}"].append(
                 {'csv': csv_files[0], 'json': json_files[0], 'name': run_dir})
 
