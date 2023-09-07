@@ -180,7 +180,7 @@ def compute_task_specific_metrics(pred_path, gt_path, task):
 def get_prediction_dir():
     while True:
         timestamp = input("Please enter the timestamp (format: DD-MM_HH-MM-SS): ")
-        dir_path = f"ensemble/validation/{timestamp}"
+        dir_path = f"ensemble/validation/{timestamp}/result"
 
         if os.path.exists(dir_path):
             return dir_path, timestamp
@@ -224,7 +224,7 @@ if __name__ == "__main__":
     log_info = log_prediction(timestamp, PREDICTION_DIR, aggregates)
 
     # Save JSON result to the corresponding timestamp folder
-    json_file_path = os.path.join(PREDICTION_DIR, 'results.json')
-    with open(json_file_path, 'w') as json_file:
+    log_dir = PREDICTION_DIR.split("/result")[0]
+    with open(os.path.join(log_dir, 'results.json'), 'w') as json_file:
         json.dump(json_result, json_file, indent=4)
         json_file.write("\n" + log_info)
