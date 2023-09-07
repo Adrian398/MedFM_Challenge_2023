@@ -37,6 +37,16 @@ def construct_model_paths(report):
     return model_infos
 
 
+def get_prediction_dir():
+    while True:
+        timestamp = input("Please enter the timestamp (format: DD-MM_HH-MM-SS): ")
+
+        if os.path.exists(os.path.join(EVAL_BASE_PATH, timestamp)):
+            return timestamp
+        else:
+            print(f"Directory for '{timestamp}' does not exist. Please enter a valid timestamp.")
+
+
 # ================================================================================
 SCRATCH_BASE_PATH = '/scratch/medfm/medfm-challenge'
 VAL_TARGET_PATH = 'ensemble/validation'
@@ -45,25 +55,8 @@ TASKS = ["colon", "endo", "chest"]
 SHOTS = ["1-shot", "5-shot", "10-shot"]
 # ================================================================================
 
-# Read all timestamps (folder names) at runtime from EVAL_BASE_PATH
-timestamps = [d for d in os.listdir(EVAL_BASE_PATH) if os.path.isdir(os.path.join(EVAL_BASE_PATH, d))]
 
-# Print available timestamps and ask user to select one
-print("Available timestamps:")
-for idx, timestamp in enumerate(timestamps, 1):
-    print(f"{idx}. {timestamp}")
-
-while True:
-    choice = input("Select a timestamp (enter the number) or type 'no' to exit: ")
-    if choice.lower() == 'no':
-        print("Exiting...")
-        exit()
-    elif choice.isdigit() and 0 < int(choice) <= len(timestamps):
-        TIMESTAMP = timestamps[int(choice) - 1]
-        break
-    else:
-        print(colored("Invalid choice. Please enter a number from the list or 'no' to exit.", 'red'))
-
+TIMESTAMP = get_prediction_dir()
 EVAL_REPORT_PATH = os.path.join(EVAL_BASE_PATH, TIMESTAMP, 'report.txt')
 
 try:
