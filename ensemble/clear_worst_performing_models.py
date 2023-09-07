@@ -219,9 +219,8 @@ def get_worst_performing_model_dirs(task, shot):
         # Consider for deletion the models with scores below the threshold for each exp
         for model_dir, model_score in scores:
             print("Model Score:", model_score, "Threshold:", threshold_score)
-            # TODO: Currently list all valid models, dont care about threshold
-            #if model_score < threshold_score:
-            bad_performing_models.append(model_dir)
+            if model_score < threshold_score:
+                bad_performing_models.append(model_dir)
 
     return bad_performing_models, best_scores_for_each_setting
 
