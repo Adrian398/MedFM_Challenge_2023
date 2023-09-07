@@ -190,7 +190,8 @@ def get_prediction_dir():
 
 def log_prediction(timestamp, prediction_dir, aggregate_value):
     log_string = f"{timestamp} {prediction_dir} {aggregate_value}\n"
-    with open('test_validation_predictions_log.txt', 'a') as log_file:
+    log_file_path = os.path.join('ensemble', 'validation', 'log.txt')
+    with open(log_file_path, 'a') as log_file:
         log_file.write(log_string)
     return log_string
 
