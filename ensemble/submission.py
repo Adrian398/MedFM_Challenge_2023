@@ -325,47 +325,43 @@ def create_submission(is_evaluation):
                     print_report_for_setting(full_model_list=data_lists, task=task, shot=shot, exp=exp)
 
     # Create Output Directory
-    continue_query = input(f"\nCreate {submission_type} directory? (y/n) ")
     submission_dir = os.path.join("submissions", "evaluation", TIMESTAMP)
-    if continue_query.lower() == "y":
-        if is_evaluation:
-            success = f"Created submission directory {submission_dir}"
-        else:
-            submission_dir = os.path.join("ensemble", f"{submission_type}", TIMESTAMP)
-            success = f"Created {submission_type} directory {submission_dir}"
-        os.makedirs(submission_dir)
-        for exp in exps:
-            os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
-        print(colored(success, 'green'))
+    if is_evaluation:
+        success = f"Created submission directory {submission_dir}"
+    else:
+        submission_dir = os.path.join("ensemble", f"{submission_type}", TIMESTAMP)
+        success = f"Created {submission_type} directory {submission_dir}"
+    os.makedirs(submission_dir)
+    for exp in exps:
+        os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
+    print(colored(success, 'green'))
 
     # Perform Ensemble Strategy
-    continue_query = input(f"\nPerform ensemble merge strategy? (y/n) ")
-    if continue_query.lower() == "y":
-        for task in tasks:
-            for shot in shots:
-                for exp in exps:
-                    model_runs = data_lists[task][shot][exp]
-                    if len(model_runs) < 2:
-                        print("Not enough runs")
-                        continue
-                    out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{submission_type}.csv")
+    for task in tasks:
+        for shot in shots:
+            for exp in exps:
+                model_runs = data_lists[task][shot][exp]
+                if len(model_runs) < 2:
+                    print("Not enough runs")
+                    continue
+                out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{submission_type}.csv")
 
-                    if ENSEMBLE_STRATEGY == "weighted":
-                        selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
-                                                                                        task=task, shot=shot, exp=exp,
-                                                                                        k=TOP_K, out_path=out_path)
-                    elif ENSEMBLE_STRATEGY == "expert":
-                        selected_models, model_occurrences = expert_model_strategy(model_runs=model_runs,
-                                                                                   task=task,
-                                                                                   out_path=out_path)
-                    else:
-                        print("Invalid ensemble strategy!")
-                        exit()
+                if ENSEMBLE_STRATEGY == "weighted":
+                    selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
+                                                                                    task=task, shot=shot, exp=exp,
+                                                                                    k=TOP_K, out_path=out_path)
+                elif ENSEMBLE_STRATEGY == "expert":
+                    selected_models, model_occurrences = expert_model_strategy(model_runs=model_runs,
+                                                                               task=task,
+                                                                               out_path=out_path)
+                else:
+                    print("Invalid ensemble strategy!")
+                    exit()
 
-                    create_ensemble_report_file(task=task, shot=shot, exp=exp,
-                                                selected_models_for_classes=selected_models,
-                                                model_occurrences=model_occurrences,
-                                                root_report_dir=submission_dir)
+                create_ensemble_report_file(task=task, shot=shot, exp=exp,
+                                            selected_models_for_classes=selected_models,
+                                            model_occurrences=model_occurrences,
+                                            root_report_dir=submission_dir)
     return submission_dir
 
 
