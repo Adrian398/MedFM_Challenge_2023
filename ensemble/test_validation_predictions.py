@@ -240,8 +240,10 @@ if __name__ == "__main__":
     json_result, aggregates = generate_json(results=results)
     print(json_result)
 
-    # Log Validation Testing
-    strategy = ENSEMBLE_CONFIG.get('strategy', None)
+    strategy = "Undefined"
+    if ENSEMBLE_CONFIG:
+        strategy = ENSEMBLE_CONFIG.get('strategy', "Undefined")
+
     log_info = log_prediction(timestamp=timestamp,
                               prediction_dir=PREDICTION_DIR,
                               aggregate_value=aggregates,
