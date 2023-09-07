@@ -6,7 +6,10 @@ from datetime import datetime
 from functools import lru_cache
 
 import pandas as pd
+from colorama import Fore
 from termcolor import colored
+from tqdm import tqdm
+
 from utils.constants import shots, tasks, exps, TASK_2_CLASS_COUNT
 
 
@@ -129,7 +132,7 @@ def print_model_reports():
         for task in tasks:
             for shot in shots:
                 for exp in exps:
-                    print_report_for_setting(full_model_list=DATA, task=task, shot=shot, exp=exp)
+                    print_report_for_setting(full_model_list=DATA_SUBMISSION, task=task, shot=shot, exp=exp)
 
 
 
@@ -267,9 +270,10 @@ def extract_data_tuples_from_model_runs(run_list):
     return data_list
 
 
-def check_and_extract_data(model_dir_abs, subm_type, task, shot):
+def check_and_extract_data(model_dir_abs, subm_type, task, shot, pbar=None):
     model_dir_rel = model_dir_abs.split('work_dirs/')[1]
-    print("Checking run directory", model_dir_rel)
+    if pbar:
+        pbar.set_description(f"Checking {model_dir_rel}")
 
     csv_path = os.path.join(model_dir_abs, f"{task}_{shot}_{subm_type}.csv")
     csv_files = glob.glob(csv_path)
@@ -285,29 +289,40 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot):
 
 
 def extract_data():
-    data_lists = {}
-    for task in tasks:
-        data_lists[task] = {}
-        for shot in shots:
-            data_lists[task][shot] = {}
-            for exp in exps:
-                data_lists[task][shot][exp] = []
+    subm_types = ["submission", "validation"]
+    data_lists = {stype: {} for stype in subm_types}
 
-            path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
-            for model_dir in glob.glob(path_pattern):
-                data, exp_num = check_and_extract_data(model_dir, "submission", task=task, shot=shot)
-                if data and exp_num:
-                    data_lists[task][shot][f"exp{exp_num}"].append(data)
-    return data_lists
+    # Total iterations: tasks * shots * exps * model_dirs * subm_types
+    total_iterations = len(tasks) * len(shots) * len(exps) * len(
+        glob.glob(os.path.join(root_dir, tasks[0], shots[0], '*exp[1-5]*'))) * len(subm_types)
+
+    with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
+        for task in tasks:
+            data_lists[task] = {}
+            for shot in shots:
+                data_lists[task][shot] = {}
+                for exp in exps:
+                    data_lists[task][shot][exp] = []
+
+                path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
+                for model_dir in glob.glob(path_pattern):
+
+                    for subm_type in subm_types:
+                        data, exp_num = check_and_extract_data(model_dir_abs=model_dir, subm_type=subm_type,
+                                                               task=task, shot=shot, pbar=pbar)
+                        if data and exp_num:
+                            data_lists[subm_type][task][shot][f"exp{exp_num}"].append(data)
+                        pbar.update(1)
+    return data_lists["submission"], data_lists["validation"]
 
 
 def create_submission(is_evaluation):
-    data_lists = DATA
-
     submission_type = 'submission'
     if is_evaluation:
+        data_lists = DATA_SUBMISSION
         print(f"\n========== Creating {colored('Evaluation', 'red')} Submission ==========")
     else:
+        data_lists = DATA_VALIDATION
         submission_type = 'validation'
         print(f"\n========== Creating {colored(submission_type.capitalize(), 'blue')} Submission ==========")
 
@@ -343,6 +358,9 @@ def create_submission(is_evaluation):
 
 
 def print_overall_model_summary():
+    """
+    Prints the overall model summary. Once is enough since the count for submission and validation is the same.
+    """
     total_models = 0
     least_models = 100000
     most_models = -1
@@ -351,7 +369,7 @@ def print_overall_model_summary():
     for task in tasks:
         for shot in shots:
             for exp in exps:
-                models_for_setting = len(DATA[task][shot][exp])
+                models_for_setting = len(DATA_SUBMISSION[task][shot][exp])
                 print(f"| Setting: {task}/{shot}/{exp}\t>> Models: {models_for_setting}")
                 total_models += models_for_setting
                 if models_for_setting > most_models:
@@ -420,7 +438,7 @@ ENSEMBLE_STRATEGIES = ["expert", "weighted"]
 if __name__ == "__main__":
     ENSEMBLE_STRATEGY, TOP_K = select_ensemble_strategy()
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
-    DATA = extract_data()
+    DATA_SUBMISSION, DATA_VALIDATION = extract_data()
 
     print_overall_model_summary()
     print_model_reports()
