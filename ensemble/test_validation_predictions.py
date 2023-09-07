@@ -192,7 +192,13 @@ def log_prediction(timestamp, prediction_dir, aggregate_value, strategy="Undefin
     # Extract the directory without "/result"
     prediction_dir_cleaned = "/".join(prediction_dir.split("/")[:-1])
 
-    log_string = f"{timestamp:<15} {strategy:<20} {prediction_dir_cleaned:<40} {aggregate_value:<10.4f}\n"
+    try:
+        aggregate_value = float(aggregate_value)
+        value_string = f"{aggregate_value:<10.4f}"
+    except ValueError:
+        value_string = f"{aggregate_value:<10}"
+
+    log_string = f"{timestamp:<15} {strategy:<20} {prediction_dir_cleaned:<40} {value_string}\n"
 
     log_file_path = os.path.join('ensemble', 'validation', 'log.txt')
 
