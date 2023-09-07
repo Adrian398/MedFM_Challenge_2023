@@ -310,6 +310,7 @@ def extract_data():
                 path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
                 for model_dir in glob.glob(path_pattern):
                     for subm_type in subm_types:
+                        pbar.set_description(f"Checking {task}/{shot}/{model_dir.split('/')[-1]} for {subm_type}")
                         data, exp_num = check_and_extract_data(model_dir_abs=model_dir, subm_type=subm_type,
                                                                task=task, shot=shot, pbar=pbar)
                         if data and exp_num:
