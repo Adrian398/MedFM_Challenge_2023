@@ -160,8 +160,8 @@ def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, k=3):
 
         # Compute the weighted sum for this class
         weighted_sum_column = pd.Series(0, index=merged_df.index)
-        for model, weight in zip(top_n_models, weights):
-            weighted_sum_column += (model['prediction'].iloc[:, i + 1] * weight) / sum_weights
+        for (model_run, _), weight in zip(top_n_models, weights):  # Use the difference weights
+            weighted_sum_column += (model_run['prediction'].iloc[:, i + 1] * weight) / sum_weights
 
         merged_df.loc[:, i + 1] = weighted_sum_column
 
