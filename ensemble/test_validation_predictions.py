@@ -250,7 +250,7 @@ if __name__ == "__main__":
     print(json_result)
 
     strategy = "Undefined"
-    strategy = "None"
+    top_k = "None"
     if ENSEMBLE_CONFIG:
         strategy = ENSEMBLE_CONFIG.get('strategy', "Undefined")
         top_k = ENSEMBLE_CONFIG.get('top-k', "None")
