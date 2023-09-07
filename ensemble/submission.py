@@ -142,6 +142,14 @@ def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, k=3):
         kth_value = top_n_models[-1][1]
         weights = [value - kth_value for _, value in top_n_models]
 
+        # Debug print #1: Print the top k model names and their weights
+        print(f"Top {k} models for class {i + 1}:")
+        for (model_run, _), weight in zip(top_n_models, weights):
+            print(f"Model: {model_run['name']}, Weight: {weight:.4f}")
+
+        # Debug print #2: Print the sum of weights before normalization
+        print(f"Sum of weights for class {i + 1}: {sum(weights):.4f}\n")
+
         # Record the selected models for the report and update the model_occurrences
         selected_models_for_class = []
         for (model_run, _), weight in zip(top_n_models, weights):  # Here, we use the difference weights
@@ -162,6 +170,9 @@ def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, k=3):
         weighted_sum_column = pd.Series(0, index=merged_df.index)
         for (model_run, _), weight in zip(top_n_models, weights):  # Use the difference weights
             weighted_sum_column += (model_run['prediction'].iloc[:, i + 1] * weight) / sum_weights
+
+        # Debug print #3: Print the weighted sum for the first 5 data points
+        print(f"Weighted sum for the first 5 data points in class {i + 1}: {weighted_sum_column[:5].tolist()}\n")
 
         merged_df.loc[:, i + 1] = weighted_sum_column
 
