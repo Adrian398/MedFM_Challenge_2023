@@ -429,7 +429,12 @@ def create_submission(is_evaluation):
                     selected_models, model_occurrences = expert_model_strategy(model_runs=model_runs,
                                                                                task=task,
                                                                                out_path=out_path)
-                elif ENSEMBLE_STRATEGY == "pd-weighted" and LOG_SCALE:
+                elif ENSEMBLE_STRATEGY == "pd-weighted":
+                    selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                                   task=task,
+                                                                                                   out_path=out_path,
+                                                                                                   k=TOP_K)
+                elif ENSEMBLE_STRATEGY == "pd-log-weighted":
                     selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
                                                                                                    task=task,
                                                                                                    out_path=out_path,
@@ -516,13 +521,14 @@ def select_ensemble_strategy():
 
             if choice == "weighted" or choice == "pd-weighted" or choice == "pd-log-weighted":
                 top_k_models = select_top_k_models()
+                log_scale = False
 
                 if choice == "pd-log-weighted":
-                    return choice, top_k_models, True
+                    log_scale = True
 
-                return choice, top_k_models, False
+                return choice, top_k_models, log_scale
             else:
-                return choice, None
+                return choice, None, None
         else:
             print("Invalid choice. Please try again.\n")
 
