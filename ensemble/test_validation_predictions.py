@@ -198,7 +198,7 @@ def log_prediction(timestamp, prediction_dir, aggregate_value, strategy="Undefin
     except ValueError:
         value_string = f"{aggregate_value:<10}"
 
-    top_k_str = str(top_k) if top_k is not None else "Undefined"
+    top_k_str = str(top_k) if top_k is not None else "None"
 
     log_string = f"{timestamp:<20} {strategy:<20} {top_k_str:<10} {prediction_dir_cleaned:<40} {value_string}\n"
 
