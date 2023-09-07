@@ -188,7 +188,7 @@ def get_prediction_dir():
             print(f"Directory '{dir_path}' does not exist. Please enter a valid timestamp.")
 
 
-def log_prediction(timestamp, prediction_dir, aggregate_value, strategy="Undefined", top_k="None"):
+def log_prediction(timestamp, prediction_dir, aggregate_value, strategy="Undefined", top_k=None):
     # Extract the directory without "/result"
     prediction_dir_cleaned = "/".join(prediction_dir.split("/")[:-1])
 
@@ -198,7 +198,9 @@ def log_prediction(timestamp, prediction_dir, aggregate_value, strategy="Undefin
     except ValueError:
         value_string = f"{aggregate_value:<10}"
 
-    log_string = f"{timestamp:<20} {strategy:<20} {top_k:<10} {prediction_dir_cleaned:<40} {value_string}\n"
+    top_k_str = str(top_k) if top_k is not None else "Undefined"
+
+    log_string = f"{timestamp:<20} {strategy:<20} {top_k_str:<10} {prediction_dir_cleaned:<40} {value_string}\n"
 
     log_file_path = os.path.join('ensemble', 'validation', 'log.txt')
 
