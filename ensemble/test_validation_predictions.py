@@ -198,14 +198,14 @@ def log_prediction(timestamp, prediction_dir, aggregate_value, strategy="Undefin
     except ValueError:
         value_string = f"{aggregate_value:<10}"
 
-    log_string = f"{timestamp:<15} {strategy:<20} {prediction_dir_cleaned:<40} {value_string}\n"
+    log_string = f"{timestamp:<20} {strategy:<20} {prediction_dir_cleaned:<40} {value_string}\n"
 
     log_file_path = os.path.join('ensemble', 'validation', 'log.txt')
 
     # Check if the file exists. If not, write the header first
     if not os.path.exists(log_file_path):
         with open(log_file_path, 'w') as log_file:
-            log_file.write(f"{'Timestamp':<15} {'Strategy':<20} {'PredictionDir':<40} {'Aggregate':<10}\n")
+            log_file.write(f"{'Timestamp':<20} {'Strategy':<20} {'PredictionDir':<40} {'Aggregate':<10}\n")
 
     with open(log_file_path, 'a') as log_file:
         log_file.write(log_string)
