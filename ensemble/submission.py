@@ -376,12 +376,12 @@ def print_overall_model_summary():
     most_models = -1
     most_setting = ""
     least_setting = ""
+    print(f"""\n============== Overall Model Summary ==============""")
     for task in tasks:
         for shot in shots:
             for exp in exps:
                 models_for_setting = len(DATA_SUBMISSION[task][shot][exp])
-                print(f"""\n============== Overall Model Summary ==============
-                \n| Setting: {task}/{shot}/{exp}\t>> Models: {models_for_setting}""")
+                print(f"| Setting: {task}/{shot}/{exp}\t>> Models: {models_for_setting}")
                 total_models += models_for_setting
                 if models_for_setting > most_models:
                     most_models = models_for_setting
