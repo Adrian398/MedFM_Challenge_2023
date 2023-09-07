@@ -248,6 +248,7 @@ def create_submission(is_evaluation):
             for exp in exps:
                 data_lists[task][shot][exp] = []
 
+            for exp in exps:
                 path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
                 for model_dir in glob.glob(path_pattern):
                     data, exp_num = check_and_extract_data(model_dir, submission_type, task=task, shot=shot)
