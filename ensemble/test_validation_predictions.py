@@ -226,5 +226,5 @@ if __name__ == "__main__":
     # Save JSON result to the corresponding timestamp folder
     log_dir = PREDICTION_DIR.split("/result")[0]
     with open(os.path.join(log_dir, 'results.json'), 'w') as json_file:
-        json.dump(json_result, json_file, indent=4)
-        json_file.write("\n" + log_info)
+        json_file.write(json_result)
+        json_file.write(log_info)
