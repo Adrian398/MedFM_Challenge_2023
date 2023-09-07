@@ -426,5 +426,5 @@ if __name__ == "__main__":
     eval_output_dir = create_submission(is_evaluation=True)
     val_output_dir = create_submission(is_evaluation=False)
 
-    print(f"Created Evaluation at {colored(eval_output_dir,'red')}")
+    print(f"\nCreated Evaluation at {colored(eval_output_dir,'red')}")
     print(f"Created Validation at {colored(val_output_dir, 'blue')}")
