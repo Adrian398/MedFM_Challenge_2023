@@ -47,7 +47,6 @@ def extract_exp_number(string):
     return int(match.group(1)) if match else 0
 
 
-@lru_cache(maxsize=None)
 def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
     """
     Merges model runs using a weighted sum approach based on the N best model runs for each class.
@@ -171,7 +170,6 @@ def find_best_run(run_list, metric):
     return best_run, best_run_index
 
 
-@lru_cache(maxsize=None)
 def expert_model_strategy(model_runs, task, shot, exp, out_path):
     print("Merging results for task", task, shot, exp)
     num_classes = TASK_2_CLASS_COUNT[task]
