@@ -84,7 +84,7 @@ def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
         # Record the selected models for the report and update the model_occurrences
         selected_models_for_class = []
         for model, weight in top_n_models:
-            model_name = model['name'].split('work_dirs/')[1]
+            model_name = model['name']
             selected_models_for_class.append(f"Class {i + 1}: {model_name} (Weight: {weight:.4f})")
 
             if model_name in model_occurrences:
