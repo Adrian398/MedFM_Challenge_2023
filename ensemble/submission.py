@@ -26,7 +26,7 @@ def compute_pairwise_diversity(top_k_models):
             if i != j:
                 model_i_predictions = top_k_models[i]['prediction']
                 model_j_predictions = top_k_models[j]['prediction']
-                disagreements = (model_i_predictions != model_j_predictions).sum(axis=0)
+                disagreements = (model_i_predictions != model_j_predictions).sum().sum()  # Fixed here
                 diversity_matrix[i, j] = disagreements / len(model_i_predictions)
 
     # Sum the diversity scores for each model
