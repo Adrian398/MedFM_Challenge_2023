@@ -290,7 +290,15 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot, pbar=None):
 
 def extract_data():
     subm_types = ["submission", "validation"]
-    data_lists = {stype: {task: {shot: {} for shot in shots} for task in tasks} for stype in subm_types}
+    data_lists = {
+        stype: {
+            task: {
+                shot: {
+                    exp: [] for exp in exps
+                } for shot in shots
+            } for task in tasks
+        } for stype in subm_types
+    }
 
     # Total iterations: tasks * shots * exps * model_dirs * subm_types
     total_iterations = len(tasks) * len(shots) * len(exps) * len(
