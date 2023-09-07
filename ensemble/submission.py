@@ -496,7 +496,7 @@ def select_ensemble_strategy():
         if choice.isdigit() and 1 <= int(choice) <= len(ENSEMBLE_STRATEGIES):
             choice = ENSEMBLE_STRATEGIES[int(choice) - 1]
 
-            if choice == "weighted":
+            if choice == "weighted" or choice == "pd-weighted":
                 top_k_models = select_top_k_models()
                 return choice, top_k_models
             else:
