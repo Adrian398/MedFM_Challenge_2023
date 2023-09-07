@@ -14,6 +14,26 @@ from tqdm import tqdm
 from utils.constants import shots, tasks, exps, TASK_2_CLASS_COUNT
 
 
+def compute_pairwise_diversity(top_k_models):
+    """
+    Computes the pairwise diversity (disagreement rates) among the top k models.
+    """
+    num_models = len(top_k_models)
+    diversity_matrix = np.zeros((num_models, num_models))
+
+    for i in range(num_models):
+        for j in range(num_models):
+            if i != j:
+                model_i_predictions = top_k_models[i]['prediction']
+                model_j_predictions = top_k_models[j]['prediction']
+                disagreements = (model_i_predictions != model_j_predictions).sum(axis=0)
+                diversity_matrix[i, j] = disagreements / len(model_i_predictions)
+
+    # Sum the diversity scores for each model
+    diversity_scores = diversity_matrix.sum(axis=1)
+    return diversity_scores
+
+
 def create_ensemble_report_file(task, shot, exp, is_eval, selected_models_for_classes, model_occurrences,
                                 root_report_dir):
     """
@@ -238,6 +258,80 @@ def rank_based_weight_ensemble_strategy(model_runs, task, out_path, k=3):
         weighted_sum_column = pd.Series(0, index=merged_df.index)
         for (model_run, _), weight in zip(top_n_models, weights):
             weighted_sum_column += (model_run['prediction'].iloc[:, i + 1] * weight) / sum_weights
+
+        merged_df.loc[:, i + 1] = weighted_sum_column
+
+    merged_df.to_csv(out_path, index=False, header=False)
+
+    return selected_models_for_classes, model_occurrences
+
+
+def diversity_weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
+    """
+    Merges model runs using a diversity-weighted sum approach based on the N best model runs for each class.
+    """
+    num_classes = TASK_2_CLASS_COUNT[task]
+    merged_df = model_runs[0]['prediction'].iloc[:, 0:1].copy()
+
+    # List to store which models were selected for each class
+    selected_models_for_classes = []
+
+    # Dict to keep track of model occurrences
+    model_occurrences = {}
+
+    # For each class, get the N best performing model runs based on the aggregate metric
+    for i in range(num_classes):
+        class_models = []
+        for run in model_runs:
+            _, aggregate_value = get_aggregate(run['metrics'], task)
+            if aggregate_value is not None and aggregate_value >= 0:
+                class_models.append((run, aggregate_value))
+
+        # Sort the models based on aggregate value and take the top N models
+        class_models.sort(key=lambda x: x[1], reverse=True)
+        top_n_models = class_models[:k]
+
+        # Compute diversity scores for the top k models
+        top_k_model_data = [model for model, _ in top_n_models]
+        diversity_scores = compute_pairwise_diversity(top_k_model_data)
+
+        # Ensure diversity scores match the expected length
+        if len(diversity_scores) != len(top_k_model_data):
+            raise ValueError("Mismatch between diversity scores length and top k models.")
+
+        # Check if k is greater than the available models and print warning
+        if k > len(class_models):
+            print(colored(
+                f"Warning: Requested top {k} models, but only {len(class_models)} are available for class {i + 1}",
+                'red'))
+
+        # Normalize diversity scores to be within the same range as weights (optional step based on diversity scores)
+        max_weight = max([weight for _, weight in top_n_models])
+        diversity_scores = [score / max(diversity_scores) * max_weight for score in diversity_scores]
+
+        # Record the selected models for the report and update the model_occurrences
+        selected_models_for_class = []
+        for model, weight in top_n_models:
+            model_name = model['name']
+            selected_models_for_class.append(f"Class {i + 1}: {model_name} (Weight: {weight:.4f})")
+
+            if model_name in model_occurrences:
+                model_occurrences[model_name] += 1
+            else:
+                model_occurrences[model_name] = 1
+
+        selected_models_for_classes.extend(selected_models_for_class)
+
+        weights = [value for _, value in top_n_models]
+
+        # Calculate the sum of weights (aggregate values) for normalization
+        sum_weights = sum([weight + diversity_score for weight, diversity_score in zip(weights, diversity_scores)])
+
+        # Compute the diversity-weighted sum for this class
+        weighted_sum_column = pd.Series(0, index=merged_df.index)
+        for model, weight, diversity_score in zip(top_k_model_data, weights, diversity_scores):
+            adjusted_weight = weight + diversity_score
+            weighted_sum_column += (model['prediction'].iloc[:, i + 1] * adjusted_weight) / sum_weights
 
         merged_df.loc[:, i + 1] = weighted_sum_column
 
