@@ -290,7 +290,7 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot, pbar=None):
 
 def extract_data():
     subm_types = ["submission", "validation"]
-    data_lists = {stype: {} for stype in subm_types}
+    data_lists = {stype: {task: {shot: {} for shot in shots} for task in tasks} for stype in subm_types}
 
     # Total iterations: tasks * shots * exps * model_dirs * subm_types
     total_iterations = len(tasks) * len(shots) * len(exps) * len(
@@ -298,15 +298,9 @@ def extract_data():
 
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
         for task in tasks:
-            data_lists[task] = {}
             for shot in shots:
-                data_lists[task][shot] = {}
-                for exp in exps:
-                    data_lists[task][shot][exp] = []
-
                 path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
                 for model_dir in glob.glob(path_pattern):
-
                     for subm_type in subm_types:
                         data, exp_num = check_and_extract_data(model_dir_abs=model_dir, subm_type=subm_type,
                                                                task=task, shot=shot, pbar=pbar)
