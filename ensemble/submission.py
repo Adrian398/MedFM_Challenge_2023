@@ -3,6 +3,7 @@ import json
 import os
 import re
 from datetime import datetime
+from functools import lru_cache
 
 import pandas as pd
 from termcolor import colored
@@ -18,6 +19,7 @@ def create_ensemble_report_file(task, shot, exp, selected_models_for_classes, mo
         shot (str): The shot name.
         exp (str): The experiment name.
         selected_models_for_classes (list): List containing the selected models for each class.
+        model_occurrences (dict): Dict containing the occurences for the selected models.
         root_report_dir (str): Root directory where the report.txt should be saved.
     """
 
@@ -39,11 +41,13 @@ def create_ensemble_report_file(task, shot, exp, selected_models_for_classes, mo
         report_file.write("\n")
 
 
+@lru_cache(maxsize=None)
 def extract_exp_number(string):
     match = re.search(r'exp(\d+)', string)
     return int(match.group(1)) if match else 0
 
 
+@lru_cache(maxsize=None)
 def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
     """
     Merges model runs using a weighted sum approach based on the N best model runs for each class.
@@ -115,6 +119,7 @@ def print_report_for_setting(full_model_list, task, shot, exp):
         print(f"Model: {model_path_rel:{max_char_length}}  {agg_name}: {agg_val:.4f}")
 
 
+@lru_cache(maxsize=None)
 def get_aggregate(model_metrics, task):
     # Dictionary mapping tasks to lambda functions for aggregate calculation
     aggregate_calculations = {
@@ -154,6 +159,7 @@ def choose_evaluation_type():
 
 
 # Find the run with the best MAP for a given class, within a list of runs
+@lru_cache(maxsize=None)
 def find_best_run(run_list, metric):
     best_run_index = 0
     best_run = run_list[0]
@@ -166,6 +172,7 @@ def find_best_run(run_list, metric):
     return best_run, best_run_index
 
 
+@lru_cache(maxsize=None)
 def expert_model_strategy(model_runs, task, shot, exp, out_path):
     print("Merging results for task", task, shot, exp)
     num_classes = TASK_2_CLASS_COUNT[task]
@@ -179,6 +186,7 @@ def expert_model_strategy(model_runs, task, shot, exp, out_path):
 
     # Find run with best MAP for each class
     for i in range(num_classes):
+        # TODO ADAPT!
         best_run, best_run_index = find_best_run(model_runs, f'MAP_class{i + 1}')
         merged_df[i + 1] = best_run["prediction"][i + 1]
 
@@ -198,6 +206,7 @@ def expert_model_strategy(model_runs, task, shot, exp, out_path):
     return selected_models_for_classes, model_occurrences
 
 
+@lru_cache(maxsize=None)
 def extract_data_tuples_from_model_runs(run_list):
     data_list = []
     for run in run_list:
