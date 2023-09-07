@@ -112,6 +112,64 @@ def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
     return selected_models_for_classes, model_occurrences
 
 
+def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, k=3):
+    """
+    Merges model runs using a difference in performance weight approach for the N best model runs for each class.
+    """
+    num_classes = TASK_2_CLASS_COUNT[task]
+
+    merged_df = model_runs[0]['prediction'].iloc[:, 0:1].copy()
+
+    # List to store which models were selected for each class
+    selected_models_for_classes = []
+
+    # Dict to keep track of model occurrences
+    model_occurrences = {}
+
+    # For each class, get the N best performing model runs based on the aggregate metric
+    for i in range(num_classes):
+        class_models = []
+        for run in model_runs:
+            _, aggregate_value = get_aggregate(run['metrics'], task)
+            if aggregate_value is not None:
+                class_models.append((run, aggregate_value))
+
+        # Sort the models based on aggregate value and take the top N models
+        class_models.sort(key=lambda x: x[1], reverse=True)
+        top_n_models = class_models[:k]
+
+        # Use the difference in performance from the k-th model as weights
+        kth_value = top_n_models[-1][1]
+        weights = [value - kth_value for _, value in top_n_models]
+
+        # Record the selected models for the report and update the model_occurrences
+        selected_models_for_class = []
+        for model, weight in zip(top_n_models, weights):  # Here, we use the difference weights
+            model_name = model['name']
+            selected_models_for_class.append(f"Class {i + 1}: {model_name} (Weight: {weight:.4f})")
+
+            if model_name in model_occurrences:
+                model_occurrences[model_name] += 1
+            else:
+                model_occurrences[model_name] = 1
+
+        selected_models_for_classes.extend(selected_models_for_class)
+
+        # Calculate the sum of weights for normalization
+        sum_weights = sum(weights)
+
+        # Compute the weighted sum for this class
+        weighted_sum_column = pd.Series(0, index=merged_df.index)
+        for model, weight in zip(top_n_models, weights):
+            weighted_sum_column += (model['prediction'].iloc[:, i + 1] * weight) / sum_weights
+
+        merged_df.loc[:, i + 1] = weighted_sum_column
+
+    merged_df.to_csv(out_path, index=False, header=False)
+
+    return selected_models_for_classes, model_occurrences
+
+
 def print_report_for_setting(full_model_list, task, shot, exp):
     print("\nReport for:", colored(os.path.join(task.capitalize(), shot, exp), 'blue'))
 
@@ -355,6 +413,10 @@ def create_submission(is_evaluation):
                     selected_models, model_occurrences = expert_model_strategy(model_runs=model_runs,
                                                                                task=task,
                                                                                out_path=out_path)
+                elif ENSEMBLE_STRATEGY == "pd-weighted":
+                    selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                                   task=task,
+                                                                                                   out_path=out_path)
                 else:
                     print("Invalid ensemble strategy!")
                     exit()
@@ -445,7 +507,7 @@ def select_ensemble_strategy():
 
 # ============================================================
 root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
-ENSEMBLE_STRATEGIES = ["expert", "weighted"]
+ENSEMBLE_STRATEGIES = ["expert", "weighted", "pd-weighted"]
 # ============================================================
 
 
