@@ -104,11 +104,9 @@ def print_report_for_setting(full_model_list, task, shot, exp):
 
     model_view = []
     for model_info in full_model_list[task][shot][exp]:
-        model_path_rel = model_info['name'].split('work_dirs/')[1]
-
         agg_name, agg_val = get_aggregate(model_metrics=model_info['metrics'], task=task)
         if agg_val is not None:
-            model_view.append((model_path_rel, agg_name, agg_val))
+            model_view.append((model_info['name'], agg_name, agg_val))
 
     model_view.sort(key=lambda x: x[2])
     max_char_length = max(len(path) for path, _, _ in model_view)
