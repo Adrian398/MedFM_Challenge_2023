@@ -266,7 +266,7 @@ def rank_based_weight_ensemble_strategy(model_runs, task, out_path, k=3):
     return selected_models_for_classes, model_occurrences
 
 
-def diversity_weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
+def diversity_weighted_ensemble_strategy(model_runs, task, out_path, k=3):
     """
     Merges model runs using a diversity-weighted sum approach based on the N best model runs for each class.
     """
@@ -601,6 +601,11 @@ def create_submission(is_evaluation):
                                                                                              task=task,
                                                                                              out_path=out_path,
                                                                                              k=TOP_K)
+                elif ENSEMBLE_STRATEGY == "diversity-weighted":
+                    selected_models, model_occurrences = diversity_weighted_ensemble_strategy(model_runs=model_runs,
+                                                                                              task=task,
+                                                                                              out_path=out_path,
+                                                                                              k=TOP_K)
                 else:
                     print("Invalid ensemble strategy!")
                     exit()
@@ -685,6 +690,7 @@ def select_ensemble_strategy():
                     or choice == "pd-weighted"
                     or choice == "pd-log-weighted"
                     or choice == "rank-based-weighted"
+                or choice == "diversity-weighted"
             ):
                 top_k_models = select_top_k_models()
                 log_scale = False
@@ -702,7 +708,7 @@ def select_ensemble_strategy():
 
 # ============================================================
 root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
-ENSEMBLE_STRATEGIES = ["expert", "weighted", "pd-weighted", "pd-log-weighted", "rank-based-weighted"]
+ENSEMBLE_STRATEGIES = ["expert", "weighted", "pd-weighted", "pd-log-weighted", "rank-based-weighted", "diversity-weighted"]
 # ============================================================
 
 
