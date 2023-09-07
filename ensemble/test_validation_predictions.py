@@ -196,6 +196,13 @@ def log_prediction(timestamp, prediction_dir, aggregate_value):
     return log_string
 
 
+def load_submission_cfg_dump(root_report_dir):
+    cfg_file_path = os.path.join(root_report_dir, "config.json")
+    with open(cfg_file_path, 'r') as cfg_file:
+        config_data = json.load(cfg_file)
+    return config_data
+
+
 # ==========================================================================================
 #PREDICTION_DIR = "ensemble/validation/06-09_22-45-28/result"  # Weighted Sum Model Ensemble Top7:  61.32564695023872   (eval=)
 #PREDICTION_DIR = "ensemble/validation/06-09_21-14-47/result"  # Weighted Sum Model Ensemble Top3:  61.390636816499786  (eval=06-09_21-07-17)
@@ -207,6 +214,7 @@ GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 
 if __name__ == "__main__":
     PREDICTION_DIR, timestamp = get_prediction_dir()
+    ENSEMBLE_CONFIG = load_submission_cfg_dump(os.path.join("ensemble", "validation", timestamp))
 
     results = {exp: {} for exp in exps}
 

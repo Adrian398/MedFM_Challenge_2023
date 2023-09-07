@@ -133,7 +133,6 @@ def print_model_reports():
                     print_report_for_setting(full_model_list=DATA_SUBMISSION, task=task, shot=shot, exp=exp)
 
 
-
 def get_aggregate(model_metrics, task):
     # Dictionary mapping tasks to lambda functions for aggregate calculation
     aggregate_calculations = {
@@ -152,24 +151,9 @@ def get_aggregate(model_metrics, task):
 
     # If there's no calculation for the task, return None for both metric name and value
     if not calculation:
-        return (None, None)
+        return None, None
 
     return calculation(model_metrics)
-
-
-def choose_evaluation_type():
-    """Prompt the user to select between evaluation or validation.
-    Returns True for Evaluation and False for Validation."""
-
-    user_input = input(f"{colored('Evaluation (e)', 'red')} or {colored('Validation (v)', 'blue')}? (Default = e) ").lower() or 'e'
-
-    if user_input == 'e':
-        return True
-    elif user_input == 'v':
-        return False
-    else:
-        print(f"Invalid choice! Defaulting to Evaluation.")
-        return True
 
 
 def compute_colon_aggregate(model_metrics, model_name):
@@ -252,7 +236,6 @@ def expert_model_strategy(model_runs, task, out_path):
 
         selected_models_for_classes.append(f"Class {class_idx + 1}: {model_name}")
 
-    #print(f"Saving merged prediction to {out_path}")
     merged_df.to_csv(out_path, index=False, header=False)
 
     return selected_models_for_classes, model_occurrences
@@ -317,6 +300,19 @@ def extract_data():
     return data_lists["submission"], data_lists["validation"]
 
 
+def create_submission_cfg_dump(root_report_dir):
+    config_data = {
+        'timestamp': TIMESTAMP,
+        'strategy': ENSEMBLE_STRATEGY,
+    }
+    cfg_file_path = os.path.join(root_report_dir, "config.json")
+
+    with open(cfg_file_path, 'w') as cfg_file:
+        json.dump(config_data, cfg_file, indent=4)
+
+    return cfg_file_path
+
+
 def create_submission(is_evaluation):
     submission_type = 'submission'
     if is_evaluation:
@@ -362,6 +358,9 @@ def create_submission(is_evaluation):
                                             selected_models_for_classes=selected_models,
                                             model_occurrences=model_occurrences,
                                             root_report_dir=submission_dir)
+    if not is_evaluation:
+        create_submission_cfg_dump(root_report_dir=submission_dir)
+
     return submission_dir
 
 
@@ -392,6 +391,7 @@ def print_overall_model_summary():
     print(f"| Most models: {most_models} {most_setting}")
     print(f"| Least models: {least_models} {least_setting}")
     print("===================================================")
+    return total_models
 
 
 def create_output_dir(is_evaluation, submission_type):
@@ -449,7 +449,7 @@ if __name__ == "__main__":
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
     DATA_SUBMISSION, DATA_VALIDATION = extract_data()
 
-    print_overall_model_summary()
+    TOTAL_MODELS = print_overall_model_summary()
     print_model_reports()
 
     eval_output_dir = create_submission(is_evaluation=True)
