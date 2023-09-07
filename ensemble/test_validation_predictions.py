@@ -206,8 +206,6 @@ def log_prediction(timestamp, prediction_dir, aggregate_value, strategy="Undefin
     if not os.path.exists(log_file_path):
         with open(log_file_path, 'w') as log_file:
             log_file.write(f"{'Timestamp':<15} {'Strategy':<20} {'PredictionDir':<40} {'Aggregate':<10}\n")
-            log_file.write(
-                "------------------------------------------------------------------------------------------------------\n")
 
     with open(log_file_path, 'a') as log_file:
         log_file.write(log_string)
