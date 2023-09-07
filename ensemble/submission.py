@@ -157,7 +157,6 @@ def choose_evaluation_type():
 
 
 # Find the run with the best MAP for a given class, within a list of runs
-@lru_cache(maxsize=None)
 def find_best_run(run_list, metric):
     best_run_index = 0
     best_run = run_list[0]
