@@ -197,10 +197,10 @@ def log_prediction(timestamp, prediction_dir, aggregate_value):
 
 
 # ==========================================================================================
-#PREDICTION_DIR = "ensemble/validation/06-09_22-45-28/result"  # Weighted Sum Model Ensemble Top7: 61.32564695023872 (eval=)
-#PREDICTION_DIR = "ensemble/validation/06-09_21-14-47/result"  # Weighted Sum Model Ensemble Top3: 61.390636816499786 (eval=06-09_21-07-17)
-#PREDICTION_DIR = "ensemble/validation/05-09_14-17-34/result"  # Expert per Class Model Ensemble
-#PREDICTION_DIR = "ensemble/validation/02-09_00-32-41/result"  # Expert
+#PREDICTION_DIR = "ensemble/validation/06-09_22-45-28/result"  # Weighted Sum Model Ensemble Top7:  61.32564695023872   (eval=)
+#PREDICTION_DIR = "ensemble/validation/06-09_21-14-47/result"  # Weighted Sum Model Ensemble Top3:  61.390636816499786  (eval=06-09_21-07-17)
+#PREDICTION_DIR = "ensemble/validation/05-09_14-17-34/result"  # Expert per Class Model Ensemble:   60.4631579320733    (eval=)
+#PREDICTION_DIR = "ensemble/validation/02-09_00-32-41/result"  # Expert                             60.17791085565442   (eval=02-09_00-32-41)
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 # ==========================================================================================
 

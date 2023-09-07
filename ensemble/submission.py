@@ -232,7 +232,7 @@ class_counts = {"colon": 2, "endo": 4, "chest": 19}
 
 # Ensemble Variables
 TOP_K_ENSEMBLE_MODELS = 7
-ENSEMBLE_STRATEGY = "weighted"
+ENSEMBLE_STRATEGY = "expert"
 
 is_evaluation = choose_evaluation_type()
 submission_type = 'submission'
