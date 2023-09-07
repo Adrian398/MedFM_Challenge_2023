@@ -380,7 +380,8 @@ def print_overall_model_summary():
         for shot in shots:
             for exp in exps:
                 models_for_setting = len(DATA_SUBMISSION[task][shot][exp])
-                print(f"| Setting: {task}/{shot}/{exp}\t>> Models: {models_for_setting}")
+                print(f"""\n============== Overall Model Summary ==============
+                \n| Setting: {task}/{shot}/{exp}\t>> Models: {models_for_setting}""")
                 total_models += models_for_setting
                 if models_for_setting > most_models:
                     most_models = models_for_setting
@@ -388,11 +389,11 @@ def print_overall_model_summary():
                 if models_for_setting < least_models:
                     least_models = models_for_setting
                     least_setting = f"{task} {shot} {exp}"
-    print("--------------------------------------")
+    print("===================================================")
     print(f"| Total models: {total_models}")
     print(f"| Most models: {most_models} {most_setting}")
     print(f"| Least models: {least_models} {least_setting}")
-    print("--------------------------------------")
+    print("===================================================")
 
 
 def create_output_dir(is_evaluation, submission_type):
