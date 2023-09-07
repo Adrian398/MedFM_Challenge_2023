@@ -156,21 +156,61 @@ def choose_evaluation_type():
         return True
 
 
+def compute_colon_aggregate(model_metrics, model_name):
+    """
+    Compute metrics for the 'colon' task.
+    """
+    auc_label = "AUC/AUC_multiclass"
+    acc_label = "accuracy/top1"
+
+    if auc_label not in model_metrics:
+        print(f"Metric '{auc_label}' not found in {model_name}")
+        return None
+
+    if acc_label not in model_metrics:
+        print(f"Metric '{acc_label}' not found in {model_name}")
+        return None
+
+    return (model_metrics[auc_label] + model_metrics[acc_label])/2
+
+
+def compute_multilabel_aggregate_p_class(model_metrics, model_name, class_idx):
+    """Compute metrics for multi-label tasks ('chest' and 'endo')."""
+    auc_label = f"AUC/AUC_class{class_idx}"
+    map_label = f"MAP_class{class_idx}"
+
+    if auc_label not in model_metrics:
+        print(f"Metric '{auc_label}' not found in {model_name}")
+        return None
+
+    if map_label not in model_metrics:
+        print(f"Metric '{map_label}' not found in {model_name}")
+        return None
+
+    return (model_metrics[auc_label] + model_metrics[map_label])/2
+
+
 # Find the run with the best MAP for a given class, within a list of runs
-def find_best_run(run_list, metric):
-    best_run_index = 0
-    best_run = run_list[0]
-    best_run_score = run_list[0]['metrics'][metric]
-    for index, run in enumerate(run_list[1:]):
-        if run['metrics'][metric] > best_run_score:
-            best_run_index = index + 1
-            best_run = run
-            best_run_score = run['metrics'][metric]
-    return best_run, best_run_index
+def find_best_model_for_class(run_list, task, class_idx):
+    scores = []
+    for model in run_list:
+        model_metrics, model_name = model['metrics'], model['name']
+
+        if task == 'colon':
+            score = compute_colon_aggregate(model_metrics, model_name)
+        elif task in ['chest', 'endo']:
+            score = compute_multilabel_aggregate_p_class(model_metrics, model_name, class_idx)
+        else:
+            raise ValueError(f"Invalid task: {task}")
+
+        scores.append((model_name, score))
+
+    # Sort the scores in descending order and return the first (highest) tuple
+    best_model = sorted(scores, key=lambda x: x[1], reverse=True)[0]
+    return best_model[0]
 
 
-def expert_model_strategy(model_runs, task, shot, exp, out_path):
-    #print("Merging results for task", task, shot, exp)
+def expert_model_strategy(model_runs, task, out_path):
     num_classes = TASK_2_CLASS_COUNT[task]
     merged_df = model_runs[0]['prediction'].iloc[:, 0:1]
 
@@ -180,21 +220,20 @@ def expert_model_strategy(model_runs, task, shot, exp, out_path):
     # Dict to keep track of model occurrences
     model_occurrences = {}
 
-    # Find run with best MAP for each class
-    for i in range(num_classes):
-        # TODO ADAPT!
-        best_run, best_run_index = find_best_run(model_runs, f'MAP_class{i + 1}')
-        merged_df[i + 1] = best_run["prediction"][i + 1]
+    # Find run with best Aggregate for each class
+    for class_idx in range(num_classes):
+        best_model_run = find_best_model_for_class(model_runs, task=task, class_idx=class_idx + 1)
+
+        merged_df[class_idx + 1] = best_model_run["prediction"][class_idx + 1]
 
         # Keeping track of the model used for each class
-        model_name = best_run['name']
+        model_name = best_model_run
         if model_name in model_occurrences:
             model_occurrences[model_name] += 1
         else:
             model_occurrences[model_name] = 1
 
-        #print(f"Merged dataframe after adding model run {best_run_index} {model_name}")
-        selected_models_for_classes.append(f"Class {i + 1}: {model_name}")
+        selected_models_for_classes.append(f"Class {class_idx + 1}: {model_name}")
 
     print(f"Saving merged prediction to {out_path}")
     merged_df.to_csv(out_path, index=False, header=False)
@@ -317,7 +356,7 @@ def create_submission(is_evaluation):
                                                                                         k=TOP_K, out_path=out_path)
                     elif ENSEMBLE_STRATEGY == "expert":
                         selected_models, model_occurrences = expert_model_strategy(model_runs=model_runs,
-                                                                                   task=task, shot=shot, exp=exp,
+                                                                                   task=task,
                                                                                    out_path=out_path)
                     else:
                         print("Invalid ensemble strategy!")
