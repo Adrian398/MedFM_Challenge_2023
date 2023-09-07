@@ -249,7 +249,7 @@ def expert_model_strategy(model_runs, task, out_path):
 
         selected_models_for_classes.append(f"Class {class_idx + 1}: {model_name}")
 
-    print(f"Saving merged prediction to {out_path}")
+    #print(f"Saving merged prediction to {out_path}")
     merged_df.to_csv(out_path, index=False, header=False)
 
     return selected_models_for_classes, model_occurrences
