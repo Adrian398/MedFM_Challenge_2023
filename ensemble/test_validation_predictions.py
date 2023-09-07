@@ -48,7 +48,7 @@ def generate_json(results):
     aggregate_value = total_sum / total_metrics_count if total_metrics_count > 0 else 0
     json_results["aggregates"] = str(aggregate_value)
 
-    return json.dumps(json_results, indent=2)
+    return json.dumps(json_results, indent=2), json_results["aggregates"]
 
 
 def process_experiment(exp, task, shot):
@@ -188,9 +188,16 @@ def get_prediction_dir():
             print(f"Directory '{dir_path}' does not exist. Please enter a valid timestamp.")
 
 
+def log_prediction(timestamp, prediction_dir, aggregate_value):
+    log_string = f"{timestamp} {prediction_dir} {aggregate_value}\n"
+    with open('test_validation_predictions_log.txt', 'a') as log_file:
+        log_file.write(log_string)
+    return log_string
+
+
 # ==========================================================================================
 #PREDICTION_DIR = "ensemble/validation/06-09_22-45-28/result"  # Weighted Sum Model Ensemble Top7: 61.32564695023872 (eval=)
-#PREDICTION_DIR = "ensemble/validation/06-09_21-14-47/result"  # Weighted Sum Model Ensemble Top3: 61.3906 (eval=06-09_21-07-17)
+#PREDICTION_DIR = "ensemble/validation/06-09_21-14-47/result"  # Weighted Sum Model Ensemble Top3: 61.390636816499786 (eval=06-09_21-07-17)
 #PREDICTION_DIR = "ensemble/validation/05-09_14-17-34/result"  # Expert per Class Model Ensemble
 #PREDICTION_DIR = "ensemble/validation/02-09_00-32-41/result"  # Expert
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
@@ -198,7 +205,7 @@ GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 
 
 if __name__ == "__main__":
-    PREDICTION_DIR = get_prediction_dir()
+    timestamp, PREDICTION_DIR = get_prediction_dir()
 
     results = {exp: {} for exp in exps}
 
@@ -209,5 +216,13 @@ if __name__ == "__main__":
                 if metrics:
                     results[exp][f"{task}_{shot}"] = metrics
 
-    json_result = generate_json(results=results)
+    json_result, aggregates = generate_json(results=results)
     print(json_result)
+
+    log_info = log_prediction(timestamp, PREDICTION_DIR, aggregates)
+
+    # Save JSON result to the corresponding timestamp folder
+    json_file_path = os.path.join(PREDICTION_DIR, 'results.json')
+    with open(json_file_path, 'w') as json_file:
+        json.dump(json_result, json_file, indent=4)
+        json_file.write("\n" + log_info)
