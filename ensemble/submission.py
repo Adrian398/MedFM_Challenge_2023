@@ -27,17 +27,17 @@ def create_ensemble_report_file(task, shot, exp, selected_models_for_classes, mo
 
     # Append the information to the report.txt file
     with open(report_path, "a") as report_file:
-        report_file.write(f"Task: {task}, Shot: {shot}, Experiment: {exp}\n")
+        report_file.write(f"Setting: {task}/{shot}/{exp}\n")
         for item in selected_models_for_classes:
             report_file.write(item + "\n")
         report_file.write("\n")
 
         # Writing model occurrences
-        report_file.write("\nModel Summary:\n")
+        report_file.write("Model Summary:\n")
         for model_path, occurrence in model_occurrences.items():
             if occurrence >= 1:
                 report_file.write(f"{model_path} used {occurrence} times\n")
-        report_file.write("\n")
+        report_file.write("\n\n")
     print("Added Ensemble report content for", colored(f"{task}/{shot}/{exp}", 'green'))
 
 
@@ -268,7 +268,26 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot):
     return None, None
 
 
+def extract_data():
+    data_lists = {}
+    for task in tasks:
+        data_lists[task] = {}
+        for shot in shots:
+            data_lists[task][shot] = {}
+            for exp in exps:
+                data_lists[task][shot][exp] = []
+
+            path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
+            for model_dir in glob.glob(path_pattern):
+                data, exp_num = check_and_extract_data(model_dir, "submission", task=task, shot=shot)
+                if data and exp_num:
+                    data_lists[task][shot][f"exp{exp_num}"].append(data)
+    return data_lists
+
+
 def create_submission(is_evaluation):
+    data_lists = DATA
+
     submission_type = 'submission'
     if is_evaluation:
         print(f"\nSelected {colored(submission_type.capitalize(), 'red')}\n")
@@ -282,24 +301,9 @@ def create_submission(is_evaluation):
     most_setting = ""
     least_setting = ""
 
-    data_lists = {}
-    for task in tasks:
-        data_lists[task] = {}
-        for shot in shots:
-            data_lists[task][shot] = {}
-            for exp in exps:
-                data_lists[task][shot][exp] = []
-
-            path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
-            for model_dir in glob.glob(path_pattern):
-                data, exp_num = check_and_extract_data(model_dir, submission_type, task=task, shot=shot)
-                if data and exp_num:
-                    data_lists[task][shot][f"exp{exp_num}"].append(data)
-
     for task in tasks:
         for shot in shots:
             for exp in exps:
-                # Count and compare
                 models_for_setting = len(data_lists[task][shot][exp])
                 print(f"{task} {shot} {exp} {models_for_setting}")
                 total_models += models_for_setting
@@ -403,6 +407,7 @@ ENSEMBLE_STRATEGIES = ["expert", "weighted"]
 if __name__ == "__main__":
     ENSEMBLE_STRATEGY, TOP_K = select_ensemble_strategy()
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
+    DATA = extract_data()
 
     eval_output_dir = create_submission(is_evaluation=True)
     val_output_dir = create_submission(is_evaluation=False)
