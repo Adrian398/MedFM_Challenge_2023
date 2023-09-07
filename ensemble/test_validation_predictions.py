@@ -188,7 +188,7 @@ def get_prediction_dir():
             print(f"Directory '{dir_path}' does not exist. Please enter a valid timestamp.")
 
 
-def log_prediction(timestamp, prediction_dir, aggregate_value, strategy="Undefined"):
+def log_prediction(timestamp, prediction_dir, aggregate_value, strategy="Undefined", top_k="None"):
     # Extract the directory without "/result"
     prediction_dir_cleaned = "/".join(prediction_dir.split("/")[:-1])
 
@@ -198,14 +198,14 @@ def log_prediction(timestamp, prediction_dir, aggregate_value, strategy="Undefin
     except ValueError:
         value_string = f"{aggregate_value:<10}"
 
-    log_string = f"{timestamp:<20} {strategy:<20} {prediction_dir_cleaned:<40} {value_string}\n"
+    log_string = f"{timestamp:<20} {strategy:<20} {top_k:<10} {prediction_dir_cleaned:<40} {value_string}\n"
 
     log_file_path = os.path.join('ensemble', 'validation', 'log.txt')
 
     # Check if the file exists. If not, write the header first
     if not os.path.exists(log_file_path):
         with open(log_file_path, 'w') as log_file:
-            log_file.write(f"{'Timestamp':<20} {'Strategy':<20} {'PredictionDir':<40} {'Aggregate':<10}\n")
+            log_file.write(f"{'Timestamp':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
 
     with open(log_file_path, 'a') as log_file:
         log_file.write(log_string)
@@ -250,13 +250,16 @@ if __name__ == "__main__":
     print(json_result)
 
     strategy = "Undefined"
+    strategy = "None"
     if ENSEMBLE_CONFIG:
         strategy = ENSEMBLE_CONFIG.get('strategy', "Undefined")
+        top_k = ENSEMBLE_CONFIG.get('top-k', "None")
 
     log_info = log_prediction(timestamp=timestamp,
                               prediction_dir=PREDICTION_DIR,
                               aggregate_value=aggregates,
-                              strategy=strategy)
+                              strategy=strategy,
+                              top_k=top_k)
 
     # Save JSON result to the corresponding timestamp folder
     log_dir = PREDICTION_DIR.split("/result")[0]
