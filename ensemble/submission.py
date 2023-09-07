@@ -234,7 +234,7 @@ def expert_model_strategy(model_runs, task, out_path):
     for class_idx in range(num_classes):
         best_model_run = find_best_model_for_class(model_runs, task=task, class_idx=class_idx + 1)
 
-        merged_df.loc[:, class_idx + 1] = best_model_run["prediction"].loc[:, class_idx + 1]
+        merged_df.loc[:, class_idx + 1] = best_model_run["prediction"].loc[:, class_idx + 1].copy()
 
         # Keeping track of the model used for each class
         model_name = best_model_run['name'].split('work_dirs/')[0]
@@ -300,10 +300,10 @@ def create_submission(is_evaluation):
 
     submission_type = 'submission'
     if is_evaluation:
-        print(f"\nSelected {colored(submission_type.capitalize(), 'red')}\n")
+        print(f"\nCreating {colored('Evaluation', 'red')} Submission\n")
     else:
         submission_type = 'validation'
-        print(f"\nSelected {colored(submission_type.capitalize(), 'blue')}\n")
+        print(f"\nCreating {colored(submission_type.capitalize(), 'blue')} Submission\n")
 
     submission_dir = create_output_dir(is_evaluation, submission_type)
 
@@ -346,7 +346,7 @@ def print_overall_model_summary():
         for shot in shots:
             for exp in exps:
                 models_for_setting = len(DATA[task][shot][exp])
-                print(f"| Setting: {task}/{shot}/{exp} >> Models: {models_for_setting}")
+                print(f"| Setting: {task}/{shot}/{exp}\t>> Models: {models_for_setting}")
                 total_models += models_for_setting
                 if models_for_setting > most_models:
                     most_models = models_for_setting
