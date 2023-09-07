@@ -427,7 +427,8 @@ def create_submission(is_evaluation):
                 elif ENSEMBLE_STRATEGY == "pd-weighted":
                     selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
                                                                                                    task=task,
-                                                                                                   out_path=out_path)
+                                                                                                   out_path=out_path,
+                                                                                                   k=TOP_K)
                 else:
                     print("Invalid ensemble strategy!")
                     exit()
