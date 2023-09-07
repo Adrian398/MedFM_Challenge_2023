@@ -5,7 +5,7 @@ import os
 import numpy as np
 import pandas as pd
 from sklearn.metrics import average_precision_score
-
+from utils.constants import shots, exps, tasks, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT
 from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_multilabel
 
 
@@ -182,23 +182,6 @@ PREDICTION_DIR = "ensemble/validation/06-09_22-45-28/result"  # Weighted Sum Mod
 #PREDICTION_DIR = "ensemble/validation/05-09_14-17-34/result"  # Expert per Class Model Ensemble
 #PREDICTION_DIR = "ensemble/validation/02-09_00-32-41/result"  # Expert
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
-shots = ['1-shot', '5-shot', '10-shot']
-tasks = ["colon", "endo", "chest"]
-exps = ["exp1", "exp2", "exp3", "exp4", "exp5"]
-TASK_2_CLASS_COUNT = {
-    'colon': 2,  # Binary classification
-    'chest': 19,  # 19-class multi-label classification
-    'endo': 4  # 4-class multi-label classification
-}
-TASK_2_CLASS_NAMES = {
-    'colon': ['tumor'],
-    'chest': ['pleural_effusion', 'nodule', 'pneumonia', 'cardiomegaly', 'hilar_enlargement', 'fracture_old',
-              'fibrosis',
-              'aortic_calcification', 'tortuous_aorta', 'thickened_pleura', 'TB', 'pneumothorax', 'emphysema',
-              'atelectasis', 'calcification', 'pulmonary_edema', 'increased_lung_markings', 'elevated_diaphragm',
-              'consolidation'],
-    'endo': ['ulcer', 'erosion', 'polyp', 'tumor']
-}
 # ==========================================================================================
 
 
