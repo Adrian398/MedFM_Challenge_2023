@@ -38,7 +38,7 @@ def create_ensemble_report_file(task, shot, exp, selected_models_for_classes, mo
             if occurrence > 1:
                 report_file.write(f"{model_path} used {occurrence} times\n")
         report_file.write("\n")
-    print(colored(f"Created Ensemble Report File:", 'green'), report_path)
+    print("Added Ensemble report content for", colored(f"{task}/{shot}/{exp}", 'green'))
 
 
 @lru_cache(maxsize=None)
@@ -323,7 +323,7 @@ def create_submission(is_evaluation):
                         print("Invalid ensemble strategy!")
                         exit()
 
-                    create_ensemble_report_file(task=task,shot=shot,exp=exp,
+                    create_ensemble_report_file(task=task, shot=shot, exp=exp,
                                                 selected_models_for_classes=selected_models,
                                                 model_occurrences=model_occurrences,
                                                 root_report_dir=submission_dir)
