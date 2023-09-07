@@ -52,6 +52,7 @@ def generate_json(results):
 
 
 def process_experiment(exp, task, shot):
+    print(f"Processing Setting:", os.path.join(exp, task, shot))
     gt_path = get_gt_csv_filepath(task=task)
     if not gt_path:
         print(f"Ground truth file for task {task} not found.")
