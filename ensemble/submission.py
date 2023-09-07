@@ -270,10 +270,8 @@ def extract_data_tuples_from_model_runs(run_list):
     return data_list
 
 
-def check_and_extract_data(model_dir_abs, subm_type, task, shot, pbar=None):
+def check_and_extract_data(model_dir_abs, subm_type, task, shot):
     model_dir_rel = model_dir_abs.split('work_dirs/')[1]
-    if pbar:
-        pbar.set_description(f"Checking {model_dir_rel}")
 
     csv_path = os.path.join(model_dir_abs, f"{task}_{shot}_{subm_type}.csv")
     csv_files = glob.glob(csv_path)
@@ -314,7 +312,7 @@ def extract_data():
                 for model_dir in glob.glob(path_pattern):
                     for subm_type in subm_types:
                         data, exp_num = check_and_extract_data(model_dir_abs=model_dir, subm_type=subm_type,
-                                                               task=task, shot=shot, pbar=pbar)
+                                                               task=task, shot=shot)
                         if data and exp_num:
                             data_lists[subm_type][task][shot][f"exp{exp_num}"].append(data)
                     pbar.update(1)
@@ -427,7 +425,7 @@ def select_ensemble_strategy():
         for idx, strategy in enumerate(ENSEMBLE_STRATEGIES, 1):
             print(f"{idx}. {strategy}")
 
-        choice = input("Enter the number corresponding to your choice: ")
+        choice = input("Enter your choice: ")
 
         if choice.isdigit() and 1 <= int(choice) <= len(ENSEMBLE_STRATEGIES):
             choice = ENSEMBLE_STRATEGIES[int(choice) - 1]
