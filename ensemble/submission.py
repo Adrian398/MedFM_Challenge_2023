@@ -331,7 +331,7 @@ def create_submission(is_evaluation):
         color = 'blue'
         print_str = f"\n========== Creating {colored(submission_type.capitalize(), 'blue')} Submission =========="
 
-    continue_query = input(f"\nCreate {colored(submission_type, color)} Submission? (y = continue) ")
+    continue_query = input(f"\nCreate {colored(submission_type, color)} Submission? (y/n) ")
     if continue_query.lower() != "y":
         return None
 
