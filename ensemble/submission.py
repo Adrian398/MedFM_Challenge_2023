@@ -121,7 +121,6 @@ def print_report_for_setting(full_model_list, task, shot, exp):
         print(f"Model: {model_path_rel:{max_char_length}}  {agg_name}: {agg_val:.4f}")
 
 
-@lru_cache(maxsize=None)
 def get_aggregate(model_metrics, task):
     # Dictionary mapping tasks to lambda functions for aggregate calculation
     aggregate_calculations = {
