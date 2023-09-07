@@ -5,6 +5,7 @@ import re
 from datetime import datetime
 from functools import lru_cache
 
+import numpy as np
 import pandas as pd
 from colorama import Fore
 from termcolor import colored
@@ -112,7 +113,7 @@ def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
     return selected_models_for_classes, model_occurrences
 
 
-def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, k=3):
+def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, k=3, log_scale=False):
     """
     Merges model runs using a difference in performance weight approach for the N best model runs for each class.
     """
@@ -140,7 +141,11 @@ def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, k=3):
 
         # Use the difference in performance from the k-th model as weights
         kth_value = top_n_models[-1][1]
-        weights = [value - kth_value for _, value in top_n_models]
+
+        if log_scale:
+            weights = [np.log(value - kth_value + 1) for _, value in top_n_models]
+        else:
+            weights = [value - kth_value for _, value in top_n_models]
 
         # Debug print #1: Print the top k model names and their weights
         print(f"Top {k} models for class {i + 1}:")
@@ -428,7 +433,8 @@ def create_submission(is_evaluation):
                     selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
                                                                                                    task=task,
                                                                                                    out_path=out_path,
-                                                                                                   k=TOP_K)
+                                                                                                   k=TOP_K,
+                                                                                                   log_scale=LOG_SCALE)
                 else:
                     print("Invalid ensemble strategy!")
                     exit()
@@ -497,6 +503,17 @@ def select_top_k_models():
             print("Invalid number. Please enter a positive integer.\n")
 
 
+def select_log_scale():
+    while True:
+        log_scale = input("Do you want to use log scaling? (y/n)")
+        if log_scale.lower() == "y":
+            return True
+        elif log_scale.lower() == "n":
+            return False
+        else:
+            print("Invalid number. Please enter a positive integer.\n")
+
+
 def select_ensemble_strategy():
     while True:
         print("Choose an ensemble strategy:")
@@ -508,8 +525,13 @@ def select_ensemble_strategy():
         if choice.isdigit() and 1 <= int(choice) <= len(ENSEMBLE_STRATEGIES):
             choice = ENSEMBLE_STRATEGIES[int(choice) - 1]
 
-            if choice == "weighted" or choice == "pd-weighted":
+            if choice == "weighted" or choice == "pd-weighted" or choice == "pd-log-weighted":
                 top_k_models = select_top_k_models()
+
+                if choice == "pd-log-weighted":
+                    log_scale = select_log_scale()
+                    return choice, top_k_models, log_scale
+
                 return choice, top_k_models
             else:
                 return choice, None
@@ -519,12 +541,12 @@ def select_ensemble_strategy():
 
 # ============================================================
 root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
-ENSEMBLE_STRATEGIES = ["expert", "weighted", "pd-weighted"]
+ENSEMBLE_STRATEGIES = ["expert", "weighted", "pd-weighted", "pd-log-weighted"]
 # ============================================================
 
 
 if __name__ == "__main__":
-    ENSEMBLE_STRATEGY, TOP_K = select_ensemble_strategy()
+    ENSEMBLE_STRATEGY, TOP_K, LOG_SCALE = select_ensemble_strategy()
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
     DATA_SUBMISSION, DATA_VALIDATION = extract_data()
 
