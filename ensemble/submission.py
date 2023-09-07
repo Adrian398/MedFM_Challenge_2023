@@ -325,12 +325,19 @@ def create_submission(is_evaluation):
     submission_type = 'submission'
     if is_evaluation:
         data_lists = DATA_SUBMISSION
-        print(f"\n========== Creating {colored('Evaluation', 'red')} Submission ==========")
+        color = 'red'
+        print_str = f"\n========== Creating {colored('Evaluation', 'red')} Submission =========="
     else:
         data_lists = DATA_VALIDATION
         submission_type = 'validation'
-        print(f"\n========== Creating {colored(submission_type.capitalize(), 'blue')} Submission ==========")
+        color = 'blue'
+        print_str = f"\n========== Creating {colored(submission_type.capitalize(), 'blue')} Submission =========="
 
+    continue_query = input(f"\nCreate {colored(submission_type, color)} Submission? (y to continue) ")
+    if continue_query.lower() != "y":
+        return None
+
+    print(print_str)
     submission_dir = create_output_dir(is_evaluation, submission_type)
 
     # Perform Ensemble Strategy
@@ -451,5 +458,7 @@ if __name__ == "__main__":
     eval_output_dir = create_submission(is_evaluation=True)
     val_output_dir = create_submission(is_evaluation=False)
 
-    print(f"\nCreated Evaluation at {colored(eval_output_dir,'red')}")
-    print(f"Created Validation at {colored(val_output_dir, 'blue')}")
+    if eval_output_dir:
+        print(f"\nCreated Evaluation at {colored(eval_output_dir,'red')}")
+    if val_output_dir:
+        print(f"Created Validation at {colored(val_output_dir, 'blue')}")
