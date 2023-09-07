@@ -80,6 +80,10 @@ def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
         class_models.sort(key=lambda x: x[1], reverse=True)
         top_n_models = class_models[:k]
 
+        # Check if k is greater than the available models and print warning
+        if k > len(class_models):
+            print(colored(f"Warning: Requested top {k} models, but only {len(class_models)} are available for class {i+1}", 'red'))
+
         # Record the selected models for the report and update the model_occurrences
         selected_models_for_class = []
         for model, weight in top_n_models:
