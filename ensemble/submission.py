@@ -429,7 +429,7 @@ def create_submission(is_evaluation):
                     selected_models, model_occurrences = expert_model_strategy(model_runs=model_runs,
                                                                                task=task,
                                                                                out_path=out_path)
-                elif ENSEMBLE_STRATEGY == "pd-weighted":
+                elif ENSEMBLE_STRATEGY == "pd-weighted" and LOG_SCALE:
                     selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
                                                                                                    task=task,
                                                                                                    out_path=out_path,
@@ -503,17 +503,6 @@ def select_top_k_models():
             print("Invalid number. Please enter a positive integer.\n")
 
 
-def select_log_scale():
-    while True:
-        log_scale = input("Do you want to use log scaling? (y/n)")
-        if log_scale.lower() == "y":
-            return True
-        elif log_scale.lower() == "n":
-            return False
-        else:
-            print("Invalid number. Please enter a positive integer.\n")
-
-
 def select_ensemble_strategy():
     while True:
         print("Choose an ensemble strategy:")
@@ -529,10 +518,9 @@ def select_ensemble_strategy():
                 top_k_models = select_top_k_models()
 
                 if choice == "pd-log-weighted":
-                    log_scale = select_log_scale()
-                    return choice, top_k_models, log_scale
+                    return choice, top_k_models, True
 
-                return choice, top_k_models
+                return choice, top_k_models, False
             else:
                 return choice, None
         else:
