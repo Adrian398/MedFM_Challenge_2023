@@ -10,7 +10,7 @@ from termcolor import colored
 from utils.constants import shots, tasks, exps, TASK_2_CLASS_COUNT
 
 
-def create_ensemble_report_file(task, shot, exp, selected_models_for_classes, model_occurrences, root_report_dir):
+def create_ensemble_report_file(task, shot, exp, is_eval, selected_models_for_classes, model_occurrences, root_report_dir):
     """
     Write the ensemble report for a given task, shot, and experiment.
 
@@ -38,7 +38,11 @@ def create_ensemble_report_file(task, shot, exp, selected_models_for_classes, mo
             if occurrence >= 1:
                 report_file.write(f"{model_path} used {occurrence} times\n")
         report_file.write("\n\n")
-    print("Added Ensemble report content for", colored(f"{task}/{shot}/{exp}", 'green'))
+
+    if is_eval:
+        print("Added ensemble information for setting", colored(f"{task}/{shot}/{exp}", 'red'))
+    else:
+        print("Added ensemble information for", colored(f"{task}/{shot}/{exp}", 'blue'))
 
 
 @lru_cache(maxsize=None)
@@ -96,7 +100,7 @@ def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
 
         merged_df.loc[:, i + 1] = weighted_sum_column
 
-    print(f"Saving merged prediction to {out_path}")
+    #print(f"Saving merged prediction to {out_path}")
     merged_df.to_csv(out_path, index=False, header=False)
 
     return selected_models_for_classes, model_occurrences
@@ -329,7 +333,7 @@ def create_submission(is_evaluation):
                     print("Invalid ensemble strategy!")
                     exit()
 
-                create_ensemble_report_file(task=task, shot=shot, exp=exp,
+                create_ensemble_report_file(task=task, shot=shot, exp=exp, is_eval=is_evaluation,
                                             selected_models_for_classes=selected_models,
                                             model_occurrences=model_occurrences,
                                             root_report_dir=submission_dir)
