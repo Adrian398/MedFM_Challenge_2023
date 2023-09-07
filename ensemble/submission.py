@@ -22,7 +22,6 @@ def create_ensemble_report_file(task, shot, exp, selected_models_for_classes, mo
         model_occurrences (dict): Dict containing the occurences for the selected models.
         root_report_dir (str): Root directory where the report.txt should be saved.
     """
-
     # Determine the path for the report.txt file
     report_path = os.path.join(root_report_dir, "report.txt")
 
@@ -39,6 +38,7 @@ def create_ensemble_report_file(task, shot, exp, selected_models_for_classes, mo
             if occurrence > 1:
                 report_file.write(f"{model_path} used {occurrence} times\n")
         report_file.write("\n")
+    print(colored(f"Created Ensemble Report File:", 'green'), report_path)
 
 
 @lru_cache(maxsize=None)
