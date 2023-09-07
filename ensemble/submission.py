@@ -144,8 +144,8 @@ def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, k=3):
 
         # Record the selected models for the report and update the model_occurrences
         selected_models_for_class = []
-        for model, weight in zip(top_n_models, weights):  # Here, we use the difference weights
-            model_name = model['name']
+        for (model_run, _), weight in zip(top_n_models, weights):  # Here, we use the difference weights
+            model_name = model_run['name']  # Corrected this line
             selected_models_for_class.append(f"Class {i + 1}: {model_name} (Weight: {weight:.4f})")
 
             if model_name in model_occurrences:
