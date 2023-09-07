@@ -183,7 +183,7 @@ def get_prediction_dir():
         dir_path = f"ensemble/validation/{timestamp}/result"
 
         if os.path.exists(dir_path):
-            return dir_path
+            return dir_path, timestamp
         else:
             print(f"Directory '{dir_path}' does not exist. Please enter a valid timestamp.")
 
@@ -205,7 +205,7 @@ GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 
 
 if __name__ == "__main__":
-    timestamp, PREDICTION_DIR = get_prediction_dir()
+    PREDICTION_DIR, timestamp = get_prediction_dir()
 
     results = {exp: {} for exp in exps}
 
