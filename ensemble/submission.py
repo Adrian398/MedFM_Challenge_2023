@@ -108,8 +108,6 @@ def print_report_for_setting(full_model_list, task, shot, exp):
 
     model_view = []
     for model_info in full_model_list[task][shot][exp]:
-        print(type(model_info))
-        print(model_info['metrics'])
         agg_name, agg_val = get_aggregate(model_metrics=model_info['metrics'], task=task)
         if agg_val is not None:
             model_view.append((model_info['name'], agg_name, agg_val))
