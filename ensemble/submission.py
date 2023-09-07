@@ -327,7 +327,7 @@ def create_submission(is_evaluation):
                                                 selected_models_for_classes=selected_models,
                                                 model_occurrences=model_occurrences,
                                                 root_report_dir=submission_dir)
-
+    return submission_dir
 
 def select_top_k_models():
     while True:
@@ -368,5 +368,8 @@ if __name__ == "__main__":
     ENSEMBLE_STRATEGY, TOP_K = select_ensemble_strategy()
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
 
-    create_submission(is_evaluation=True)
-    #create_submission(is_evaluation=False)
+    eval_output_dir = create_submission(is_evaluation=True)
+    val_output_dir = create_submission(is_evaluation=False)
+
+    print(f"Created Evaluation at {colored(eval_output_dir,'red')}")
+    print(f"Created Validation at {colored(val_output_dir, 'blue')}")
