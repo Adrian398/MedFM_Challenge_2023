@@ -224,7 +224,7 @@ def expert_model_strategy(model_runs, task, out_path):
     for class_idx in range(num_classes):
         best_model_run = find_best_model_for_class(model_runs, task=task, class_idx=class_idx + 1)
 
-        merged_df[class_idx + 1] = best_model_run["prediction"][class_idx + 1]
+        merged_df.loc[:, class_idx + 1] = best_model_run["prediction"].loc[:, class_idx + 1]
 
         # Keeping track of the model used for each class
         model_name = best_model_run
