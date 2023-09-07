@@ -95,7 +95,7 @@ def compute_colon_aggregate(data, filepath):
 
 def compute_multilabel_aggregate(data, filepath):
     """Compute metrics for multi-label tasks ('chest' and 'endo')."""
-    auc_label = "AUC/AUC_multilabel"
+    auc_label = "AUC/AUC_multilabe"
     map_label = "multi-label/mAP"
 
     if auc_label not in data:
@@ -236,7 +236,6 @@ def process_task_shot_combination_for_worst_models(args):
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
 tasks = ["colon", "endo", "chest"]
 shots = ["1", "5", "10"]
-N_inferences_per_task = 10
 batch_size = 4
 metric_tags = {"auc": "AUC/AUC_multiclass",
                "aucl": "AUC/AUC_multilabe",
