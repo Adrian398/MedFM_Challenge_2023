@@ -203,7 +203,7 @@ def find_best_model_for_class(run_list, task, class_idx):
         else:
             raise ValueError(f"Invalid task: {task}")
 
-        scores.append((model_name, score))
+        scores.append((model, score))
 
     # Sort the scores in descending order and return the first (highest) tuple
     best_model = sorted(scores, key=lambda x: x[1], reverse=True)[0]
