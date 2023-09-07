@@ -57,6 +57,7 @@ def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
     """
     print("Merging results for task", task, shot, exp)
     num_classes = TASK_2_CLASS_COUNT[task]
+
     merged_df = model_runs[0]['prediction'].iloc[:, 0:1].copy()
 
     # List to store which models were selected for each class
@@ -238,7 +239,8 @@ def expert_model_strategy(model_runs, task, out_path):
     for class_idx in range(num_classes):
         best_model_run = find_best_model_for_class(model_runs, task=task, class_idx=class_idx + 1)
 
-        merged_df.loc[:, class_idx + 1] = best_model_run["prediction"].loc[:, class_idx + 1].copy()
+        merged_df = merged_df.copy()
+        merged_df.loc[:, class_idx + 1] = best_model_run["prediction"].loc[:, class_idx + 1]
 
         # Keeping track of the model used for each class
         model_name = best_model_run['name'].split('work_dirs/')[0]
