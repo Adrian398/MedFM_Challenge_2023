@@ -291,13 +291,14 @@ def create_submission(is_evaluation):
     submission_dir = os.path.join("submissions", "evaluation", TIMESTAMP)
     if continue_query.lower() == "y":
         if is_evaluation:
-            print(f"Creating submission directory {submission_dir}")
+            success = f"Created submission directory {submission_dir}"
         else:
             submission_dir = os.path.join("ensemble", f"{submission_type}", TIMESTAMP)
-            print(f"Creating {submission_type} directory {submission_dir}")
+            success = f"Created {submission_type} directory {submission_dir}"
         os.makedirs(submission_dir)
         for exp in exps:
             os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
+        print(colored(success, 'green'))
 
     # Perform Ensemble Strategy
     continue_query = input(f"\nPerform ensemble merge strategy? (y/n) ")
