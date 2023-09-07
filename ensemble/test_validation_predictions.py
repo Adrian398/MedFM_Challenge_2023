@@ -177,8 +177,19 @@ def compute_task_specific_metrics(pred_path, gt_path, task):
         raise ValueError(f"Invalid task: {task}")
 
 
+def get_prediction_dir():
+    while True:
+        timestamp = input("Please enter the timestamp (format: DD-MM_HH-MM-SS): ")
+        dir_path = f"ensemble/validation/{timestamp}/result"
+
+        if os.path.exists(dir_path):
+            return dir_path
+        else:
+            print(f"Directory '{dir_path}' does not exist. Please enter a valid timestamp.")
+
+
 # ==========================================================================================
-PREDICTION_DIR = "ensemble/validation/06-09_22-45-28/result"  # Weighted Sum Model Ensemble Top7:  (eval=)
+#PREDICTION_DIR = "ensemble/validation/06-09_22-45-28/result"  # Weighted Sum Model Ensemble Top7: 61.32564695023872 (eval=)
 #PREDICTION_DIR = "ensemble/validation/06-09_21-14-47/result"  # Weighted Sum Model Ensemble Top3: 61.3906 (eval=06-09_21-07-17)
 #PREDICTION_DIR = "ensemble/validation/05-09_14-17-34/result"  # Expert per Class Model Ensemble
 #PREDICTION_DIR = "ensemble/validation/02-09_00-32-41/result"  # Expert
@@ -187,6 +198,8 @@ GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 
 
 if __name__ == "__main__":
+    PREDICTION_DIR = get_prediction_dir()
+
     results = {exp: {} for exp in exps}
 
     for exp in exps:
