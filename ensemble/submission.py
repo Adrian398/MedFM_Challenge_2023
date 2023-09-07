@@ -170,7 +170,7 @@ def find_best_run(run_list, metric):
 
 
 def expert_model_strategy(model_runs, task, shot, exp, out_path):
-    print("Merging results for task", task, shot, exp)
+    #print("Merging results for task", task, shot, exp)
     num_classes = TASK_2_CLASS_COUNT[task]
     merged_df = model_runs[0]['prediction'].iloc[:, 0:1]
 
@@ -193,7 +193,7 @@ def expert_model_strategy(model_runs, task, shot, exp, out_path):
         else:
             model_occurrences[model_name] = 1
 
-        print(f"Merged dataframe after adding model run {best_run_index} {model_name}")
+        #print(f"Merged dataframe after adding model run {best_run_index} {model_name}")
         selected_models_for_classes.append(f"Class {i + 1}: {model_name}")
 
     print(f"Saving merged prediction to {out_path}")
