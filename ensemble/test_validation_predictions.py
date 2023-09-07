@@ -188,19 +188,25 @@ def get_prediction_dir():
             print(f"Directory '{dir_path}' does not exist. Please enter a valid timestamp.")
 
 
-def log_prediction(timestamp, strategy, prediction_dir, aggregate_value):
+def log_prediction(timestamp, prediction_dir, aggregate_value, strategy="Undefined"):
+    # Extract the directory without "/result"
+    prediction_dir_cleaned = "/".join(prediction_dir.split("/")[:-1])
+
+    log_string = f"{timestamp:<15} {strategy:<20} {prediction_dir_cleaned:<40} {aggregate_value:<10.4f}\n"
+
     log_file_path = os.path.join('ensemble', 'validation', 'log.txt')
 
-    # Check if the log file is empty or doesn't exist
-    if not os.path.exists(log_file_path) or os.path.getsize(log_file_path) == 0:
-        with open(log_file_path, 'a') as log_file:
+    # Check if the file exists. If not, write the header first
+    if not os.path.exists(log_file_path):
+        with open(log_file_path, 'w') as log_file:
             log_file.write(
-                "{:<20} {:<10} {:<40} {:<15}\n".format("Timestamp", "Strategy", "PredictionDir", "AggregateValue"))
+                "Timestamp         Strategy              PredictionDir                           Aggregate \n")
+            log_file.write(
+                "------------------------------------------------------------------------------------------------------\n")
 
-    strategy = "Undefined" if strategy is None else strategy
-    log_string = "{:<20} {:<10} {:<40} {:<15}\n".format(timestamp, strategy, prediction_dir, aggregate_value)
     with open(log_file_path, 'a') as log_file:
         log_file.write(log_string)
+
     return log_string
 
 
