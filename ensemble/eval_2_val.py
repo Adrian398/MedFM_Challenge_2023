@@ -92,4 +92,4 @@ for name, task, shot, exp in model_infos:
 
     target_file_path = os.path.join(target_path, file_name)
     shutil.copy(source_file_path, target_file_path)
-    print(f"Copied from {source_file_path} to {source_file_path}")
+    print(f"Copied from {source_file_path} to {target_file_path}")
