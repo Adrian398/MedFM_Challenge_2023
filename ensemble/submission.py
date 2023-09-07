@@ -301,8 +301,10 @@ def extract_data():
     }
 
     # Total iterations: tasks * shots * exps * model_dirs * subm_types
-    total_iterations = len(tasks) * len(shots) * len(exps) * len(
-        glob.glob(os.path.join(root_dir, tasks[0], shots[0], '*exp[1-5]*'))) * len(subm_types)
+    total_iterations = 0
+    for task in tasks:
+        for shot in shots:
+            total_iterations += len(glob.glob(os.path.join(root_dir, task, shot, '*exp[1-5]*')))
 
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
         for task in tasks:
@@ -310,7 +312,7 @@ def extract_data():
                 path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
                 for model_dir in glob.glob(path_pattern):
                     for subm_type in subm_types:
-                        pbar.set_description(f"Checking {task}/{shot}/{model_dir.split('/')[-1]} for {subm_type}")
+                        pbar.set_description(f"Checking {subm_type}/{task}/{shot}")
                         data, exp_num = check_and_extract_data(model_dir_abs=model_dir, subm_type=subm_type,
                                                                task=task, shot=shot, pbar=pbar)
                         if data and exp_num:
