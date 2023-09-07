@@ -75,6 +75,40 @@ def get_event_file_from_run_dir(run_dir):
         return None
 
 
+def compute_colon_aggregate(data, filepath):
+    """
+    Compute metrics for the 'colon' task.
+    """
+    auc_label = "AUC/AUC_multiclass"
+    acc_label = "accuracy/top1"
+
+    if auc_label not in data:
+        print(f"Metric '{auc_label}' not found in {filepath}")
+        return None
+
+    if acc_label not in data:
+        print(f"Metric '{acc_label}' not found in {filepath}")
+        return None
+
+    return (data[auc_label] + data[acc_label])/2
+
+
+def compute_multilabel_aggregate(data, filepath):
+    """Compute metrics for multi-label tasks ('chest' and 'endo')."""
+    auc_label = "AUC/AUC_multilabel"
+    map_label = "multi-label/mAP"
+
+    if auc_label not in data:
+        print(f"Metric '{auc_label}' not found in {filepath}")
+        return None
+
+    if map_label not in data:
+        print(f"Metric '{map_label}' not found in {filepath}")
+        return None
+
+    return (data[auc_label] + data[map_label])/2
+
+
 def extract_metric_from_performance_json(model_dir, task):
     for dirpath, _, filenames in os.walk(model_dir):
         for filename in filenames:
@@ -84,11 +118,13 @@ def extract_metric_from_performance_json(model_dir, task):
                     with open(filepath, 'r') as file:
                         data = json.load(file)
 
-                    metric_tag = task_specific_metrics.get(task, "Aggregate")
-                    if metric_tag not in data:
-                        print(f"Metric '{metric_tag}' not found in {filepath}")
-                        return None
-                    return data[metric_tag]
+                    if task == 'colon':
+                        return compute_colon_aggregate(data, filepath)
+                    elif task in ['chest', 'endo']:
+                        return compute_multilabel_aggregate(data, filepath)
+                    else:
+                        raise ValueError(f"Invalid task: {task}")
+
                 except json.JSONDecodeError:
                     print(f"Cannot load JSON from: {filepath}")
                     return None
@@ -183,8 +219,9 @@ def get_worst_performing_model_dirs(task, shot):
         # Consider for deletion the models with scores below the threshold for each exp
         for model_dir, model_score in scores:
             print("Model Score:", model_score, "Threshold:", threshold_score)
-            if model_score < threshold_score:
-                bad_performing_models.append(model_dir)
+            # TODO: Currently list all valid models, dont care about threshold
+            #if model_score < threshold_score:
+            bad_performing_models.append(model_dir)
 
     return bad_performing_models, best_scores_for_each_setting
 
