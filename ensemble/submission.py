@@ -58,7 +58,6 @@ def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
     """
     Merges model runs using a weighted sum approach based on the N best model runs for each class.
     """
-    print("Merging results for task", task, shot, exp)
     num_classes = TASK_2_CLASS_COUNT[task]
 
     merged_df = model_runs[0]['prediction'].iloc[:, 0:1].copy()
@@ -104,7 +103,6 @@ def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
 
         merged_df.loc[:, i + 1] = weighted_sum_column
 
-    #print(f"Saving merged prediction to {out_path}")
     merged_df.to_csv(out_path, index=False, header=False)
 
     return selected_models_for_classes, model_occurrences
