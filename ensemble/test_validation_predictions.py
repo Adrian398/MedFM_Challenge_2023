@@ -188,9 +188,17 @@ def get_prediction_dir():
             print(f"Directory '{dir_path}' does not exist. Please enter a valid timestamp.")
 
 
-def log_prediction(timestamp, prediction_dir, aggregate_value):
-    log_string = f"{timestamp} {prediction_dir} {aggregate_value}\n"
+def log_prediction(timestamp, strategy, prediction_dir, aggregate_value):
     log_file_path = os.path.join('ensemble', 'validation', 'log.txt')
+
+    # Check if the log file is empty or doesn't exist
+    if not os.path.exists(log_file_path) or os.path.getsize(log_file_path) == 0:
+        with open(log_file_path, 'a') as log_file:
+            log_file.write(
+                "{:<20} {:<10} {:<40} {:<15}\n".format("Timestamp", "Strategy", "PredictionDir", "AggregateValue"))
+
+    strategy = "Undefined" if strategy is None else strategy
+    log_string = "{:<20} {:<10} {:<40} {:<15}\n".format(timestamp, strategy, prediction_dir, aggregate_value)
     with open(log_file_path, 'a') as log_file:
         log_file.write(log_string)
     return log_string
@@ -198,6 +206,10 @@ def log_prediction(timestamp, prediction_dir, aggregate_value):
 
 def load_submission_cfg_dump(root_report_dir):
     cfg_file_path = os.path.join(root_report_dir, "config.json")
+
+    if not os.path.exists(cfg_file_path):
+        return None
+
     with open(cfg_file_path, 'r') as cfg_file:
         config_data = json.load(cfg_file)
     return config_data
@@ -228,8 +240,12 @@ if __name__ == "__main__":
     json_result, aggregates = generate_json(results=results)
     print(json_result)
 
-    # Log Timestamp + Aggregate
-    log_info = log_prediction(timestamp, PREDICTION_DIR, aggregates)
+    # Log Validation Testing
+    strategy = ENSEMBLE_CONFIG.get('strategy', None)
+    log_info = log_prediction(timestamp=timestamp,
+                              prediction_dir=PREDICTION_DIR,
+                              aggregate_value=aggregates,
+                              strategy=strategy)
 
     # Save JSON result to the corresponding timestamp folder
     log_dir = PREDICTION_DIR.split("/result")[0]
