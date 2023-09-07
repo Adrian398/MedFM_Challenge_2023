@@ -187,7 +187,7 @@ def expert_model_strategy(model_runs, task, shot, exp, out_path):
         merged_df[i + 1] = best_run["prediction"][i + 1]
 
         # Keeping track of the model used for each class
-        model_name = best_run['name'].split('work_dirs/')[1]
+        model_name = best_run['name']
         if model_name in model_occurrences:
             model_occurrences[model_name] += 1
         else:
