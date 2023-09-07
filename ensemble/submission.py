@@ -35,7 +35,7 @@ def create_ensemble_report_file(task, shot, exp, selected_models_for_classes, mo
         # Writing model occurrences
         report_file.write("\nModel Summary:\n")
         for model_path, occurrence in model_occurrences.items():
-            if occurrence > 1:
+            if occurrence >= 1:
                 report_file.write(f"{model_path} used {occurrence} times\n")
         report_file.write("\n")
     print("Added Ensemble report content for", colored(f"{task}/{shot}/{exp}", 'green'))
@@ -367,6 +367,7 @@ def create_submission(is_evaluation):
                                                 model_occurrences=model_occurrences,
                                                 root_report_dir=submission_dir)
     return submission_dir
+
 
 def select_top_k_models():
     while True:
