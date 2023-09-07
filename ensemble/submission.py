@@ -14,7 +14,8 @@ from tqdm import tqdm
 from utils.constants import shots, tasks, exps, TASK_2_CLASS_COUNT
 
 
-def create_ensemble_report_file(task, shot, exp, is_eval, selected_models_for_classes, model_occurrences, root_report_dir):
+def create_ensemble_report_file(task, shot, exp, is_eval, selected_models_for_classes, model_occurrences,
+                                root_report_dir):
     """
     Write the ensemble report for a given task, shot, and experiment.
 
@@ -83,7 +84,9 @@ def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
 
         # Check if k is greater than the available models and print warning
         if k > len(class_models):
-            print(colored(f"Warning: Requested top {k} models, but only {len(class_models)} are available for class {i+1}", 'red'))
+            print(colored(
+                f"Warning: Requested top {k} models, but only {len(class_models)} are available for class {i + 1}",
+                'red'))
 
         # Record the selected models for the report and update the model_occurrences
         selected_models_for_class = []
@@ -186,6 +189,63 @@ def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, k=3, l
     return selected_models_for_classes, model_occurrences
 
 
+def rank_based_weight_ensemble_strategy(model_runs, task, out_path, k=3):
+    """
+    Merges model runs using a rank-based weight approach for the N best model runs for each class.
+    """
+    num_classes = TASK_2_CLASS_COUNT[task]
+
+    merged_df = model_runs[0]['prediction'].iloc[:, 0:1].copy()
+
+    # List to store which models were selected for each class
+    selected_models_for_classes = []
+
+    # Dict to keep track of model occurrences
+    model_occurrences = {}
+
+    # For each class, get the N best performing model runs based on the aggregate metric
+    for i in range(num_classes):
+        class_models = []
+        for run in model_runs:
+            _, aggregate_value = get_aggregate(run['metrics'], task)
+            if aggregate_value is not None:
+                class_models.append((run, aggregate_value))
+
+        # Sort the models based on aggregate value and take the top N models
+        class_models.sort(key=lambda x: x[1], reverse=True)
+        top_n_models = class_models[:k]
+
+        # Assign rank-based weights
+        weights = list(range(k, 0, -1))
+
+        # Record the selected models for the report and update the model_occurrences
+        selected_models_for_class = []
+        for (model_run, _), weight in zip(top_n_models, weights):
+            model_name = model_run['name']
+            selected_models_for_class.append(f"Class {i + 1}: {model_name} (Rank: {k + 1 - weight})")
+
+            if model_name in model_occurrences:
+                model_occurrences[model_name] += 1
+            else:
+                model_occurrences[model_name] = 1
+
+        selected_models_for_classes.extend(selected_models_for_class)
+
+        # Calculate the sum of weights for normalization
+        sum_weights = sum(weights)
+
+        # Compute the weighted sum for this class
+        weighted_sum_column = pd.Series(0, index=merged_df.index)
+        for (model_run, _), weight in zip(top_n_models, weights):
+            weighted_sum_column += (model_run['prediction'].iloc[:, i + 1] * weight) / sum_weights
+
+        merged_df.loc[:, i + 1] = weighted_sum_column
+
+    merged_df.to_csv(out_path, index=False, header=False)
+
+    return selected_models_for_classes, model_occurrences
+
+
 def print_report_for_setting(full_model_list, task, shot, exp):
     print("\nReport for:", colored(os.path.join(task.capitalize(), shot, exp), 'blue'))
 
@@ -249,7 +309,7 @@ def compute_colon_aggregate(model_metrics, model_name):
         print(f"Metric '{acc_label}' not found in {model_name}")
         return None
 
-    return (model_metrics[auc_label] + model_metrics[acc_label])/2
+    return (model_metrics[auc_label] + model_metrics[acc_label]) / 2
 
 
 def compute_multilabel_aggregate_p_class(model_metrics, model_name, class_idx):
@@ -265,7 +325,7 @@ def compute_multilabel_aggregate_p_class(model_metrics, model_name, class_idx):
         print(f"Metric '{map_label}' not found in {model_name}")
         return None
 
-    return (model_metrics[auc_label] + model_metrics[map_label])/2
+    return (model_metrics[auc_label] + model_metrics[map_label]) / 2
 
 
 # Find the run with the best MAP for a given class, within a list of runs
@@ -430,16 +490,23 @@ def create_submission(is_evaluation):
                                                                                task=task,
                                                                                out_path=out_path)
                 elif ENSEMBLE_STRATEGY == "pd-weighted":
-                    selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
-                                                                                                   task=task,
-                                                                                                   out_path=out_path,
-                                                                                                   k=TOP_K)
+                    selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(
+                        model_runs=model_runs,
+                        task=task,
+                        out_path=out_path,
+                        k=TOP_K)
                 elif ENSEMBLE_STRATEGY == "pd-log-weighted":
-                    selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
-                                                                                                   task=task,
-                                                                                                   out_path=out_path,
-                                                                                                   k=TOP_K,
-                                                                                                   log_scale=LOG_SCALE)
+                    selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(
+                        model_runs=model_runs,
+                        task=task,
+                        out_path=out_path,
+                        k=TOP_K,
+                        log_scale=LOG_SCALE)
+                elif ENSEMBLE_STRATEGY == "rank-based-weighted":
+                    selected_models, model_occurrences = rank_based_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                             task=task,
+                                                                                             out_path=out_path,
+                                                                                             k=TOP_K)
                 else:
                     print("Invalid ensemble strategy!")
                     exit()
@@ -519,10 +586,16 @@ def select_ensemble_strategy():
         if choice.isdigit() and 1 <= int(choice) <= len(ENSEMBLE_STRATEGIES):
             choice = ENSEMBLE_STRATEGIES[int(choice) - 1]
 
-            if choice == "weighted" or choice == "pd-weighted" or choice == "pd-log-weighted":
+            # Top-K Methods
+            if (choice == "weighted"
+                    or choice == "pd-weighted"
+                    or choice == "pd-log-weighted"
+                    or choice == "rank-based-weighted"
+            ):
                 top_k_models = select_top_k_models()
                 log_scale = False
 
+                # Log Scale Methods
                 if choice == "pd-log-weighted":
                     log_scale = True
 
@@ -535,7 +608,7 @@ def select_ensemble_strategy():
 
 # ============================================================
 root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
-ENSEMBLE_STRATEGIES = ["expert", "weighted", "pd-weighted", "pd-log-weighted"]
+ENSEMBLE_STRATEGIES = ["expert", "weighted", "pd-weighted", "pd-log-weighted", "rank-based-weighted"]
 # ============================================================
 
 
@@ -551,6 +624,6 @@ if __name__ == "__main__":
     val_output_dir = create_submission(is_evaluation=False)
 
     if eval_output_dir:
-        print(f"\nCreated Evaluation at {colored(eval_output_dir,'red')}")
+        print(f"\nCreated Evaluation at {colored(eval_output_dir, 'red')}")
     if val_output_dir:
         print(f"Created Validation at {colored(val_output_dir, 'blue')}")
