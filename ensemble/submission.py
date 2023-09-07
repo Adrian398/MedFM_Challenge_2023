@@ -306,10 +306,10 @@ def create_submission(is_evaluation):
 
     submission_type = 'submission'
     if is_evaluation:
-        print(f"\nCreating {colored('Evaluation', 'red')} Submission")
+        print(f"\n========== Creating {colored('Evaluation', 'red')} Submission ==========")
     else:
         submission_type = 'validation'
-        print(f"\nCreating {colored(submission_type.capitalize(), 'blue')} Submission")
+        print(f"\n========== Creating {colored(submission_type.capitalize(), 'blue')} Submission ==========")
 
     submission_dir = create_output_dir(is_evaluation, submission_type)
 
@@ -371,10 +371,10 @@ def create_output_dir(is_evaluation, submission_type):
     # Create Output Directory
     submission_dir = os.path.join("submissions", "evaluation", TIMESTAMP)
     if is_evaluation:
-        success = f"Created {colored('submission', 'red')} directory {submission_dir}"
+        success = f"Created {colored('Evaluation', 'red')} directory {submission_dir}"
     else:
         submission_dir = os.path.join("ensemble", f"{submission_type}", TIMESTAMP)
-        success = f"Created {colored(submission_type, 'blue')} directory {submission_dir}"
+        success = f"Created {colored(submission_type.capitalize(), 'blue')} directory {submission_dir}"
     os.makedirs(submission_dir)
     for exp in exps:
         os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
