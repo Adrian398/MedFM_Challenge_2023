@@ -118,6 +118,16 @@ def print_report_for_setting(full_model_list, task, shot, exp):
         print(f"Model: {model_path_rel:{max_char_length}}  {agg_name}: {agg_val:.4f}")
 
 
+def print_model_reports():
+    continue_query = input("\nPrint report for the best models? (y/n) ")
+    if continue_query.lower() == "y":
+        for task in tasks:
+            for shot in shots:
+                for exp in exps:
+                    print_report_for_setting(full_model_list=DATA, task=task, shot=shot, exp=exp)
+
+
+
 def get_aggregate(model_metrics, task):
     # Dictionary mapping tasks to lambda functions for aggregate calculation
     aggregate_calculations = {
@@ -295,50 +305,7 @@ def create_submission(is_evaluation):
         submission_type = 'validation'
         print(f"\nSelected {colored(submission_type.capitalize(), 'blue')}\n")
 
-    total_models = 0
-    least_models = 100000
-    most_models = -1
-    most_setting = ""
-    least_setting = ""
-
-    for task in tasks:
-        for shot in shots:
-            for exp in exps:
-                models_for_setting = len(data_lists[task][shot][exp])
-                print(f"{task} {shot} {exp} {models_for_setting}")
-                total_models += models_for_setting
-                if models_for_setting > most_models:
-                    most_models = models_for_setting
-                    most_setting = f"{task} {shot} {exp}"
-                if models_for_setting < least_models:
-                    least_models = models_for_setting
-                    least_setting = f"{task} {shot} {exp}"
-
-    print("--------------------------------------")
-    print(f"| Total models: {total_models}")
-    print(f"| Most models: {most_models} {most_setting}")
-    print(f"| Least models: {least_models} {least_setting}")
-    print("--------------------------------------")
-
-    # Print Setting Reports
-    continue_query = input("\nPrint report for the best models? (y/n) ")
-    if continue_query.lower() == "y":
-        for task in tasks:
-            for shot in shots:
-                for exp in exps:
-                    print_report_for_setting(full_model_list=data_lists, task=task, shot=shot, exp=exp)
-
-    # Create Output Directory
-    submission_dir = os.path.join("submissions", "evaluation", TIMESTAMP)
-    if is_evaluation:
-        success = f"Created submission directory {submission_dir}"
-    else:
-        submission_dir = os.path.join("ensemble", f"{submission_type}", TIMESTAMP)
-        success = f"Created {submission_type} directory {submission_dir}"
-    os.makedirs(submission_dir)
-    for exp in exps:
-        os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
-    print(colored(success, 'green'))
+    submission_dir = create_output_dir(is_evaluation, submission_type)
 
     # Perform Ensemble Strategy
     for task in tasks:
@@ -366,6 +333,46 @@ def create_submission(is_evaluation):
                                             selected_models_for_classes=selected_models,
                                             model_occurrences=model_occurrences,
                                             root_report_dir=submission_dir)
+    return submission_dir
+
+
+def print_overall_model_summary():
+    total_models = 0
+    least_models = 100000
+    most_models = -1
+    most_setting = ""
+    least_setting = ""
+    for task in tasks:
+        for shot in shots:
+            for exp in exps:
+                models_for_setting = len(DATA[task][shot][exp])
+                print(f"| Setting: {task}/{shot}/{exp} >> Models: {models_for_setting}")
+                total_models += models_for_setting
+                if models_for_setting > most_models:
+                    most_models = models_for_setting
+                    most_setting = f"{task} {shot} {exp}"
+                if models_for_setting < least_models:
+                    least_models = models_for_setting
+                    least_setting = f"{task} {shot} {exp}"
+    print("--------------------------------------")
+    print(f"| Total models: {total_models}")
+    print(f"| Most models: {most_models} {most_setting}")
+    print(f"| Least models: {least_models} {least_setting}")
+    print("--------------------------------------")
+
+
+def create_output_dir(is_evaluation, submission_type):
+    # Create Output Directory
+    submission_dir = os.path.join("submissions", "evaluation", TIMESTAMP)
+    if is_evaluation:
+        success = f"Created submission directory {submission_dir}"
+    else:
+        submission_dir = os.path.join("ensemble", f"{submission_type}", TIMESTAMP)
+        success = f"Created {submission_type} directory {submission_dir}"
+    os.makedirs(submission_dir)
+    for exp in exps:
+        os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
+    print(colored(success, 'green'))
     return submission_dir
 
 
@@ -408,6 +415,9 @@ if __name__ == "__main__":
     ENSEMBLE_STRATEGY, TOP_K = select_ensemble_strategy()
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
     DATA = extract_data()
+
+    print_overall_model_summary()
+    print_model_reports()
 
     eval_output_dir = create_submission(is_evaluation=True)
     val_output_dir = create_submission(is_evaluation=False)
