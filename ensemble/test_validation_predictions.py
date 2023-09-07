@@ -205,8 +205,7 @@ def log_prediction(timestamp, prediction_dir, aggregate_value, strategy="Undefin
     # Check if the file exists. If not, write the header first
     if not os.path.exists(log_file_path):
         with open(log_file_path, 'w') as log_file:
-            log_file.write(
-                "Timestamp         Strategy              PredictionDir                           Aggregate \n")
+            log_file.write(f"{'Timestamp':<15} {'Strategy':<20} {'PredictionDir':<40} {'Aggregate':<10}\n")
             log_file.write(
                 "------------------------------------------------------------------------------------------------------\n")
 
