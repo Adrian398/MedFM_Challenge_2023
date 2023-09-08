@@ -228,13 +228,19 @@ def get_worst_performing_model_dirs(task, shot):
 
 def remove_model_dir(directory):
     """Removes the specified directory after getting confirmation from the user."""
-    user_confirmation = input(f"Do you want to delete the directory {directory}? (yes/no): ").strip().lower()
-    if user_confirmation == 'yes':
+    directory_name = directory.split('work_dirs/')[1]
+    user_confirmation = input(
+        f"Delete the directory {directory_name}? ('Enter' to confirm; 'no' to exit): ").strip().lower()
+
+    if user_confirmation == 'no':
+        print("Exiting the deletion process.")
+        exit()  # Exits the program
+    elif user_confirmation == '':
         try:
             shutil.rmtree(directory)
-            print(f"Directory {directory} deleted successfully.")
+            print(f"Directory {directory_name} deleted successfully.")
         except Exception as e:
-            print(f"Error while deleting directory {directory}. Error: {e}")
+            print(f"Error while deleting directory {directory_name}. Error: {e}")
 
 
 def process_task_shot_combination_for_worst_models(args):
@@ -288,7 +294,8 @@ if __name__ == "__main__":
 
     print_report(worst_model_dirs, best_scores, model_performance)
 
-    user_input = input("\nDo you want to delete the worst-performing model runs? (yes/no): ")
-    if user_input.strip().lower() == 'yes':
+    user_input = input(
+        "\nDo you want to delete the worst-performing model runs? (Press 'Enter' to confirm or type 'no' to exit): ")
+    if user_input.strip().lower() == '':
         for model_dir in worst_model_dirs:
             remove_model_dir(model_dir)
