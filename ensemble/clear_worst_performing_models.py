@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import shutil
 import sys
 from multiprocessing import Pool
 
@@ -225,6 +226,17 @@ def get_worst_performing_model_dirs(task, shot):
     return bad_performing_models, best_scores_for_each_setting
 
 
+def remove_model_dir(directory):
+    """Removes the specified directory after getting confirmation from the user."""
+    user_confirmation = input(f"Do you want to delete the directory {directory}? (yes/no): ").strip().lower()
+    if user_confirmation == 'yes':
+        try:
+            shutil.rmtree(directory)
+            print(f"Directory {directory} deleted successfully.")
+        except Exception as e:
+            print(f"Error while deleting directory {directory}. Error: {e}")
+
+
 def process_task_shot_combination_for_worst_models(args):
     task, shot = args
     bad_performing_models, best_scores_for_each_setting = get_worst_performing_model_dirs(task=task, shot=shot)
@@ -276,7 +288,7 @@ if __name__ == "__main__":
 
     print_report(worst_model_dirs, best_scores, model_performance)
 
-    # user_input = input(f"\nDo you want to delete the worst-performing model runs? (yes/no): ")
-    # if user_input.strip().lower() == 'yes':
-    #    for model_dir in worst_model_dirs:
-    #        remove_model_dir(model_dir)
+    user_input = input("\nDo you want to delete the worst-performing model runs? (yes/no): ")
+    if user_input.strip().lower() == 'yes':
+        for model_dir in worst_model_dirs:
+            remove_model_dir(model_dir)
