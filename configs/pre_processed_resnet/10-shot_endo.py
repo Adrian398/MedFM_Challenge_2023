@@ -14,7 +14,7 @@ val_bs = 128
 dataset = 'endo'
 model_name = 'resnet101'
 exp_num = 1
-nshot = 1
+nshot = 10
 
 run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
 work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
@@ -82,6 +82,6 @@ default_hooks = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
+train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=125)
 
 randomness = dict(seed=0)
