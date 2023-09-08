@@ -201,14 +201,14 @@ def log_prediction(timestamp, prediction_dir, aggregate_value, model_cnt, strate
     top_k_str = str(top_k) if top_k is not None else "None"
     model_cnt = str(model_cnt) if model_cnt is not None else "Undefined"
 
-    log_string = f"{timestamp:<20} {model_cnt:<10} {strategy:<20} {top_k_str:<10} {prediction_dir_cleaned:<40} {value_string}\n"
+    log_string = f"{timestamp:<20} {model_cnt:<20} {strategy:<20} {top_k_str:<10} {prediction_dir_cleaned:<40} {value_string}\n"
 
     log_file_path = os.path.join('ensemble', 'validation', 'log-test.txt')
 
     # Check if the file exists. If not, write the header first
     if not os.path.exists(log_file_path):
         with open(log_file_path, 'w') as log_file:
-            log_file.write(f"{'Timestamp':<20} {'Model-Count':<10} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
+            log_file.write(f"{'Timestamp':<20} {'Model-Count':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
 
     with open(log_file_path, 'a') as log_file:
         log_file.write(log_string)
