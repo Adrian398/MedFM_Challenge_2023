@@ -548,7 +548,7 @@ def extract_data(tasks):
         for shot in shots:
             total_iterations += len(glob.glob(os.path.join(root_dir, task, shot, '*exp[1-5]*')))
 
-    #print(f"\nChecking {colored(str(total_iterations), 'blue')} models:")
+    print(f"\nChecking and extracting data for  {colored(str(total_iterations), 'blue')} models:")
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
         for task in tasks:
             for shot in shots:
@@ -737,7 +737,7 @@ def select_task():
             print("Invalid choice. Please try again.\n")
 
 
-def process_strategy(strategy, top_k, task):
+def process_strategy(strategy, task, top_k=None):
     val_output_dir = create_submission(strategy=strategy,
                                        top_k=top_k,
                                        is_evaluation=False,
@@ -749,7 +749,7 @@ def process_strategy(strategy, top_k, task):
 def main(tasks):
     top_k_max, top_k_max_setting = get_least_model_count(tasks=tasks)
     print(top_k_max, top_k_max_setting)
-    exit()
+
     for task in tasks:
         for strategy in ENSEMBLE_STRATEGIES:
             if strategy != "expert":
@@ -757,6 +757,9 @@ def main(tasks):
                     process_strategy(strategy=strategy,
                                      top_k=top_k,
                                      task=task)
+            else:
+                process_strategy(strategy=strategy,
+                                 task=task)
 
 
 if __name__ == "__main__":
@@ -772,5 +775,6 @@ if __name__ == "__main__":
                            "pd-log-weighted",
                            "rank-based-weighted",
                            "diversity-weighted"]
+    ENSEMBLE_STRATEGIES = ["expert"]
 
     main(task_list)
