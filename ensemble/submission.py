@@ -76,55 +76,6 @@ def extract_exp_number(string):
     return int(match.group(1)) if match else 0
 
 
-def hard_voting_ensemble_strategy(model_runs, task, shot, exp, out_path, top_k=None):
-    """
-    Merges model runs using an averaging approach for binary classification.
-    If top_k is provided, only the top-k models based on aggregate metrics are considered for averaging.
-    """
-    # Ensure the task is binary
-    assert TASK_2_CLASS_COUNT[task] == 2, "This function is only for binary classification tasks!"
-
-    # Sort model runs based on aggregate metric (if top_k is provided)
-    if top_k:
-        model_runs = sorted(model_runs, key=lambda x: get_aggregate(x['metrics'], task)[1], reverse=True)[:top_k]
-
-    merged_df = model_runs[0]['prediction'].iloc[:, 0:1].copy()
-
-    # Initialize columns to store the sum of scores for each class
-    merged_df['sum_score_0'] = 0.0
-    merged_df['sum_score_1'] = 0.0
-
-    # List to store which models were selected for each class
-    selected_models_for_classes = []
-
-    # Dict to keep track of model occurrences
-    model_occurrences = {}
-
-    for run in model_runs:
-        _, aggregate_value = get_aggregate(run['metrics'], task)
-        if aggregate_value is not None:
-            merged_df['sum_score_0'] += run['prediction'].iloc[:, 1]
-            merged_df['sum_score_1'] += run['prediction'].iloc[:, 2]
-
-            model_name = run['name']
-            selected_models_for_classes.append(model_name)
-
-            if model_name in model_occurrences:
-                model_occurrences[model_name] += 1
-            else:
-                model_occurrences[model_name] = 1
-
-    # Calculate the average score for each class
-    total_models = len(model_runs)
-    merged_df['avg_score_0'] = merged_df['sum_score_0'] / total_models
-    merged_df['avg_score_1'] = merged_df['sum_score_1'] / total_models
-
-    # Save the results
-    merged_df.to_csv(out_path, index=False, header=False, columns=['img_id', 'avg_score_0', 'avg_score_1'])
-
-    return selected_models_for_classes, model_occurrences
-
-
 def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
     """
     Merges model runs using a weighted sum approach based on the N best model runs for each class.
@@ -624,11 +575,8 @@ def create_submission(is_evaluation):
                     print("Not enough runs")
                     continue
                 out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{submission_type}.csv")
-                if task == "colon":
-                    selected_models, model_occurrences = hard_voting_ensemble_strategy(model_runs=model_runs,
-                                                                                       task=task, shot=shot, exp=exp,
-                                                                                       out_path=out_path)
-                elif ENSEMBLE_STRATEGY == "weighted":
+
+                if ENSEMBLE_STRATEGY == "weighted":
                     selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
                                                                                     task=task, shot=shot, exp=exp,
                                                                                     k=TOP_K, out_path=out_path)
