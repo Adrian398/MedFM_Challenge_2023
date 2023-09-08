@@ -35,8 +35,7 @@ def compute_pairwise_diversity(top_k_models):
     return diversity_scores
 
 
-def create_ensemble_report_file(task, shot, exp, is_eval, selected_models_for_classes, model_occurrences,
-                                root_report_dir):
+def create_ensemble_report_file(task, shot, exp, selected_models_for_classes, model_occurrences, root_report_dir):
     """
     Write the ensemble report for a given task, shot, and experiment.
 
@@ -64,11 +63,6 @@ def create_ensemble_report_file(task, shot, exp, is_eval, selected_models_for_cl
             if occurrence >= 1:
                 report_file.write(f"{model_path} used {occurrence} times\n")
         report_file.write("\n\n")
-
-    if is_eval:
-        print("Added ensemble information for setting", colored(f"{task}/{shot}/{exp}", 'red'))
-    else:
-        print("Added ensemble information for", colored(f"{task}/{shot}/{exp}", 'blue'))
 
 
 @lru_cache(maxsize=None)
@@ -585,13 +579,10 @@ def create_submission(strategy, top_k, is_evaluation, task):
     submission_type = 'submission'
     if is_evaluation:
         data = DATA_SUBMISSION
-        print_str = f"\n========== Creating {colored('Evaluation', 'red')} Submission =========="
     else:
         data = DATA_VALIDATION
         submission_type = 'validation'
-        print_str = f"\n========== Creating {colored(submission_type.capitalize(), 'blue')} Submission =========="
 
-    print(print_str)
     submission_dir = create_output_dir(strategy=strategy,
                                        is_evaluation=is_evaluation,
                                        submission_type=submission_type)
@@ -640,7 +631,7 @@ def create_submission(strategy, top_k, is_evaluation, task):
                 print("Invalid ensemble strategy!")
                 exit()
 
-            create_ensemble_report_file(task=task, shot=shot, exp=exp, is_eval=is_evaluation,
+            create_ensemble_report_file(task=task, shot=shot, exp=exp,
                                         selected_models_for_classes=selected_models,
                                         model_occurrences=model_occurrences,
                                         root_report_dir=submission_dir)
