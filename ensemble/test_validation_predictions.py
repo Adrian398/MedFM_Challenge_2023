@@ -170,7 +170,6 @@ def compute_multilabel_metrics(merged_df, target_columns, score_cols, num_classe
 def compute_task_specific_metrics(pred_path, gt_path, task):
     pred_df, gt_df, score_cols = read_and_validate_files(pred_path, gt_path, task)
 
-    print(len(pred_df), len(gt_df))
     target_columns = TASK_2_CLASS_NAMES.get(task, [])
 
     # Merge predictions and ground truth based on img_id
