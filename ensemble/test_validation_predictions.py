@@ -119,8 +119,8 @@ def get_file_by_keyword(directory, keyword, file_extension=None):
 def read_and_validate_files(pred_path, gt_path, task):
     """Read prediction and ground truth files, then validate the necessary columns."""
     try:
-        pred_df = pd.read_csv(pred_path)
-        gt_df = pd.read_csv(gt_path)
+        pred_df = pd.read_csv(pred_path, header=None)
+        gt_df = pd.read_csv(gt_path, header=None)
     except Exception as e:
         raise ValueError(f"Error reading CSV files: {e}")
 
