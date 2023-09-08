@@ -690,7 +690,7 @@ def create_output_dir(is_evaluation, submission_type):
     if is_evaluation:
         success = f"Created {colored('Evaluation', 'red')} directory {submission_dir}"
     else:
-        submission_dir = os.path.join("ensemble", f"{submission_type}", TIMESTAMP)
+        submission_dir = os.path.join("ensemble", "gridsearch", f"{submission_type}", TIMESTAMP)
         success = f"Created {colored(submission_type.capitalize(), 'blue')} directory {submission_dir}"
     os.makedirs(submission_dir)
     for exp in exps:
@@ -756,9 +756,9 @@ if __name__ == "__main__":
 
     TOTAL_MODELS = print_overall_model_summary()
     print_model_reports()
-    exit()
 
-    eval_output_dir = create_submission(is_evaluation=True)
+    # TODO: Add evaluation
+    #eval_output_dir = create_submission(is_evaluation=True)
     val_output_dir = create_submission(is_evaluation=False)
 
     if eval_output_dir:
