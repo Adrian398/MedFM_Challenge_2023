@@ -312,7 +312,7 @@ def main(args):
         except ValueError:
             print("Invalid input. Please enter a number or 'no' to exit.")
 
-    run_commands_on_cluster(commands, num_commands, gpu=gpu_type)
+    run_commands_on_cluster(commands, num_commands, gpu_type=gpu_type)
 
 
 def parse_args():
