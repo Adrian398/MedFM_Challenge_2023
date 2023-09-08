@@ -205,7 +205,14 @@ def get_prediction_timestamp_dirs(base_path):
     return sorted_valid_dirs
 
 
-def log_prediction(timestamp, prediction_dir, aggregate_value, model_cnt, strategy="Undefined", top_k=None):
+def build_pred_log_string(pred_dict):
+    timestamp = pred_dict.get('timestamp', "None")
+    model_cnt = pred_dict.get('model_count', "None")
+    strategy = pred_dict.get('strategy', "None")
+    top_k = pred_dict.get('top_k', "None")
+    prediction_dir = pred_dict.get('prediction_dir', "None")
+    aggregate_value = pred_dict.get('aggregate_value', "None")
+
     try:
         aggregate_value = float(aggregate_value)
         value_string = f"{aggregate_value:<10.4f}"
@@ -213,16 +220,7 @@ def log_prediction(timestamp, prediction_dir, aggregate_value, model_cnt, strate
         value_string = f"{aggregate_value:<10}"
 
     top_k_str = str(top_k) if top_k is not None else "None"
-    model_cnt = str(model_cnt) if model_cnt is not None else "Undefined"
-
-    return {
-        'timestamp': timestamp,
-        'model_count': model_cnt,
-        'strategy': strategy,
-        'top_k_str': top_k_str,
-        'prediction_dir': prediction_dir,
-        'aggregate_value': aggregate_value
-    }
+    model_cnt = str(model_cnt) if model_cnt is not None else "None"
 
     return f"{timestamp:<20} {model_cnt:<20} {strategy:<20} {top_k_str:<10} {prediction_dir:<40} {value_string}\n"
 
@@ -297,19 +295,20 @@ def main():
     base_path = "ensemble/validation"
     timestamp_dirs = get_prediction_timestamp_dirs(base_path)
 
-    log_lines = []
+    log_pred_dicts = []
     for timestamp_dir in timestamp_dirs:
         print(colored(f"Processing Timestamp {timestamp_dir}", 'blue'))
         log_pred_dict = process_prediction_dir(base_path=base_path, timestamp_dir=timestamp_dir)
-        log_lines.append(log_pred_dict)
+        log_pred_dicts.append(log_pred_dict)
 
     log_file_path = os.path.join(base_path, 'log.txt')
 
     with open(log_file_path, 'w') as log_file:
         log_file.write(f"{'Timestamp':<20} {'Model-Count':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
 
-        for line in log_lines:
-            log_file.write(line)
+        for log_pred_dict in log_pred_dicts:
+            log_pred_str = build_pred_log_string(log_pred_dict)
+            log_file.write(log_pred_str)
 
 
 if __name__ == "__main__":
