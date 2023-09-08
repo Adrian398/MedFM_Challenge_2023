@@ -76,6 +76,52 @@ def extract_exp_number(string):
     return int(match.group(1)) if match else 0
 
 
+def hard_voting_ensemble_strategy(model_runs, task, shot, exp, out_path):
+    """
+    Merges model runs using a hard voting approach for binary classification.
+    """
+    # Ensure the task is binary
+    assert TASK_2_CLASS_COUNT[task] == 2, "This function is only for binary classification tasks!"
+
+    merged_df = model_runs[0]['prediction'].iloc[:, 0:1].copy()
+
+    # List to store which models were selected for each class
+    selected_models_for_classes = []
+
+    # Dict to keep track of model occurrences
+    model_occurrences = {}
+
+    # For the binary task, compute the votes for each model
+    votes_column = pd.Series(0, index=merged_df.index)
+    for run in model_runs:
+        _, aggregate_value = get_aggregate(run['metrics'], task)
+        if aggregate_value is not None:
+            # Here, we consider predictions greater than 0.5 as a vote for class 1
+            # and predictions less than or equal to 0.5 as a vote for class 0.
+            # This threshold can be adjusted if needed.
+            votes = run['prediction'].iloc[:, 1].apply(lambda x: 1 if x > 0.5 else 0)
+            votes_column += votes
+
+            model_name = run['name']
+            selected_models_for_classes.append(model_name)
+
+            if model_name in model_occurrences:
+                model_occurrences[model_name] += 1
+            else:
+                model_occurrences[model_name] = 1
+
+    # Calculate the final prediction based on majority voting.
+    # If the number of votes is greater than half of the total models, predict class 1. Otherwise, predict class 0.
+    total_models = len(model_runs)
+    final_prediction = votes_column.apply(lambda x: 1 if x > total_models/2 else 0)
+
+    merged_df.loc[:, 1] = final_prediction
+
+    merged_df.to_csv(out_path, index=False, header=False)
+
+    return selected_models_for_classes, model_occurrences
+
+
 def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
     """
     Merges model runs using a weighted sum approach based on the N best model runs for each class.
@@ -575,8 +621,11 @@ def create_submission(is_evaluation):
                     print("Not enough runs")
                     continue
                 out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{submission_type}.csv")
-
-                if ENSEMBLE_STRATEGY == "weighted":
+                if task == "colon":
+                    selected_models, model_occurrences = hard_voting_ensemble_strategy(model_runs=model_runs,
+                                                                                       task=task, shot=shot, exp=exp,
+                                                                                       out_path=out_path)
+                elif ENSEMBLE_STRATEGY == "weighted":
                     selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
                                                                                     task=task, shot=shot, exp=exp,
                                                                                     k=TOP_K, out_path=out_path)
