@@ -76,7 +76,7 @@ def extract_exp_number(string):
     return int(match.group(1)) if match else 0
 
 
-def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
+def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, top_k=3):
     """
     Merges model runs using a weighted sum approach based on the N best model runs for each class.
     """
@@ -100,12 +100,12 @@ def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, k=3):
 
         # Sort the models based on aggregate value and take the top N models
         class_models.sort(key=lambda x: x[1], reverse=True)
-        top_n_models = class_models[:k]
+        top_n_models = class_models[:top_k]
 
         # Check if k is greater than the available models and print warning
-        if k > len(class_models):
+        if top_k > len(class_models):
             print(colored(
-                f"Warning: Requested top {k} models, but only {len(class_models)} are available for class {i + 1}",
+                f"Warning: Requested top {top_k} models, but only {len(class_models)} are available for class {i + 1}",
                 'red'))
 
         # Record the selected models for the report and update the model_occurrences
@@ -209,7 +209,7 @@ def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, k=3, l
     return selected_models_for_classes, model_occurrences
 
 
-def rank_based_weight_ensemble_strategy(model_runs, task, out_path, k=3):
+def rank_based_weight_ensemble_strategy(model_runs, task, out_path, top_k=3):
     """
     Merges model runs using a rank-based weight approach for the N best model runs for each class.
     """
@@ -233,16 +233,16 @@ def rank_based_weight_ensemble_strategy(model_runs, task, out_path, k=3):
 
         # Sort the models based on aggregate value and take the top N models
         class_models.sort(key=lambda x: x[1], reverse=True)
-        top_n_models = class_models[:k]
+        top_n_models = class_models[:top_k]
 
         # Assign rank-based weights
-        weights = list(range(k, 0, -1))
+        weights = list(range(top_k, 0, -1))
 
         # Record the selected models for the report and update the model_occurrences
         selected_models_for_class = []
         for (model_run, _), weight in zip(top_n_models, weights):
             model_name = model_run['name']
-            selected_models_for_class.append(f"Class {i + 1}: {model_name} (Rank: {k + 1 - weight})")
+            selected_models_for_class.append(f"Class {i + 1}: {model_name} (Rank: {top_k + 1 - weight})")
 
             if model_name in model_occurrences:
                 model_occurrences[model_name] += 1
@@ -266,7 +266,7 @@ def rank_based_weight_ensemble_strategy(model_runs, task, out_path, k=3):
     return selected_models_for_classes, model_occurrences
 
 
-def diversity_weighted_ensemble_strategy(model_runs, task, out_path, k=3):
+def diversity_weighted_ensemble_strategy(model_runs, task, out_path, top_k=3):
     """
     Merges model runs using a diversity-weighted sum approach based on the N best model runs for each class.
     """
@@ -289,7 +289,7 @@ def diversity_weighted_ensemble_strategy(model_runs, task, out_path, k=3):
 
         # Sort the models based on aggregate value and take the top N models
         class_models.sort(key=lambda x: x[1], reverse=True)
-        top_n_models = class_models[:k]
+        top_n_models = class_models[:top_k]
 
         # Compute diversity scores for the top k models
         top_k_model_data = [model for model, _ in top_n_models]
@@ -300,9 +300,9 @@ def diversity_weighted_ensemble_strategy(model_runs, task, out_path, k=3):
             raise ValueError("Mismatch between diversity scores length and top k models.")
 
         # Check if k is greater than the available models and print warning
-        if k > len(class_models):
+        if top_k > len(class_models):
             print(colored(
-                f"Warning: Requested top {k} models, but only {len(class_models)} are available for class {i + 1}",
+                f"Warning: Requested top {top_k} models, but only {len(class_models)} are available for class {i + 1}",
                 'red'))
 
         # Normalize diversity scores to be within the same range as weights (optional step based on diversity scores)
@@ -528,7 +528,7 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot):
     return None, None
 
 
-def extract_data():
+def extract_data(tasks):
     #subm_types = ["submission", "validation"]
     # TODO: For now only validation
     subm_types = ["validation"]
@@ -548,7 +548,7 @@ def extract_data():
         for shot in shots:
             total_iterations += len(glob.glob(os.path.join(root_dir, task, shot, '*exp[1-5]*')))
 
-    print(f"\nChecking {colored(str(total_iterations), 'blue')} models:")
+    #print(f"\nChecking {colored(str(total_iterations), 'blue')} models:")
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
         for task in tasks:
             for shot in shots:
@@ -580,78 +580,89 @@ def create_submission_cfg_dump(root_report_dir):
     return cfg_file_path
 
 
-def create_submission(is_evaluation):
+def create_submission(strategy, top_k, is_evaluation, task):
     submission_type = 'submission'
     if is_evaluation:
-        data_lists = DATA_SUBMISSION
-        color = 'red'
+        data = DATA_SUBMISSION
         print_str = f"\n========== Creating {colored('Evaluation', 'red')} Submission =========="
     else:
-        data_lists = DATA_VALIDATION
+        data = DATA_VALIDATION
         submission_type = 'validation'
-        color = 'blue'
         print_str = f"\n========== Creating {colored(submission_type.capitalize(), 'blue')} Submission =========="
 
-    continue_query = input(f"\nCreate {colored(submission_type, color)} Submission? (y/n) ")
-    if continue_query.lower() != "y":
-        return None
-
     print(print_str)
-    submission_dir = create_output_dir(is_evaluation, submission_type)
+    submission_dir = create_output_dir(strategy=strategy,
+                                       is_evaluation=is_evaluation,
+                                       submission_type=submission_type)
 
     # Perform Ensemble Strategy
-    for task in tasks:
-        for shot in shots:
-            for exp in exps:
-                model_runs = data_lists[task][shot][exp]
-                if len(model_runs) < 2:
-                    print("Not enough runs")
-                    continue
-                out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{submission_type}.csv")
+    for shot in shots:
+        for exp in exps:
+            model_runs = data[task][shot][exp]
+            if len(model_runs) < 2:
+                print("Not enough runs")
+                continue
+            out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{submission_type}.csv")
 
-                if ENSEMBLE_STRATEGY == "weighted":
-                    selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
-                                                                                    task=task, shot=shot, exp=exp,
-                                                                                    k=TOP_K, out_path=out_path)
-                elif ENSEMBLE_STRATEGY == "expert":
-                    selected_models, model_occurrences = expert_model_strategy(model_runs=model_runs,
-                                                                               task=task,
-                                                                               out_path=out_path)
-                elif ENSEMBLE_STRATEGY == "pd-weighted":
-                    selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(
-                        model_runs=model_runs,
-                        task=task,
-                        out_path=out_path,
-                        k=TOP_K)
-                elif ENSEMBLE_STRATEGY == "pd-log-weighted":
-                    selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(
-                        model_runs=model_runs,
-                        task=task,
-                        out_path=out_path,
-                        k=TOP_K,
-                        log_scale=LOG_SCALE)
-                elif ENSEMBLE_STRATEGY == "rank-based-weighted":
-                    selected_models, model_occurrences = rank_based_weight_ensemble_strategy(model_runs=model_runs,
-                                                                                             task=task,
-                                                                                             out_path=out_path,
-                                                                                             k=TOP_K)
-                elif ENSEMBLE_STRATEGY == "diversity-weighted":
-                    selected_models, model_occurrences = diversity_weighted_ensemble_strategy(model_runs=model_runs,
-                                                                                              task=task,
-                                                                                              out_path=out_path,
-                                                                                              k=TOP_K)
-                else:
-                    print("Invalid ensemble strategy!")
-                    exit()
+            if strategy == "weighted":
+                selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
+                                                                                task=task, shot=shot, exp=exp,
+                                                                                top_k=top_k, out_path=out_path)
+            elif strategy == "expert":
+                selected_models, model_occurrences = expert_model_strategy(model_runs=model_runs,
+                                                                           task=task,
+                                                                           out_path=out_path)
+            elif strategy == "pd-weighted":
+                selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(
+                    model_runs=model_runs,
+                    task=task,
+                    out_path=out_path,
+                    k=top_k)
+            elif strategy == "pd-log-weighted":
+                selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(
+                    model_runs=model_runs,
+                    task=task,
+                    out_path=out_path,
+                    k=top_k,
+                    log_scale=True)
+            elif strategy == "rank-based-weighted":
+                selected_models, model_occurrences = rank_based_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                         task=task,
+                                                                                         out_path=out_path,
+                                                                                         top_k=top_k)
+            elif strategy == "diversity-weighted":
+                selected_models, model_occurrences = diversity_weighted_ensemble_strategy(model_runs=model_runs,
+                                                                                          task=task,
+                                                                                          out_path=out_path,
+                                                                                          top_k=top_k)
+            else:
+                print("Invalid ensemble strategy!")
+                exit()
 
-                create_ensemble_report_file(task=task, shot=shot, exp=exp, is_eval=is_evaluation,
-                                            selected_models_for_classes=selected_models,
-                                            model_occurrences=model_occurrences,
-                                            root_report_dir=submission_dir)
+            create_ensemble_report_file(task=task, shot=shot, exp=exp, is_eval=is_evaluation,
+                                        selected_models_for_classes=selected_models,
+                                        model_occurrences=model_occurrences,
+                                        root_report_dir=submission_dir)
     if not is_evaluation:
         create_submission_cfg_dump(root_report_dir=submission_dir)
 
     return submission_dir
+
+
+def get_least_model_count():
+    total_models = 0
+    least_models = 100000
+    least_setting = ""
+    for task in tasks:
+        for shot in shots:
+            for exp in exps:
+                models_for_setting = len(DATA_SUBMISSION[task][shot][exp])
+                print(f"| Setting: {task}/{shot}/{exp}\t>> Models: {models_for_setting}")
+                total_models += models_for_setting
+                if models_for_setting < least_models:
+                    least_models = models_for_setting
+                    least_setting = f"{task} {shot} {exp}"
+    return least_models, least_setting
 
 
 def print_overall_model_summary():
@@ -684,14 +695,16 @@ def print_overall_model_summary():
     return total_models
 
 
-def create_output_dir(is_evaluation, submission_type):
+def create_output_dir(strategy, is_evaluation, submission_type):
     # Create Output Directory
     submission_dir = os.path.join("submissions", "evaluation", TIMESTAMP)
+
     if is_evaluation:
         success = f"Created {colored('Evaluation', 'red')} directory {submission_dir}"
     else:
-        submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, ENSEMBLE_STRATEGY)
+        submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, strategy)
         success = f"Created {colored(submission_type.capitalize(), 'blue')} directory {submission_dir}"
+
     os.makedirs(submission_dir)
     for exp in exps:
         os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
@@ -708,61 +721,55 @@ def select_top_k_models():
             print("Invalid number. Please enter a positive integer.\n")
 
 
-def select_ensemble_strategy():
+def select_task():
+    tasks = ["colon", "endo", "chest"]
     while True:
-        print("Choose an ensemble strategy:")
-        for idx, strategy in enumerate(ENSEMBLE_STRATEGIES, 1):
-            print(f"{idx}. {strategy}")
+        print("Choose a task:")
+        for idx, task in enumerate(tasks, 1):
+            print(f"{idx}. {task}")
 
         choice = input("Enter your choice: ")
 
-        if choice.isdigit() and 1 <= int(choice) <= len(ENSEMBLE_STRATEGIES):
-            choice = ENSEMBLE_STRATEGIES[int(choice) - 1]
-
-            # Top-K Methods
-            if (choice == "weighted"
-                    or choice == "pd-weighted"
-                    or choice == "pd-log-weighted"
-                    or choice == "rank-based-weighted"
-                or choice == "diversity-weighted"
-            ):
-                top_k_models = select_top_k_models()
-                log_scale = False
-
-                # Log Scale Methods
-                if choice == "pd-log-weighted":
-                    log_scale = True
-
-                return choice, top_k_models, log_scale
-            else:
-                return choice, None, None
+        if choice.isdigit() and 1 <= int(choice) <= len(tasks):
+            choice = tasks[int(choice) - 1]
+            return choice
         else:
             print("Invalid choice. Please try again.\n")
 
 
-# ============================================================
-root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
-ENSEMBLE_STRATEGIES = ["expert", "weighted", "pd-weighted", "pd-log-weighted", "rank-based-weighted", "diversity-weighted"]
-# ============================================================
+def process_strategy(strategy, top_k, task):
+    val_output_dir = create_submission(strategy=strategy,
+                                       top_k=top_k,
+                                       is_evaluation=False,
+                                       task=task)
+    if val_output_dir:
+        print(f"Created Validation at {colored(val_output_dir, 'blue')}")
+
+
+def main(tasks):
+    top_k_max, top_k_max_setting = get_least_model_count()
+    exit()
+    for task in tasks:
+        for strategy in ENSEMBLE_STRATEGIES:
+            if strategy != "expert":
+                for top_k in range(top_k_max):
+                    process_strategy(strategy=strategy,
+                                     top_k=top_k,
+                                     task=task)
 
 
 if __name__ == "__main__":
-    ENSEMBLE_STRATEGY, TOP_K, LOG_SCALE = select_ensemble_strategy()
+    #selected_task = select_task()
+    task_list = ["colon"]
+    root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
+
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
-    tasks = ["colon"]
+    DATA_SUBMISSION, DATA_VALIDATION = extract_data(tasks=task_list)
+    ENSEMBLE_STRATEGIES = ["expert",
+                           "weighted",
+                           "pd-weighted",
+                           "pd-log-weighted",
+                           "rank-based-weighted",
+                           "diversity-weighted"]
 
-    # TODO: DATA_SUBMISSION empty for now
-    DATA_SUBMISSION, DATA_VALIDATION = extract_data()
-
-    TOTAL_MODELS = print_overall_model_summary()
-    print_model_reports()
-
-    # TODO: Add evaluation
-    #eval_output_dir = create_submission(is_evaluation=True)
-    eval_output_dir = None
-    val_output_dir = create_submission(is_evaluation=False)
-
-    if eval_output_dir:
-        print(f"\nCreated Evaluation at {colored(eval_output_dir, 'red')}")
-    if val_output_dir:
-        print(f"Created Validation at {colored(val_output_dir, 'blue')}")
+    main(task_list)
