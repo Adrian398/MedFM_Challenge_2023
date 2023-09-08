@@ -120,19 +120,21 @@ def read_and_validate_files(pred_path, gt_path, task):
     """Read prediction and ground truth files, then validate the necessary columns."""
     try:
         pred_df = pd.read_csv(pred_path, header=None)
-        gt_df = pd.read_csv(gt_path, header=None)
+        gt_df = pd.read_csv(gt_path)
     except Exception as e:
         raise ValueError(f"Error reading CSV files: {e}")
+
+    print("Columns in gt_df after reading:", gt_df.columns)
 
     score_cols = [f'score_{i}' for i in range(TASK_2_CLASS_COUNT.get(task, 2))]
 
     if len(pred_df.columns) != len(['img_id'] + score_cols):
         raise ValueError(f"Unexpected number of columns in {pred_path}. Columns are: {pred_df.columns.tolist()}")
 
-    print(f"Length of score_cols: {len(score_cols)}")
-    print(f"Number of columns in pred_df: {len(pred_df.columns)}")
-    print(task)
-    print(pred_path, gt_path)
+    #print(f"Length of score_cols: {len(score_cols)}")
+    #print(f"Number of columns in pred_df: {len(pred_df.columns)}")
+    #print(task)
+    #print(pred_path, gt_path)
 
     pred_df.columns = ['img_id'] + score_cols
 
