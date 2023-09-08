@@ -288,12 +288,11 @@ def main():
 
     log_file_path = os.path.join(base_path, 'log.txt')
 
-    if not os.path.exists(log_file_path):
-        with open(log_file_path, 'w') as log_file:
-            log_file.write(f"{'Timestamp':<20} {'Model-Count':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
+    with open(log_file_path, 'w') as log_file:
+        log_file.write(f"{'Timestamp':<20} {'Model-Count':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
 
-            for line in log_lines:
-                log_file.write(line)
+        for line in log_lines:
+            log_file.write(line)
 
 
 if __name__ == "__main__":
