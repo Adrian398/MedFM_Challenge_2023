@@ -690,7 +690,7 @@ def create_output_dir(is_evaluation, submission_type):
     if is_evaluation:
         success = f"Created {colored('Evaluation', 'red')} directory {submission_dir}"
     else:
-        submission_dir = os.path.join("ensemble", "gridsearch", f"{submission_type}", TIMESTAMP)
+        submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, ENSEMBLE_STRATEGY)
         success = f"Created {colored(submission_type.capitalize(), 'blue')} directory {submission_dir}"
     os.makedirs(submission_dir)
     for exp in exps:
