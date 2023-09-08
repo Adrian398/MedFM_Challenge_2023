@@ -280,11 +280,11 @@ def main():
     base_path = "ensemble/validation"
     timestamp_dirs = get_prediction_timestamp_dirs(base_path)
 
-    log_lines = {}
+    log_lines = []
     for timestamp_dir in timestamp_dirs:
         print(colored(f"Processing Timestamp {timestamp_dir}", 'blue'))
         log_pred = process_prediction_dir(base_path=base_path, timestamp_dir=timestamp_dir)
-        log_lines[timestamp_dir] = log_pred
+        log_lines.append(log_pred)
 
     log_file_path = os.path.join(base_path, 'log.txt')
 
