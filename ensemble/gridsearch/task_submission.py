@@ -2,6 +2,7 @@ import glob
 import json
 import os
 import re
+from collections import defaultdict
 from datetime import datetime
 from functools import lru_cache
 
@@ -359,7 +360,7 @@ def print_report_for_setting(full_model_list, task, shot, exp):
               f"{m1_name}: {m1_val:.4f}  {m2_name}: {m2_val:.4f}")
 
 
-def print_model_reports():
+def print_model_reports(tasks):
     continue_query = input("\nPrint report for the best models? (y/n) ")
     if continue_query.lower() == "y":
         for task in tasks:
@@ -565,12 +566,12 @@ def extract_data(tasks):
     return data_lists["validation"], data_lists["validation"]
 
 
-def create_submission_cfg_dump(root_report_dir):
+def create_submission_cfg_dump(top_k, total_models, strategy, root_report_dir):
     config_data = {
         'timestamp': TIMESTAMP,
-        'top-k': TOP_K,
-        'model-count': TOTAL_MODELS,
-        'strategy': ENSEMBLE_STRATEGY,
+        'top-k': top_k,
+        'model-count': total_models,
+        'strategy': strategy,
     }
     cfg_file_path = os.path.join(root_report_dir, "config.json")
 
@@ -644,28 +645,30 @@ def create_submission(strategy, top_k, is_evaluation, task):
                                         model_occurrences=model_occurrences,
                                         root_report_dir=submission_dir)
     if not is_evaluation:
-        create_submission_cfg_dump(root_report_dir=submission_dir)
+        create_submission_cfg_dump(top_k=top_k,
+                                   strategy=strategy,
+                                   total_models=TOTAL_MODELS[task],
+                                   root_report_dir=submission_dir)
 
     return submission_dir
 
 
-def get_least_model_count(tasks):
+def get_least_model_count(task):
     total_models = 0
     least_models = 100000
     least_setting = ""
-    for task in tasks:
-        for shot in shots:
-            for exp in exps:
-                models_for_setting = len(DATA_SUBMISSION[task][shot][exp])
-                print(f"| Setting: {task}/{shot}/{exp}\t>> Models: {models_for_setting}")
-                total_models += models_for_setting
-                if models_for_setting < least_models:
-                    least_models = models_for_setting
-                    least_setting = f"{task} {shot} {exp}"
-    return least_models, least_setting
+    for shot in shots:
+        for exp in exps:
+            models_for_setting = len(DATA_SUBMISSION[task][shot][exp])
+            print(f"| Setting: {task}/{shot}/{exp}\t>> Models: {models_for_setting}")
+            total_models += models_for_setting
+            if models_for_setting < least_models:
+                least_models = models_for_setting
+                least_setting = f"{task} {shot} {exp}"
+    return total_models, least_models, least_setting
 
 
-def print_overall_model_summary():
+def print_overall_model_summary(tasks):
     """
     Prints the overall model summary. Once is enough since the count for submission and validation is the same.
     """
@@ -747,10 +750,9 @@ def process_strategy(strategy, task, top_k=None):
 
 
 def main(tasks):
-    top_k_max, top_k_max_setting = get_least_model_count(tasks=tasks)
-    print(top_k_max, top_k_max_setting)
-
     for task in tasks:
+        TOTAL_MODELS[task], top_k_max, top_k_max_setting = get_least_model_count(task=task)
+
         for strategy in ENSEMBLE_STRATEGIES:
             if strategy != "expert":
                 for top_k in range(top_k_max):
@@ -767,6 +769,7 @@ if __name__ == "__main__":
     task_list = ["colon"]
     root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 
+    TOTAL_MODELS = defaultdict()
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
     DATA_SUBMISSION, DATA_VALIDATION = extract_data(tasks=task_list)
     ENSEMBLE_STRATEGIES = ["expert",
