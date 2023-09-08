@@ -759,6 +759,7 @@ if __name__ == "__main__":
 
     # TODO: Add evaluation
     #eval_output_dir = create_submission(is_evaluation=True)
+    eval_output_dir = None
     val_output_dir = create_submission(is_evaluation=False)
 
     if eval_output_dir:
