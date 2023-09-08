@@ -7,6 +7,8 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 from sklearn.metrics import average_precision_score
+from termcolor import colored
+
 from utils.constants import shots, exps, tasks, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT
 from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_multilabel
 
@@ -56,7 +58,7 @@ def generate_json(results):
 
 
 def process_experiment(pred_dir, exp, task, shot):
-    print(f"Processing Setting:", os.path.join(exp, task, shot))
+    #print(f"Processing Setting:", os.path.join(exp, task, shot))
     gt_path = get_gt_csv_filepath(task=task)
     if not gt_path:
         print(f"Ground truth file for task {task} not found.")
@@ -280,6 +282,7 @@ def main():
 
     log_lines = {}
     for timestamp_dir in timestamp_dirs:
+        print(colored(f"Processing Timestamp {timestamp_dir}", 'blue'))
         log_pred = process_prediction_dir(base_path=base_path, timestamp_dir=timestamp_dir)
         log_lines[timestamp_dir] = log_pred
 
