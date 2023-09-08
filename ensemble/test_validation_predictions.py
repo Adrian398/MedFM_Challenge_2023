@@ -186,7 +186,7 @@ def sort_key(timestamp):
     return datetime.strptime(timestamp, "%d-%m_%H-%M-%S")
 
 
-def get_prediction_dirs(base_path):
+def get_prediction_timestamp_dirs(base_path):
     all_dirs = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
     timestamp_dirs = [d for d in all_dirs if TIMESTAMP_PATTERN.match(d)]
 
@@ -242,8 +242,8 @@ def load_submission_cfg_dump(dir):
     return config_data
 
 
-def process_prediction_dir(base_path, timestamp):
-    prediction_root_path = os.path.join(base_path, timestamp)
+def process_prediction_dir(base_path, timestamp_dir):
+    prediction_root_path = os.path.join(base_path, timestamp_dir)
     prediction_result_path = os.path.join(prediction_root_path, 'result')
 
     ensemble_cfg = load_submission_cfg_dump(dir=prediction_root_path)
@@ -268,7 +268,7 @@ def process_prediction_dir(base_path, timestamp):
         top_k = ensemble_cfg.get('top-k', top_k)
         model_count = ensemble_cfg.get('model_count', model_count)
 
-    log_prediction(timestamp=timestamp,
+    log_prediction(timestamp=timestamp_dir,
                    prediction_dir=prediction_result_path,
                    aggregate_value=aggregates,
                    strategy=strategy,
@@ -291,8 +291,10 @@ GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 
 def main():
     base_path = "ensemble/validation"
-    prediction_dirs = get_prediction_dirs(base_path)
-    print(prediction_dirs)
+    timestamp_dirs = get_prediction_timestamp_dirs(base_path)
+
+    for timestamp_dir in timestamp_dirs:
+        process_prediction_dir(base_path=base_path, timestamp_dir=timestamp_dir)
 
 
 if __name__ == "__main__":
