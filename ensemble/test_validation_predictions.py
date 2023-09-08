@@ -126,14 +126,12 @@ def read_and_validate_files(pred_path, gt_path, task):
 
     print("Columns in gt_df after reading:", gt_df.columns)
 
-    score_cols = [f'score_{i}' for i in range(TASK_2_CLASS_COUNT.get(task, 2))]
-
-    expected_cols_count = len(score_cols) + 1  # +1 for 'img_id'
-    if len(pred_df.columns) != expected_cols_count:
-        raise ValueError(f"Unexpected number of columns in {pred_path}. Expected {expected_cols_count} columns but got {len(pred_df.columns)} columns.")
-
-
-    pred_df.columns = ['img_id'] + score_cols
+    if pred_df.shape[1] == 2:  # Binary labeled predictions
+        pred_df.columns = ['img_id', 'label']
+        score_cols = ['label']
+    else:
+        score_cols = [f'score_{i}' for i in range(TASK_2_CLASS_COUNT.get(task, 2))]
+        pred_df.columns = ['img_id'] + score_cols
 
     print("Columns in pred_df after renaming:", pred_df.columns)
 
