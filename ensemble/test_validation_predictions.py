@@ -243,7 +243,7 @@ def process_prediction_dir(base_path, timestamp_dir):
                     results[exp][f"{task}_{shot}"] = metrics
 
     json_result, aggregates = generate_json(results=results)
-    print(json_result)
+    #print(json_result)
 
     strategy = "Undefined"
     top_k = "None"
