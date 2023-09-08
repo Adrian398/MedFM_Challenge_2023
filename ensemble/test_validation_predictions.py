@@ -1,12 +1,16 @@
 import glob
 import json
 import os
+import re
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
 from sklearn.metrics import average_precision_score
 from utils.constants import shots, exps, tasks, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT
 from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_multilabel
+
+TIMESTAMP_PATTERN = re.compile(r"\d{2}-\d{2}_\d{2}-\d{2}-\d{2}")
 
 
 def generate_json(results):
@@ -51,14 +55,14 @@ def generate_json(results):
     return json.dumps(json_results, indent=2), json_results["aggregates"]
 
 
-def process_experiment(exp, task, shot):
+def process_experiment(pred_dir, exp, task, shot):
     print(f"Processing Setting:", os.path.join(exp, task, shot))
     gt_path = get_gt_csv_filepath(task=task)
     if not gt_path:
         print(f"Ground truth file for task {task} not found.")
         return None
 
-    pred_path = get_pred_csv_filepath(exp=exp, task=task, shot=shot)
+    pred_path = get_pred_csv_filepath(pred_dir=pred_dir, exp=exp, task=task, shot=shot)
     if not pred_path:
         print(f"Prediction file for {exp} and task {task} with shot {shot} not found.")
         return None
@@ -70,8 +74,8 @@ def get_gt_csv_filepath(task):
     return get_file_by_keyword(directory=GT_DIR, keyword=task, file_extension='csv')
 
 
-def get_pred_csv_filepath(exp, task, shot):
-    pred_dir = os.path.join(PREDICTION_DIR, exp)
+def get_pred_csv_filepath(pred_dir, exp, task, shot):
+    pred_dir = os.path.join(pred_dir, exp)
     file_name = f"{task}_{shot}_validation"
     return get_file_by_keyword(directory=pred_dir, keyword=file_name, file_extension='csv')
 
@@ -177,15 +181,26 @@ def compute_task_specific_metrics(pred_path, gt_path, task):
         raise ValueError(f"Invalid task: {task}")
 
 
-def get_prediction_dir():
-    while True:
-        timestamp = input("Please enter the timestamp (format: DD-MM_HH-MM-SS): ")
-        dir_path = f"ensemble/validation/{timestamp}/result"
+def sort_key(timestamp):
+    """Convert timestamp string to datetime object for sorting."""
+    return datetime.strptime(timestamp, "%d-%m_%H-%M-%S")
 
-        if os.path.exists(dir_path):
-            return dir_path, timestamp
-        else:
-            print(f"Directory '{dir_path}' does not exist. Please enter a valid timestamp.")
+
+def get_prediction_dirs(base_path):
+    all_dirs = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
+    timestamp_dirs = [d for d in all_dirs if TIMESTAMP_PATTERN.match(d)]
+
+    # Filter timestamp directories that have a 'result' sub-folder
+    valid_dirs = [d for d in timestamp_dirs if os.path.exists(os.path.join(base_path, d, "result"))]
+
+    # If no valid directories are found, return an empty list
+    if not valid_dirs:
+        print("No valid timestamp directories found.")
+        return []
+
+    sorted_valid_dirs = sorted(valid_dirs, key=sort_key)
+
+    return sorted_valid_dirs
 
 
 def log_prediction(timestamp, prediction_dir, aggregate_value, model_cnt, strategy="Undefined", top_k=None):
@@ -216,8 +231,8 @@ def log_prediction(timestamp, prediction_dir, aggregate_value, model_cnt, strate
     return log_string
 
 
-def load_submission_cfg_dump(root_report_dir):
-    cfg_file_path = os.path.join(root_report_dir, "config.json")
+def load_submission_cfg_dump(dir):
+    cfg_file_path = os.path.join(dir, "config.json")
 
     if not os.path.exists(cfg_file_path):
         return None
@@ -225,6 +240,44 @@ def load_submission_cfg_dump(root_report_dir):
     with open(cfg_file_path, 'r') as cfg_file:
         config_data = json.load(cfg_file)
     return config_data
+
+
+def process_prediction_dir(base_path, timestamp):
+    prediction_root_path = os.path.join(base_path, timestamp)
+    prediction_result_path = os.path.join(prediction_root_path, 'result')
+
+    ensemble_cfg = load_submission_cfg_dump(dir=prediction_root_path)
+
+    results = {exp: {} for exp in exps}
+
+    for exp in exps:
+        for task in tasks:
+            for shot in shots:
+                metrics = process_experiment(pred_dir=prediction_result_path, exp=exp, task=task, shot=shot)
+                if metrics:
+                    results[exp][f"{task}_{shot}"] = metrics
+
+    json_result, aggregates = generate_json(results=results)
+    print(json_result)
+
+    strategy = "Undefined"
+    top_k = "None"
+    model_count = "Undefined"
+    if ensemble_cfg:
+        strategy = ensemble_cfg.get('strategy', strategy)
+        top_k = ensemble_cfg.get('top-k', top_k)
+        model_count = ensemble_cfg.get('model_count', model_count)
+
+    log_prediction(timestamp=timestamp,
+                   prediction_dir=prediction_result_path,
+                   aggregate_value=aggregates,
+                   strategy=strategy,
+                   top_k=top_k,
+                   model_cnt=model_count)
+
+    # Save JSON result to the corresponding timestamp folder
+    with open(os.path.join(prediction_root_path, 'results.json'), 'w') as json_file:
+        json_file.write(json_result)
 
 
 # ==========================================================================================
@@ -236,38 +289,11 @@ GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 # ==========================================================================================
 
 
+def main():
+    base_path = "ensemble/validation"
+    prediction_dirs = get_prediction_dirs(base_path)
+    print(prediction_dirs)
+
+
 if __name__ == "__main__":
-    PREDICTION_DIR, timestamp = get_prediction_dir()
-    ENSEMBLE_CONFIG = load_submission_cfg_dump(os.path.join("ensemble", "validation", timestamp))
-
-    results = {exp: {} for exp in exps}
-
-    for exp in exps:
-        for task in tasks:
-            for shot in shots:
-                metrics = process_experiment(exp=exp, task=task, shot=shot)
-                if metrics:
-                    results[exp][f"{task}_{shot}"] = metrics
-
-    json_result, aggregates = generate_json(results=results)
-    print(json_result)
-
-    strategy = "Undefined"
-    top_k = "None"
-    model_count = "Undefined"
-    if ENSEMBLE_CONFIG:
-        strategy = ENSEMBLE_CONFIG.get('strategy', strategy)
-        top_k = ENSEMBLE_CONFIG.get('top-k', top_k)
-        model_count = ENSEMBLE_CONFIG.get('model_count', model_count)
-
-    log_info = log_prediction(timestamp=timestamp,
-                              prediction_dir=PREDICTION_DIR,
-                              aggregate_value=aggregates,
-                              strategy=strategy,
-                              top_k=top_k,
-                              model_cnt=model_count)
-
-    # Save JSON result to the corresponding timestamp folder
-    log_dir = PREDICTION_DIR.split("/result")[0]
-    with open(os.path.join(log_dir, 'results.json'), 'w') as json_file:
-        json_file.write(json_result)
+    main()
