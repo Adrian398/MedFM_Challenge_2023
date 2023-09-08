@@ -128,6 +128,8 @@ def read_and_validate_files(pred_path, gt_path, task):
 
     print(f"Length of score_cols: {len(score_cols)}")
     print(f"Number of columns in pred_df: {len(pred_df.columns)}")
+    print(task)
+    print(pred_path, gt_path)
 
     pred_df.columns = ['img_id'] + score_cols
 
