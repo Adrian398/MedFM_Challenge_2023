@@ -1,9 +1,12 @@
+import argparse
 import json
+import os
 from collections import defaultdict
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import matplotlib.gridspec as gridspec
 
 from ensemble.utils.constants import exps, tasks, shots
 
@@ -13,6 +16,13 @@ with open("worse.json", "r") as worse_file:
 
 with open("better.json", "r") as better_file:
     better_data = json.load(better_file)
+
+
+def load_json_from_directory(base_path, timestamp):
+    path = os.path.join(base_path, timestamp, "results.json")
+    with open(path, 'r') as file:
+        data = json.load(file)
+    return data
 
 
 def compare_metric_jsons(src_data, trg_data):
@@ -45,20 +55,41 @@ def compare_metric_jsons(src_data, trg_data):
                         auc_heatmap_data[task][col_key] = diff
     return acc_map_heatmap_data, auc_heatmap_data
 
+def main():
+    # Step 1: Accept timestamps as input arguments
+    parser = argparse.ArgumentParser(description="Compare two JSON files based on timestamps.")
+    parser.add_argument("timestamp1", help="First timestamp for the directory containing the first JSON file.")
+    parser.add_argument("timestamp2", help="Second timestamp for the directory containing the second JSON file.")
+    args = parser.parse_args()
 
-acc_map_data, auc_heatmap_data = compare_metric_jsons(src_data=worse_data,
-                                                      trg_data=better_data)
-acc_map_heatmap_df = pd.DataFrame(acc_map_data)
-auc_heatmap_df = pd.DataFrame(auc_heatmap_data)
+    base_path = "ensemble/validation"
+    src_data = load_json_from_directory(base_path, args.timestamp1)
+    trg_data = load_json_from_directory(base_path, args.timestamp2)
 
-# Plotting the heatmap for ACC_metric (colon) & mAP_metric (chest, endo) using the 'coolwarm' colormap
-plt.figure(figsize=(15, 7))
-sns.heatmap(acc_map_heatmap_df, cmap='RdBu', center=0, annot=True, fmt=".2f")
-plt.title('Differences in ACC_metric (colon) & mAP_metric (chest, endo)')
-plt.show()
+    acc_map_data, auc_heatmap_data = compare_metric_jsons(src_data=src_data,trg_data=trg_data)
 
-# Plotting the heatmap for AUC_metric across all tasks using the 'coolwarm' colormap
-plt.figure(figsize=(15, 7))
-sns.heatmap(auc_heatmap_df, cmap='RdBu', center=0, annot=True, fmt=".2f")
-plt.title('Differences in AUC_metric for All Tasks')
-plt.show()
+    acc_map_heatmap_df = pd.DataFrame(acc_map_data)
+    auc_heatmap_df = pd.DataFrame(auc_heatmap_data)
+
+    fig = plt.figure(figsize=(15, 14))
+    gs = gridspec.GridSpec(2, 1, height_ratios=[1, 1])
+
+    # Create the first heatmap in the top section of the grid
+    ax0 = plt.subplot(gs[0])
+    sns.heatmap(acc_map_heatmap_df, cmap='RdBu', center=0, annot=True, fmt=".2f", ax=ax0)
+    ax0.set_title('Differences in ACC_metric (colon) & mAP_metric (chest, endo)')
+
+    # Create the second heatmap in the bottom section of the grid
+    ax1 = plt.subplot(gs[1])
+    sns.heatmap(auc_heatmap_df, cmap='RdBu', center=0, annot=True, fmt=".2f", ax=ax1)
+    ax1.set_title('Differences in AUC_metric for All Tasks')
+
+    # Adjust the space between the plots
+    plt.tight_layout()
+
+    # Save the combined image
+    plt.savefig(f"{args.timestamp1}_vs_{args.timestamp2}_combined_comparison.png")
+
+
+if __name__ == "__main__":
+    main()
