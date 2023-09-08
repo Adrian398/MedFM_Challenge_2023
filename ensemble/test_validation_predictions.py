@@ -207,7 +207,7 @@ def get_prediction_timestamp_dirs(base_path):
 
 def build_pred_log_string(pred_dict):
     timestamp = pred_dict.get('timestamp', "None")
-    model_cnt = pred_dict.get('model_count', "None")
+    model_cnt = pred_dict.get('model-count', "None")
     strategy = pred_dict.get('strategy', "None")
     top_k = pred_dict.get('top_k', "None")
     prediction_dir = pred_dict.get('prediction_dir', "None")
@@ -253,13 +253,13 @@ def process_prediction_dir(base_path, timestamp_dir):
 
     json_result, aggregates = generate_json(results=results)
 
-    strategy = "Undefined"
+    strategy = "None"
     top_k = "None"
-    model_count = "Undefined"
+    model_count = "None"
     if ensemble_cfg:
         strategy = ensemble_cfg.get('strategy', strategy)
         top_k = ensemble_cfg.get('top-k', top_k)
-        model_count = ensemble_cfg.get('model_count', model_count)
+        model_count = ensemble_cfg.get('model-count', model_count)
 
     # Save JSON result to the corresponding timestamp folder
     with open(os.path.join(prediction_root_path, 'results.json'), 'w') as json_file:
