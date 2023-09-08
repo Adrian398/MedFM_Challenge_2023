@@ -119,17 +119,13 @@ def get_file_by_keyword(directory, keyword, file_extension=None):
 def read_and_validate_files(pred_path, gt_path, task):
     """Read prediction and ground truth files, then validate the necessary columns."""
     try:
-        pred_df = pd.read_csv(pred_path, header=None)
+        pred_df = pd.read_csv(pred_path)
         gt_df = pd.read_csv(gt_path)
     except Exception as e:
         raise ValueError(f"Error reading CSV files: {e}")
 
-    if pred_df.shape[1] == 2:  # Binary labeled predictions
-        pred_df.columns = ['img_id', 'label']
-        score_cols = ['label']
-    else:
-        score_cols = [f'score_{i}' for i in range(TASK_2_CLASS_COUNT.get(task, 2))]
-        pred_df.columns = ['img_id'] + score_cols
+    score_cols = [f'score_{i}' for i in range(TASK_2_CLASS_COUNT.get(task, 2))]
+    pred_df.columns = ['img_id'] + score_cols
 
     # Validate columns in prediction
     missing_cols = [col for col in ['img_id'] + score_cols if col not in pred_df.columns]
@@ -174,6 +170,7 @@ def compute_multilabel_metrics(merged_df, target_columns, score_cols, num_classe
 def compute_task_specific_metrics(pred_path, gt_path, task):
     pred_df, gt_df, score_cols = read_and_validate_files(pred_path, gt_path, task)
 
+    print(len(pred_df), len(gt_df))
     target_columns = TASK_2_CLASS_NAMES.get(task, [])
 
     # Merge predictions and ground truth based on img_id
