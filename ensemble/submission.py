@@ -346,14 +346,17 @@ def print_report_for_setting(full_model_list, task, shot, exp):
     model_view = []
     for model_info in full_model_list[task][shot][exp]:
         agg_name, agg_val = get_aggregate(model_metrics=model_info['metrics'], task=task)
-        if agg_val is not None:
-            model_view.append((model_info['name'], agg_name, agg_val))
+        m1_name, m1_val, m2_name, m2_val = get_metrics(model_metrics=model_info['metrics'], task=task)
+
+        if agg_val is not None and m1_val is not None and m2_val is not None:
+            model_view.append((model_info['name'], agg_name, agg_val, m1_name, m1_val, m2_name, m2_val))
 
     model_view.sort(key=lambda x: x[2])
     max_char_length = max(len(path) for path, _, _ in model_view)
 
-    for model_path_rel, agg_name, agg_val in model_view:
-        print(f"Model: {model_path_rel:{max_char_length}}  {agg_name}: {agg_val:.4f}")
+    for model_path_rel, agg_name, agg_val, m1_name, m1_val, m2_name, m2_val in model_view:
+        print(f"Model: {model_path_rel:{max_char_length}} {agg_name}: {agg_val:.4f}  "
+              f"{m1_name}: {m1_val:.4f}  {m2_name}: {m2_val:.4f}")
 
 
 def print_model_reports():
@@ -384,6 +387,32 @@ def get_aggregate(model_metrics, task):
     # If there's no calculation for the task, return None for both metric name and value
     if not calculation:
         return None, None
+
+    return calculation(model_metrics)
+
+
+def get_metrics(model_metrics, task):
+    # Dictionary mapping tasks to lambda functions for aggregate calculation
+    aggregate_calculations = {
+        "colon": lambda metrics:
+        ("AUC", metrics["AUC/AUC_multiclass"], "Acc", metrics["accuracy/top1"])
+        if "AUC/AUC_multiclass" in metrics and "accuracy/top1" in metrics else (None, None, None, None),
+
+        "chest": lambda metrics:
+        ("AUC", metrics["AUC/AUC_multilabe"], "mAP", metrics["multi-label/mAP"])
+        if "AUC/AUC_multilabe" in metrics and "multi-label/mAP" in metrics else (None, None, None, None),
+
+        "endo": lambda metrics:
+        ("AUC", metrics["AUC/AUC_multilabe"], "mAP", metrics["multi-label/mAP"])
+        if "AUC/AUC_multilabe" in metrics and "multi-label/mAP" in metrics else (None, None, None, None),
+    }
+
+    # Get the appropriate aggregate calculation for the task
+    calculation = aggregate_calculations.get(task)
+
+    # If there's no calculation for the task, return None for all four values
+    if not calculation:
+        return None, None, None, None
 
     return calculation(model_metrics)
 
