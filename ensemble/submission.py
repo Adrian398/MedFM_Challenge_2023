@@ -76,14 +76,23 @@ def extract_exp_number(string):
     return int(match.group(1)) if match else 0
 
 
-def hard_voting_ensemble_strategy(model_runs, task, shot, exp, out_path):
+def hard_voting_ensemble_strategy(model_runs, task, shot, exp, out_path, top_k=None):
     """
-    Merges model runs using a hard voting approach for binary classification.
+    Merges model runs using an averaging approach for binary classification.
+    If top_k is provided, only the top-k models based on aggregate metrics are considered for averaging.
     """
     # Ensure the task is binary
     assert TASK_2_CLASS_COUNT[task] == 2, "This function is only for binary classification tasks!"
 
+    # Sort model runs based on aggregate metric (if top_k is provided)
+    if top_k:
+        model_runs = sorted(model_runs, key=lambda x: get_aggregate(x['metrics'], task)[1], reverse=True)[:top_k]
+
     merged_df = model_runs[0]['prediction'].iloc[:, 0:1].copy()
+
+    # Initialize columns to store the sum of scores for each class
+    merged_df['sum_score_0'] = 0.0
+    merged_df['sum_score_1'] = 0.0
 
     # List to store which models were selected for each class
     selected_models_for_classes = []
@@ -91,16 +100,11 @@ def hard_voting_ensemble_strategy(model_runs, task, shot, exp, out_path):
     # Dict to keep track of model occurrences
     model_occurrences = {}
 
-    # For the binary task, compute the votes for each model
-    votes_column = pd.Series(0, index=merged_df.index)
     for run in model_runs:
         _, aggregate_value = get_aggregate(run['metrics'], task)
         if aggregate_value is not None:
-            # Here, we consider predictions greater than 0.5 as a vote for class 1
-            # and predictions less than or equal to 0.5 as a vote for class 0.
-            # This threshold can be adjusted if needed.
-            votes = run['prediction'].iloc[:, 1].apply(lambda x: 1 if x > 0.5 else 0)
-            votes_column += votes
+            merged_df['sum_score_0'] += run['prediction'].iloc[:, 1]
+            merged_df['sum_score_1'] += run['prediction'].iloc[:, 2]
 
             model_name = run['name']
             selected_models_for_classes.append(model_name)
@@ -110,15 +114,13 @@ def hard_voting_ensemble_strategy(model_runs, task, shot, exp, out_path):
             else:
                 model_occurrences[model_name] = 1
 
+    # Calculate the average score for each class
     total_models = len(model_runs)
+    merged_df['avg_score_0'] = merged_df['sum_score_0'] / total_models
+    merged_df['avg_score_1'] = merged_df['sum_score_1'] / total_models
 
-    # Determine the final label based on majority voting
-    final_prediction = votes_column.apply(lambda x: [1, 0] if x <= total_models / 2 else [0, 1])
-
-    merged_df['score_0'] = final_prediction.apply(lambda x: x[0])
-    merged_df['score_1'] = final_prediction.apply(lambda x: x[1])
-
-    merged_df.to_csv(out_path, index=False, header=False)
+    # Save the results
+    merged_df.to_csv(out_path, index=False, header=False, columns=['img_id', 'avg_score_0', 'avg_score_1'])
 
     return selected_models_for_classes, model_occurrences
 
