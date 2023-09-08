@@ -188,7 +188,7 @@ def get_prediction_dir():
             print(f"Directory '{dir_path}' does not exist. Please enter a valid timestamp.")
 
 
-def log_prediction(timestamp, prediction_dir, aggregate_value, strategy="Undefined", top_k=None):
+def log_prediction(timestamp, prediction_dir, aggregate_value, model_cnt, strategy="Undefined", top_k=None):
     # Extract the directory without "/result"
     prediction_dir_cleaned = "/".join(prediction_dir.split("/")[:-1])
 
@@ -199,15 +199,16 @@ def log_prediction(timestamp, prediction_dir, aggregate_value, strategy="Undefin
         value_string = f"{aggregate_value:<10}"
 
     top_k_str = str(top_k) if top_k is not None else "None"
+    model_cnt = str(model_cnt) if model_cnt is not None else "Undefined"
 
-    log_string = f"{timestamp:<20} {strategy:<20} {top_k_str:<10} {prediction_dir_cleaned:<40} {value_string}\n"
+    log_string = f"{timestamp:<20} {model_cnt:<10} {strategy:<20} {top_k_str:<10} {prediction_dir_cleaned:<40} {value_string}\n"
 
     log_file_path = os.path.join('ensemble', 'validation', 'log.txt')
 
     # Check if the file exists. If not, write the header first
     if not os.path.exists(log_file_path):
         with open(log_file_path, 'w') as log_file:
-            log_file.write(f"{'Timestamp':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
+            log_file.write(f"{'Timestamp':<20} {'Model-Count':<10} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
 
     with open(log_file_path, 'a') as log_file:
         log_file.write(log_string)
@@ -253,15 +254,18 @@ if __name__ == "__main__":
 
     strategy = "Undefined"
     top_k = "None"
+    model_count = "Undefined"
     if ENSEMBLE_CONFIG:
-        strategy = ENSEMBLE_CONFIG.get('strategy', "Undefined")
-        top_k = ENSEMBLE_CONFIG.get('top-k', "None")
+        strategy = ENSEMBLE_CONFIG.get('strategy', strategy)
+        top_k = ENSEMBLE_CONFIG.get('top-k', top_k)
+        model_count = ENSEMBLE_CONFIG.get('model_count', model_count)
 
     log_info = log_prediction(timestamp=timestamp,
                               prediction_dir=PREDICTION_DIR,
                               aggregate_value=aggregates,
                               strategy=strategy,
-                              top_k=top_k)
+                              top_k=top_k,
+                              model_cnt=model_count)
 
     # Save JSON result to the corresponding timestamp folder
     log_dir = PREDICTION_DIR.split("/result")[0]

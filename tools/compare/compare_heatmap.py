@@ -79,7 +79,7 @@ def main():
     # Adjust the space between the plots
     plt.tight_layout()
 
-    out_path = "ensemble/validation/compare_heatmaps"
+    out_path = "ensemble/validation/compare"
 
     # Check if the directory exists, and if not, create it
     if not os.path.exists(out_path):

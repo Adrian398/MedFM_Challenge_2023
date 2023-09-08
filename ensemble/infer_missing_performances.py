@@ -1,127 +1,68 @@
-"""
-This script does the following steps:
-- walk through the whole work_dirs directory
-- detect and print all model folders that have not yet been tested (i.e. the performance json file is missing)
-- prompt the user to start the testing process
-- generate the testing commands
-- batch all commands on the corresponding gpus, whereas each gpu is dedicated for a specific task
-"""
 import argparse
 import itertools
 import json
-import os
-import re
 import subprocess
-import sys
-import time
 from collections import Counter
 from multiprocessing import Pool
 from functools import lru_cache
-from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from termcolor import colored
 
-EXP_PATTERN = re.compile(r'exp(\d+)')
+from ensemble.utils.utils import *
+from utils.constants import *
 
 
-def run_commands_on_cluster(commands, num_commands, gpu='all'):
+def run_single_command(command, gpu, task_counter, num_commands):
     """
-    Runs the generated commands on the cluster.
-    """
+    Runs a single command on the specified GPU.
 
-    if gpu == 'c':
-        gpus = ['rtx4090']
-    elif gpu == 'ab':
-        gpus = ['rtx3090']
-    elif gpu == '8a':
-        gpus = ['rtx2080ti']
-    elif gpu == 'all':
-        gpus = ['rtx4090', 'rtx3090', 'rtx4090', 'rtx3090']
-    else:
-        raise ValueError(f'Invalid gpu type {gpu}.')
+    Args:
+        command (str): The command to run.
+        gpu (str): GPU type on which the command will be executed.
+        task_counter (dict): A counter dict to keep track of tasks processed.
+        num_commands (int): Number of commands to run for each task.
+    """
+    task = command.split("/")[6]
+    if task_counter[task] >= num_commands:
+        return
+
+    cfg_path = command.split(" ")[3]
+    cfg_path_split = cfg_path.split("/")
+    shot, exp = cfg_path_split[6], extract_exp_number(cfg_path_split[7])
+
+    log_dir = cfg_path.rsplit("/", 1)[0]
+    log_file_name = f"{task}_{shot}_exp{exp}_performance_slurm-%j"
+
+    # Ensure the log directory exists
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+
+    slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
+    task_counter[task] += 1
+    subprocess.run(slurm_cmd, shell=True)
+
+
+def run_commands_on_cluster(commands, num_commands, gpu_type='all'):
+    """
+    Runs the provided commands on the cluster using specified GPUs.
+
+    Args:
+    - commands (list): List of commands to be executed.
+    - num_commands (int): Number of commands to execute for each task.
+    - gpu_type (str, optional): Type of GPU to use. Defaults to 'all'.
+
+    Returns:
+    - None
+    """
+    gpus = determine_gpu(gpu_type)
+    if not gpus:
+        raise ValueError(f'Invalid gpu type {gpu_type}.')
 
     gpu_cycle = itertools.cycle(gpus)
-
-    task_counter = {
-        'colon': 0,
-        'chest': 0,
-        'endo': 0
-    }
+    task_counter = Counter({'colon': 0, 'chest': 0, 'endo': 0})
 
     for command in commands:
         gpu = next(gpu_cycle)
-
-        task = command.split("/")[6]
-
-        # Check if we have already run the desired number of commands for this task
-        if task_counter[task] >= num_commands:
-            continue
-
-        cfg_path = command.split(" ")[3]
-        cfg_path_split = cfg_path.split("/")
-        shot, exp = cfg_path_split[6], extract_exp_number(cfg_path_split[7])
-
-        log_dir = cfg_path.rsplit("/", 1)[0]
-        log_file_name = f"{task}_{shot}_exp{exp}_performance_slurm-%j"
-
-        # Ensure the log directory exists
-        if not os.path.exists(log_dir):
-            os.makedirs(log_dir)
-
-        print("\n")
-        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
-        print(slurm_cmd)
-
-        task_counter[task] += 1
-
-        subprocess.run(slurm_cmd, shell=True)
-
-
-def get_file_from_directory(directory, extension, contains_string=None):
-    """Get a file from an absolute directory (i.e. from /scratch/..) with the given extension and optional substring."""
-    for file in os.listdir(directory):
-        if file.endswith(extension) and (not contains_string or contains_string in file):
-            return os.path.join(directory, file)
-    return None
-
-
-def print_report(model_infos):
-    model_dirs = [model["path"] for model in model_infos.values()]
-    if len(model_dirs) == 0:
-        print(colored(f"\nAll valid models have an existing performance JSON!\n", 'green'))
-        exit()
-    else:
-        sorted_report_entries = sorted([model_dir for model_dir in model_dirs], key=sort_key)
-        print("\n---------------------------------------------------------------------------------------------------------------")
-        print("| Valid Models without an existing performance JSON file:")
-        print("---------------------------------------------------------------------------------------------------------------")
-        for entry in sorted_report_entries:
-            print(f"| {entry}")
-        print("---------------------------------------------------------------------------------------------------------------")
-        print(f"| Found {len(model_dirs)} model runs without existing performance JSON.")
-        print("---------------------------------------------------------------------------------------------------------------")
-
-def sort_key(entry):
-    # Extract task, shot, and experiment number from the entry
-    parts = entry.split('/')
-    task = parts[5]
-    shot = int(parts[6].split('-')[0])
-    exp_number = extract_exp_number(parts[-1])
-    return task, shot, exp_number
-
-
-def my_print(message):
-    sys.stdout.write(str(message) + '\n')
-    sys.stdout.flush()
-
-
-def process_task_shot_combination(args):
-    task, shot = args
-    return task, shot, get_model_dirs_without_performance(task=task, shot=shot)
-
-
-def extract_exp_number(string):
-    match = EXP_PATTERN.search(string)
-    return int(match.group(1)) if match else 0
+        run_single_command(command, gpu, task_counter, num_commands)
 
 
 def find_and_validate_json_files(model_dir, task):
@@ -177,13 +118,76 @@ def find_and_validate_json_files(model_dir, task):
     return True
 
 
-@lru_cache(maxsize=None)
-def is_metric_in_event_file(file_path, metric):
-    event_acc = EventAccumulator(file_path, size_guidance={'scalars': 0})  # 0 means load none, just check tags
-    event_acc.Reload()
-    scalar_tags = event_acc.Tags()['scalars']
+def is_valid_model_dir(abs_model_dir, task):
+    """
+    Checks if a directory is a valid model directory.
 
-    return metric in scalar_tags
+    Args:
+        abs_model_dir (str): Absolute path to the model directory.
+        task (str): The task type, e.g., 'colon', 'chest', etc.
+
+    Returns:
+        bool: True if it's a valid model directory, False otherwise.
+    """
+    # Skip if no best checkpoint file
+    checkpoint_path = get_file_from_directory(abs_model_dir, ".pth", "best")
+    if checkpoint_path is None:
+        return False
+
+    # Skip/Delete if no event file
+    event_file = get_event_file_from_model_dir(abs_model_dir)
+    if event_file is None:
+        return False
+
+    # Skip if performance json file is present
+    if find_and_validate_json_files(abs_model_dir, task):
+        return False
+
+    return True
+
+
+def print_report(model_infos):
+    """
+    Prints a report of model directories without a performance JSON.
+
+    Args:
+    - model_infos (dict): Information about the models.
+
+    Returns:
+    - None
+    """
+    model_dirs = [model["path"] for model in model_infos.values()]
+    if len(model_dirs) == 0:
+        print(colored(f"\nAll valid models have an existing performance JSON!\n", 'green'))
+        exit()
+    else:
+        sorted_report_entries = sorted([model_dir for model_dir in model_dirs], key=sort_key)
+        print(
+            "\n---------------------------------------------------------------------------------------------------------------")
+        print("| Valid Models without an existing performance JSON file:")
+        print(
+            "---------------------------------------------------------------------------------------------------------------")
+        for entry in sorted_report_entries:
+            print(f"| {entry}")
+        print(
+            "---------------------------------------------------------------------------------------------------------------")
+        print(f"| Found {len(model_dirs)} model runs without existing performance JSON.")
+        print(
+            "---------------------------------------------------------------------------------------------------------------")
+
+
+def sort_key(entry):
+    # Extract task, shot, and experiment number from the entry
+    parts = entry.split('/')
+    task = parts[5]
+    shot = int(parts[6].split('-')[0])
+    exp_number = extract_exp_number(parts[-1])
+    return task, shot, exp_number
+
+
+def process_task_shot_combination(args):
+    task, shot = args
+    return task, shot, get_model_dirs_without_performance(task=task, shot=shot)
 
 
 @lru_cache(maxsize=None)
@@ -200,79 +204,80 @@ def get_event_file_from_model_dir(model_dir):
 
 
 def get_model_dirs_without_performance(task, shot):
+    """
+    Retrieves a list of model directories without a performance file.
+
+    Args:
+        task (str): The task type.
+        shot (str): The shot type or number.
+
+    Returns:
+        list: List of model directories without performance.
+    """
     model_dirs = []
-    setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
+    setting_directory = os.path.join(work_dir_path, task, shot)
 
     try:
         setting_model_dirs = os.listdir(setting_directory)
     except Exception:
-        return None
+        return []
 
     for model_dir in setting_model_dirs:
-        my_print(f"Checking {task}/{shot}-shot/{model_dir}")
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
-        # Skip if no best checkpoint file
-        checkpoint_path = get_file_from_directory(abs_model_dir, ".pth", "best")
-        if checkpoint_path is None:
-            my_print("No best checkpoint file found")
-            continue
+        if is_valid_model_dir(abs_model_dir, task):
+            model_dirs.append(model_dir)
 
-        # Skip/Delete if no event file
-        event_file = get_event_file_from_model_dir(abs_model_dir)
-        if event_file is None:
-            my_print("No event file found")
-            continue
-
-        # Skip if performance json file is present
-        if find_and_validate_json_files(abs_model_dir, task):
-            continue
-
-        model_dirs.append(model_dir)
     return model_dirs
+
+
+def generate_test_commands(model_infos):
+    """
+    Generates test commands for given model information.
+
+    Args:
+        model_infos (dict): Dictionary containing model information.
+
+    Returns:
+        list: List of generated commands.
+    """
+    commands = []
+    for model in model_infos.values():
+        model_path = model['path']
+        config_filepath = get_file_from_directory(model_path, ".py")
+        checkpoint_filepath = get_file_from_directory(model_path, ".pth", "best")
+        out_filepath = os.path.join(model_path, "performance.json")
+
+        command = (f"python ensemble/create_performance_file_sample.py "
+                   f"--config_path {config_filepath} "
+                   f"--checkpoint_path {checkpoint_filepath} "
+                   f"--output_path {out_filepath}")
+        commands.append(command)
+    return commands
 
 
 # ========================================================================================
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
-task_choices = ["colon", "endo", "chest"]
-shots = ["1", "5", "10"]
 N_inferences_per_task = 10
 batch_size = 4
-metric_tags = {"auc": "AUC/AUC_multiclass",
-               "aucl": "AUC/AUC_multilabe",
-               "map": "multi-label/mAP",
-               "agg": "Aggregate"}
 # ========================================================================================
 
 
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser(description='Infers missing performances from model runs on the test set.')
-    parser.add_argument("--gpu", type=str, default='all',
-                        help="GPU type: \n- 'c'=rtx4090,\n- '8a'=rtx2070ti\n"
-                             "- 'ab'=rtx3090\n- 'all'=rtx4090, rtx3090 cyclic")
-    parser.add_argument("--task", type=str, nargs='*', default=["colon", "endo", "chest"],
-                        choices=task_choices,
-                        help="Task type: 'colon', 'chest', or 'endo'. "
-                             "Multiple tasks can be provided separated with a whitespace. "
-                             "Default is all tasks.")
-    args = parser.parse_args()
-
+def main(args):
+    """
+    Main method for the script.
+    """
     gpu_type = args.gpu
-    tasks = args.task
+    selected_tasks = args.task
 
     with Pool() as pool:
-        combinations = [(task, shot) for task in tasks for shot in shots]
-
-        # Use imap_unordered and directly iterate over the results
-        results = []
-        for result in pool.imap_unordered(process_task_shot_combination, combinations):
-            results.append(result)
+        combinations = [(task, shot) for task in selected_tasks for shot in shots]
+        results = [result for result in pool.imap_unordered(process_task_shot_combination, combinations)]
 
     model_infos = {}
     for task, shot, model_list in results:
         for model_name in model_list:
-            model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
+            model_path = os.path.join(work_dir_path, task, shot, model_name)
             exp_num = extract_exp_number(model_name)
             model_infos[model_name] = {
                 "task": task,
@@ -288,34 +293,12 @@ if __name__ == "__main__":
     if user_input.strip().lower() == 'no':
         exit()
 
-    commands = []
-    for model in model_infos.values():
-        task = model['task']
-        shot = model['shot']
-        exp_num = model['exp_num']
-        model_path = model['path']
-        model_name = model['name']
-
-        # Config Path
-        config_filepath = get_file_from_directory(model_path, ".py")
-
-        # Checkpoint Path
-        checkpoint_filepath = get_file_from_directory(model_path, ".pth", "best")
-
-        # Destination Path
-        out_filepath = os.path.join(model_path, "performance.json")
-
-        command = (f"python ensemble/create_performance_file_sample.py "
-                   f"--config_path {config_filepath} "
-                   f"--checkpoint_path {checkpoint_filepath} "
-                   f"--output_path {out_filepath}")
-        commands.append(command)
-
+    commands = generate_test_commands(model_infos)
     task_counts = Counter(model["task"] for model in model_infos.values())
 
-    my_print("Task Counts:")
+    print("Task Counts:")
     for task, count in task_counts.items():
-        my_print(f"{task.capitalize()}: {count}")
+        print(f"{task.capitalize()}: {count}")
 
     while True:
         user_input = input("\nHow many testing commands per task do you want to generate? ").strip().lower()
@@ -327,6 +310,30 @@ if __name__ == "__main__":
             num_commands = int(user_input)
             break
         except ValueError:
-            my_print("Invalid input. Please enter a number or 'no' to exit.")
+            print("Invalid input. Please enter a number or 'no' to exit.")
 
     run_commands_on_cluster(commands, num_commands, gpu=gpu_type)
+
+
+def parse_args():
+    """
+    Parses command line arguments.
+
+    Returns:
+        Namespace: Parsed arguments.
+    """
+    parser = argparse.ArgumentParser(description='Infers missing performances from model runs on the test set.')
+    parser.add_argument("--gpu", type=str, default='all',
+                        help="GPU type: \n- 'c'=rtx4090,\n- '8a'=rtx2070ti\n"
+                             "- 'ab'=rtx3090\n- 'all'=rtx4090, rtx3090 cyclic")
+    parser.add_argument("--task", type=str, nargs='*', default=["colon", "endo", "chest"],
+                        choices=tasks,
+                        help="Task type: 'colon', 'chest', or 'endo'. "
+                             "Multiple tasks can be provided separated with a whitespace. "
+                             "Default is all tasks.")
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)
