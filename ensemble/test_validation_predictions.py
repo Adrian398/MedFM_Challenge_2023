@@ -203,7 +203,7 @@ def log_prediction(timestamp, prediction_dir, aggregate_value, model_cnt, strate
 
     log_string = f"{timestamp:<20} {model_cnt:<10} {strategy:<20} {top_k_str:<10} {prediction_dir_cleaned:<40} {value_string}\n"
 
-    log_file_path = os.path.join('ensemble', 'validation', 'log.txt')
+    log_file_path = os.path.join('ensemble', 'validation', 'log-test.txt')
 
     # Check if the file exists. If not, write the header first
     if not os.path.exists(log_file_path):
