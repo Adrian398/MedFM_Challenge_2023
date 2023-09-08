@@ -207,7 +207,7 @@ def get_prediction_timestamp_dirs(base_path):
 
 def build_pred_log_string(pred_dict):
     timestamp = pred_dict.get('timestamp', "None")
-    model_cnt = pred_dict.get('model-count', "None")
+    model_cnt = pred_dict.get('model_count', "None")
     strategy = pred_dict.get('strategy', "None")
     top_k = pred_dict.get('top_k', "None")
     prediction_dir = pred_dict.get('prediction_dir', "None")
