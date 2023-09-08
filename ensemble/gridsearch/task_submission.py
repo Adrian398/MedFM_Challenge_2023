@@ -543,7 +543,7 @@ def extract_data(tasks):
         for shot in shots:
             total_iterations += len(glob.glob(os.path.join(root_dir, task, shot, '*exp[1-5]*')))
 
-    print(f"\nChecking and extracting data for  {colored(str(total_iterations), 'blue')} models:")
+    print(f"Checking and extracting data for  {colored(str(total_iterations), 'blue')} models:")
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
         for task in tasks:
             for shot in shots:
@@ -651,7 +651,6 @@ def get_least_model_count(task):
     for shot in shots:
         for exp in exps:
             models_for_setting = len(DATA_SUBMISSION[task][shot][exp])
-            print(f"| Setting: {task}/{shot}/{exp}\t>> Models: {models_for_setting}")
             total_models += models_for_setting
             if models_for_setting < least_models:
                 least_models = models_for_setting
@@ -736,8 +735,6 @@ def process_strategy(strategy, task, top_k=None):
                                        top_k=top_k,
                                        is_evaluation=False,
                                        task=task)
-    if val_output_dir:
-        print(f"Created Validation at {colored(val_output_dir, 'blue')}")
 
 
 def main(tasks):
