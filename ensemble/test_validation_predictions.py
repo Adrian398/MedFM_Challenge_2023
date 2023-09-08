@@ -267,4 +267,3 @@ if __name__ == "__main__":
     log_dir = PREDICTION_DIR.split("/result")[0]
     with open(os.path.join(log_dir, 'results.json'), 'w') as json_file:
         json_file.write(json_result)
-        json_file.write(log_info)
