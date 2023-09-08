@@ -767,6 +767,5 @@ if __name__ == "__main__":
                            "pd-log-weighted",
                            "rank-based-weighted",
                            "diversity-weighted"]
-    ENSEMBLE_STRATEGIES = ["expert"]
 
     main(task_list)
