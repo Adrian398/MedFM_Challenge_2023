@@ -110,12 +110,13 @@ def hard_voting_ensemble_strategy(model_runs, task, shot, exp, out_path):
             else:
                 model_occurrences[model_name] = 1
 
-    # Calculate the final prediction based on majority voting.
-    # If the number of votes is greater than half of the total models, predict class 1. Otherwise, predict class 0.
     total_models = len(model_runs)
-    final_prediction = votes_column.apply(lambda x: 1 if x > total_models/2 else 0)
 
-    merged_df.loc[:, 1] = final_prediction
+    # Determine the final label based on majority voting
+    final_prediction = votes_column.apply(lambda x: [1, 0] if x <= total_models / 2 else [0, 1])
+
+    merged_df['score_0'] = final_prediction.apply(lambda x: x[0])
+    merged_df['score_1'] = final_prediction.apply(lambda x: x[1])
 
     merged_df.to_csv(out_path, index=False, header=False)
 
