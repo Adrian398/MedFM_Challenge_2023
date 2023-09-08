@@ -55,7 +55,6 @@ def main():
     args = parser.parse_args()
 
     base_path = "ensemble/validation"
-    out_path = "ensemble/validation/compare_heatmaps"
     src_data = load_json_from_directory(base_path, args.timestamp1)
     trg_data = load_json_from_directory(base_path, args.timestamp2)
 
@@ -79,6 +78,12 @@ def main():
 
     # Adjust the space between the plots
     plt.tight_layout()
+
+    out_path = "ensemble/validation/compare_heatmaps"
+
+    # Check if the directory exists, and if not, create it
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
 
     # Save the combined image
     plt.savefig(os.path.join(out_path, f"{args.timestamp1}_vs_{args.timestamp2}_combined_comparison.png"))
