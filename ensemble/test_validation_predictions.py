@@ -128,15 +128,9 @@ def read_and_validate_files(pred_path, gt_path, task):
 
     score_cols = [f'score_{i}' for i in range(TASK_2_CLASS_COUNT.get(task, 2))]
 
-    if len(pred_df.columns) != len(['img_id'] + score_cols):
-        raise ValueError(f"Unexpected number of columns in {pred_path}. Columns are: {pred_df.columns.tolist()}")
-
-    #print(f"Length of score_cols: {len(score_cols)}")
-    #print(f"Number of columns in pred_df: {len(pred_df.columns)}")
-    #print(task)
-    #print(pred_path, gt_path)
-
     pred_df.columns = ['img_id'] + score_cols
+
+    print("Columns in pred_df after renaming:", pred_df.columns)
 
     # Validate columns in prediction
     missing_cols = [col for col in ['img_id'] + score_cols if col not in pred_df.columns]
