@@ -55,6 +55,7 @@ def main():
     args = parser.parse_args()
 
     base_path = "ensemble/validation"
+    out_path = "ensemble/validation/compare_heatmaps"
     src_data = load_json_from_directory(base_path, args.timestamp1)
     trg_data = load_json_from_directory(base_path, args.timestamp2)
 
@@ -80,7 +81,7 @@ def main():
     plt.tight_layout()
 
     # Save the combined image
-    plt.savefig(f"{args.timestamp1}_vs_{args.timestamp2}_combined_comparison.png")
+    plt.savefig(os.path.join(out_path, f"{args.timestamp1}_vs_{args.timestamp2}_combined_comparison.png"))
 
 
 if __name__ == "__main__":
