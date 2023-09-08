@@ -126,6 +126,10 @@ def read_and_validate_files(pred_path, gt_path, task):
 
     score_cols = [f'score_{i}' for i in range(TASK_2_CLASS_COUNT.get(task, 2))]
 
+    if len(pred_df.columns) != len(['img_id'] + score_cols):
+        # Handle this case differently or raise a more informative error
+        raise ValueError(f"Unexpected number of columns in {pred_path}")
+
     print(f"Length of score_cols: {len(score_cols)}")
     print(f"Number of columns in pred_df: {len(pred_df.columns)}")
     print(task)
