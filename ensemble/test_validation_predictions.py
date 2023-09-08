@@ -125,6 +125,10 @@ def read_and_validate_files(pred_path, gt_path, task):
         raise ValueError(f"Error reading CSV files: {e}")
 
     score_cols = [f'score_{i}' for i in range(TASK_2_CLASS_COUNT.get(task, 2))]
+
+    print(f"Length of score_cols: {len(score_cols)}")
+    print(f"Number of columns in pred_df: {len(pred_df.columns)}")
+
     pred_df.columns = ['img_id'] + score_cols
 
     # Validate columns in prediction
