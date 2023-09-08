@@ -649,7 +649,7 @@ def create_submission(strategy, top_k, is_evaluation, task):
     return submission_dir
 
 
-def get_least_model_count():
+def get_least_model_count(tasks):
     total_models = 0
     least_models = 100000
     least_setting = ""
@@ -747,7 +747,8 @@ def process_strategy(strategy, top_k, task):
 
 
 def main(tasks):
-    top_k_max, top_k_max_setting = get_least_model_count()
+    top_k_max, top_k_max_setting = get_least_model_count(tasks=tasks)
+    print(top_k_max, top_k_max_setting)
     exit()
     for task in tasks:
         for strategy in ENSEMBLE_STRATEGIES:
