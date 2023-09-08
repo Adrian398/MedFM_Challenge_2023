@@ -295,7 +295,7 @@ def main():
     num_processes = min(cpu_count(), len(timestamp_dirs))
 
     with Pool(num_processes) as pool:
-        log_pred_dicts = pool.map(worker_func, timestamp_dirs)
+        log_pred_dicts = pool.map(worker_func, base_path, timestamp_dirs)
 
     log_file_path = os.path.join(base_path, 'log.txt')
 
