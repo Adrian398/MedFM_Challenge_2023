@@ -3,6 +3,7 @@ import json
 import os
 import re
 from datetime import datetime
+from multiprocessing import cpu_count, Pool
 
 import numpy as np
 import pandas as pd
@@ -273,20 +274,15 @@ def process_prediction_dir(base_path, timestamp_dir):
             'prediction_dir': prediction_root_path,
             'aggregate_value': aggregates
     }
-    #
-    # return log_prediction(timestamp=timestamp_dir,
-    #                       prediction_dir=prediction_root_path,
-    #                       aggregate_value=aggregates,
-    #                       strategy=strategy,
-    #                       top_k=top_k,
-    #                       model_cnt=model_count)
+
+
+def worker_func(base_path, timestamp_dir):
+    print(colored(f"Processing Timestamp {timestamp_dir}", 'blue'))
+    return process_prediction_dir(base_path=base_path, timestamp_dir=timestamp_dir)
+
 
 
 # ==========================================================================================
-#PREDICTION_DIR = "ensemble/validation/06-09_22-45-28/result"  # Weighted Sum Model Ensemble Top7:  61.32564695023872   (eval=)
-#PREDICTION_DIR = "ensemble/validation/06-09_21-14-47/result"  # Weighted Sum Model Ensemble Top3:  61.390636816499786  (eval=06-09_21-07-17)
-#PREDICTION_DIR = "ensemble/validation/07-09_15-22-33/result"  # Expert per Class Model Ensemble:   60.64968279839973   (eval=)
-#PREDICTION_DIR = "ensemble/validation/02-09_00-32-41/result"  # Expert                             60.17791085565442   (eval=02-09_00-32-41)
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 # ==========================================================================================
 
@@ -295,11 +291,11 @@ def main():
     base_path = "ensemble/validation"
     timestamp_dirs = get_prediction_timestamp_dirs(base_path)
 
-    log_pred_dicts = []
-    for timestamp_dir in timestamp_dirs:
-        print(colored(f"Processing Timestamp {timestamp_dir}", 'blue'))
-        log_pred_dict = process_prediction_dir(base_path=base_path, timestamp_dir=timestamp_dir)
-        log_pred_dicts.append(log_pred_dict)
+    # Number of processes to spawn. You can adjust this value as needed.
+    num_processes = min(cpu_count(), len(timestamp_dirs))
+
+    with Pool(num_processes) as pool:
+        log_pred_dicts = pool.map(worker_func, timestamp_dirs)
 
     log_file_path = os.path.join(base_path, 'log.txt')
 
