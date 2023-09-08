@@ -543,7 +543,7 @@ def extract_data(tasks):
         for shot in shots:
             total_iterations += len(glob.glob(os.path.join(root_dir, task, shot, '*exp[1-5]*')))
 
-    print(f"Checking and extracting data for  {colored(str(total_iterations), 'blue')} models:")
+    print(f"Checking and extracting data for {colored(str(total_iterations), 'blue')} models:")
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
         for task in tasks:
             for shot in shots:
@@ -584,6 +584,7 @@ def create_submission(strategy, top_k, is_evaluation, task):
         submission_type = 'validation'
 
     submission_dir = create_output_dir(strategy=strategy,
+                                       task=task,
                                        is_evaluation=is_evaluation,
                                        submission_type=submission_type)
 
@@ -688,7 +689,7 @@ def print_overall_model_summary(tasks):
     return total_models
 
 
-def create_output_dir(strategy, is_evaluation, submission_type):
+def create_output_dir(task, strategy, is_evaluation, submission_type):
     # Create Output Directory
     submission_dir = os.path.join("submissions", "evaluation", TIMESTAMP)
 
@@ -696,7 +697,7 @@ def create_output_dir(strategy, is_evaluation, submission_type):
         success = f"Created {colored('Evaluation', 'red')} directory {submission_dir}"
     else:
         submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, strategy)
-        success = f"Created {colored(submission_type.capitalize(), 'blue')} directory at {submission_dir}"
+        success = f"Created {colored(task.capitalize(), 'blue')} {submission_type} directory at {submission_dir}"
 
     os.makedirs(submission_dir)
     for exp in exps:
