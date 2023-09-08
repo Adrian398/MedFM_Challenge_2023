@@ -294,8 +294,10 @@ def main():
     # Number of processes to spawn. You can adjust this value as needed.
     num_processes = min(cpu_count(), len(timestamp_dirs))
 
+    args = [(base_path, timestamp_dir) for timestamp_dir in timestamp_dirs]
+
     with Pool(num_processes) as pool:
-        log_pred_dicts = pool.map(worker_func, base_path, timestamp_dirs)
+        log_pred_dicts = pool.starmap(worker_func, args)
 
     log_file_path = os.path.join(base_path, 'log.txt')
 
