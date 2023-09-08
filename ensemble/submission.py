@@ -536,6 +536,7 @@ def create_submission_cfg_dump(root_report_dir):
     config_data = {
         'timestamp': TIMESTAMP,
         'top-k': TOP_K,
+        'model-count': TOTAL_MODELS,
         'strategy': ENSEMBLE_STRATEGY,
     }
     cfg_file_path = os.path.join(root_report_dir, "config.json")
