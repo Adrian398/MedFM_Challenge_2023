@@ -215,6 +215,15 @@ def log_prediction(timestamp, prediction_dir, aggregate_value, model_cnt, strate
     top_k_str = str(top_k) if top_k is not None else "None"
     model_cnt = str(model_cnt) if model_cnt is not None else "Undefined"
 
+    return {
+        'timestamp': timestamp,
+        'model_count': model_cnt,
+        'strategy': strategy,
+        'top_k_str': top_k_str,
+        'prediction_dir': prediction_dir,
+        'aggregate_value': aggregate_value
+    }
+
     return f"{timestamp:<20} {model_cnt:<20} {strategy:<20} {top_k_str:<10} {prediction_dir:<40} {value_string}\n"
 
 
@@ -245,7 +254,6 @@ def process_prediction_dir(base_path, timestamp_dir):
                     results[exp][f"{task}_{shot}"] = metrics
 
     json_result, aggregates = generate_json(results=results)
-    #print(json_result)
 
     strategy = "Undefined"
     top_k = "None"
@@ -259,12 +267,21 @@ def process_prediction_dir(base_path, timestamp_dir):
     with open(os.path.join(prediction_root_path, 'results.json'), 'w') as json_file:
         json_file.write(json_result)
 
-    return log_prediction(timestamp=timestamp_dir,
-                          prediction_dir=prediction_root_path,
-                          aggregate_value=aggregates,
-                          strategy=strategy,
-                          top_k=top_k,
-                          model_cnt=model_count)
+    return {
+            'timestamp': timestamp_dir,
+            'model_count': model_count,
+            'strategy': strategy,
+            'top_k': top_k,
+            'prediction_dir': prediction_root_path,
+            'aggregate_value': aggregates
+    }
+    #
+    # return log_prediction(timestamp=timestamp_dir,
+    #                       prediction_dir=prediction_root_path,
+    #                       aggregate_value=aggregates,
+    #                       strategy=strategy,
+    #                       top_k=top_k,
+    #                       model_cnt=model_count)
 
 
 # ==========================================================================================
@@ -283,8 +300,8 @@ def main():
     log_lines = []
     for timestamp_dir in timestamp_dirs:
         print(colored(f"Processing Timestamp {timestamp_dir}", 'blue'))
-        log_pred = process_prediction_dir(base_path=base_path, timestamp_dir=timestamp_dir)
-        log_lines.append(log_pred)
+        log_pred_dict = process_prediction_dir(base_path=base_path, timestamp_dir=timestamp_dir)
+        log_lines.append(log_pred_dict)
 
     log_file_path = os.path.join(base_path, 'log.txt')
 
