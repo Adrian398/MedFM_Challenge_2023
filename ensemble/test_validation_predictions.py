@@ -257,6 +257,7 @@ def process_prediction_dir(base_path, timestamp_dir):
     top_k = "None"
     model_count = "None"
     if ensemble_cfg:
+        print(ensemble_cfg)
         strategy = ensemble_cfg.get('strategy', strategy)
         top_k = ensemble_cfg.get('top-k', top_k)
         model_count = ensemble_cfg.get('model-count', model_count)
