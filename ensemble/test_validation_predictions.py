@@ -124,16 +124,12 @@ def read_and_validate_files(pred_path, gt_path, task):
     except Exception as e:
         raise ValueError(f"Error reading CSV files: {e}")
 
-    print("Columns in gt_df after reading:", gt_df.columns)
-
     if pred_df.shape[1] == 2:  # Binary labeled predictions
         pred_df.columns = ['img_id', 'label']
         score_cols = ['label']
     else:
         score_cols = [f'score_{i}' for i in range(TASK_2_CLASS_COUNT.get(task, 2))]
         pred_df.columns = ['img_id'] + score_cols
-
-    print("Columns in pred_df after renaming:", pred_df.columns)
 
     # Validate columns in prediction
     missing_cols = [col for col in ['img_id'] + score_cols if col not in pred_df.columns]
