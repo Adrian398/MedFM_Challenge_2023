@@ -204,9 +204,6 @@ def get_prediction_timestamp_dirs(base_path):
 
 
 def log_prediction(timestamp, prediction_dir, aggregate_value, model_cnt, strategy="Undefined", top_k=None):
-    # Extract the directory without "/result"
-    prediction_dir_cleaned = "/".join(prediction_dir.split("/")[:-1])
-
     try:
         aggregate_value = float(aggregate_value)
         value_string = f"{aggregate_value:<10.4f}"
@@ -216,19 +213,7 @@ def log_prediction(timestamp, prediction_dir, aggregate_value, model_cnt, strate
     top_k_str = str(top_k) if top_k is not None else "None"
     model_cnt = str(model_cnt) if model_cnt is not None else "Undefined"
 
-    log_string = f"{timestamp:<20} {model_cnt:<20} {strategy:<20} {top_k_str:<10} {prediction_dir_cleaned:<40} {value_string}\n"
-
-    log_file_path = os.path.join('ensemble', 'validation', 'log-test.txt')
-
-    # Check if the file exists. If not, write the header first
-    if not os.path.exists(log_file_path):
-        with open(log_file_path, 'w') as log_file:
-            log_file.write(f"{'Timestamp':<20} {'Model-Count':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
-
-    with open(log_file_path, 'a') as log_file:
-        log_file.write(log_string)
-
-    return log_string
+    return f"{timestamp:<20} {model_cnt:<20} {strategy:<20} {top_k_str:<10} {prediction_dir:<40} {value_string}\n"
 
 
 def load_submission_cfg_dump(dir):
@@ -268,16 +253,16 @@ def process_prediction_dir(base_path, timestamp_dir):
         top_k = ensemble_cfg.get('top-k', top_k)
         model_count = ensemble_cfg.get('model_count', model_count)
 
-    log_prediction(timestamp=timestamp_dir,
-                   prediction_dir=prediction_result_path,
-                   aggregate_value=aggregates,
-                   strategy=strategy,
-                   top_k=top_k,
-                   model_cnt=model_count)
-
     # Save JSON result to the corresponding timestamp folder
     with open(os.path.join(prediction_root_path, 'results.json'), 'w') as json_file:
         json_file.write(json_result)
+
+    return log_prediction(timestamp=timestamp_dir,
+                          prediction_dir=prediction_root_path,
+                          aggregate_value=aggregates,
+                          strategy=strategy,
+                          top_k=top_k,
+                          model_cnt=model_count)
 
 
 # ==========================================================================================
@@ -293,8 +278,19 @@ def main():
     base_path = "ensemble/validation"
     timestamp_dirs = get_prediction_timestamp_dirs(base_path)
 
+    log_lines = {}
     for timestamp_dir in timestamp_dirs:
-        process_prediction_dir(base_path=base_path, timestamp_dir=timestamp_dir)
+        log_pred = process_prediction_dir(base_path=base_path, timestamp_dir=timestamp_dir)
+        log_lines[timestamp_dir] = log_pred
+
+    log_file_path = os.path.join(base_path, 'log.txt')
+
+    if not os.path.exists(log_file_path):
+        with open(log_file_path, 'w') as log_file:
+            log_file.write(f"{'Timestamp':<20} {'Model-Count':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
+
+            for line in log_lines:
+                log_file.write(line)
 
 
 if __name__ == "__main__":
