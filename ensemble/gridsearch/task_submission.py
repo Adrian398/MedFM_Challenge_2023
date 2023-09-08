@@ -560,7 +560,9 @@ def extract_data():
                         if data and exp_num:
                             data_lists[subm_type][task][shot][f"exp{exp_num}"].append(data)
                     pbar.update(1)
-    return data_lists["submission"], data_lists["validation"]
+    # TODO: add submission
+    #return data_lists["submission"], data_lists["validation"]
+    return None, data_lists["validation"]
 
 
 def create_submission_cfg_dump(root_report_dir):
