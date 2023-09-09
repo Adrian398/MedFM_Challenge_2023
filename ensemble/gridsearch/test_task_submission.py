@@ -60,28 +60,29 @@ def generate_json(results):
     return json.dumps(json_results, indent=2), json_results["aggregates"]
 
 
-def process_experiment(pred_dir, exp, task, shot):
+def process_experiment(top_k_path, exp, task, shot):
     gt_path = get_gt_csv_filepath(task=task)
     if not gt_path:
         print(f"Ground truth file for task {task} not found.")
         return None
 
-    pred_path = get_pred_csv_filepath(pred_dir=pred_dir, exp=exp, task=task, shot=shot)
-    if not pred_path:
+    pred_csv_path = os.path.join(top_k_path, "result")
+    pred_csv_file_path = get_pred_csv_filepath(pred_csv_path=pred_csv_path, exp=exp, task=task, shot=shot)
+    if not pred_csv_file_path:
         print(f"Prediction file for {exp} and task {task} with shot {shot} not found.")
         return None
 
-    return compute_task_specific_metrics(pred_path=pred_path, gt_path=gt_path, task=task)
+    return compute_task_specific_metrics(pred_path=pred_csv_file_path, gt_path=gt_path, task=task)
 
 
 def get_gt_csv_filepath(task):
     return get_file_by_keyword(directory=GT_DIR, keyword=task, file_extension='csv')
 
 
-def get_pred_csv_filepath(pred_dir, exp, task, shot):
-    pred_dir = os.path.join(pred_dir, exp)
+def get_pred_csv_filepath(pred_csv_path, exp, task, shot):
+    exp_path = os.path.join(pred_csv_path, exp)
     file_name = f"{task}_{shot}_validation"
-    return get_file_by_keyword(directory=pred_dir, keyword=file_name, file_extension='csv')
+    return get_file_by_keyword(directory=exp_path, keyword=file_name, file_extension='csv')
 
 
 def get_file_by_keyword(directory, keyword, file_extension=None):
@@ -259,7 +260,7 @@ def process_top_k(top_k, strategy_path, task):
     results = {exp: {} for exp in exps}
     for exp in exps:
         for shot in shots:
-            metrics = process_experiment(pred_dir=top_k_path, exp=exp, task=task, shot=shot)
+            metrics = process_experiment(top_k_path=top_k_path, exp=exp, task=task, shot=shot)
             if metrics:
                 results[exp][f"{task}_{shot}"] = metrics
 
