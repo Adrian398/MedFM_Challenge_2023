@@ -12,7 +12,7 @@ from sklearn.metrics import average_precision_score
 from termcolor import colored
 
 from ensemble.gridsearch.task_submission import ENSEMBLE_STRATEGIES
-from ensemble.utils.constants import shots, exps, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT
+from ensemble.utils.constants import shots, exps, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT, tasks
 from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_multilabel
 
 
@@ -344,17 +344,20 @@ def main():
     print(args)
 
     with Pool(num_processes) as pool:
-        log_pred_dicts = pool.starmap(worker_func, args)
+        result_dict = pool.starmap(worker_func, args)
 
-    print(log_pred_dicts)
-    # log_file_path = os.path.join(base_path, 'log.txt')
-    #
-    # with open(log_file_path, 'w') as log_file:
-    #     log_file.write(f"{'Timestamp':<20} {'Model-Count':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
-    #
-    #     for log_pred_dict in log_pred_dicts:
-    #         log_pred_str = build_pred_log_string(log_pred_dict)
-    #         log_file.write(log_pred_str)
+    for timestamp in timestamps:
+        for task in tasks:
+            log_file_path = os.path.join(base_path, timestamp, task, 'log.txt')
+
+            with open(log_file_path, 'w') as log_file:
+                log_file.write(f"{'Timestamp':<20} {'Model-Count':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
+
+                for strategy in result_dict[timestamp][task]:
+                    print(strategy)
+                    exit()
+                    #log_pred_str = build_pred_log_string(log_pred_dict)
+                    #log_file.write(log_pred_str)
 
 
 if __name__ == "__main__":
