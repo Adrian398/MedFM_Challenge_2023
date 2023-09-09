@@ -303,7 +303,7 @@ def process_top_k(top_k, strategy_path, task):
     top_k_path = strategy_path
     if top_k:
         top_k_path = os.path.join(strategy_path, top_k)
-        print(colored(f"\t\t\tProcessing Top-K {top_k}", 'light_grey'))
+        #print(colored(f"\t\t\tProcessing Top-K {top_k}", 'light_grey'))
 
     ensemble_cfg = load_submission_cfg_dump(dir=top_k_path)
 
