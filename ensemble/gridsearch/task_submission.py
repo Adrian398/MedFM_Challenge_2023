@@ -575,7 +575,7 @@ def create_submission_cfg_dump(top_k, total_models, strategy, root_report_dir):
     return cfg_file_path
 
 
-def create_submission(strategy, top_k, is_evaluation, task):
+def process_top_k(strategy, top_k, is_evaluation, task):
     submission_type = 'submission'
     if is_evaluation:
         data = DATA_SUBMISSION
@@ -690,15 +690,15 @@ def print_overall_model_summary(tasks):
 
 def create_output_dir(task, top_k, strategy, is_evaluation, submission_type):
     # Create Output Directory
-    submission_dir = os.path.join("submissions", "evaluation", TIMESTAMP)
+    submission_dir = os.path.join("submissions", "evaluation", TIMESTAMP, task)
 
     if is_evaluation:
         success = f"Created {colored('Evaluation', 'red')} directory {submission_dir}"
     else:
         if top_k:
-            submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, strategy, f"top-{str(top_k)}")
+            submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, task, strategy, f"top-{str(top_k)}")
         else:
-            submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, strategy)
+            submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, task, strategy)
         success = f"Created {colored(task.capitalize(), 'blue')} {submission_type} directory at {submission_dir}"
 
     os.makedirs(submission_dir)
@@ -733,26 +733,33 @@ def select_task():
             print("Invalid choice. Please try again.\n")
 
 
-def process_strategy(strategy, task, top_k=None):
-    val_output_dir = create_submission(strategy=strategy,
-                                       top_k=top_k,
-                                       is_evaluation=False,
-                                       task=task)
+# def process_top_k(strategy, task, top_k=None):
+#     create_submission(strategy=strategy, top_k=top_k, is_evaluation=False, task=task)
+
+
+def process_strategy(strategy, task, top_k_max):
+    if strategy != "expert":
+        for top_k in range(2, top_k_max):
+            process_top_k(strategy=strategy,
+                          top_k=top_k,
+                          task=task,
+                          is_evaluation=False)
+    else:
+        process_top_k(strategy=strategy,
+                      task=task,
+                      top_k=None,
+                      is_evaluation=False)
+
+
+def process_task(task):
+    TOTAL_MODELS[task], top_k_max, top_k_max_setting = get_least_model_count(task=task)
+    for strategy in ENSEMBLE_STRATEGIES:
+        process_strategy(strategy=strategy, top_k_max=top_k_max, task=task)
 
 
 def main(tasks):
     for task in tasks:
-        TOTAL_MODELS[task], top_k_max, top_k_max_setting = get_least_model_count(task=task)
-
-        for strategy in ENSEMBLE_STRATEGIES:
-            if strategy != "expert":
-                for top_k in range(2, top_k_max):
-                    process_strategy(strategy=strategy,
-                                     top_k=top_k,
-                                     task=task)
-            else:
-                process_strategy(strategy=strategy,
-                                 task=task)
+        process_task(task)
 
 
 ENSEMBLE_STRATEGIES = ["expert",

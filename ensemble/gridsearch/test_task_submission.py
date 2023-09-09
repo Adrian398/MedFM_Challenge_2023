@@ -334,14 +334,11 @@ def main():
     task = "colon"
     base_path = "ensemble/gridsearch"
     timestamps = get_prediction_timestamp_dirs(base_path)
-    print(timestamps)
 
     # Number of processes to spawn. You can adjust this value as needed.
     num_processes = min(cpu_count(), len(timestamps))
-    print("Processes:", num_processes)
 
     args = [(base_path, timestamp, task) for timestamp in timestamps]
-    print(args)
 
     with Pool(num_processes) as pool:
         result_dict = pool.starmap(worker_func, args)
