@@ -188,7 +188,11 @@ def get_model_dirs_without_prediction(task, shot):
 
         # Skip if prediction csv file is present
         if contains_csv_file(task, shot, abs_model_dir):
-            continue
+            # If model was trained with pre-processed data and is endo, update CSVs
+            if "pre_processed" in model_name and task == "endo":
+                print(colored(f"Endo Model {model_name} with pre-processed data added to models for update.", 'red'))
+            else:
+                continue
 
         model_dirs.append(model_dir)
     return model_dirs
@@ -293,14 +297,26 @@ if __name__ == "__main__":  # Important when using multiprocessing
         checkpoint_filepath = get_file_from_directory(model_path, ".pth", "best")
 
         # Image Path
-        img_suffix_choice = csv_suffix_2_img_suffix.get(csv_suffix_choice, "test")  # defaults to 'test'
-        images_path = os.path.join("/scratch", "medfm", "medfm-challenge", "data", f"MedFMC_{img_suffix_choice}", task,
-                                   "images")
+        img_suffix_choice = csv_suffix_2_img_suffix.get(csv_suffix_choice, None)
+        if img_suffix_choice is None:
+            raise f"No valid data folder existent for the suffix {csv_suffix_choice}"
+
+        image_base_path = os.path.join("/scratch", "medfm", "medfm-challenge", "data", f"MedFMC_{img_suffix_choice}")
+        # In case of endo models trained on pre-processed data, use pre-processed images for prediction CSVs
+        if "pre_processed" in model_name and task == "endo":
+            images_path = os.path.join(image_base_path, task, "pre_processed_images")
+        else:
+            images_path = os.path.join(image_base_path, task, "images")
 
         # Destination Path
         out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_{csv_suffix_choice}.csv")
 
-        command = (f"python tools/infer.py {config_filepath} {checkpoint_filepath} {images_path} --batch-size {batch_size} --out {out_filepath}")
+        command = (f"python tools/infer.py "
+                   f"{config_filepath} "
+                   f"{checkpoint_filepath} "
+                   f"{images_path} "
+                   f"--batch-size {batch_size} "
+                   f"--out {out_filepath}")
         commands.append(command)
 
     task_counts = Counter(model["task"] for model in model_infos.values())

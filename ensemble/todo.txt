@@ -26,3 +26,8 @@ In general:
     - Input is path to the validation submission dir and path to the annotation file
     - We have prediction probabilities and labels -> calculate mAP and AUC (metrics)
 [ ] 4) In submission.py implement different "ensemble strategies" and assess those with the previously written script
+
+
+
+[ ] Endo Evaluation UND Validation Prediction CSVs mit Preprocessed Images neu erstellen
+[ ] Alignment von Zeilen in Evaluation Submission CSVs
