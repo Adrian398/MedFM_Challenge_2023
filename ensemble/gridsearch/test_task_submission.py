@@ -318,7 +318,7 @@ def process_task(timestamp_path, task):
 def process_prediction_dir(base_path, timestamp, tasks):
     timestamp_path = os.path.join(base_path, timestamp)
 
-    timestamp_result_dicts = defaultdict(nested_defaultdict)
+    timestamp_result_dicts = {}
     for task in tasks:
         task_result_dicts = process_task(timestamp_path=timestamp_path, task=task)
         timestamp_result_dicts[timestamp] = task_result_dicts
@@ -349,24 +349,27 @@ def main():
     args = [(base_path, timestamp, tasks) for timestamp in timestamps]
 
     with Pool(num_processes) as pool:
-        result_dict = pool.starmap(worker_func, args)
+        results_list = pool.starmap(worker_func, args)
 
-    print(result_dict)
-    for timestamp in timestamps:
-        for task in tasks:
+    result = {k: v for d in results_list for k, v in d.items()}
+
+    for timestamp, tasks in result.items():
+        print(f"Processing Timestamp: {timestamp}")
+
+        for task, strategies in tasks.items():
+            print(f"  Task: {task}")
+
             log_file_path = os.path.join(base_path, timestamp, task, 'log.txt')
-
             with open(log_file_path, 'w') as log_file:
                 log_file.write(
                     f"{'Timestamp':<20} {'Model-Count':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
 
-                for _, task_value in result_dict[timestamp].items():
-                    for _, strategy_values in task_value.items():
-                        for strategy in strategy_values:
-                            print(strategy)
-                            exit()
-                    # log_pred_str = build_pred_log_string(log_pred_dict)
-                    # log_file.write(log_pred_str)
+            for strategy, results in strategies.items():
+                print(f"    Strategy: {strategy}")
+
+                for result in results:
+                    model_count = result['model_count']
+                    prediction_dir = result['prediction_dir']
 
 
 if __name__ == "__main__":
