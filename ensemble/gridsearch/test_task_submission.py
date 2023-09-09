@@ -346,7 +346,8 @@ def main():
 
     tasks = ["colon"]
     args = [(base_path, timestamp, task) for timestamp in timestamps for task in tasks]
-
+    print(args)
+    exit()
     with Pool(num_processes) as pool:
         result_dict = pool.starmap(worker_func, args)
 
