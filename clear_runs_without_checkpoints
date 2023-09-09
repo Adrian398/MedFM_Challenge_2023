@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Check the number of arguments provided
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <task> <shot>"
+    echo "E.g.: ./clear_runs_without_checkpoints colon 1"
+    exit 1
+fi
+
+TASK="$1"
+SHOT="$2"
+DIRECTORY="work_dirs/${TASK}/${SHOT}-shot/"
+
+# Check if the target directory exists
+if [ ! -d "$DIRECTORY" ]; then
+    echo "Error: Directory ${DIRECTORY} does not exist."
+    exit 1
+fi
+
+echo "Deleting all dirs without .pth files in ${DIRECTORY}"
+
+# Switch to the target directory
+cd "${DIRECTORY}"
+
+for dir in */; do
+    # Check if the directory contains any .pth files
+    if [ $(find "${dir}" -maxdepth 1 -type f -name "*.pth" | wc -l) -eq 0 ]; then
+        echo "Deleting dir: ${dir}"
+        rm -r "${dir}"
+    fi
+done
+
