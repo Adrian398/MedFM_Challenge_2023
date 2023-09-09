@@ -196,25 +196,19 @@ def sort_key(timestamp):
     return datetime.strptime(timestamp, "%d-%m_%H-%M-%S")
 
 
+def find_result_folder(directory):
+    """Recursively search for a 'result' folder in the given directory."""
+    for root, dirs, files in os.walk(directory):
+        if "result" in dirs:
+            return True
+    return False
+
+
 def get_prediction_timestamp_dirs(base_path):
-    tasks = ['chest', 'colon', 'endo']
     all_dirs = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
     timestamp_dirs = [d for d in all_dirs if TIMESTAMP_PATTERN.match(d)]
 
-    valid_dirs = []
-
-    for d in timestamp_dirs:
-        # Check for a direct 'result' sub-folder
-        if os.path.exists(os.path.join(base_path, d, "result")):
-            valid_dirs.append(d)
-            continue
-
-        # Check within each task directory
-        for task in tasks:
-            task_dir = os.path.join(base_path, d, task)
-            if os.path.exists(task_dir) and os.path.exists(os.path.join(task_dir, "result")):
-                valid_dirs.append(d)
-                break
+    valid_dirs = [d for d in timestamp_dirs if find_result_folder(os.path.join(base_path, d))]
 
     # If no valid directories are found, return an empty list
     if not valid_dirs:
