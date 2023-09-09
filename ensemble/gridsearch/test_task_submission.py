@@ -288,7 +288,7 @@ def process_top_k(top_k, strategy_path, task):
 
 
 def process_strategy(task_path, strategy, task):
-    print(colored(f"Processing Strategy {strategy}", 'light-red'))
+    print(colored(f"Processing Strategy {strategy}", 'light_red'))
 
     strategy_path = os.path.join(task_path, strategy)
 
