@@ -219,12 +219,12 @@ def get_prediction_timestamp_dirs(base_path):
     return sorted_valid_dirs
 
 
-def build_pred_log_string(pred_dict, task):
-    model_cnt = pred_dict.get('model_count', "None")
-    strategy = pred_dict.get('strategy', "None")
-    top_k = pred_dict.get('top_k', "None")
-    prediction_dir = pred_dict.get('prediction_dir', "None")
-    aggregate_value = pred_dict.get('aggregate_value', "None")
+def build_log_string(data, task):
+    model_cnt = data.get('model_count', "None")
+    strategy = data.get('strategy', "None")
+    top_k = data.get('top_k', "None")
+    prediction_dir = data.get('prediction_dir', "None")
+    aggregate_value = data.get('aggregate_value', "None")
 
     try:
         aggregate_value = float(aggregate_value)
@@ -363,25 +363,19 @@ def main():
 
     result = {key: value for d in results_list for key, value in d.items()}
 
-    print(result)
-
-    for timestamp_dict in result.values():
-        for task_dict in timestamp_dict.values():
-            print(task_dict)
-    exit()
-    for timestamp, tasks in result.items():
-        for task, strategies in tasks.items():
-            log_file_path = os.path.join(base_path, timestamp, task, 'log.txt')
+    for timestmap_key, timestamp_dict in result.values():
+        for task_key, task_dict in timestamp_dict.items():
+            log_file_path = os.path.join(base_path, timestmap_key, task_key, 'log.txt')
 
             with open(log_file_path, 'w') as log_file:
                 log_file.write(
                     f"{'Model-Count':<15} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
-                print(f"Wrote Log file to {log_file_path}")
+                print(f"Wrote Log file to {timestmap_key}/{task_key}/log.txt")
 
-            for strategy, results in strategies.items():
-                for result in results:
+            for strategy_key, strategy_list in task_dict.items():
+                for top_k_item in strategy_list:
                     with open(log_file_path, 'a') as log_file:
-                        log_pred_str = build_pred_log_string(result, task)
+                        log_pred_str = build_log_string(top_k_item, task_key)
                         log_file.write(log_pred_str)
 
 
