@@ -372,10 +372,10 @@ def main():
                     f"{'Model-Count':<15} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
                 print(f"Wrote Log file to {timestmap_key}/{task_key}/log.txt")
 
-            for strategy_key, strategy_list in task_dict.items():
-                print(strategy_list)
+            for strategy_key, strategy_dict in task_dict.items():
+                print("Key:", strategy_key, "Value:", strategy_dict)
 
-                # for top_k_item in strategy_list:
+                # for top_k_item in strategy_dict.items():
                 #     with open(log_file_path, 'a') as log_file:
                 #         log_pred_str = build_log_string(top_k_item, task_key)
                 #         log_file.write(log_pred_str)
