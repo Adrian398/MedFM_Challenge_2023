@@ -288,8 +288,8 @@ def process_top_k(top_k, strategy_path, task):
     }
 
 
-def process_strategy(timestamp_path, strategy, task):
-    strategy_path = os.path.join(timestamp_path, strategy)
+def process_strategy(task_path, strategy, task):
+    strategy_path = os.path.join(task_path, strategy)
 
     result_dicts = []
     if strategy == "expert":
@@ -303,22 +303,33 @@ def process_strategy(timestamp_path, strategy, task):
     return result_dicts
 
 
-def process_prediction_dir(base_path, timestamp, task):
-    timestamp_path = os.path.join(base_path, timestamp)
+def process_task(timestamp_path, task):
+    task_path = os.path.join(timestamp_path, task)
 
-    strategy_results_dict = defaultdict(nested_defaultdict)
+    task_result_dicts = defaultdict(nested_defaultdict)
     for strategy in ENSEMBLE_STRATEGIES:
-        result_dicts = process_strategy(timestamp_path=timestamp_path,
+        strategy_result_dicts = process_strategy(task_path=task_path,
                                         strategy=strategy,
                                         task=task)
-        strategy_results_dict[timestamp][task][strategy] = result_dicts
+        task_result_dicts[task][strategy] = strategy_result_dicts
 
-    return strategy_results_dict
+    return task_result_dicts
 
 
-def worker_func(base_path, timestamp, task):
+def process_prediction_dir(base_path, timestamp, tasks):
+    timestamp_path = os.path.join(base_path, timestamp)
+
+    timestamp_result_dicts = defaultdict(nested_defaultdict)
+    for task in tasks:
+        task_result_dicts = process_task(timestamp_path=timestamp_path, task=task)
+        timestamp_result_dicts[timestamp] = task_result_dicts
+
+    return timestamp_result_dicts
+
+
+def worker_func(base_path, timestamp, tasks):
     print(colored(f"Processing Timestamp {timestamp}", 'blue'))
-    return process_prediction_dir(base_path=base_path, timestamp=timestamp, task=task)
+    return process_prediction_dir(base_path=base_path, timestamp=timestamp, tasks=tasks)
 
 
 # ==========================================================================================
@@ -327,14 +338,14 @@ GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 
 
 def main():
-    task = "colon"
     base_path = "ensemble/gridsearch"
     timestamps = get_prediction_timestamp_dirs(base_path)
 
     # Number of processes to spawn. You can adjust this value as needed.
     num_processes = min(cpu_count(), len(timestamps))
 
-    args = [(base_path, timestamp, task) for timestamp in timestamps]
+    tasks = ["colon"]
+    args = [(base_path, timestamp, task) for timestamp in timestamps for task in tasks]
 
     with Pool(num_processes) as pool:
         result_dict = pool.starmap(worker_func, args)
