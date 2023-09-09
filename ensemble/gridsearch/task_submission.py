@@ -523,29 +523,27 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot):
     return None, None
 
 
-def extract_data(tasks):
-    #subm_types = ["submission", "validation"]
-    # TODO: For now only validation
-    subm_types = ["validation"]
+def extract_data():
+    subm_types = ["submission", "validation"]
     data_lists = {
         stype: {
             task: {
                 shot: {
                     exp: [] for exp in exps
                 } for shot in shots
-            } for task in tasks
+            } for task in TASKS
         } for stype in subm_types
     }
 
     # Total iterations: tasks * shots * exps * model_dirs * subm_types
     total_iterations = 0
-    for task in tasks:
+    for task in TASKS:
         for shot in shots:
             total_iterations += len(glob.glob(os.path.join(root_dir, task, shot, '*exp[1-5]*')))
 
     print(f"Checking and extracting data for {colored(str(total_iterations), 'blue')} models:")
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
-        for task in tasks:
+        for task in TASKS:
             for shot in shots:
                 path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
                 for model_dir in glob.glob(path_pattern):
@@ -555,9 +553,7 @@ def extract_data(tasks):
                         if data and exp_num:
                             data_lists[subm_type][task][shot][f"exp{exp_num}"].append(data)
                     pbar.update(1)
-    # TODO: add submission
-    #return data_lists["submission"], data_lists["validation"]
-    return data_lists["validation"], data_lists["validation"]
+    return data_lists["submission"], data_lists["validation"]
 
 
 def create_submission_cfg_dump(top_k, total_models, strategy, root_report_dir):
@@ -575,19 +571,18 @@ def create_submission_cfg_dump(top_k, total_models, strategy, root_report_dir):
     return cfg_file_path
 
 
-def process_top_k(strategy, top_k, is_evaluation, task):
-    submission_type = 'submission'
-    if is_evaluation:
+def process_top_k(strategy, top_k, task, subm_type):
+    if subm_type == "submission":
         data = DATA_SUBMISSION
-    else:
+    elif subm_type == "validation":
         data = DATA_VALIDATION
-        submission_type = 'validation'
+    else:
+        raise f"Unknown submission type {subm_type}!"
 
     submission_dir = create_output_dir(strategy=strategy,
                                        top_k=top_k,
                                        task=task,
-                                       is_evaluation=is_evaluation,
-                                       submission_type=submission_type)
+                                       submission_type=subm_type)
 
     # Perform Ensemble Strategy
     for shot in shots:
@@ -596,7 +591,7 @@ def process_top_k(strategy, top_k, is_evaluation, task):
             if len(model_runs) < 2:
                 print("Not enough runs")
                 continue
-            out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{submission_type}.csv")
+            out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{subm_type}.csv")
 
             if strategy == "weighted":
                 selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
@@ -635,7 +630,7 @@ def process_top_k(strategy, top_k, is_evaluation, task):
                                         selected_models_for_classes=selected_models,
                                         model_occurrences=model_occurrences,
                                         root_report_dir=submission_dir)
-    if not is_evaluation:
+    if subm_type == "validation":
         create_submission_cfg_dump(top_k=top_k,
                                    strategy=strategy,
                                    total_models=TOTAL_MODELS[task],
@@ -688,17 +683,17 @@ def print_overall_model_summary(tasks):
     return total_models
 
 
-def create_output_dir(task, top_k, strategy, is_evaluation, submission_type):
-    # Create Output Directory
-    submission_dir = os.path.join("submissions", "evaluation", TIMESTAMP, task)
+def create_output_dir(task, top_k, strategy, submission_type):
+    base_path = os.path.join("ensemble", "gridsearch")
+    submission_dir = os.path.join(base_path, submission_type, TIMESTAMP, task)
 
-    if is_evaluation:
-        success = f"Created {colored('Evaluation', 'red')} directory {submission_dir}"
+    if submission_type == "submission":
+        success = f"Created {colored(task.capitalize(), 'red')} {submission_type} directory {submission_dir}"
     else:
         if top_k:
-            submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, task, strategy, f"top-{str(top_k)}")
+            submission_dir = os.path.join(base_path, submission_type, TIMESTAMP, task, strategy, f"top-{str(top_k)}")
         else:
-            submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, task, strategy)
+            submission_dir = os.path.join(base_path, submission_type, TIMESTAMP, task, strategy)
         success = f"Created {colored(task.capitalize(), 'blue')} {submission_type} directory at {submission_dir}"
 
     os.makedirs(submission_dir)
@@ -733,50 +728,55 @@ def select_task():
             print("Invalid choice. Please try again.\n")
 
 
-# def process_top_k(strategy, task, top_k=None):
-#     create_submission(strategy=strategy, top_k=top_k, is_evaluation=False, task=task)
-
-
-def process_strategy(strategy, task, top_k_max):
+def process_strategy(strategy, task, subm_type):
     if strategy != "expert":
-        for top_k in range(2, top_k_max):
+        for top_k in range(2, TOP_K_MAX[task]):
             process_top_k(strategy=strategy,
                           top_k=top_k,
                           task=task,
-                          is_evaluation=False)
+                          subm_type=subm_type)
     else:
         process_top_k(strategy=strategy,
                       task=task,
                       top_k=None,
-                      is_evaluation=False)
+                      subm_type=subm_type)
+
+
+def process_subm_type(task, subm_type):
+    for strategy in ENSEMBLE_STRATEGIES:
+        process_strategy(strategy=strategy, task=task, subm_type=subm_type)
 
 
 def process_task(task):
-    TOTAL_MODELS[task], top_k_max, top_k_max_setting = get_least_model_count(task=task)
-    for strategy in ENSEMBLE_STRATEGIES:
-        process_strategy(strategy=strategy, top_k_max=top_k_max, task=task)
+    TOTAL_MODELS[task], TOP_K_MAX[task], _ = get_least_model_count(task=task)
+
+    for subm_type in SUBMISSION_TYPES:
+        process_subm_type(task=task, subm_type=subm_type)
 
 
-def main(tasks):
-    for task in tasks:
-        process_task(task)
+def main():
+    for task in TASKS:
+        process_task(task=task)
 
 
+# ======================================================
 ENSEMBLE_STRATEGIES = ["expert",
                        "weighted",
                        "pd-weighted",
                        "pd-log-weighted",
                        "rank-based-weighted",
                        "diversity-weighted"]
+SUBMISSION_TYPES = ["submission", "validation"]
+TASKS = ["colon", "endo", "chest"]
+# ======================================================
 
 
 if __name__ == "__main__":
-    #selected_task = select_task()
-    task_list = ["colon", "endo", "chest"]
     root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 
     TOTAL_MODELS = defaultdict()
+    TOP_K_MAX = defaultdict()
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
-    DATA_SUBMISSION, DATA_VALIDATION = extract_data(tasks=task_list)
+    DATA_SUBMISSION, DATA_VALIDATION = extract_data()
 
-    main(task_list)
+    main()

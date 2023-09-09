@@ -8,8 +8,10 @@ from multiprocessing import cpu_count, Pool
 
 import numpy as np
 import pandas as pd
+from colorama import Fore
 from sklearn.metrics import average_precision_score
 from termcolor import colored
+from tqdm import tqdm
 
 from ensemble.gridsearch.task_submission import ENSEMBLE_STRATEGIES
 from ensemble.utils.constants import shots, exps, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT
@@ -427,7 +429,45 @@ def worker_func(base_path, timestamp, tasks):
 
 # ==========================================================================================
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
+WORK_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
 # ==========================================================================================
+
+
+def extract_data(tasks):
+    data_lists = {
+        task: {
+            shot: {
+                exp: [] for exp in exps
+            } for shot in shots
+        } for task in tasks
+    }
+
+    # Total iterations: tasks * shots * exps * model_dirs * subm_types
+    total_iterations = 0
+    for task in tasks:
+        for shot in shots:
+            total_iterations += len(glob.glob(os.path.join(WORK_DIR, task, shot, '*exp[1-5]*')))
+
+    print(f"Checking and extracting data for {colored(str(total_iterations), 'blue')} models:")
+    with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
+        for task in tasks:
+            for shot in shots:
+                path_pattern = os.path.join(WORK_DIR, task, shot, '*exp[1-5]*')
+                for model_dir in glob.glob(path_pattern):
+                    for subm_type in subm_types:
+                        data, exp_num = check_and_extract_data(model_dir_abs=model_dir, subm_type=subm_type,
+                                                               task=task, shot=shot)
+                        if data and exp_num:
+                            data_lists[subm_type][task][shot][f"exp{exp_num}"].append(data)
+                    pbar.update(1)
+    # TODO: add submission
+    #return data_lists["submission"], data_lists["validation"]
+    return data_lists["validation"], data_lists["validation"]
+
+
+def create_evaluation_submission(timestamp, tasks):
+
+    DATA_SUBMISSION = extract_data(tasks=tasks)
 
 
 def main():
@@ -466,6 +506,8 @@ def main():
 
         result = compile_results_to_json(base_path=base_path, timestamp=timestamp_key, tasks=tasks)
 
+        create_evaluation_submission(timestamp=timestamp_key,
+                                     tasks=tasks)
 
 if __name__ == "__main__":
     main()
