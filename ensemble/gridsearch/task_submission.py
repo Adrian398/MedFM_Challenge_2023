@@ -685,7 +685,7 @@ def print_overall_model_summary(tasks):
 
 def create_output_dir(task, top_k, strategy, submission_type):
     base_path = os.path.join("ensemble", "gridsearch")
-    submission_dir = os.path.join(base_path, submission_type, TIMESTAMP, task, strategy)
+    submission_dir = os.path.join(base_path, TIMESTAMP, submission_type, task, strategy)
 
     color = 'red'
     if submission_type == "validation":
