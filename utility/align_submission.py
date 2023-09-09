@@ -22,7 +22,7 @@ for d in directories:
 
 newest_directory = max(valid_directories, key=lambda x: x[0])[1]
 print(f"Aligning newest submission {newest_directory}")
-results_dir = os.path.join(path, newest_directory, "predictions")
+results_dir = os.path.join(path, newest_directory, "result")
 
 for exp in experiments:
     exp_dir = os.path.join(results_dir, exp)
