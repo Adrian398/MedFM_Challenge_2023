@@ -755,6 +755,14 @@ def main(tasks):
                                  task=task)
 
 
+ENSEMBLE_STRATEGIES = ["expert",
+                       "weighted",
+                       "pd-weighted",
+                       "pd-log-weighted",
+                       "rank-based-weighted",
+                       "diversity-weighted"]
+
+
 if __name__ == "__main__":
     #selected_task = select_task()
     task_list = ["colon"]
@@ -763,11 +771,5 @@ if __name__ == "__main__":
     TOTAL_MODELS = defaultdict()
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
     DATA_SUBMISSION, DATA_VALIDATION = extract_data(tasks=task_list)
-    ENSEMBLE_STRATEGIES = ["expert",
-                           "weighted",
-                           "pd-weighted",
-                           "pd-log-weighted",
-                           "rank-based-weighted",
-                           "diversity-weighted"]
 
     main(task_list)
