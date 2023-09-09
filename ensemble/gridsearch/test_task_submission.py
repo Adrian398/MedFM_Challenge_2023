@@ -370,6 +370,9 @@ def main():
                 for result in results:
                     model_count = result['model_count']
                     prediction_dir = result['prediction_dir']
+                    log_pred_str = build_pred_log_string(result)
+                    log_file.write(log_pred_str)
+                    print(f"Wrote Log file to {log_file_path}")
 
 
 if __name__ == "__main__":
