@@ -427,5 +427,6 @@ def main():
 
         compile_results_to_json(base_path=base_path, tasks=tasks, output_json_path="results.json")
 
+
 if __name__ == "__main__":
     main()
