@@ -1,0 +1,11 @@
+- figure out a good checkpoint resume workflow with the same lr/etc.
+- (x) analyze all images of positive tumor patient
+- try different learning rate strategies
+- try different adam optimizer parameters
+- try different learning rates
+- try different optimizers
+- find out diff between lr and base_lr
+- improve data augmentation
+- try out impact of different experiment files
+- try different batch sizes
+- https://towardsdatascience.com/inshort-occlusion-analysis-for-explaining-dnns-d0ad3af9aeb6
