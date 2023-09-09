@@ -314,7 +314,7 @@ def process_task(timestamp_path, task):
 
     task_path = os.path.join(timestamp_path, task)
 
-    task_result_dicts = defaultdict(nested_defaultdict)
+    task_result_dicts = {task: {}}
     for strategy in ENSEMBLE_STRATEGIES:
         strategy_result_dicts = process_strategy(task_path=task_path,
                                                  strategy=strategy,
@@ -365,6 +365,10 @@ def main():
 
     print(result)
 
+    for timestamp_dict in result.values():
+        for task_dict in timestamp_dict.values():
+            print(task_dict)
+    exit()
     for timestamp, tasks in result.items():
         for task, strategies in tasks.items():
             log_file_path = os.path.join(base_path, timestamp, task, 'log.txt')
