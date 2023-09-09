@@ -466,6 +466,7 @@ def build_final_submission(base_path, timestamp, strategies):
                     source_csv_file = os.path.join(source_csv_file_dir, csv_file)
                     destination = os.path.join(target_dir, csv_file, csv_file)
                     shutil.copy(source_csv_file, destination)
+                    print(f"Copied {csv_file} from {source_csv_file} to {destination}")
 
 
 # ==========================================================================================
