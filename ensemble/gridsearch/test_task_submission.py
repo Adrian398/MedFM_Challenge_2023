@@ -219,7 +219,7 @@ def get_prediction_timestamp_dirs(base_path):
     return sorted_valid_dirs
 
 
-def build_pred_log_string(pred_dict):
+def build_pred_log_string(pred_dict, task):
     timestamp = pred_dict.get('timestamp', "None")
     model_cnt = pred_dict.get('model_count', "None")
     strategy = pred_dict.get('strategy', "None")
@@ -235,8 +235,9 @@ def build_pred_log_string(pred_dict):
 
     top_k_str = str(top_k) if top_k is not None else "None"
     model_cnt = str(model_cnt) if model_cnt is not None else "None"
+    prediction_dir = prediction_dir.split(f"{task}/")[1]
 
-    return f"{timestamp:<20} {model_cnt:<20} {strategy:<20} {top_k_str:<10} {prediction_dir:<40} {value_string}\n"
+    return f"{model_cnt:<15} {strategy:<20} {top_k_str:<10} {prediction_dir:<25} {value_string}\n"
 
 
 def load_submission_cfg_dump(dir):
@@ -369,7 +370,7 @@ def main():
 
                 for result in results:
                     with open(log_file_path, 'a') as log_file:
-                        log_pred_str = build_pred_log_string(result)
+                        log_pred_str = build_pred_log_string(result, task)
                         log_file.write(log_pred_str)
                         print(f"Wrote Log file to {log_file_path}")
 
