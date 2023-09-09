@@ -697,7 +697,10 @@ def create_output_dir(task, top_k, strategy, is_evaluation, submission_type):
     if is_evaluation:
         success = f"Created {colored('Evaluation', 'red')} directory {submission_dir}"
     else:
-        submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, strategy, top_k)
+        if top_k:
+            submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, strategy, top_k)
+        else:
+            submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, strategy)
         success = f"Created {colored(task.capitalize(), 'blue')} {submission_type} directory at {submission_dir}"
 
     os.makedirs(submission_dir)
