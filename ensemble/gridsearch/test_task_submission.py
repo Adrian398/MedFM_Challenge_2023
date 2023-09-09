@@ -351,6 +351,7 @@ def main():
     with Pool(num_processes) as pool:
         result_dict = pool.starmap(worker_func, args)
 
+    print(result_dict)
     for timestamp in timestamps:
         for task in tasks:
             log_file_path = os.path.join(base_path, timestamp, task, 'log.txt')
