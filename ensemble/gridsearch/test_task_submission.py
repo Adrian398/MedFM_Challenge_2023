@@ -360,6 +360,8 @@ def main():
     result = {k: v for d in results_list for k, v in d.items()}
 
     for timestamp, tasks in result.items():
+        print(tasks)
+        exit()
         for task, strategies in tasks.items():
             log_file_path = os.path.join(base_path, timestamp, task, 'log.txt')
 
