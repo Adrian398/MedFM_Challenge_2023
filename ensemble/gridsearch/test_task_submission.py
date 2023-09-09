@@ -194,8 +194,19 @@ def get_prediction_timestamp_dirs(base_path):
     all_dirs = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
     timestamp_dirs = [d for d in all_dirs if TIMESTAMP_PATTERN.match(d)]
 
-    # Filter timestamp directories that have a 'result' sub-folder
-    valid_dirs = [d for d in timestamp_dirs if os.path.exists(os.path.join(base_path, d, "result"))]
+    valid_dirs = []
+
+    for d in timestamp_dirs:
+        # Check for a direct 'result' sub-folder
+        if os.path.exists(os.path.join(base_path, d, "result")):
+            valid_dirs.append(d)
+            continue
+
+        # Check one directory deeper for 'result' sub-folders
+        subdirs = [sub for sub in os.listdir(os.path.join(base_path, d)) if
+                   os.path.isdir(os.path.join(base_path, d, sub))]
+        if any(os.path.exists(os.path.join(base_path, d, sub, "result")) for sub in subdirs):
+            valid_dirs.append(d)
 
     # If no valid directories are found, return an empty list
     if not valid_dirs:
