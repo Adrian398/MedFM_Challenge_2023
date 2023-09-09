@@ -12,9 +12,8 @@ from sklearn.metrics import average_precision_score
 from termcolor import colored
 
 from ensemble.gridsearch.task_submission import ENSEMBLE_STRATEGIES
-from ensemble.utils.constants import shots, exps, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT, tasks
+from ensemble.utils.constants import shots, exps, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT
 from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_multilabel
-
 
 TIMESTAMP_PATTERN = re.compile(r"\d{2}-\d{2}_\d{2}-\d{2}-\d{2}")
 
@@ -66,7 +65,6 @@ def generate_json(results):
 
 
 def process_experiment(top_k_path, exp, task, shot):
-    print(task)
     gt_path = get_gt_csv_filepath(task=task)
     if not gt_path:
         print(f"Ground truth file for task {task} not found.")
@@ -281,11 +279,11 @@ def process_top_k(top_k, strategy_path, task):
         json_file.write(json_result)
 
     return {
-            'model_count': model_count,
-            'strategy': strategy,
-            'top_k': top_k,
-            'prediction_dir': top_k_path,
-            'aggregate_value': aggregates
+        'model_count': model_count,
+        'strategy': strategy,
+        'top_k': top_k,
+        'prediction_dir': top_k_path,
+        'aggregate_value': aggregates
     }
 
 
@@ -310,8 +308,8 @@ def process_task(timestamp_path, task):
     task_result_dicts = defaultdict(nested_defaultdict)
     for strategy in ENSEMBLE_STRATEGIES:
         strategy_result_dicts = process_strategy(task_path=task_path,
-                                        strategy=strategy,
-                                        task=task)
+                                                 strategy=strategy,
+                                                 task=task)
         task_result_dicts[task][strategy] = strategy_result_dicts
 
     return task_result_dicts
@@ -321,6 +319,7 @@ def process_prediction_dir(base_path, timestamp, tasks):
     timestamp_path = os.path.join(base_path, timestamp)
 
     timestamp_result_dicts = defaultdict(nested_defaultdict)
+    print(type(tasks), tasks)
     for task in tasks:
         task_result_dicts = process_task(timestamp_path=timestamp_path, task=task)
         timestamp_result_dicts[timestamp] = task_result_dicts
@@ -335,6 +334,8 @@ def worker_func(base_path, timestamp, tasks):
 
 # ==========================================================================================
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
+
+
 # ==========================================================================================
 
 
@@ -356,13 +357,14 @@ def main():
             log_file_path = os.path.join(base_path, timestamp, task, 'log.txt')
 
             with open(log_file_path, 'w') as log_file:
-                log_file.write(f"{'Timestamp':<20} {'Model-Count':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
+                log_file.write(
+                    f"{'Timestamp':<20} {'Model-Count':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
 
                 for strategy in result_dict[timestamp][task]:
                     print(strategy)
                     exit()
-                    #log_pred_str = build_pred_log_string(log_pred_dict)
-                    #log_file.write(log_pred_str)
+                    # log_pred_str = build_pred_log_string(log_pred_dict)
+                    # log_file.write(log_pred_str)
 
 
 if __name__ == "__main__":
