@@ -328,7 +328,7 @@ def process_timestamp(base_path, timestamp, tasks):
     timestamp_result_dicts = {}
     for task in tasks:
         task_result_dicts = process_task(timestamp_path=timestamp_path, task=task)
-        timestamp_result_dicts[timestamp] = task_result_dicts
+        timestamp_result_dicts[timestamp][task] = task_result_dicts
 
     return timestamp_result_dicts
 
