@@ -298,7 +298,7 @@ def process_strategy(task_path, strategy, task):
         result_dict = process_top_k(top_k=None, strategy_path=strategy_path, task=task)
         result_dicts.append(result_dict)
     else:
-        for top_k in os.listdir(strategy_path):
+        for top_k in sorted(os.listdir(strategy_path)):
             result_dict = process_top_k(top_k=top_k, strategy_path=strategy_path, task=task)
             result_dicts.append(result_dict)
 
