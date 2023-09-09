@@ -276,7 +276,7 @@ def compile_results_to_json(base_path, timestamp, tasks):
             model_count, strategy, top_k, _, aggregate = line.split()
             aggregate_value = float(aggregate)
 
-            if aggregate_value < best_aggregate:
+            if aggregate_value > best_aggregate:
                 best_aggregate = aggregate_value
                 results["tasks"][task] = {
                     "Model-Count": model_count,
