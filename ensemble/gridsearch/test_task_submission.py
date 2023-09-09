@@ -1,7 +1,9 @@
+import fnmatch
 import glob
 import json
 import os
 import re
+import shutil
 from collections import defaultdict
 from datetime import datetime
 from multiprocessing import cpu_count, Pool
@@ -14,7 +16,7 @@ from termcolor import colored
 from tqdm import tqdm
 
 from ensemble.gridsearch.task_submission import ENSEMBLE_STRATEGIES
-from ensemble.utils.constants import shots, exps, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT
+from ensemble.utils.constants import shots, exps, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT, tasks
 from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_multilabel
 
 TIMESTAMP_PATTERN = re.compile(r"\d{2}-\d{2}_\d{2}-\d{2}-\d{2}")
@@ -338,7 +340,7 @@ def compile_results_to_json(base_path, timestamp, tasks):
     print(f"\nWrote Best Ensembles JSON file to {best_ensembles_output_path}")
     print(json.dumps(best_ensembles_per_task, indent=4))
 
-    return final_results
+    return final_results, best_ensembles_per_task
 
 
 def process_top_k(top_k, strategy_path, task):
@@ -428,6 +430,44 @@ def worker_func(base_path, timestamp, tasks):
     return process_timestamp(base_path=base_path, timestamp=timestamp, tasks=tasks)
 
 
+def create_subm_target_dir(timestamp):
+    # Create submission target directory
+    submission_target_path = os.path.join("submissions/evaluation", timestamp)
+    if not os.path.isdir(submission_target_path):
+        os.makedirs(submission_target_path)
+
+    for exp in exps:
+        os.makedirs(os.path.join(submission_target_path, "result", f"{exp}"), exist_ok=True)
+    print(f"Created {colored(timestamp, 'red')} submission directory {submission_target_path}")
+
+    return submission_target_path
+
+
+def build_final_submission(base_path, timestamp, strategies):
+    submission_path = os.path.join(base_path, timestamp, 'submission')
+    target_dir = create_subm_target_dir(timestamp=timestamp)
+
+    for task in tasks:
+        strategy = strategies[task]['Strategy']
+        top_k = strategies[task]['Top-K']
+        csv_file_pattern = f"{task}_*.csv"
+
+        for exp in exps:
+            if strategy == "expert":
+                result_path = os.path.join(submission_path, task, strategy)
+            else:
+                result_path = os.path.join(submission_path, task, strategy, top_k)
+
+            csv_file_dir = os.path.join('result', exp)
+            source_csv_file_dir = os.path.join(result_path, csv_file_dir)
+
+            for csv_file in os.listdir(source_csv_file_dir):
+                if fnmatch.fnmatch(csv_file, csv_file_pattern):
+                    source_csv_file = os.path.join(source_csv_file_dir, csv_file)
+                    destination = os.path.join(target_dir, csv_file, csv_file)
+                    shutil.copy(source_csv_file, destination)
+
+
 # ==========================================================================================
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 WORK_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
@@ -468,7 +508,11 @@ def main():
                     log_file.write(line)
                 print(f"Wrote Log file to {timestamp_key}/{task_key}/log.txt")
 
-        result = compile_results_to_json(base_path=base_path, timestamp=timestamp_key, tasks=tasks)
+        _, strategy_per_task = compile_results_to_json(base_path=base_path, timestamp=timestamp_key, tasks=tasks)
+
+        build_final_submission(base_path=base_path,
+                               timestamp=timestamp_key,
+                               strategies=strategy_per_task)
 
 
 if __name__ == "__main__":
