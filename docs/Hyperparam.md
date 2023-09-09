@@ -1,3 +1,0 @@
-# Scheduler Overview
-ConstantLR, LinearLR, ExponentialLR, ...
-https://mmengine.readthedocs.io/en/latest/api/optim.html
