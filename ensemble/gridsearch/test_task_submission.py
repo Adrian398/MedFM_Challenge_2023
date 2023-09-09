@@ -373,7 +373,6 @@ def main():
                 print(f"Wrote Log file to {timestmap_key}/{task_key}/log.txt")
 
             for strategy_key, strategy_list in task_dict.items():
-                print("Key:", strategy_key, "Value:", strategy_list)
 
                 for top_k_item in strategy_list:
                     with open(log_file_path, 'a') as log_file:
