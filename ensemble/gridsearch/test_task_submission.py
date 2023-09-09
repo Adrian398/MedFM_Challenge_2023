@@ -254,7 +254,7 @@ def extract_number_from_string(s):
     return int(''.join(filter(str.isdigit, s)))
 
 
-def compile_results_to_json(base_path, tasks, output_json_path):
+def compile_results_to_json(base_path, timestamp, tasks, output_json_path):
     results = {
         "tasks": {},
         "best": {}
@@ -406,9 +406,9 @@ def main():
 
     timestamps_dict = {key: value for d in results_list for key, value in d.items()}
 
-    for timestmap_key, timestamp_dict in timestamps_dict.items():
+    for timestamp_key, timestamp_dict in timestamps_dict.items():
         for task_key, task_dict in timestamp_dict.items():
-            log_file_path = os.path.join(base_path, timestmap_key, task_key, 'log.txt')
+            log_file_path = os.path.join(base_path, timestamp_key, task_key, 'log.txt')
 
             lines = []
             for strategy_key, strategy_list in task_dict.items():
@@ -423,9 +423,9 @@ def main():
                     f"{'Model-Count':<15} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
                 for line in lines:
                     log_file.write(line)
-                print(f"Wrote Log file to {timestmap_key}/{task_key}/log.txt")
+                print(f"Wrote Log file to {timestamp_key}/{task_key}/log.txt")
 
-        compile_results_to_json(base_path=base_path, tasks=tasks, output_json_path="results.json")
+        compile_results_to_json(base_path=base_path, timestamp=timestamp_key, tasks=tasks, output_json_path="results.json")
 
 
 if __name__ == "__main__":
