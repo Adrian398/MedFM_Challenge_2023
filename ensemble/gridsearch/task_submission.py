@@ -156,9 +156,7 @@ def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, top_k=
         # Sort the models based on aggregate value and take the top N models
         class_models.sort(key=lambda x: x[1], reverse=True)
         top_n_models = class_models[:top_k]
-        print(top_k)
-        print(len(top_n_models))
-        print(len(top_n_models[-1]))
+
         # Use the difference in performance from the k-th model as weights
         kth_value = top_n_models[-1][1]
 
