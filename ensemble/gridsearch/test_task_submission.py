@@ -288,6 +288,8 @@ def process_top_k(top_k, strategy_path, task):
 
 
 def process_strategy(task_path, strategy, task):
+    print(colored(f"Processing Strategy {strategy}", 'light-red'))
+
     strategy_path = os.path.join(task_path, strategy)
 
     result_dicts = []
@@ -303,6 +305,8 @@ def process_strategy(task_path, strategy, task):
 
 
 def process_task(timestamp_path, task):
+    print(colored(f"Processing Task {task}", 'cyan'))
+
     task_path = os.path.join(timestamp_path, task)
 
     task_result_dicts = defaultdict(nested_defaultdict)
@@ -315,7 +319,9 @@ def process_task(timestamp_path, task):
     return task_result_dicts
 
 
-def process_prediction_dir(base_path, timestamp, tasks):
+def process_timestamp(base_path, timestamp, tasks):
+    print(colored(f"Processing Timestamp {timestamp}", 'blue'))
+
     timestamp_path = os.path.join(base_path, timestamp)
 
     timestamp_result_dicts = {}
@@ -327,8 +333,7 @@ def process_prediction_dir(base_path, timestamp, tasks):
 
 
 def worker_func(base_path, timestamp, tasks):
-    print(colored(f"Processing Timestamp {timestamp}", 'blue'))
-    return process_prediction_dir(base_path=base_path, timestamp=timestamp, tasks=tasks)
+    return process_timestamp(base_path=base_path, timestamp=timestamp, tasks=tasks)
 
 
 # ==========================================================================================
