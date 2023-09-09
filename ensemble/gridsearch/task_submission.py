@@ -748,7 +748,7 @@ def main(tasks):
 
         for strategy in ENSEMBLE_STRATEGIES:
             if strategy != "expert":
-                for top_k in range(1, top_k_max):
+                for top_k in range(2, top_k_max):
                     process_strategy(strategy=strategy,
                                      top_k=top_k,
                                      task=task)
