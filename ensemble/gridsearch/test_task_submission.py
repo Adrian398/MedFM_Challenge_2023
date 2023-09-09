@@ -220,7 +220,6 @@ def get_prediction_timestamp_dirs(base_path):
 
 
 def build_pred_log_string(pred_dict, task):
-    timestamp = pred_dict.get('timestamp', "None")
     model_cnt = pred_dict.get('model_count', "None")
     strategy = pred_dict.get('strategy', "None")
     top_k = pred_dict.get('top_k', "None")
@@ -237,7 +236,7 @@ def build_pred_log_string(pred_dict, task):
     model_cnt = str(model_cnt) if model_cnt is not None else "None"
     prediction_dir = prediction_dir.split(f"{task}/")[1]
 
-    return f"{model_cnt:<15} {strategy:<20} {top_k_str:<10} {prediction_dir:<25} {value_string}\n"
+    return f"{model_cnt:<15} {strategy:<20} {top_k_str:<10} {prediction_dir:<40} {value_string}\n"
 
 
 def load_submission_cfg_dump(dir):
@@ -363,7 +362,7 @@ def main():
             log_file_path = os.path.join(base_path, timestamp, task, 'log.txt')
             with open(log_file_path, 'w') as log_file:
                 log_file.write(
-                    f"{'Timestamp':<20} {'Model-Count':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
+                    f"{'Model-Count':<15} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
 
             for strategy, results in strategies.items():
                 print(f"    Strategy: {strategy}")
