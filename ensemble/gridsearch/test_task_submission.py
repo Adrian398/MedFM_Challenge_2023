@@ -361,9 +361,9 @@ def main():
     with Pool(num_processes) as pool:
         results_list = pool.starmap(worker_func, args)
 
-    result = {key: value for d in results_list for key, value in d.items()}
+    timestamps_dict = {key: value for d in results_list for key, value in d.items()}
 
-    for timestmap_key, timestamp_dict in result.values():
+    for timestmap_key, timestamp_dict in timestamps_dict.items():
         for task_key, task_dict in timestamp_dict.items():
             log_file_path = os.path.join(base_path, timestmap_key, task_key, 'log.txt')
 
