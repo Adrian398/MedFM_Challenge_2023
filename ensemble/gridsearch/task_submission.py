@@ -584,6 +584,7 @@ def create_submission(strategy, top_k, is_evaluation, task):
         submission_type = 'validation'
 
     submission_dir = create_output_dir(strategy=strategy,
+                                       top_k=top_k,
                                        task=task,
                                        is_evaluation=is_evaluation,
                                        submission_type=submission_type)
@@ -689,14 +690,14 @@ def print_overall_model_summary(tasks):
     return total_models
 
 
-def create_output_dir(task, strategy, is_evaluation, submission_type):
+def create_output_dir(task, top_k, strategy, is_evaluation, submission_type):
     # Create Output Directory
     submission_dir = os.path.join("submissions", "evaluation", TIMESTAMP)
 
     if is_evaluation:
         success = f"Created {colored('Evaluation', 'red')} directory {submission_dir}"
     else:
-        submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, strategy)
+        submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, strategy, top_k)
         success = f"Created {colored(task.capitalize(), 'blue')} {submission_type} directory at {submission_dir}"
 
     os.makedirs(submission_dir)
