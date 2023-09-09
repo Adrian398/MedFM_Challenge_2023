@@ -359,24 +359,19 @@ def main():
     result = {k: v for d in results_list for k, v in d.items()}
 
     for timestamp, tasks in result.items():
-        print(f"Processing Timestamp: {timestamp}")
-
         for task, strategies in tasks.items():
-            print(f"  Task: {task}")
-
             log_file_path = os.path.join(base_path, timestamp, task, 'log.txt')
+
             with open(log_file_path, 'w') as log_file:
                 log_file.write(
                     f"{'Model-Count':<15} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
+                print(f"Wrote Log file to {log_file_path}")
 
             for strategy, results in strategies.items():
-                print(f"    Strategy: {strategy}")
-
                 for result in results:
                     with open(log_file_path, 'a') as log_file:
                         log_pred_str = build_pred_log_string(result, task)
                         log_file.write(log_pred_str)
-                        print(f"Wrote Log file to {log_file_path}")
 
 
 if __name__ == "__main__":
