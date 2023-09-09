@@ -263,6 +263,8 @@ def compile_results_to_json(base_path, timestamp, tasks):
         "aggregates": 0
     }
 
+    best_ensembles_per_task = {}
+
     metrics_sum = 0.0
     metrics_count = 0
 
@@ -289,6 +291,8 @@ def compile_results_to_json(base_path, timestamp, tasks):
                     "Top-K": top_k,
                     "Aggregate": aggregate
                 }
+
+        best_ensembles_per_task[task] = best_result
 
         strategy = best_result['Strategy']
         top_k = best_result['Top-K']
@@ -321,8 +325,15 @@ def compile_results_to_json(base_path, timestamp, tasks):
     with open(output_json_path, 'w') as file:
         json.dump(final_results, file, indent=4)
 
+    # Save the best ensembles to the timestamp directory
+    best_ensembles_output_path = os.path.join(base_path, timestamp, "best_ensemble_per_task.json")
+    with open(best_ensembles_output_path, 'w') as file:
+        json.dump(best_ensembles_per_task, file, indent=4)
+
     print(f"Wrote Final Result JSON file to {output_json_path}")
     print(json.dumps(final_results, indent=4))
+    print(f"\nWrote Best Ensembles JSON file to {best_ensembles_output_path}")
+    print(json.dumps(best_ensembles_per_task, indent=4))
 
     return final_results
 
