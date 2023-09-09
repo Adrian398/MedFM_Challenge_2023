@@ -254,6 +254,51 @@ def extract_number_from_string(s):
     return int(''.join(filter(str.isdigit, s)))
 
 
+def compile_results_to_json(base_path, tasks, output_json_path):
+    results = {
+        "tasks": {},
+        "best": {}
+    }
+
+    for task in tasks:
+        task_path = os.path.join(base_path, task, 'log.txt')
+        with open(task_path, 'r') as file:
+            lines = file.readlines()
+
+        # Skip the header
+        lines = lines[1:]
+
+        task_results = []
+        best_aggregate = float('-inf')  # Assuming that lower values are better. Change this if needed.
+
+        for line in lines:
+            model_count, strategy, top_k, prediction_dir, aggregate = line.split()
+            aggregate_value = float(aggregate)
+
+            if aggregate_value < best_aggregate:
+                best_aggregate = aggregate_value
+                results["best"][task] = {
+                    "Model-Count": model_count,
+                    "Strategy": strategy,
+                    "Top-K": top_k,
+                    "PredictionDir": prediction_dir,
+                    "Aggregate": aggregate
+                }
+
+            task_results.append({
+                "Model-Count": model_count,
+                "Strategy": strategy,
+                "Top-K": top_k,
+                "Aggregate": aggregate
+            })
+
+        results["tasks"][task] = task_results
+
+    # Write the results to the JSON file
+    with open(output_json_path, 'w') as file:
+        json.dump(results, file, indent=4)
+
+
 def process_top_k(top_k, strategy_path, task):
     top_k_path = strategy_path
     if top_k:
@@ -343,8 +388,6 @@ def worker_func(base_path, timestamp, tasks):
 
 # ==========================================================================================
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
-
-
 # ==========================================================================================
 
 
@@ -382,6 +425,7 @@ def main():
                     log_file.write(line)
                 print(f"Wrote Log file to {timestmap_key}/{task_key}/log.txt")
 
+        compile_results_to_json(base_path=base_path, tasks=tasks, output_json_path="results.json")
 
 if __name__ == "__main__":
     main()
