@@ -456,7 +456,7 @@ def build_final_submission(base_path, timestamp, strategies):
             if strategy == "expert":
                 result_path = os.path.join(submission_path, task, strategy)
             else:
-                result_path = os.path.join(submission_path, task, strategy, top_k)
+                result_path = os.path.join(submission_path, task, strategy, f"top-{top_k}")
 
             csv_file_dir = os.path.join('result', exp)
             source_csv_file_dir = os.path.join(result_path, csv_file_dir)
