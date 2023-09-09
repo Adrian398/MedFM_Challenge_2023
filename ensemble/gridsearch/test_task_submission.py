@@ -197,6 +197,7 @@ def sort_key(timestamp):
 
 
 def get_prediction_timestamp_dirs(base_path):
+    tasks = ['chest', 'colon', 'endo']
     all_dirs = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
     timestamp_dirs = [d for d in all_dirs if TIMESTAMP_PATTERN.match(d)]
 
@@ -208,11 +209,12 @@ def get_prediction_timestamp_dirs(base_path):
             valid_dirs.append(d)
             continue
 
-        # Check one directory deeper for 'result' sub-folders
-        subdirs = [sub for sub in os.listdir(os.path.join(base_path, d)) if
-                   os.path.isdir(os.path.join(base_path, d, sub))]
-        if any(os.path.exists(os.path.join(base_path, d, sub, "result")) for sub in subdirs):
-            valid_dirs.append(d)
+        # Check within each task directory
+        for task in tasks:
+            task_dir = os.path.join(base_path, d, task)
+            if os.path.exists(task_dir) and os.path.exists(os.path.join(task_dir, "result")):
+                valid_dirs.append(d)
+                break
 
     # If no valid directories are found, return an empty list
     if not valid_dirs:
