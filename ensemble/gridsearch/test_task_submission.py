@@ -359,9 +359,11 @@ def main():
                 log_file.write(
                     f"{'Timestamp':<20} {'Model-Count':<20} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
 
-                for strategy in result_dict[timestamp][task]:
-                    print(strategy)
-                    exit()
+                for _, task_value in result_dict[timestamp].items():
+                    for _, strategy_values in task_value.items():
+                        for strategy in strategy_values:
+                            print(strategy)
+                            exit()
                     # log_pred_str = build_pred_log_string(log_pred_dict)
                     # log_file.write(log_pred_str)
 
