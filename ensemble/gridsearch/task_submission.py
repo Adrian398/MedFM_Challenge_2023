@@ -131,7 +131,7 @@ def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, top_k=3):
     return selected_models_for_classes, model_occurrences
 
 
-def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, k=3, log_scale=False):
+def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, top_k=3, log_scale=False):
     """
     Merges model runs using a difference in performance weight approach for the N best model runs for each class.
     """
@@ -155,8 +155,10 @@ def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, k=3, l
 
         # Sort the models based on aggregate value and take the top N models
         class_models.sort(key=lambda x: x[1], reverse=True)
-        top_n_models = class_models[:k]
-
+        top_n_models = class_models[:top_k]
+        print(top_k)
+        print(len(top_n_models))
+        print(len(top_n_models[-1]))
         # Use the difference in performance from the k-th model as weights
         kth_value = top_n_models[-1][1]
 
@@ -166,7 +168,7 @@ def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, k=3, l
             weights = [value - kth_value for _, value in top_n_models]
 
         # Debug print #1: Print the top k model names and their weights
-        print(f"Top {k} models for class {i + 1}:")
+        print(f"Top {top_k} models for class {i + 1}:")
         for (model_run, _), weight in zip(top_n_models, weights):
             print(f"Model: {model_run['name']}, Weight: {weight:.4f}")
 
@@ -607,18 +609,16 @@ def create_submission(strategy, top_k, is_evaluation, task):
                                                                            task=task,
                                                                            out_path=out_path)
             elif strategy == "pd-weighted":
-                selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(
-                    model_runs=model_runs,
-                    task=task,
-                    out_path=out_path,
-                    k=top_k)
+                selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                               task=task,
+                                                                                               out_path=out_path,
+                                                                                               top_k=top_k)
             elif strategy == "pd-log-weighted":
-                selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(
-                    model_runs=model_runs,
-                    task=task,
-                    out_path=out_path,
-                    k=top_k,
-                    log_scale=True)
+                selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                               task=task,
+                                                                                               out_path=out_path,
+                                                                                               top_k=top_k,
+                                                                                               log_scale=True)
             elif strategy == "rank-based-weighted":
                 selected_models, model_occurrences = rank_based_weight_ensemble_strategy(model_runs=model_runs,
                                                                                          task=task,
@@ -698,7 +698,7 @@ def create_output_dir(task, top_k, strategy, is_evaluation, submission_type):
         success = f"Created {colored('Evaluation', 'red')} directory {submission_dir}"
     else:
         if top_k:
-            submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, strategy, str(top_k))
+            submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, strategy, f"top-{str(top_k)}")
         else:
             submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, strategy)
         success = f"Created {colored(task.capitalize(), 'blue')} {submission_type} directory at {submission_dir}"
