@@ -15,7 +15,12 @@ from ensemble.gridsearch.task_submission import ENSEMBLE_STRATEGIES
 from ensemble.utils.constants import shots, exps, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT
 from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_multilabel
 
+
 TIMESTAMP_PATTERN = re.compile(r"\d{2}-\d{2}_\d{2}-\d{2}-\d{2}")
+
+
+def nested_defaultdict():
+    return defaultdict(nested_defaultdict)
 
 
 def generate_json(results):
@@ -305,7 +310,7 @@ def process_strategy(timestamp_path, strategy, task):
 def process_prediction_dir(base_path, timestamp, task):
     timestamp_path = os.path.join(base_path, timestamp)
 
-    strategy_results_dict = defaultdict()
+    strategy_results_dict = defaultdict(nested_defaultdict)
     for strategy in ENSEMBLE_STRATEGIES:
         result_dicts = process_strategy(timestamp_path=timestamp_path,
                                         strategy=strategy,
