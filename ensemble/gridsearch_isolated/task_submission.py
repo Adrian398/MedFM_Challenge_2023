@@ -696,7 +696,8 @@ def create_output_dir(task, top_k, strategy, submission_type):
             submission_dir = os.path.join(base_path, submission_type, TIMESTAMP, task, strategy)
         success = f"Created {colored(task.capitalize(), 'blue')} {submission_type} directory at {submission_dir}"
 
-    os.makedirs(submission_dir)
+    if not os.path.isdir(submission_dir):
+        os.makedirs(submission_dir)
     for exp in exps:
         os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
     print(success)
