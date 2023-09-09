@@ -464,7 +464,7 @@ def build_final_submission(base_path, timestamp, strategies):
             for csv_file in os.listdir(source_csv_file_dir):
                 if fnmatch.fnmatch(csv_file, csv_file_pattern):
                     source_csv_file = os.path.join(source_csv_file_dir, csv_file)
-                    destination = os.path.join(target_dir, csv_file, csv_file)
+                    destination = os.path.join(target_dir, csv_file_dir, csv_file)
                     shutil.copy(source_csv_file, destination)
                     print(f"Copied {csv_file} from {source_csv_file} to {destination}")
 
