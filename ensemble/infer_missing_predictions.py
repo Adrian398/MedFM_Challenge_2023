@@ -303,14 +303,17 @@ if __name__ == "__main__":  # Important when using multiprocessing
 
         image_base_path = os.path.join("/scratch", "medfm", "medfm-challenge", "data", f"MedFMC_{img_suffix_choice}")
 
-        # In case of endo models trained on pre-processed data, use pre-processed images for prediction CSVs
-        if "pre_processed" in model_name and task == "endo":
-            print("Considering pre-processed endo images")
-            images_path = os.path.join(image_base_path, task, "pre_processed_images")
-            out_filepath = os.path.join(model_path, f"{task}-pp_{shot}-shot_{csv_suffix_choice}.csv")
-        else:
-            images_path = os.path.join(image_base_path, task, "images")
-            out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_{csv_suffix_choice}.csv")
+        # # In case of endo models trained on pre-processed data, use pre-processed images for prediction CSVs
+        # if "pre_processed" in model_name and task == "endo":
+        #     print("Considering pre-processed endo images")
+        #     images_path = os.path.join(image_base_path, task, "pre_processed_images")
+        #     out_filepath = os.path.join(model_path, f"{task}-pp_{shot}-shot_{csv_suffix_choice}.csv")
+        # else:
+        #     images_path = os.path.join(image_base_path, task, "images")
+        #     out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_{csv_suffix_choice}.csv")
+
+        images_path = os.path.join(image_base_path, task, "images")
+        out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_{csv_suffix_choice}.csv")
 
         command = (f"python tools/infer.py "
                    f"{config_filepath} "
