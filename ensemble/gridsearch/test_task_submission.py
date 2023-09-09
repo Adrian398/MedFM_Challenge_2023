@@ -361,7 +361,9 @@ def main():
     with Pool(num_processes) as pool:
         results_list = pool.starmap(worker_func, args)
 
-    result = {key: value for task in results_list for key, value in task.items()}
+    result = {key: value for d in results_list for key, value in d.items()}
+
+    print(result)
 
     for timestamp, tasks in result.items():
         for task, strategies in tasks.items():
