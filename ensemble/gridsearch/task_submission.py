@@ -685,22 +685,25 @@ def print_overall_model_summary(tasks):
 
 def create_output_dir(task, top_k, strategy, submission_type):
     base_path = os.path.join("ensemble", "gridsearch")
-    submission_dir = os.path.join(base_path, submission_type, TIMESTAMP, task)
+    submission_dir = os.path.join(base_path, submission_type, TIMESTAMP, task, strategy)
 
-    if submission_type == "submission":
-        success = f"Created {colored(task.capitalize(), 'red')} {submission_type} directory {submission_dir}"
+    color = 'red'
+    if submission_type == "validation":
+        color = 'blue'
+
+    if top_k:
+        submission_dir = os.path.join(submission_dir, f"top-{str(top_k)}")
     else:
-        if top_k:
-            submission_dir = os.path.join(base_path, submission_type, TIMESTAMP, task, strategy, f"top-{str(top_k)}")
-        else:
-            submission_dir = os.path.join(base_path, submission_type, TIMESTAMP, task, strategy)
-        success = f"Created {colored(task.capitalize(), 'blue')} {submission_type} directory at {submission_dir}"
+        submission_dir = os.path.join(submission_dir)
 
     if not os.path.isdir(submission_dir):
         os.makedirs(submission_dir)
+
     for exp in exps:
         os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
-    print(success)
+
+    print(f"Created {colored(task.capitalize(), color)} {submission_type} directory {submission_dir}")
+
     return submission_dir
 
 
