@@ -254,6 +254,7 @@ def process_top_k(top_k, strategy_path, task):
     top_k_path = strategy_path
     if top_k:
         top_k_path = os.path.join(strategy_path, top_k)
+        print(colored(f"\t\t\tProcessing Top-K {top_k}", 'light_grey'))
 
     ensemble_cfg = load_submission_cfg_dump(dir=top_k_path)
 
@@ -288,7 +289,7 @@ def process_top_k(top_k, strategy_path, task):
 
 
 def process_strategy(task_path, strategy, task):
-    print(colored(f"Processing Strategy {strategy}", 'light_red'))
+    print(colored(f"\t\tProcessing Strategy {strategy}", 'light_red'))
 
     strategy_path = os.path.join(task_path, strategy)
 
@@ -305,7 +306,7 @@ def process_strategy(task_path, strategy, task):
 
 
 def process_task(timestamp_path, task):
-    print(colored(f"Processing Task {task}", 'cyan'))
+    print(colored(f"\tProcessing Task {task}", 'cyan'))
 
     task_path = os.path.join(timestamp_path, task)
 
