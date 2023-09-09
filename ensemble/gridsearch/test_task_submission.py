@@ -254,10 +254,12 @@ def extract_number_from_string(s):
     return int(''.join(filter(str.isdigit, s)))
 
 
-def compile_results_to_json(base_path, timestamp, tasks, output_json_path):
+def compile_results_to_json(base_path, timestamp, tasks):
+    output_json_path = os.path.join(base_path, timestamp, "best_ensembles.json")
+    print(f"Wrote Result JSON file to {output_json_path}")
+
     results = {
-        "tasks": {},
-        "best": {}
+        "tasks": {}
     }
 
     for task in tasks:
@@ -268,16 +270,16 @@ def compile_results_to_json(base_path, timestamp, tasks, output_json_path):
         # Skip the header
         lines = lines[1:]
 
-        task_results = []
-        best_aggregate = float('-inf')  # Assuming that lower values are better. Change this if needed.
+        best_aggregate = float('inf')
 
         for line in lines:
             model_count, strategy, top_k, prediction_dir, aggregate = line.split()
             aggregate_value = float(aggregate)
 
+            # Check if this strategy is the best for this task
             if aggregate_value < best_aggregate:
                 best_aggregate = aggregate_value
-                results["best"][task] = {
+                results["tasks"][task] = {
                     "Model-Count": model_count,
                     "Strategy": strategy,
                     "Top-K": top_k,
@@ -285,16 +287,6 @@ def compile_results_to_json(base_path, timestamp, tasks, output_json_path):
                     "Aggregate": aggregate
                 }
 
-            task_results.append({
-                "Model-Count": model_count,
-                "Strategy": strategy,
-                "Top-K": top_k,
-                "Aggregate": aggregate
-            })
-
-        results["tasks"][task] = task_results
-
-    # Write the results to the JSON file
     with open(output_json_path, 'w') as file:
         json.dump(results, file, indent=4)
 
@@ -425,7 +417,7 @@ def main():
                     log_file.write(line)
                 print(f"Wrote Log file to {timestamp_key}/{task_key}/log.txt")
 
-        compile_results_to_json(base_path=base_path, timestamp=timestamp_key, tasks=tasks, output_json_path="results.json")
+        compile_results_to_json(base_path=base_path, timestamp=timestamp_key, tasks=tasks)
 
 
 if __name__ == "__main__":
