@@ -319,7 +319,6 @@ def process_prediction_dir(base_path, timestamp, tasks):
     timestamp_path = os.path.join(base_path, timestamp)
 
     timestamp_result_dicts = defaultdict(nested_defaultdict)
-    print(type(tasks), tasks)
     for task in tasks:
         task_result_dicts = process_task(timestamp_path=timestamp_path, task=task)
         timestamp_result_dicts[timestamp] = task_result_dicts
