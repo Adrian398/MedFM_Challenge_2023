@@ -13,7 +13,7 @@ from sklearn.metrics import average_precision_score
 from termcolor import colored
 from tqdm import tqdm
 
-from ensemble.gridsearch_isolated.task_submission import ENSEMBLE_STRATEGIES
+from ensemble.gridsearch.task_submission import ENSEMBLE_STRATEGIES
 from ensemble.utils.constants import shots, exps, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT
 from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_multilabel
 
@@ -434,7 +434,7 @@ WORK_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
 
 
 def main():
-    base_path = "ensemble/gridsearch_isolated"
+    base_path = "ensemble/gridsearch"
     timestamps = get_prediction_timestamp_dirs(base_path)
 
     # Number of processes to spawn. You can adjust this value as needed.

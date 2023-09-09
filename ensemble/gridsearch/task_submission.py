@@ -684,7 +684,7 @@ def print_overall_model_summary(tasks):
 
 
 def create_output_dir(task, top_k, strategy, submission_type):
-    base_path = os.path.join("ensemble", "gridsearch_isolated")
+    base_path = os.path.join("ensemble", "gridsearch")
     submission_dir = os.path.join(base_path, submission_type, TIMESTAMP, task)
 
     if submission_type == "submission":

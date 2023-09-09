@@ -9,7 +9,7 @@ import time
 
 logging.basicConfig(level=logging.INFO)
 
-gridsearch_config_path = "gridsearch_isolated/configs/config.py"
+gridsearch_config_path = "gridsearch/configs/config.py"
 
 BASE_PARAMS_CONFIG = {
     'model': ["clip-b_vpt", "dinov2-b_vpt", "eva-b_vpt", "swin-b_vpt", "swinv2-b", "vit-b_vpt"],
@@ -104,7 +104,7 @@ def run_commands_on_cluster(commands, gpu=None):
     gpu_cycle = itertools.cycle(gpus)
 
     # Ensure the log directory exists
-    log_dir = "gridsearch_isolated/output"
+    log_dir = "gridsearch/output"
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
