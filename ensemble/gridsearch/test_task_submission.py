@@ -314,12 +314,12 @@ def process_task(timestamp_path, task):
 
     task_path = os.path.join(timestamp_path, task)
 
-    task_result_dicts = {task: {}}
+    task_result_dicts = defaultdict()
     for strategy in ENSEMBLE_STRATEGIES:
         strategy_result_dicts = process_strategy(task_path=task_path,
                                                  strategy=strategy,
                                                  task=task)
-        task_result_dicts[task][strategy] = strategy_result_dicts
+        task_result_dicts[strategy] = strategy_result_dicts
 
     return task_result_dicts
 
