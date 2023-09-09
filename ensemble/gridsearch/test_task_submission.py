@@ -263,27 +263,25 @@ def compile_results_to_json(base_path, timestamp, tasks):
     }
 
     for task in tasks:
-        task_path = os.path.join(base_path, timestamp, task, 'log.txt')
-        with open(task_path, 'r') as file:
+        task_log_path = os.path.join(base_path, timestamp, task, 'log.txt')
+        with open(task_log_path, 'r') as file:
             lines = file.readlines()
 
         # Skip the header
         lines = lines[1:]
 
-        best_aggregate = float('inf')
+        best_aggregate = float('-inf')
 
         for line in lines:
-            model_count, strategy, top_k, prediction_dir, aggregate = line.split()
+            model_count, strategy, top_k, _, aggregate = line.split()
             aggregate_value = float(aggregate)
 
-            # Check if this strategy is the best for this task
             if aggregate_value < best_aggregate:
                 best_aggregate = aggregate_value
                 results["tasks"][task] = {
                     "Model-Count": model_count,
                     "Strategy": strategy,
                     "Top-K": top_k,
-                    "PredictionDir": prediction_dir,
                     "Aggregate": aggregate
                 }
 
