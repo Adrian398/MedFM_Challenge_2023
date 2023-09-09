@@ -317,6 +317,7 @@ def main():
     task = "colon"
     base_path = "ensemble/gridsearch"
     timestamps = get_prediction_timestamp_dirs(base_path)
+    print(timestamps)
 
     # Number of processes to spawn. You can adjust this value as needed.
     num_processes = min(cpu_count(), len(timestamps))
