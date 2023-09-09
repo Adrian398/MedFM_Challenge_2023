@@ -357,6 +357,8 @@ def main():
     with Pool(num_processes) as pool:
         results_list = pool.starmap(worker_func, args)
 
+    print(results_list)
+    exit()
     result = {k: v for d in results_list for k, v in d.items()}
 
     for timestamp, tasks in result.items():
