@@ -258,9 +258,13 @@ def compile_results_to_json(base_path, timestamp, tasks):
     output_json_path = os.path.join(base_path, timestamp, "best_ensembles.json")
     print(f"Wrote Result JSON file to {output_json_path}")
 
-    results = {
-        "tasks": {}
+    final_results = {
+        "task": {},
+        "aggregates": 0
     }
+
+    metrics_sum = 0.0
+    metrics_count = 0
 
     for task in tasks:
         task_log_path = os.path.join(base_path, timestamp, task, 'log.txt')
@@ -271,6 +275,7 @@ def compile_results_to_json(base_path, timestamp, tasks):
         lines = lines[1:]
 
         best_aggregate = float('-inf')
+        best_result = None
 
         for line in lines:
             model_count, strategy, top_k, _, aggregate = line.split()
@@ -278,15 +283,48 @@ def compile_results_to_json(base_path, timestamp, tasks):
 
             if aggregate_value > best_aggregate:
                 best_aggregate = aggregate_value
-                results["tasks"][task] = {
+                best_result = {
                     "Model-Count": model_count,
                     "Strategy": strategy,
                     "Top-K": top_k,
                     "Aggregate": aggregate
                 }
 
+        strategy = best_result['Strategy']
+        top_k = best_result['Top-K']
+
+        if strategy == "expert":
+            results_file_path = os.path.join(base_path, timestamp, task, strategy, "results.json")
+        else:
+            results_file_path = os.path.join(base_path, timestamp, task, strategy, f"top-{top_k}", "results.json")
+
+        with open(results_file_path, 'r') as results_file:
+            results_data = json.load(results_file)
+
+        # Merge the task results into the main results
+        for exp_key, exp_value in results_data['task'].items():
+            if exp_key not in final_results['task']:
+                final_results['task'][exp_key] = {}
+            final_results['task'][exp_key].update(exp_value)
+
+            # Accumulate metrics for aggregate computation
+            for _, metrics in exp_value.items():
+                for metric_score in metrics.values():
+                    metrics_sum += float(metric_score)
+                    metrics_count += 1
+
+    # Compute the aggregate value
+    final_results["aggregates"] = metrics_sum / metrics_count if metrics_count != 0 else 0
+
+    # Save the final results to the timestamp directory
+    output_json_path = os.path.join(base_path, timestamp, "results.json")
     with open(output_json_path, 'w') as file:
-        json.dump(results, file, indent=4)
+        json.dump(final_results, file, indent=4)
+
+    print(f"Wrote Final Result JSON file to {output_json_path}")
+    print(json.dumps(final_results, indent=4))
+
+    return final_results
 
 
 def process_top_k(top_k, strategy_path, task):
@@ -415,7 +453,7 @@ def main():
                     log_file.write(line)
                 print(f"Wrote Log file to {timestamp_key}/{task_key}/log.txt")
 
-        compile_results_to_json(base_path=base_path, timestamp=timestamp_key, tasks=tasks)
+        result = compile_results_to_json(base_path=base_path, timestamp=timestamp_key, tasks=tasks)
 
 
 if __name__ == "__main__":
