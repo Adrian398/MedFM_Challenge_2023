@@ -257,7 +257,7 @@ def extract_number_from_string(s):
 
 
 def compile_results_to_json(base_path, timestamp, tasks):
-    output_json_path = os.path.join(base_path, timestamp, "best_ensembles.json")
+    output_json_path = os.path.join(base_path, timestamp, 'validation', "best_ensembles.json")
     print(f"Wrote Result JSON file to {output_json_path}")
 
     final_results = {
@@ -271,7 +271,7 @@ def compile_results_to_json(base_path, timestamp, tasks):
     metrics_count = 0
 
     for task in tasks:
-        task_log_path = os.path.join(base_path, timestamp, task, 'log.txt')
+        task_log_path = os.path.join(base_path, timestamp, 'validation', task, 'log.txt')
         with open(task_log_path, 'r') as file:
             lines = file.readlines()
 
@@ -300,9 +300,10 @@ def compile_results_to_json(base_path, timestamp, tasks):
         top_k = best_result['Top-K']
 
         if strategy == "expert":
-            results_file_path = os.path.join(base_path, timestamp, task, strategy, "results.json")
+            results_file_path = os.path.join(base_path, timestamp, 'validation', task, strategy, "results.json")
         else:
-            results_file_path = os.path.join(base_path, timestamp, task, strategy, f"top-{top_k}", "results.json")
+            results_file_path = os.path.join(base_path, timestamp, 'validation', task, strategy,
+                                             f"top-{top_k}", "results.json")
 
         with open(results_file_path, 'r') as results_file:
             results_data = json.load(results_file)
@@ -323,12 +324,12 @@ def compile_results_to_json(base_path, timestamp, tasks):
     final_results["aggregates"] = metrics_sum / metrics_count if metrics_count != 0 else 0
 
     # Save the final results to the timestamp directory
-    output_json_path = os.path.join(base_path, timestamp, "results.json")
+    output_json_path = os.path.join(base_path, timestamp, 'validation', "results.json")
     with open(output_json_path, 'w') as file:
         json.dump(final_results, file, indent=4)
 
     # Save the best ensembles to the timestamp directory
-    best_ensembles_output_path = os.path.join(base_path, timestamp, "best_ensemble_per_task.json")
+    best_ensembles_output_path = os.path.join(base_path, timestamp, 'validation', "best_ensemble_per_task.json")
     with open(best_ensembles_output_path, 'w') as file:
         json.dump(best_ensembles_per_task, file, indent=4)
 
@@ -413,7 +414,7 @@ def process_task(timestamp_path, task):
 def process_timestamp(base_path, timestamp, tasks):
     print(colored(f"Processing Timestamp {timestamp}", 'blue'))
 
-    timestamp_path = os.path.join(base_path, timestamp)
+    timestamp_path = os.path.join(base_path, timestamp, 'validation')
 
     timestamp_result_dicts = {timestamp: {}}
     for task in tasks:
@@ -450,7 +451,7 @@ def main():
 
     for timestamp_key, timestamp_dict in timestamps_dict.items():
         for task_key, task_dict in timestamp_dict.items():
-            log_file_path = os.path.join(base_path, timestamp_key, task_key, 'log.txt')
+            log_file_path = os.path.join(base_path, timestamp_key, 'validation', task_key, 'log.txt')
 
             lines = []
             for strategy_key, strategy_list in task_dict.items():
