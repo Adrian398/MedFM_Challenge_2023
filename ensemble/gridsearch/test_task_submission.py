@@ -261,7 +261,7 @@ def compile_results_to_json(base_path, timestamp, tasks, output_json_path):
     }
 
     for task in tasks:
-        task_path = os.path.join(base_path, task, 'log.txt')
+        task_path = os.path.join(base_path, timestamp, task, 'log.txt')
         with open(task_path, 'r') as file:
             lines = file.readlines()
 
