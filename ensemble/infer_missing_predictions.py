@@ -188,11 +188,11 @@ def get_model_dirs_without_prediction(task, shot):
 
         # Skip if prediction csv file is present
         if contains_csv_file(task, shot, abs_model_dir):
-            # If model was trained with pre-processed data and is endo, update CSVs
-            if "pre_processed" in model_dir and task == "endo":
-                print(colored(f"Endo Model {model_dir} with pre-processed data added to models for update.", 'red'))
-            else:
-                continue
+            # # If model was trained with pre-processed data and is endo, update CSVs
+            # if "pre_processed" in model_dir and task == "endo":
+            #     print(colored(f"Endo Model {model_dir} with pre-processed data added to models for update.", 'red'))
+            # else:
+            continue
 
         model_dirs.append(model_dir)
     return model_dirs
