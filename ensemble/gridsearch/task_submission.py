@@ -772,7 +772,7 @@ ENSEMBLE_STRATEGIES = ["expert",
 
 if __name__ == "__main__":
     #selected_task = select_task()
-    task_list = ["colon"]
+    task_list = ["colon", "endo"]
     root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 
     TOTAL_MODELS = defaultdict()
