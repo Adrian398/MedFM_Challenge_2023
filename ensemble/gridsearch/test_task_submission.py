@@ -332,6 +332,10 @@ def compile_results_to_json(base_path, timestamp, tasks):
         top_k = best_result['Top-K']
 
         if "expert" in strategy:
+            # Migration
+            if strategy == "expert-per-class":
+                strategy = "expert"
+
             results_file_path = os.path.join(base_path, timestamp, 'validation', task, strategy, "results.json")
         else:
             results_file_path = os.path.join(base_path, timestamp, 'validation', task, strategy,
@@ -459,7 +463,7 @@ def process_strategy(task_path, strategy, task):
 
     # Skip strategy if directory is missing
     if not os.path.isdir(strategy_path):
-        print(f"Skipping non-existent strategy directory: {strategy_path}")
+        print(f"\t\tSkipping non-existent strategy directory: {strategy_path}")
         return None
 
     result_dicts = []
@@ -482,9 +486,11 @@ def process_task(timestamp_path, task):
     task_path = os.path.join(timestamp_path, task)
 
     if os.path.isdir(task_path):
-        strategy_dirs = os.listdir(task_path)
+        strategy_dirs = [d for d in os.listdir(task_path) if os.path.isdir(os.path.join(task_path, d))]
+        if not strategy_dirs:
+            raise ValueError(f"No strategy directories found in {task_path}")
     else:
-        raise ValueError(f"No strategy directories found in {task_path}")
+        raise ValueError(f"{task_path} is not a directory.")
 
     task_result_dicts = defaultdict()
     for strategy in strategy_dirs:
@@ -536,8 +542,6 @@ def main():
         timestamps = [timestamp]
     else:
         timestamps = get_prediction_timestamp_dirs(base_path)
-
-    print(timestamps)
 
     # Number of processes to spawn. You can adjust this value as needed.
     num_processes = min(cpu_count(), len(timestamps))
