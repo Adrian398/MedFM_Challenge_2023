@@ -354,8 +354,14 @@ def print_report_for_setting(full_model_list, task, shot, exp):
     model_view.sort(key=lambda x: x[2])
     max_char_length = max(len(path) for path, _, _, _, _, _, _ in model_view)
 
-    for model_path_rel, agg_name, agg_val, m1_name, m1_val, m2_name, m2_val in model_view:
-        print(f"Model: {model_path_rel:{max_char_length + 2}} {agg_name}: {agg_val:.4f}  "
+    for idx, (model_path_rel, agg_name, agg_val, m1_name, m1_val, m2_name, m2_val) in enumerate(model_view):
+        # Check if it's the last model in the list
+        if idx == len(model_view) - 1:
+            model_name_str = colored(f"Model: {model_path_rel:{max_char_length + 2}}", on_color='on_blue')
+        else:
+            model_name_str = f"Model: {model_path_rel:{max_char_length + 2}}"
+
+        print(f"{model_name_str} {agg_name}: {agg_val:.4f}  "
               f"{m1_name}: {m1_val:.4f}  {m2_name}: {m2_val:.4f}")
 
 
