@@ -69,7 +69,7 @@ val_evaluator = train_evaluator
 test_evaluator = train_evaluator
 
 default_hooks = dict(
-    checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="AveragePrecision", rule="greater"),
+    checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="multi-label/mAP", rule="greater"),
     logger=dict(interval=10),
 )
 
