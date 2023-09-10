@@ -119,6 +119,7 @@ def find_and_validate_json_files(model_dir, task):
     json_files_found = False  # To track if we found any JSON files
     performance_json_count = 0  # To track the number of "performance.json" files found
 
+    model_name = model_dir.split('work_dirs/')[1]
     for dirpath, dirnames, filenames in os.walk(model_dir):
         for filename in filenames:
             if filename.endswith('.json'):
@@ -134,21 +135,21 @@ def find_and_validate_json_files(model_dir, task):
                         performance_json_count += 1
 
                         if "MAP_class1" not in data:
-                            print(colored(f"Found 'performance.json' but mAP per class (e.g. 'MAP_class1') missing", 'red'))
-                            return False
+                            print(colored(f"'MAP_class1' missing: {model_name}", 'red'))
+                            return True
 
                         if task == "endo" and "AUC/AUC_multilabe" not in data:
-                            print(colored(f"Found 'performance.json' but 'AUC/AUC_multilabe' missing", 'red'))
-                            return False
+                            print(colored(f"'AUC/AUC_multilabe' missing: {model_name}", 'red'))
+                            return True
 
                         for index in range(1, TASK_2_CLASS_COUNT[task]):
                             if f"MAP_class{index}" in data and data[f"MAP_class{index}"] == -0.0:
-                                print(colored(f"The value of 'MAP_class{index}' is -0.0.", 'red'))
-                                return False
+                                print(colored(f"Value of 'MAP_class{index}' is -0.0: {model_name}", 'red'))
+                                return True
 
                         if task == "colon" and "accuracy/top1" not in data:
-                            print(colored(f"Found 'performance.json' but accuracy/top1 missing", 'red'))
-                            return False
+                            print(colored(f"'accuracy/top1' missing: {model_name}", 'red'))
+                            return True
 
                         if task == "colon" and "accuracy/top1" in data:
                             model_path = dirpath.split("work_dirs/")[1]
@@ -167,7 +168,7 @@ def find_and_validate_json_files(model_dir, task):
                     return False
 
     if not json_files_found:
-        my_print(f"No JSON files found for {model_dir}")
+        my_print(f"No JSON files found for {model_name}")
         return False
 
     if performance_json_count != 1:
