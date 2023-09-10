@@ -6,8 +6,8 @@ _base_ = [
 ]
 
 lr = 1e-6
-train_bs = 8
-val_bs = 32
+train_bs = 16
+val_bs = 64
 dataset = 'endo'
 model_name = 'swinv2'
 exp_num = 1
