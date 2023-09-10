@@ -813,8 +813,7 @@ if __name__ == "__main__":
 
     TASKS = ["colon", "endo", "chest"]
     SUBMISSION_TYPES = ["validation"]
-    ENSEMBLE_STRATEGIES = ["expert-per-class",
-                           "expert-per-task"]
+
 
     TOTAL_MODELS = defaultdict()
     TOP_K_MAX = defaultdict()
