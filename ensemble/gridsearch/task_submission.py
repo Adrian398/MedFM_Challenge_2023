@@ -805,7 +805,7 @@ TASKS = ["colon", "endo", "chest"]
 if __name__ == "__main__":
     root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 
-    TASKS = ["colon"]
+    TASKS = ["colon", "endo", "chest"]
     SUBMISSION_TYPES = ["validation"]
     ENSEMBLE_STRATEGIES = ["expert-per-class",
                            "expert-per-task"]
