@@ -49,7 +49,7 @@ def get_prediction_dir():
 
 # ================================================================================
 SCRATCH_BASE_PATH = '/scratch/medfm/medfm-challenge'
-VAL_TARGET_PATH = 'ensemble/validation'
+VAL_TARGET_PATH = 'ensemble/gridsearch/'
 EVAL_BASE_PATH = 'submissions/evaluation'
 TASKS = ["colon", "endo", "chest"]
 SHOTS = ["1-shot", "5-shot", "10-shot"]
@@ -80,7 +80,7 @@ for name, task, shot, exp in model_infos:
         exit()
 
     # Construct target path and ensure that the directory exists
-    target_path = os.path.join(VAL_TARGET_PATH, TIMESTAMP, 'result', exp)
+    target_path = os.path.join(VAL_TARGET_PATH, TIMESTAMP, 'validation', 'result', exp)
     os.makedirs(target_path, exist_ok=True)
 
     target_file_path = os.path.join(target_path, file_name)
