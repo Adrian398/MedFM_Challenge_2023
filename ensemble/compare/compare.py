@@ -54,11 +54,12 @@ def main():
     parser.add_argument("timestamp2", help="Second timestamp for the directory containing the second JSON file.")
     args = parser.parse_args()
 
-    base_path = "ensemble/validation"
+    #base_path = "ensemble/validation"
+    base_path = "submission/evaluation"
     src_data = load_json_from_directory(base_path, args.timestamp1)
     trg_data = load_json_from_directory(base_path, args.timestamp2)
 
-    acc_map_data, auc_heatmap_data = compare_metric_jsons(src_data=src_data,trg_data=trg_data)
+    acc_map_data, auc_heatmap_data = compare_metric_jsons(src_data=src_data, trg_data=trg_data)
 
     acc_map_heatmap_df = pd.DataFrame(acc_map_data)
     auc_heatmap_df = pd.DataFrame(auc_heatmap_data)
@@ -69,12 +70,12 @@ def main():
     # Create the first heatmap in the top section of the grid
     ax0 = plt.subplot(gs[0])
     sns.heatmap(acc_map_heatmap_df, cmap='RdBu', center=0, annot=True, fmt=".2f", ax=ax0)
-    ax0.set_title('Differences in ACC_metric (colon) & mAP_metric (chest, endo)')
+    ax0.set_title('Differences in ACC_metric / mAP_metric')
 
     # Create the second heatmap in the bottom section of the grid
     ax1 = plt.subplot(gs[1])
     sns.heatmap(auc_heatmap_df, cmap='RdBu', center=0, annot=True, fmt=".2f", ax=ax1)
-    ax1.set_title('Differences in AUC_metric for All Tasks')
+    ax1.set_title('Differences in AUC_metric')
 
     # Adjust the space between the plots
     plt.tight_layout()
