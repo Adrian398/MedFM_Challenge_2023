@@ -739,6 +739,7 @@ def select_ensemble_strategy():
 # ============================================================
 root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 ENSEMBLE_STRATEGIES = ["expert", "weighted", "pd-weighted", "pd-log-weighted", "rank-based-weighted", "diversity-weighted"]
+PRINT_ONLY = True
 # ============================================================
 
 
@@ -750,10 +751,11 @@ if __name__ == "__main__":
     TOTAL_MODELS = print_overall_model_summary()
     print_model_reports()
 
-    eval_output_dir = create_submission(is_evaluation=True)
-    val_output_dir = create_submission(is_evaluation=False)
+    if not PRINT_ONLY:
+        eval_output_dir = create_submission(is_evaluation=True)
+        val_output_dir = create_submission(is_evaluation=False)
 
-    if eval_output_dir:
-        print(f"\nCreated Evaluation at {colored(eval_output_dir, 'red')}")
-    if val_output_dir:
-        print(f"Created Validation at {colored(val_output_dir, 'blue')}")
+        if eval_output_dir:
+            print(f"\nCreated Evaluation at {colored(eval_output_dir, 'red')}")
+        if val_output_dir:
+            print(f"Created Validation at {colored(val_output_dir, 'blue')}")
