@@ -340,7 +340,7 @@ def compile_results_to_json(base_path, timestamp, tasks):
     print(f"\nWrote Best Ensembles JSON file to {best_ensembles_output_path}")
     print(json.dumps(best_ensembles_per_task, indent=4))
 
-    return final_results, best_ensembles_per_task
+    return final_results, best_ensembles_per_task, output_json_path, best_ensembles_output_path
 
 
 def process_top_k(top_k, strategy_path, task):
@@ -443,7 +443,7 @@ def create_subm_target_dir(timestamp):
     return submission_target_path
 
 
-def build_final_submission(base_path, timestamp, strategies):
+def build_final_submission(base_path, timestamp, strategies, ensemble_path, json_path):
     submission_path = os.path.join(base_path, timestamp, 'submission')
     target_dir = create_subm_target_dir(timestamp=timestamp)
 
@@ -467,6 +467,10 @@ def build_final_submission(base_path, timestamp, strategies):
                     destination = os.path.join(target_dir, csv_file_dir, csv_file)
                     shutil.copy(source_csv_file, destination)
                     print(f"Copied {csv_file} from {source_csv_file} to {destination}")
+
+    # Copy results.json
+    shutil.copy(json_path, target_dir)
+    shutil.copy(ensemble_path, target_dir)
 
 
 # ==========================================================================================
@@ -509,11 +513,13 @@ def main():
                     log_file.write(line)
                 print(f"Wrote Log file to {timestamp_key}/{task_key}/log.txt")
 
-        _, strategy_per_task = compile_results_to_json(base_path=base_path, timestamp=timestamp_key, tasks=tasks)
+        _, strategy_per_task, json_path, ensemble_path = compile_results_to_json(base_path=base_path, timestamp=timestamp_key, tasks=tasks)
 
         build_final_submission(base_path=base_path,
                                timestamp=timestamp_key,
-                               strategies=strategy_per_task)
+                               strategies=strategy_per_task,
+                               json_path=json_path,
+                               ensemble_path=ensemble_path)
 
 
 if __name__ == "__main__":
