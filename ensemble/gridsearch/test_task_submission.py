@@ -16,7 +16,7 @@ from termcolor import colored
 from ensemble.gridsearch.task_submission import ENSEMBLE_STRATEGIES
 from ensemble.utils.constants import shots, exps, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT, tasks
 from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_multilabel
-from utility.softmax_submission import process_csv, softmax
+from utility.softmax_submission import softmax
 
 TIMESTAMP_PATTERN = re.compile(r"\d{2}-\d{2}_\d{2}-\d{2}-\d{2}")
 
@@ -332,6 +332,8 @@ def compile_results_to_json(base_path, timestamp, tasks):
 
 def process_csv_to_df(filename):
     df = pd.read_csv(filename)
+    print(df.columns)
+    exit()
     df[['col2', 'col3']] = softmax(df[['col2', 'col3']].values)
 
     return df
