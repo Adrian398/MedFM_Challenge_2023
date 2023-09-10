@@ -355,7 +355,7 @@ def process_experiment(top_k_path, exp, task, shot):
     metrics_dict = compute_task_specific_metrics(pred_path=pred_csv_file_path, gt_path=gt_path, task=task)
 
     # Perform Softmax before score calculation
-    if task == "colon":
+    if COLON_SOFTMAX_PRINT and task == "colon":
         colon_df = process_csv_to_df(pred_csv_file_path)
         print(f"Processed {pred_csv_file_path} to dataframe")
         metrics_softmaxed_dict = compute_task_specific_metrics(pred_path=colon_df,
@@ -501,6 +501,7 @@ def build_final_submission(base_path, timestamp, strategies, ensemble_path, json
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 WORK_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
 TIMESTAMPS_2_IGNORE = ["02-09_00-32-41"]
+COLON_SOFTMAX_PRINT = False
 # ==========================================================================================
 
 
