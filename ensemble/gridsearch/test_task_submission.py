@@ -21,6 +21,28 @@ from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_mu
 TIMESTAMP_PATTERN = re.compile(r"\d{2}-\d{2}_\d{2}-\d{2}-\d{2}")
 
 
+def get_timestamp(arguments, base_path):
+    if arguments.ts:
+        return arguments.ts
+
+    return get_newest_timestamp(base_path)
+
+
+def get_newest_timestamp(base_path):
+    """Get the newest timestamp from directory names in base_path."""
+    valid_directories = []
+
+    for d in os.listdir(base_path):
+        if os.path.isdir(os.path.join(base_path, d)):
+            try:
+                date = datetime.strptime(d, "%d-%m_%H-%M-%S")
+                valid_directories.append((date, d))
+            except ValueError:
+                pass
+
+    return max(valid_directories, key=lambda x: x[0])[1]
+
+
 def create_subm_target_dir(timestamp):
     # Create submission target directory
     submission_target_path = os.path.join("submissions/evaluation", timestamp)
@@ -469,7 +491,6 @@ def process_strategy(task_path, strategy, task):
     result_dicts = []
 
     if "expert" in strategy:
-        print(f"Process expert strategy: {strategy}")
         result_dict = process_top_k(top_k=None, strategy_path=strategy_path, task=task)
         result_dicts.append(result_dict)
     else:
@@ -486,7 +507,7 @@ def process_task(timestamp_path, task):
     task_path = os.path.join(timestamp_path, task)
 
     if os.path.isdir(task_path):
-        strategy_dirs = [d for d in os.listdir(task_path) if os.path.isdir(os.path.join(task_path, d))]
+        strategy_dirs = sorted([d for d in os.listdir(task_path) if os.path.isdir(os.path.join(task_path, d))])
         if not strategy_dirs:
             raise ValueError(f"No strategy directories found in {task_path}")
     else:
@@ -530,18 +551,12 @@ BUILD_SUBMISSION = False
 # ==========================================================================================
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Test validation submission directories for their performance.")
-    parser.add_argument("--ts", help="Timestamp for the directory.")
-    args = parser.parse_args()
-
+def main(arguments):
     base_path = "ensemble/gridsearch"
 
-    timestamp = args.ts
-    if timestamp:
-        timestamps = [timestamp]
-    else:
-        timestamps = get_prediction_timestamp_dirs(base_path)
+    timestamps = [get_timestamp(arguments, base_path)]
+    print(timestamps)
+    exit()
 
     # Number of processes to spawn. You can adjust this value as needed.
     num_processes = min(cpu_count(), len(timestamps))
@@ -584,4 +599,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Test validation submission directories for their performance.")
+    parser.add_argument("--ts", help="Timestamp for the directory.")
+    args = parser.parse_args()
+
+    main(args)
