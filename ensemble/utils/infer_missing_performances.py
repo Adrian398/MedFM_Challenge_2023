@@ -136,20 +136,20 @@ def find_and_validate_json_files(model_dir, task):
 
                         if "MAP_class1" not in data:
                             print(colored(f"'MAP_class1' missing: {model_name}", 'red'))
-                            return True
+                            return False
 
                         if task == "endo" and "AUC/AUC_multilabe" not in data:
                             print(colored(f"'AUC/AUC_multilabe' missing: {model_name}", 'red'))
-                            return True
+                            return False
 
                         for index in range(1, TASK_2_CLASS_COUNT[task]):
                             if f"MAP_class{index}" in data and data[f"MAP_class{index}"] == -0.0:
                                 print(colored(f"Value of 'MAP_class{index}' is -0.0: {model_name}", 'red'))
-                                return True
+                                return False
 
                         if task == "colon" and "accuracy/top1" not in data:
                             print(colored(f"'accuracy/top1' missing: {model_name}", 'red'))
-                            return True
+                            return False
 
                         if task == "colon" and "accuracy/top1" in data:
                             model_path = dirpath.split("work_dirs/")[1]
@@ -199,7 +199,7 @@ def is_valid_model_dir(abs_model_dir, task):
     if event_file is None:
         return False
 
-    # Skip if performance json file is present
+    # Skip if performance json file is present and its present
     if find_and_validate_json_files(abs_model_dir, task):
         return False
 
