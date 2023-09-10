@@ -1,6 +1,6 @@
 # Instructions
 
-### **1. Validation Directory** 
+### **1. Create The Validation Directory** 
 Use `task_submission.py` to load the data from all available valid model runs. A model run is valid if it contains 
    - a `submission.csv` file,
    - a `validation.csv` file, and 
@@ -56,13 +56,13 @@ The leaf directories (mostly top-k) then contain:
 
 
 
-### **2. Performance Testing**
-Use `test_task_submission.py` to fetch all available timestamps from the `ensemble/gridsearch` directory. 
-The content within every `result` directory in the leaf directory that was previously created is then being assessed and 
-compared against the labels of the given validation dataset.  
+### **2. Test The Performance**
+Use `test_task_submission.py` to fetch the latest timestamps from the `ensemble/gridsearch/validation` directory. 
+The content within every `result` directory in the leaf directories that were previously created is then assessed and 
+compared against the labels of the officially given validation dataset.  
 
-#### 2.1 Ensemble: Isolated Task Results
-During this process, every leaf folder receives a `results.json` file that contains the isolated evaluated metrics for the given **task only**.
+#### 2.1 Ensemble: Create The Isolated Task Results
+During this process, every leaf folder receives a `results.json` file that contains the isolated evaluated metrics for the given task **only**.
 
 Example File:
 ``` json
@@ -117,9 +117,9 @@ Model-Count     Strategy             Top-K      PredictionDir                   
 360             rank-based-weighted  5          rank-based-weighted/top-5                94.0612 
 ```
 
-#### 2.2 Ensemble: Compound Task Results
-Now that we have (hopefully) determined the best ensemble strategy per task, this information is automatically extracted 
-to `best_ensemble_per_task.json` located within the timestamp directory (root directory of the run). The model count is a
+#### 2.2 Ensemble: Create The Compound Task Results
+Now that we have (hopefully) determined the best ensemble strategy per task, this information is automatically being extracted 
+to the `best_ensemble_per_task.json` file, which is located within the timestamp directory (root directory of the run). The model count is a
 relevant information in the way as that we can tell why two exact same runs might have different aggregate results. It increases the traceability.
 If more or less models are incorporated, the selected models, and thus the results may change.
 
@@ -149,8 +149,8 @@ Example File:
 
 With the knowledge of the best performing ensemble strategies for every task, we can then create the compound `results.json` file
 within the root directory by fusing the metrics from each individual task `results.json` together. The **aggregates** 
-value can then be calculated in the same manner as it is officially done when submitting a submission. Thus, our resulting
-aggregates value can be compared (with care) to the results on the leaderboard.
+value can then be calculated in the same manner as it is officially done when submitting an evaluation submission. Thus, our resulting
+aggregates value can be compared (with care) to the results on the leaderboard (with some bias).
 
 Example File:
 ``` json
