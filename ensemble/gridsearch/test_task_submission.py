@@ -476,10 +476,6 @@ def process_strategy(task_path, strategy, task):
     return result_dicts
 
 
-def expert_strategy_migration(strategy):
-    if strategy
-
-
 def process_task(timestamp_path, task):
     print(colored(f"\tProcessing Task {task}", 'cyan'))
 
@@ -524,6 +520,7 @@ GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 WORK_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
 TIMESTAMPS_2_IGNORE = ["02-09_00-32-41"]
 COLON_SOFTMAX_PRINT = False
+BUILD_SUBMISSION = False
 # ==========================================================================================
 
 
@@ -574,11 +571,12 @@ def main():
 
         _, strategy_per_task, json_path, ensemble_path = compile_results_to_json(base_path=base_path, timestamp=timestamp_key, tasks=tasks)
 
-        build_final_submission(base_path=base_path,
-                               timestamp=timestamp_key,
-                               strategies=strategy_per_task,
-                               json_path=json_path,
-                               ensemble_path=ensemble_path)
+        if BUILD_SUBMISSION:
+            build_final_submission(base_path=base_path,
+                                   timestamp=timestamp_key,
+                                   strategies=strategy_per_task,
+                                   json_path=json_path,
+                                   ensemble_path=ensemble_path)
 
 
 if __name__ == "__main__":
