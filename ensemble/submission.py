@@ -349,7 +349,7 @@ def print_report_for_setting(full_model_list, task, shot, exp):
         m1_name, m1_val, m2_name, m2_val = get_metrics(model_metrics=model_info['metrics'], task=task)
 
         if agg_val is not None and m1_val is not None and m2_val is not None:
-            model_view.append((model_info['name'], agg_name, agg_val, m1_name, m1_val, m2_name, m2_val))
+            model_view.append((model_info['name'].split(f"{shot}/")[1], agg_name, agg_val, m1_name, m1_val, m2_name, m2_val))
 
     model_view.sort(key=lambda x: x[2])
     max_char_length = max(len(path) for path, _, _, _, _, _, _ in model_view)
