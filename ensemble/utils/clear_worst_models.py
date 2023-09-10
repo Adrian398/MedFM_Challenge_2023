@@ -221,13 +221,13 @@ def get_worst_performing_model_dirs(task, shot):
         for model_dir, model_score in scores:
             max_char_length = max(len(m_dir.split('shot/')[1]) for m_dir, _ in scores)
             m_name = model_dir.split('shot/')[1]
-            m_name = f"{m_name:{max_char_length + 2}}"
-
+            m_name = f"| {m_name:{max_char_length + 2}}"
+            print("----")
             if model_score < threshold_score:
-                print(f"{colored(m_name, 'red')}", f"Aggregate: {model_score:.2f}", f"Threshold: {threshold_score:.2f}")
+                print(f"| {colored(m_name, 'red')}", f"Aggregate: {model_score:.2f}", f"  Threshold: {threshold_score:.2f}")
                 bad_performing_models.append(model_dir)
             else:
-                print(f"{m_name}", f"Aggregate: {model_score:.2f}", f"Threshold: {threshold_score:.2f}")
+                print(f"| {m_name}", f"Aggregate: {model_score:.2f}", f"  Threshold: {threshold_score:.2f}")
 
     return bad_performing_models, best_scores_for_each_setting
 
@@ -301,7 +301,11 @@ if __name__ == "__main__":
     print_report(worst_model_dirs, best_scores, model_performance)
 
     user_input = input(
-        "\nDo you want to delete the worst-performing model runs? (Press 'Enter' to confirm or type 'no' to exit): ")
-    if user_input.strip().lower() == '':
+        "\nDo you want to delete the worst-performing model runs? (y)es / (n)o: ")
+    input = user_input.strip().lower()
+
+    if input == 'y':
         for model_dir in worst_model_dirs:
             remove_model_dir(model_dir)
+    else:
+        exit()
