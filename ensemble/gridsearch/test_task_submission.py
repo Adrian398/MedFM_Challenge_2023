@@ -508,7 +508,7 @@ COLON_SOFTMAX_PRINT = False
 
 def main():
     parser = argparse.ArgumentParser(description="Test validation submission directories for their performance.")
-    parser.add_argument("timestamp", help="Timestamp for the directory.")
+    parser.add_argument("-timestamp", help="Timestamp for the directory.")
     args = parser.parse_args()
 
     base_path = "ensemble/gridsearch"
