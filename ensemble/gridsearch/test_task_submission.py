@@ -331,7 +331,8 @@ def compile_results_to_json(base_path, timestamp, tasks):
 
 
 def process_csv_to_df(filename):
-    df = pd.read_csv(filename)
+    df = pd.read_csv(filename, header=None)
+    print(filename)
     print(df.columns)
     exit()
     df[['col2', 'col3']] = softmax(df[['col2', 'col3']].values)
