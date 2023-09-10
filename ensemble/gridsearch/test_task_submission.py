@@ -196,7 +196,7 @@ def find_result_folder(directory):
 
 def get_prediction_timestamp_dirs(base_path):
     all_dirs = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
-    timestamp_dirs = [d for d in all_dirs if TIMESTAMP_PATTERN.match(d)]
+    timestamp_dirs = [d for d in all_dirs if TIMESTAMP_PATTERN.match(d) and d not in TIMESTAMPS_2_IGNORE]
 
     valid_dirs = [d for d in timestamp_dirs if find_result_folder(os.path.join(base_path, d))]
 
@@ -497,6 +497,7 @@ def build_final_submission(base_path, timestamp, strategies, ensemble_path, json
 # ==========================================================================================
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 WORK_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
+TIMESTAMPS_2_IGNORE = ["02-09_00-32-41"]
 # ==========================================================================================
 
 
