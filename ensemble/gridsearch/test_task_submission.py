@@ -413,6 +413,7 @@ def process_strategy(task_path, strategy, task):
 
     # Skip strategy if directory is missing
     if not os.path.isdir(strategy_path):
+        print(f"Skipping non-existent strategy directory: {strategy_path}")
         return None
 
     result_dicts = []
