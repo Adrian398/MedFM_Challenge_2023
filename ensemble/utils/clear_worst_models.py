@@ -214,14 +214,16 @@ def get_worst_performing_model_dirs(task, shot):
         best_score_for_exp_group = max(score for exp_num, score in scores)
         best_scores_for_each_setting[(task, shot, exp_num)] = best_score_for_exp_group
 
-        print("Best Score for Exp Group:", best_score_for_exp_group)
+        print(f"\nBest Score for {task}/{shot}/exp-{exp_num}:", f"{best_score_for_exp_group:.4f}")
         threshold_score = SCORE_INTERVAL * best_score_for_exp_group
 
         # Consider for deletion the models with scores below the threshold for each exp
         for model_dir, model_score in scores:
-            print("Model Score:", model_score, "Threshold:", threshold_score)
             if model_score < threshold_score:
+                print(f"Model: {colored(model_dir, 'red')}", f"Aggregate: {model_score:.2f}", f"Threshold: {threshold_score:.2f}")
                 bad_performing_models.append(model_dir)
+            else:
+                print(f"Model: {model_dir}", f"Aggregate: {model_score:.2f}", f"Threshold: {threshold_score:.2f}")
 
     return bad_performing_models, best_scores_for_each_setting
 
