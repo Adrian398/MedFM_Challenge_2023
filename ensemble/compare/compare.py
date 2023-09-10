@@ -54,7 +54,7 @@ def main():
     parser.add_argument("timestamp2", help="Second timestamp for the directory containing the second JSON file.")
     args = parser.parse_args()
 
-    base_path = "ensemble/validation"
+    base_path = "ensemble/gridsearch"
     src_data = load_json_from_directory(base_path, args.timestamp1)
     trg_data = load_json_from_directory(base_path, args.timestamp2)
 
