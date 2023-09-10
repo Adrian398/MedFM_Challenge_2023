@@ -354,9 +354,9 @@ def compile_results_to_json(base_path, timestamp, tasks):
         top_k = best_result['Top-K']
 
         if "expert" in strategy:
-            # Migration
-            if strategy == "expert-per-class":
-                strategy = "expert"
+            # # Migration
+            # if strategy == "expert-per-class" and timestamp == "09-09_22-54-23":
+            #     strategy = "expert"
 
             results_file_path = os.path.join(base_path, timestamp, 'validation', task, strategy, "results.json")
         else:
@@ -462,8 +462,8 @@ def process_top_k(top_k, strategy_path, task):
         top_k = ensemble_cfg.get('top-k', top_k)
         model_count = ensemble_cfg.get('model-count', model_count)
 
-    if strategy == "expert":
-        strategy = "expert-per-class"
+    # if strategy == "expert":
+    #     strategy = "expert-per-class"
 
     # Save JSON result to the corresponding timestamp folder
     with open(os.path.join(top_k_path, 'results.json'), 'w') as json_file:
