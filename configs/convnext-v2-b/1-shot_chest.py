@@ -59,6 +59,15 @@ custom_hooks = [dict(type='EMAHook', momentum=1e-4, priority='ABOVE_NORMAL')]
 
 randomness = dict(seed=0)
 
+train_evaluator = [
+    dict(type='AveragePrecision'),
+    dict(type='MultiLabelMetric', average='macro'),  # class-wise mean
+    dict(type='MultiLabelMetric', average='micro'),  # overall mean
+    dict(type='AUC', multilabel=True),
+    dict(type='Aggregate', multilabel=True)]
+val_evaluator = train_evaluator
+test_evaluator = train_evaluator
+
 default_hooks = dict(
     checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="AveragePrecision", rule="greater"),
     logger=dict(interval=10),
