@@ -1,3 +1,4 @@
+import argparse
 import fnmatch
 import glob
 import json
@@ -506,8 +507,17 @@ COLON_SOFTMAX_PRINT = False
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Test validation submission directories for their performance.")
+    parser.add_argument("timestamp", help="Timestamp for the directory.")
+    args = parser.parse_args()
+
     base_path = "ensemble/gridsearch"
-    timestamps = get_prediction_timestamp_dirs(base_path)
+
+    timestamp = args.timestamp
+    if timestamp:
+        timestamps = [timestamp]
+    else:
+        timestamps = get_prediction_timestamp_dirs(base_path)
 
     # Number of processes to spawn. You can adjust this value as needed.
     num_processes = min(cpu_count(), len(timestamps))
