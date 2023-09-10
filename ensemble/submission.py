@@ -546,7 +546,7 @@ def extract_data(root_dir):
         for shot in shots:
             total_iterations += len(glob.glob(os.path.join(root_dir, task, shot, '*exp[1-5]*')))
 
-    print(f"\nChecking {colored(str(total_iterations), 'blue')} models:")
+    print(f"Checking {colored(str(total_iterations), 'blue')} models:")
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
         for task in tasks:
             for shot in shots:
