@@ -288,7 +288,7 @@ def compile_results_to_json(base_path, timestamp, tasks):
         strategy = best_result['Strategy']
         top_k = best_result['Top-K']
 
-        if strategy == "expert":
+        if "expert" in strategy:
             results_file_path = os.path.join(base_path, timestamp, 'validation', task, strategy, "results.json")
         else:
             results_file_path = os.path.join(base_path, timestamp, 'validation', task, strategy,
@@ -412,7 +412,7 @@ def process_strategy(task_path, strategy, task):
     strategy_path = os.path.join(task_path, strategy)
 
     result_dicts = []
-    if strategy == "expert":
+    if "expert" in strategy:
         result_dict = process_top_k(top_k=None, strategy_path=strategy_path, task=task)
         result_dicts.append(result_dict)
     else:
@@ -478,7 +478,7 @@ def build_final_submission(base_path, timestamp, strategies, ensemble_path, json
         csv_file_pattern = f"{task}_*.csv"
 
         for exp in exps:
-            if strategy == "expert":
+            if "expert" in strategy:
                 result_path = os.path.join(submission_path, task, strategy)
             else:
                 result_path = os.path.join(submission_path, task, strategy, f"top-{top_k}")
