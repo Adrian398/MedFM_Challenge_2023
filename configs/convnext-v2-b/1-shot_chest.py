@@ -1,15 +1,16 @@
 _base_ = [
-    '../datasets/endoscopy_pre_processed.py',
+    'mmpretrain::_base_/models/convnext_v2/base.py',
+    '../datasets/chest.py',
     '../schedules/adamw_inverted_cosine_lr.py',
     'mmpretrain::_base_/default_runtime.py',
     '../custom_imports.py',
 ]
 
 lr = 1e-6
-train_bs = 12
-val_bs = 32
-dataset = 'endo'
-model_name = 'swinv2'
+train_bs = 8
+val_bs = 96
+dataset = 'chest'
+model_name = 'convnext-v2-b'
 exp_num = 1
 nshot = 1
 
@@ -17,25 +18,22 @@ run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
 work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
 
 model = dict(
-    _scope_='mmpretrain',
+    type='ImageClassifier',
     backbone=dict(
+        type='ConvNeXt',
         arch='base',
-        drop_path_rate=0.2,
-        img_size=384,
         init_cfg=dict(
-            checkpoint=
-            'https://download.openmmlab.com/mmclassification/v0/swin-v2/swinv2-base-w24_in21k-pre_3rdparty_in1k-384px_20220803-44eb70f8.pth',
             prefix='backbone',
-            type='Pretrained'),
-        pretrained_window_sizes=[12, 12, 12, 6],
-        type='SwinTransformerV2',
-        window_size=[24, 24, 24, 12]),
+            type='Pretrained',
+            checkpoint='https://download.openmmlab.com/mmclassification/v0/convnext-v2/convnext-v2-base_fcmae-in21k-pre_3rdparty_in1k-384px_20230104-379425cc.pth'
+        )
+    ),
     head=dict(
         in_channels=1024,
-        num_classes=4,
-        type='MultiLabelLinearClsHead'),
-    neck=dict(type='GlobalAveragePooling'),
-    type='ImageClassifier')
+        num_classes=19,
+        type='MultiLabelLinearClsHead'
+    )
+)
 
 train_dataloader = dict(
     batch_size=train_bs,
@@ -54,7 +52,10 @@ test_dataloader = dict(
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=15, max_epochs=500)
+train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
+
+# runtime setting
+custom_hooks = [dict(type='EMAHook', momentum=1e-4, priority='ABOVE_NORMAL')]
 
 randomness = dict(seed=0)
 
@@ -62,3 +63,4 @@ default_hooks = dict(
     checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="AveragePrecision", rule="greater"),
     logger=dict(interval=10),
 )
+
