@@ -412,9 +412,10 @@ def process_experiment(top_k_path, exp, task, shot):
 
 
 def process_top_k(top_k, strategy_path, task):
-    top_k_path = strategy_path
     if top_k:
         top_k_path = os.path.join(strategy_path, top_k)
+    else:
+        top_k_path = strategy_path
 
     ensemble_cfg = load_submission_cfg_dump(dir=top_k_path)
 
@@ -434,6 +435,9 @@ def process_top_k(top_k, strategy_path, task):
         strategy = ensemble_cfg.get('strategy', strategy)
         top_k = ensemble_cfg.get('top-k', top_k)
         model_count = ensemble_cfg.get('model-count', model_count)
+
+    if strategy == "expert":
+        strategy = "expert-per-class"
 
     # Save JSON result to the corresponding timestamp folder
     with open(os.path.join(top_k_path, 'results.json'), 'w') as json_file:
