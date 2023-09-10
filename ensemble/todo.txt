@@ -32,6 +32,7 @@ In general:
 [X] Softmax probabilities for colon in ensemble/submission -> almost no effect on validation set
 
 
-[ ] Add Multiprocessing to task_submission to improve performance
+[-] Add Multiprocessing to task_submission to improve performance
 [ ] Add "expert-per-setting" ensemble strategy
 [ ] Extend ensemble gridsearch to search the best ensemble strategy among "tasks" & "n-shot" instead of only "tasks"
+[ ] Train more specific densenet configs on chest since they outperform all other architectures
