@@ -449,7 +449,11 @@ def compute_multilabel_aggregate(model_data, class_idx=None):
 
     if auc_label not in model_metrics:
         print(f"Metric '{auc_label}' not found in {model_name}")
-        return None
+        auc_label = "AUC/AUC_multiclass"
+
+        if auc_label not in model_metrics:
+            print(f"Metric '{auc_label}' not found in {model_name}")
+            return None
 
     if map_label not in model_metrics:
         print(f"Metric '{map_label}' not found in {model_name}")
