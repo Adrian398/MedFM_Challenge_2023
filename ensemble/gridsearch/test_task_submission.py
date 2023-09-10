@@ -10,20 +10,14 @@ from multiprocessing import cpu_count, Pool
 
 import numpy as np
 import pandas as pd
-from colorama import Fore
 from sklearn.metrics import average_precision_score
 from termcolor import colored
-from tqdm import tqdm
 
 from ensemble.gridsearch.task_submission import ENSEMBLE_STRATEGIES
 from ensemble.utils.constants import shots, exps, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT, tasks
 from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_multilabel
 
 TIMESTAMP_PATTERN = re.compile(r"\d{2}-\d{2}_\d{2}-\d{2}-\d{2}")
-
-
-def nested_defaultdict():
-    return defaultdict(nested_defaultdict)
 
 
 def generate_json(results):
@@ -66,21 +60,6 @@ def generate_json(results):
     json_results["aggregates"] = str(aggregate_value)
 
     return json.dumps(json_results, indent=2), json_results["aggregates"]
-
-
-def process_experiment(top_k_path, exp, task, shot):
-    gt_path = get_gt_csv_filepath(task=task)
-    if not gt_path:
-        print(f"Ground truth file for task {task} not found.")
-        return None
-
-    pred_csv_path = os.path.join(top_k_path, "result")
-    pred_csv_file_path = get_pred_csv_filepath(pred_csv_path=pred_csv_path, exp=exp, task=task, shot=shot)
-    if not pred_csv_file_path:
-        print(f"Prediction file for {exp} and task {task} with shot {shot} not found.")
-        return None
-
-    return compute_task_specific_metrics(pred_path=pred_csv_file_path, gt_path=gt_path, task=task)
 
 
 def get_gt_csv_filepath(task):
@@ -341,6 +320,21 @@ def compile_results_to_json(base_path, timestamp, tasks):
     print(json.dumps(best_ensembles_per_task, indent=4))
 
     return final_results, best_ensembles_per_task, output_json_path, best_ensembles_output_path
+
+
+def process_experiment(top_k_path, exp, task, shot):
+    gt_path = get_gt_csv_filepath(task=task)
+    if not gt_path:
+        print(f"Ground truth file for task {task} not found.")
+        return None
+
+    pred_csv_path = os.path.join(top_k_path, "result")
+    pred_csv_file_path = get_pred_csv_filepath(pred_csv_path=pred_csv_path, exp=exp, task=task, shot=shot)
+    if not pred_csv_file_path:
+        print(f"Prediction file for {exp} and task {task} with shot {shot} not found.")
+        return None
+
+    return compute_task_specific_metrics(pred_path=pred_csv_file_path, gt_path=gt_path, task=task)
 
 
 def process_top_k(top_k, strategy_path, task):

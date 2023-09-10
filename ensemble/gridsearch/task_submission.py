@@ -778,6 +778,10 @@ TASKS = ["colon", "endo", "chest"]
 if __name__ == "__main__":
     root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 
+    TASKS = ["colon"]
+    SUBMISSION_TYPES = ["validation"]
+    ENSEMBLE_STRATEGIES = ["expert"]
+
     TOTAL_MODELS = defaultdict()
     TOP_K_MAX = defaultdict()
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
