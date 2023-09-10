@@ -134,11 +134,18 @@ def find_and_validate_json_files(model_dir, task):
                         performance_json_count += 1
 
                         if "MAP_class1" not in data:
-                            print(f"Found 'performance.json' but mAP per class (e.g. 'MAP_class1') missing")
+                            print(colored(f"Found 'performance.json' but mAP per class (e.g. 'MAP_class1') missing", 'red'))
                             return False
 
+                        if task == "endo" and "AUC/AUC_multilabe" not in data:
+                            print(colored(f"Found 'performance.json' but 'AUC/AUC_multilabe' missing", 'red'))
+
+                        for index in range(1, TASK_2_CLASS_COUNT[task]):
+                            if f"MAP_class{index}" in data and data[f"MAP_class{index}"] == -0.0:
+                                print(colored(f"The value of 'MAP_class{index}' is -0.0.", 'red'))
+
                         if task == "colon" and "accuracy/top1" not in data:
-                            print(f"Found 'performance.json' but accuracy/top1 missing")
+                            print(colored(f"Found 'performance.json' but accuracy/top1 missing", 'red'))
                             return False
 
                         if task == "colon" and "accuracy/top1" in data:
