@@ -290,7 +290,7 @@ GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 
 
 def main():
-    base_path = "ensemble/validation"
+    base_path = "ensemble/gridsearch"
     timestamp_dirs = get_prediction_timestamp_dirs(base_path)
 
     # Number of processes to spawn. You can adjust this value as needed.
