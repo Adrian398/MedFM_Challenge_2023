@@ -474,10 +474,11 @@ def find_best_model(model_list, num_classes, class_idx=None):
         else:
             raise ValueError(f"Invalid amount of classes: {num_classes}")
 
+        if score is None:
+            raise ValueError(f"Could not calculate score: {model_data['name']}")
+
         scores.append((model_data, score))
 
-    print("Classes:", num_classes, "Class_idx:", class_idx)
-    print(scores[1])
     # Sort the scores in descending order and return the first (highest) tuple
     best_model = sorted(scores, key=lambda x: x[1], reverse=True)[0]
     return best_model[0]
