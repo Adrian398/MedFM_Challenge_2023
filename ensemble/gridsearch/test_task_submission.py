@@ -21,6 +21,49 @@ from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_mu
 TIMESTAMP_PATTERN = re.compile(r"\d{2}-\d{2}_\d{2}-\d{2}-\d{2}")
 
 
+def create_subm_target_dir(timestamp):
+    # Create submission target directory
+    submission_target_path = os.path.join("submissions/evaluation", timestamp)
+    if not os.path.isdir(submission_target_path):
+        os.makedirs(submission_target_path)
+
+    for exp in exps:
+        os.makedirs(os.path.join(submission_target_path, "result", f"{exp}"), exist_ok=True)
+    print(f"Created {colored(timestamp, 'red')} submission directory {submission_target_path}")
+
+    return submission_target_path
+
+
+def build_final_submission(base_path, timestamp, strategies, ensemble_path, json_path):
+    submission_path = os.path.join(base_path, timestamp, 'submission')
+    target_dir = create_subm_target_dir(timestamp=timestamp)
+
+    for task in tasks:
+        strategy = strategies[task]['Strategy']
+        top_k = strategies[task]['Top-K']
+        csv_file_pattern = f"{task}_*.csv"
+
+        for exp in exps:
+            if "expert" in strategy:
+                result_path = os.path.join(submission_path, task, strategy)
+            else:
+                result_path = os.path.join(submission_path, task, strategy, f"top-{top_k}")
+
+            csv_file_dir = os.path.join('result', exp)
+            source_csv_file_dir = os.path.join(result_path, csv_file_dir)
+
+            for csv_file in os.listdir(source_csv_file_dir):
+                if fnmatch.fnmatch(csv_file, csv_file_pattern):
+                    source_csv_file = os.path.join(source_csv_file_dir, csv_file)
+                    destination = os.path.join(target_dir, csv_file_dir, csv_file)
+                    shutil.copy(source_csv_file, destination)
+                    print(f"Copied {csv_file} from {source_csv_file} to {destination}")
+
+    # Copy results.json
+    shutil.copy(json_path, target_dir)
+    shutil.copy(ensemble_path, target_dir)
+
+
 def generate_json(results):
     """Generate a refined JSON object with aggregates."""
 
@@ -372,7 +415,6 @@ def process_top_k(top_k, strategy_path, task):
     top_k_path = strategy_path
     if top_k:
         top_k_path = os.path.join(strategy_path, top_k)
-        #print(colored(f"\t\t\tProcessing Top-K {top_k}", 'light_grey'))
 
     ensemble_cfg = load_submission_cfg_dump(dir=top_k_path)
 
@@ -419,6 +461,7 @@ def process_strategy(task_path, strategy, task):
     result_dicts = []
 
     if "expert" in strategy:
+        print(f"Process expert strategy: {strategy}")
         result_dict = process_top_k(top_k=None, strategy_path=strategy_path, task=task)
         result_dicts.append(result_dict)
     else:
@@ -429,13 +472,22 @@ def process_strategy(task_path, strategy, task):
     return result_dicts
 
 
+def expert_strategy_migration(strategy):
+    if strategy
+
+
 def process_task(timestamp_path, task):
     print(colored(f"\tProcessing Task {task}", 'cyan'))
 
     task_path = os.path.join(timestamp_path, task)
 
+    if os.path.isdir(task_path):
+        strategy_dirs = os.listdir(task_path)
+    else:
+        raise ValueError(f"No strategy directories found in {task_path}")
+
     task_result_dicts = defaultdict()
-    for strategy in ENSEMBLE_STRATEGIES:
+    for strategy in strategy_dirs:
         strategy_result_dicts = process_strategy(task_path=task_path,
                                                  strategy=strategy,
                                                  task=task)
@@ -461,49 +513,6 @@ def process_timestamp(base_path, timestamp, tasks):
 
 def worker_func(base_path, timestamp, tasks):
     return process_timestamp(base_path=base_path, timestamp=timestamp, tasks=tasks)
-
-
-def create_subm_target_dir(timestamp):
-    # Create submission target directory
-    submission_target_path = os.path.join("submissions/evaluation", timestamp)
-    if not os.path.isdir(submission_target_path):
-        os.makedirs(submission_target_path)
-
-    for exp in exps:
-        os.makedirs(os.path.join(submission_target_path, "result", f"{exp}"), exist_ok=True)
-    print(f"Created {colored(timestamp, 'red')} submission directory {submission_target_path}")
-
-    return submission_target_path
-
-
-def build_final_submission(base_path, timestamp, strategies, ensemble_path, json_path):
-    submission_path = os.path.join(base_path, timestamp, 'submission')
-    target_dir = create_subm_target_dir(timestamp=timestamp)
-
-    for task in tasks:
-        strategy = strategies[task]['Strategy']
-        top_k = strategies[task]['Top-K']
-        csv_file_pattern = f"{task}_*.csv"
-
-        for exp in exps:
-            if "expert" in strategy:
-                result_path = os.path.join(submission_path, task, strategy)
-            else:
-                result_path = os.path.join(submission_path, task, strategy, f"top-{top_k}")
-
-            csv_file_dir = os.path.join('result', exp)
-            source_csv_file_dir = os.path.join(result_path, csv_file_dir)
-
-            for csv_file in os.listdir(source_csv_file_dir):
-                if fnmatch.fnmatch(csv_file, csv_file_pattern):
-                    source_csv_file = os.path.join(source_csv_file_dir, csv_file)
-                    destination = os.path.join(target_dir, csv_file_dir, csv_file)
-                    shutil.copy(source_csv_file, destination)
-                    print(f"Copied {csv_file} from {source_csv_file} to {destination}")
-
-    # Copy results.json
-    shutil.copy(json_path, target_dir)
-    shutil.copy(ensemble_path, target_dir)
 
 
 # ==========================================================================================
