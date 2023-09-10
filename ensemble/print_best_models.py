@@ -1,7 +1,6 @@
 from datetime import datetime
 
-from ensemble.gridsearch.task_submission import extract_data
-from ensemble.submission import print_report_for_setting
+from ensemble.submission import print_report_for_setting, extract_data
 from ensemble.utils.constants import tasks, shots, exps
 
 

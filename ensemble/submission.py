@@ -528,7 +528,7 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot):
     return None, None
 
 
-def extract_data():
+def extract_data(root_dir):
     subm_types = ["submission", "validation"]
     data_lists = {
         stype: {
@@ -739,23 +739,21 @@ def select_ensemble_strategy():
 # ============================================================
 root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 ENSEMBLE_STRATEGIES = ["expert", "weighted", "pd-weighted", "pd-log-weighted", "rank-based-weighted", "diversity-weighted"]
-PRINT_ONLY = True
 # ============================================================
 
 
 if __name__ == "__main__":
     ENSEMBLE_STRATEGY, TOP_K, LOG_SCALE = select_ensemble_strategy()
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
-    DATA_SUBMISSION, DATA_VALIDATION = extract_data()
+    DATA_SUBMISSION, DATA_VALIDATION = extract_data(root_dir=root_dir)
 
     TOTAL_MODELS = print_overall_model_summary()
     print_model_reports()
 
-    if not PRINT_ONLY:
-        eval_output_dir = create_submission(is_evaluation=True)
-        val_output_dir = create_submission(is_evaluation=False)
+    eval_output_dir = create_submission(is_evaluation=True)
+    val_output_dir = create_submission(is_evaluation=False)
 
-        if eval_output_dir:
-            print(f"\nCreated Evaluation at {colored(eval_output_dir, 'red')}")
-        if val_output_dir:
-            print(f"Created Validation at {colored(val_output_dir, 'blue')}")
+    if eval_output_dir:
+        print(f"\nCreated Evaluation at {colored(eval_output_dir, 'red')}")
+    if val_output_dir:
+        print(f"Created Validation at {colored(val_output_dir, 'blue')}")

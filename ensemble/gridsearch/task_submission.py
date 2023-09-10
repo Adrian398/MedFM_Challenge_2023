@@ -551,7 +551,7 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot):
     return None, None
 
 
-def extract_data():
+def extract_data(root_dir):
     subm_types = ["submission", "validation"]
     data_lists = {
         stype: {
@@ -814,10 +814,9 @@ if __name__ == "__main__":
     TASKS = ["colon", "endo", "chest"]
     SUBMISSION_TYPES = ["validation"]
 
-
     TOTAL_MODELS = defaultdict()
     TOP_K_MAX = defaultdict()
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
-    DATA_SUBMISSION, DATA_VALIDATION = extract_data()
+    DATA_SUBMISSION, DATA_VALIDATION = extract_data(root_dir=root_dir)
 
     main()
