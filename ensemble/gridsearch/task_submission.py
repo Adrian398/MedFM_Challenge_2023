@@ -412,10 +412,13 @@ def get_metrics(model_metrics, task):
     return calculation(model_metrics)
 
 
-def compute_colon_aggregate(model_metrics, model_name):
+def compute_binary_classification_aggregate(model_data):
     """
-    Compute metrics for the 'colon' task.
+    Compute metrics for a binary classification setting (e.g., 'colon').
+    AUC and ACC metrics are considered.
     """
+    model_metrics, model_name = model_data['metrics'], model_data['name']
+
     auc_label = "AUC/AUC_multiclass"
     acc_label = "accuracy/top1"
 
@@ -430,10 +433,19 @@ def compute_colon_aggregate(model_metrics, model_name):
     return (model_metrics[auc_label] + model_metrics[acc_label]) / 2
 
 
-def compute_multilabel_aggregate_p_class(model_metrics, model_name, class_idx):
-    """Compute metrics for multi-label tasks ('chest' and 'endo')."""
-    auc_label = f"AUC/AUC_class{class_idx}"
-    map_label = f"MAP_class{class_idx}"
+def compute_multilabel_aggregate(model_data, class_idx=None):
+    """
+    Compute metrics for multi-label setting (e.g., 'chest' and 'endo').
+    AUC and mAP metrics are considered.
+    """
+    model_metrics, model_name = model_data['metrics'], model_data['name']
+
+    auc_label = "AUC/AUC_multilabe"
+    map_label = "multi-label/mAP"
+
+    if class_idx:
+        auc_label = f"AUC/AUC_class{class_idx}"
+        map_label = f"MAP_class{class_idx}"
 
     if auc_label not in model_metrics:
         print(f"Metric '{auc_label}' not found in {model_name}")
@@ -446,39 +458,34 @@ def compute_multilabel_aggregate_p_class(model_metrics, model_name, class_idx):
     return (model_metrics[auc_label] + model_metrics[map_label]) / 2
 
 
-# Find the run with the best MAP for a given class, within a list of runs
-def find_best_model_for_class(run_list, task, class_idx):
+def find_best_model(model_list, num_classes, class_idx=None):
     scores = []
-    for model in run_list:
-        model_metrics, model_name = model['metrics'], model['name']
 
-        if task == 'colon':
-            score = compute_colon_aggregate(model_metrics, model_name)
-        elif task in ['chest', 'endo']:
-            score = compute_multilabel_aggregate_p_class(model_metrics, model_name, class_idx)
+    for model_data in model_list:
+
+        if num_classes == 2:
+            score = compute_binary_classification_aggregate(model_data=model_data)
+        elif num_classes > 2:
+            score = compute_multilabel_aggregate(model_data=model_data, class_idx=class_idx)
         else:
-            raise ValueError(f"Invalid task: {task}")
+            raise ValueError(f"Invalid amount of classes: {num_classes}")
 
-        scores.append((model, score))
+        scores.append((model_data, score))
 
     # Sort the scores in descending order and return the first (highest) tuple
     best_model = sorted(scores, key=lambda x: x[1], reverse=True)[0]
     return best_model[0]
 
 
-def expert_model_strategy(model_runs, task, out_path):
+def expert_per_class_model_strategy(model_runs, task, out_path):
     num_classes = TASK_2_CLASS_COUNT[task]
     merged_df = model_runs[0]['prediction'].iloc[:, 0:1]
 
-    # List to store which model was selected for each class
     selected_models_for_classes = []
-
-    # Dict to keep track of model occurrences
     model_occurrences = {}
 
-    # Find run with best Aggregate for each class
     for class_idx in range(num_classes):
-        best_model_run = find_best_model_for_class(model_runs, task=task, class_idx=class_idx + 1)
+        best_model_run = find_best_model(model_runs, num_classes=num_classes, class_idx=class_idx + 1)
 
         merged_df = merged_df.copy()
         merged_df.loc[:, class_idx + 1] = best_model_run["prediction"].loc[:, class_idx + 1]
@@ -495,6 +502,21 @@ def expert_model_strategy(model_runs, task, out_path):
     merged_df.to_csv(out_path, index=False, header=False)
 
     return selected_models_for_classes, model_occurrences
+
+
+def expert_per_task_model_strategy(model_runs, task, out_path):
+    best_model_run = find_best_model(model_list=model_runs, num_classes=TASK_2_CLASS_COUNT[task])
+
+    merged_df = best_model_run['prediction']
+    merged_df.to_csv(out_path, index=False, header=False)
+
+    # Extract and return the name of the best model
+    best_model_name = best_model_run['name'].split('work_dirs/')[0]
+
+    # Dict to keep track of model occurrences (in this case, just the best model)
+    model_occurrences = {best_model_name: 1}
+
+    return [f"Overall Best Model: {best_model_name}"], model_occurrences
 
 
 @lru_cache(maxsize=None)
@@ -597,10 +619,14 @@ def process_top_k(strategy, top_k, task, subm_type):
                 selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
                                                                                 task=task, shot=shot, exp=exp,
                                                                                 top_k=top_k, out_path=out_path)
-            elif strategy == "expert":
-                selected_models, model_occurrences = expert_model_strategy(model_runs=model_runs,
-                                                                           task=task,
-                                                                           out_path=out_path)
+            elif strategy == "expert-per-class":
+                selected_models, model_occurrences = expert_per_class_model_strategy(model_runs=model_runs,
+                                                                                     task=task,
+                                                                                     out_path=out_path)
+            elif strategy == "expert-per-task":
+                selected_models, model_occurrences = expert_per_task_model_strategy(model_runs=model_runs,
+                                                                                    task=task,
+                                                                                    out_path=out_path)
             elif strategy == "pd-weighted":
                 selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
                                                                                                task=task,
@@ -733,17 +759,17 @@ def select_task():
 
 
 def process_strategy(strategy, task, subm_type):
-    if strategy != "expert":
+    if "expert" in strategy:
+        process_top_k(strategy=strategy,
+                      task=task,
+                      top_k=None,
+                      subm_type=subm_type)
+    else:
         for top_k in range(2, TOP_K_MAX[task]):
             process_top_k(strategy=strategy,
                           top_k=top_k,
                           task=task,
                           subm_type=subm_type)
-    else:
-        process_top_k(strategy=strategy,
-                      task=task,
-                      top_k=None,
-                      subm_type=subm_type)
 
 
 def process_subm_type(task, subm_type):
@@ -764,7 +790,8 @@ def main():
 
 
 # ======================================================
-ENSEMBLE_STRATEGIES = ["expert",
+ENSEMBLE_STRATEGIES = ["expert-per-task",
+                       "expert-per-class",
                        "weighted",
                        "pd-weighted",
                        "pd-log-weighted",
@@ -780,7 +807,8 @@ if __name__ == "__main__":
 
     TASKS = ["colon"]
     SUBMISSION_TYPES = ["validation"]
-    ENSEMBLE_STRATEGIES = ["expert"]
+    ENSEMBLE_STRATEGIES = ["expert-per-class",
+                           "expert-per-task"]
 
     TOTAL_MODELS = defaultdict()
     TOP_K_MAX = defaultdict()
