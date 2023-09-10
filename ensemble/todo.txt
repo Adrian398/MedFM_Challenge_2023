@@ -9,7 +9,6 @@
         2 Save best MAP
 
 In general:
-[ ] Softmax probabilities for colon in ensemble/submission
 [X] Add copying of used configs to some directory in the submission directory (or add a report summarizing used models)
 [X] Local validation:
     - download annotations for validation data
@@ -28,6 +27,11 @@ In general:
 [X] 4) In submission.py implement different "ensemble strategies" and assess those with the previously written script
 
 
+[X] Recreate all Endo Submission and Validation prediction CSVs with pre-processed images
+[X] Check and align submission csv files
+[X] Softmax probabilities for colon in ensemble/submission -> almost no effect on validation set
 
-[X] Endo Evaluation UND Validation Prediction CSVs mit Preprocessed Images neu erstellen
-[ ] Alignment von Zeilen in Evaluation Submission CSVs
+
+[ ] Add Multiprocessing to task_submission to improve performance
+[ ] Add "expert-per-setting" ensemble strategy
+[ ] Extend ensemble gridsearch to search the best ensemble strategy among "tasks" & "n-shot" instead of only "tasks"
