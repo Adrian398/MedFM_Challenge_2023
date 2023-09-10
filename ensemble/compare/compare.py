@@ -11,7 +11,7 @@ import matplotlib.gridspec as gridspec
 from ensemble.utils.constants import exps, tasks, shots
 
 def load_json_from_directory(base_path, timestamp):
-    path = os.path.join(base_path, timestamp, "results.json")
+    path = os.path.join(base_path, timestamp, 'validation', "results.json")
     with open(path, 'r') as file:
         data = json.load(file)
     return data
