@@ -226,7 +226,7 @@ work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs"
 task_choices = ["colon", "endo", "chest"]
 shots = ["1", "5", "10"]
 N_inferences_per_task = 10
-batch_size = 1
+batch_size = 4
 metric_tags = {"auc": "AUC/AUC_multiclass",
                "aucl": "AUC/AUC_multilabe",
                "map": "multi-label/mAP",
