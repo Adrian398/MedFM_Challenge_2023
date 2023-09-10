@@ -16,6 +16,7 @@ from termcolor import colored
 from ensemble.gridsearch.task_submission import ENSEMBLE_STRATEGIES
 from ensemble.utils.constants import shots, exps, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT, tasks
 from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_multilabel
+from utility.softmax_submission import process_csv, softmax
 
 TIMESTAMP_PATTERN = re.compile(r"\d{2}-\d{2}_\d{2}-\d{2}-\d{2}")
 
@@ -105,13 +106,20 @@ def get_file_by_keyword(directory, keyword, file_extension=None):
     return None
 
 
-def read_and_validate_files(pred_path, gt_path, task):
+def read_and_validate_files(pred_path, gt_path, task, pred_is_df):
     """Read prediction and ground truth files, then validate the necessary columns."""
     try:
-        pred_df = pd.read_csv(pred_path)
         gt_df = pd.read_csv(gt_path)
     except Exception as e:
         raise ValueError(f"Error reading CSV files: {e}")
+
+    if pred_is_df:
+        pred_df = pred_path
+    else:
+        try:
+            pred_df = pd.read_csv(pred_path)
+        except Exception as e:
+            raise ValueError(f"Error reading CSV files: {e}")
 
     score_cols = [f'score_{i}' for i in range(TASK_2_CLASS_COUNT.get(task, 2))]
     pred_df.columns = ['img_id'] + score_cols
@@ -156,8 +164,8 @@ def compute_multilabel_metrics(merged_df, target_columns, score_cols, num_classe
     return metrics_dict
 
 
-def compute_task_specific_metrics(pred_path, gt_path, task):
-    pred_df, gt_df, score_cols = read_and_validate_files(pred_path, gt_path, task)
+def compute_task_specific_metrics(pred_path, gt_path, task, pred_is_df=False):
+    pred_df, gt_df, score_cols = read_and_validate_files(pred_path, gt_path, task, pred_is_df)
 
     target_columns = TASK_2_CLASS_NAMES.get(task, [])
 
@@ -322,6 +330,13 @@ def compile_results_to_json(base_path, timestamp, tasks):
     return final_results, best_ensembles_per_task, output_json_path, best_ensembles_output_path
 
 
+def process_csv_to_df(filename):
+    df = pd.read_csv(filename)
+    df[['col2', 'col3']] = softmax(df[['col2', 'col3']].values)
+
+    return df
+
+
 def process_experiment(top_k_path, exp, task, shot):
     gt_path = get_gt_csv_filepath(task=task)
     if not gt_path:
@@ -334,7 +349,19 @@ def process_experiment(top_k_path, exp, task, shot):
         print(f"Prediction file for {exp} and task {task} with shot {shot} not found.")
         return None
 
-    return compute_task_specific_metrics(pred_path=pred_csv_file_path, gt_path=gt_path, task=task)
+    metrics_dict = compute_task_specific_metrics(pred_path=pred_csv_file_path, gt_path=gt_path, task=task)
+
+    # Perform Softmax before score calculation
+    if task == "colon":
+        colon_df = process_csv_to_df(pred_csv_file_path)
+        print(f"Processed {pred_csv_file_path} to dataframe")
+        metrics_softmaxed_dict = compute_task_specific_metrics(pred_path=colon_df,
+                                                               gt_path=gt_path,
+                                                               task=task,
+                                                               pred_is_df=True)
+        print(f"""Colon Metrics Normal:\tAUC:{metrics_softmaxed_dict['AUC']:.4f}\tACC:{metrics_softmaxed_dict['ACC']:.4f}""")
+        print(f"""Colon Metrics Softmax:\tAUC:{metrics_softmaxed_dict['AUC']:.4f}\tACC:{metrics_softmaxed_dict['ACC']:.4f}""")
+    return metrics_dict
 
 
 def process_top_k(top_k, strategy_path, task):
