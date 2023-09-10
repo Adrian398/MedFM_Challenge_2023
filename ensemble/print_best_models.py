@@ -8,7 +8,7 @@ from ensemble.utils.constants import tasks, shots, exps
 if __name__ == "__main__":
     root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
-    DATA_SUBMISSION, DATA_VALIDATION = extract_data()
+    DATA_SUBMISSION, DATA_VALIDATION = extract_data(root_dir=root_dir)
 
     total_models = 0
     least_models = 100000
