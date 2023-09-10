@@ -153,7 +153,7 @@ def find_and_validate_json_files(model_dir, task):
 
                         if task == "colon" and "accuracy/top1" in data:
                             model_path = dirpath.split("work_dirs/")[1]
-                            print(colored(f"Accuracy found in colon: {model_path}", 'blue'))
+                            #print(colored(f"Accuracy found in colon: {model_path}", 'blue'))
 
                 except json.JSONDecodeError:
                     my_print(f"Cannot load JSON from: {filepath}")
