@@ -411,7 +411,12 @@ def process_strategy(task_path, strategy, task):
 
     strategy_path = os.path.join(task_path, strategy)
 
+    # Skip strategy if directory is missing
+    if not os.path.isdir(strategy_path):
+        return None
+
     result_dicts = []
+
     if "expert" in strategy:
         result_dict = process_top_k(top_k=None, strategy_path=strategy_path, task=task)
         result_dicts.append(result_dict)
@@ -433,7 +438,9 @@ def process_task(timestamp_path, task):
         strategy_result_dicts = process_strategy(task_path=task_path,
                                                  strategy=strategy,
                                                  task=task)
-        task_result_dicts[strategy] = strategy_result_dicts
+
+        if strategy_result_dicts:
+            task_result_dicts[strategy] = strategy_result_dicts
 
     return task_result_dicts
 
