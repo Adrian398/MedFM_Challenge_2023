@@ -362,7 +362,7 @@ def process_experiment(top_k_path, exp, task, shot):
                                                                gt_path=gt_path,
                                                                task=task,
                                                                pred_is_df=True)
-        print(f"""Colon Metrics Normal:\tAUC:{metrics_softmaxed_dict['AUC']:.4f}\tACC:{metrics_softmaxed_dict['ACC']:.4f}""")
+        print(f"""Colon Metrics Normal:\tAUC:{metrics_dict['AUC']:.4f}\tACC:{metrics_dict['ACC']:.4f}""")
         print(f"""Colon Metrics Softmax:\tAUC:{metrics_softmaxed_dict['AUC']:.4f}\tACC:{metrics_softmaxed_dict['ACC']:.4f}""")
     return metrics_dict
 
