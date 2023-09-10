@@ -555,8 +555,6 @@ def main(arguments):
     base_path = "ensemble/gridsearch"
 
     timestamps = [get_timestamp(arguments, base_path)]
-    print(timestamps)
-    exit()
 
     # Number of processes to spawn. You can adjust this value as needed.
     num_processes = min(cpu_count(), len(timestamps))
