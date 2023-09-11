@@ -233,7 +233,7 @@ def compute_task_specific_metrics(pred_path, gt_path, task, pred_is_df=False):
 
     target_columns = TASK_2_CLASS_NAMES.get(task, [])
 
-    print("pred_df:", pred_df.shape, "gt_df:", gt_df)
+    print("pred_df:", pred_df.shape, "gt_df:", gt_df.shape)
     exit()
 
     # Merge predictions and ground truth based on img_id
