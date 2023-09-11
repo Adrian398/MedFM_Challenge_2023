@@ -307,7 +307,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
             print("Considering pre-processed endo images")
             image_folder_name = "pre_processed_images"
 
-        if data_suffix == "train-test":
+        if csv_suffix_choice == "train-test":
             images_path = os.path.join("/scratch/medfm/medfm-challenge/data_anns/MedFMC", task, 'test_WithLabel.txt')
             print(f"Considering {images_path} as image path")
         else:
@@ -315,7 +315,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
             images_path = os.path.join(image_base_path, task, image_folder_name)
 
         out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_{csv_suffix_choice}.csv")
-        exit()
+
         command = (f"python tools/infer.py "
                    f"{config_filepath} "
                    f"{checkpoint_filepath} "
