@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 import sys
+from collections import defaultdict
 from multiprocessing import Pool
 
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
@@ -46,7 +47,7 @@ def print_report(invalid_model_dirs, best_scores, model_performance):
 
 def extract_exp_number(string):
     match = EXP_PATTERN.search(string)
-    return int(match.group(1)) if match else 0
+    return int(match.group(1)) if match else None
 
 
 def sort_key(entry):
@@ -193,7 +194,6 @@ def get_worst_performing_model_dirs(task, shot):
 
     model_performance = {}
     for model_dir in setting_model_dirs:
-        my_print(f"Checking {task}/{shot}-shot/{model_dir}")
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
         # Only consider model directories with a performance.json file
@@ -204,30 +204,48 @@ def get_worst_performing_model_dirs(task, shot):
 
     # Group by exp number
     exp_grouped_scores = {}
+    invalid_runs = []
     for model_dir, score in model_performance.items():
         exp_num = extract_exp_number(model_dir)
-        if exp_num not in exp_grouped_scores:
-            exp_grouped_scores[exp_num] = []
-        exp_grouped_scores[exp_num].append((model_dir, score))
 
-    for exp_num, scores in exp_grouped_scores.items():
-        best_score_for_exp_group = max(score for exp_num, score in scores)
+        if exp_num:
+            if exp_num not in exp_grouped_scores:
+                exp_grouped_scores[exp_num] = []
+            exp_grouped_scores[exp_num].append((model_dir, score))
+        else:
+            invalid_runs.append((model_dir, score))
+
+    sorted_exp_nums = sorted(exp_grouped_scores.keys(), key=lambda x: int(x))
+
+    for exp_num in sorted_exp_nums:
+        scores = exp_grouped_scores[exp_num]
+
+        best_score_for_exp_group = max(score for _, score in scores)
         best_scores_for_each_setting[(task, shot, exp_num)] = best_score_for_exp_group
-        setting = f"\nHighest Aggregate for {task}/{shot}-shot/exp-{exp_num} = {best_score_for_exp_group:.4f}"
-        print(colored(setting, 'blue'))
+
+        print(colored(f"\nHighest Aggregate for {task}/{shot}-shot/exp-{exp_num} = {best_score_for_exp_group:.4f}", 'blue'))
+
         threshold_score = SCORE_INTERVAL * best_score_for_exp_group
 
-        # Consider for deletion the models with scores below the threshold for each exp
+        models_to_print = []
+
         for model_dir, model_score in scores:
             max_char_length = max(len(m_dir.split('shot/')[1]) for m_dir, _ in scores)
             m_name = model_dir.split('shot/')[1]
-            m_name = f"| {m_name:{max_char_length + 2}}"
-            print("----")
+            m_name = f"{m_name:{max_char_length + 2}}"
+
+            print_str = f"| {m_name} Aggregate: {model_score:.2f}  Threshold: {threshold_score:.2f}"
+
             if model_score < threshold_score:
-                print(f"| {colored(m_name, 'red')}", f"Aggregate: {model_score:.2f}", f"  Threshold: {threshold_score:.2f}")
+                models_to_print.append(colored(print_str, 'red'))
                 bad_performing_models.append(model_dir)
             else:
-                print(f"| {m_name}", f"Aggregate: {model_score:.2f}", f"  Threshold: {threshold_score:.2f}")
+                models_to_print.append(print_str)
+
+        # Sort the list by scores in descending order and print
+        for model_info in sorted(models_to_print, key=lambda x: float(x.split("Aggregate: ")[1].split()[0]),
+                                 reverse=True):
+            print(model_info)
 
     return bad_performing_models, best_scores_for_each_setting
 
@@ -235,18 +253,11 @@ def get_worst_performing_model_dirs(task, shot):
 def remove_model_dir(directory):
     """Removes the specified directory after getting confirmation from the user."""
     directory_name = directory.split('work_dirs/')[1]
-    user_confirmation = input(
-        f"Delete the directory {directory_name}? ('Enter' to confirm; 'no' to exit): ").strip().lower()
-
-    if user_confirmation == 'no':
-        print("Exiting the deletion process.")
-        exit()  # Exits the program
-    elif user_confirmation == '':
-        try:
-            shutil.rmtree(directory)
-            print(f"Directory {directory_name} deleted successfully.")
-        except Exception as e:
-            print(f"Error while deleting directory {directory_name}. Error: {e}")
+    try:
+        shutil.rmtree(directory)
+        print(f"Directory {directory_name} deleted successfully.")
+    except Exception as e:
+        print(f"Error while deleting directory {directory_name}. Error: {e}")
 
 
 def process_task_shot_combination_for_worst_models(args):
