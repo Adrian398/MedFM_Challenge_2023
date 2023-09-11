@@ -13,7 +13,7 @@ model_name = 'swinv2'
 exp_num = 1
 nshot = 10
 
-run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}'
 work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
 
 model = dict(
@@ -82,6 +82,6 @@ train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=125)
 randomness = dict(seed=0)
 
 default_hooks = dict(
-    checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="AveragePrecision", rule="greater"),
+    checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
     logger=dict(interval=10),
 )
