@@ -36,3 +36,10 @@ In general:
 [ ] Add "expert-per-setting" ensemble strategy
 [ ] Extend ensemble gridsearch to search the best ensemble strategy among "tasks" & "n-shot" instead of only "tasks"
 [ ] Train more specific densenet configs on chest since they outperform all other architectures
+
+
+Meta-Classifier:
+[ ] Generate Train-Test Prediction CSV for all Models
+[ ] Generate Submission + Validation Prediction CSV for all Models
+[ ] Generate Performance JSON for all Models
+[ ] Test Training of Meta-Classifier for one specific Setting (endo/1-shot) or something similar
