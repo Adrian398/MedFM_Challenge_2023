@@ -233,6 +233,9 @@ def compute_task_specific_metrics(pred_path, gt_path, task, pred_is_df=False):
 
     target_columns = TASK_2_CLASS_NAMES.get(task, [])
 
+    print("pred_df:", pred_df.shape, "gt_df:", gt_df)
+    exit()
+
     # Merge predictions and ground truth based on img_id
     merged_df = pd.merge(pred_df, gt_df, on='img_id', how='inner')
 
@@ -558,7 +561,7 @@ def main(arguments):
     # Number of processes to spawn. You can adjust this value as needed.
     num_processes = min(cpu_count(), len(timestamps))
 
-    tasks = ["colon", "endo", "chest"]
+    tasks = ["endo"]
     args = [(base_path, timestamp, tasks) for timestamp in timestamps]
 
     with Pool(num_processes) as pool:
