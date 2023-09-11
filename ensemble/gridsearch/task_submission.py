@@ -483,6 +483,23 @@ def find_best_model(model_list, num_classes, class_idx=None):
     return best_model[0]
 
 
+def stacking_strategy(model_runs, task, out_path):
+    # Step 1: Generate Meta-Features for the Validation Set
+    num_classes = TASK_2_CLASS_COUNT[task]
+
+    # Create an empty list to store meta-features for each model
+    meta_features_list = []
+
+    for model_run in model_runs:
+        predictions = model_run['prediction'].iloc[:, 1 : num_classes + 1]  # Assuming first column is an ID or non-feature column
+        meta_features_list.append(predictions)
+
+    # Concatenate predictions horizontally to get meta-features
+    meta_features_val = pd.concat(meta_features_list, axis=1)
+    print(meta_features_val)
+    return None, None
+
+
 def expert_per_class_model_strategy(model_runs, task, out_path):
     num_classes = TASK_2_CLASS_COUNT[task]
     merged_df = model_runs[0]['prediction'].iloc[:, 0:1]
@@ -625,6 +642,9 @@ def process_top_k(strategy, top_k, task, subm_type):
                 selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
                                                                                 task=task, shot=shot, exp=exp,
                                                                                 top_k=top_k, out_path=out_path)
+            elif strategy == "stacking":
+                selected_models, model_occurrences = stacking_strategy(model_runs=model_runs, task=task,
+                                                                       out_path=out_path)
             elif strategy == "expert-per-class":
                 selected_models, model_occurrences = expert_per_class_model_strategy(model_runs=model_runs,
                                                                                      task=task,
@@ -765,7 +785,7 @@ def select_task():
 
 
 def process_strategy(strategy, task, subm_type):
-    if "expert" in strategy:
+    if "expert" in strategy or "stacking" == strategy:
         process_top_k(strategy=strategy,
                       task=task,
                       top_k=None,
@@ -798,6 +818,7 @@ def main():
 # ======================================================
 ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "expert-per-class",
+                       "stacking",
                        "weighted",
                        "pd-weighted",
                        "pd-log-weighted",
@@ -811,7 +832,7 @@ TASKS = ["colon", "endo", "chest"]
 if __name__ == "__main__":
     root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 
-    TASKS = ["colon", "endo", "chest"]
+    TASKS = ["endo"]
     SUBMISSION_TYPES = ["validation"]
 
     TOTAL_MODELS = defaultdict()
