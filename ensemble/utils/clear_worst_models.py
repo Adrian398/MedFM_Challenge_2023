@@ -215,11 +215,16 @@ def get_worst_performing_model_dirs(task, shot):
         else:
             invalid_runs.append((model_dir, score))
 
-    for exp_num, scores in exp_grouped_scores.items():
-        best_score_for_exp_group = max(score for exp_num, score in scores)
+    sorted_exp_nums = sorted(exp_grouped_scores.keys(), key=lambda x: int(x))
+
+    for exp_num in sorted_exp_nums:
+        scores = exp_grouped_scores[exp_num]
+
+        best_score_for_exp_group = max(score for _, score in scores)
         best_scores_for_each_setting[(task, shot, exp_num)] = best_score_for_exp_group
-        setting = f"\nHighest Aggregate for {task}/{shot}-shot/exp-{exp_num} = {best_score_for_exp_group:.4f}"
-        print(colored(setting, 'blue'))
+
+        print(colored(f"\nHighest Aggregate for {task}/{shot}-shot/exp-{exp_num} = {best_score_for_exp_group:.4f}", 'blue'))
+
         threshold_score = SCORE_INTERVAL * best_score_for_exp_group
 
         # Consider for deletion the models with scores below the threshold for each exp
