@@ -504,18 +504,24 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
     meta_features_df.rename({'0': 'img_id'}, axis='columns', inplace=True)
 
     print(meta_features_df.columns)
-
+    exit()
     # Create an empty list to store meta-features for each model
-    meta_features_df_list = []
+    meta_features_df_list = [meta_features_df]
+
     for exp in model_runs:
         for model_run in model_runs[exp]:
             predictions = model_run['prediction'].iloc[:, 1 : num_classes + 1]
 
             # Using a unique identifier for each prediction column, e.g. model name or index
-            for col_idx, col_name in enumerate(predictions.columns):
+            renamed_predictions = predictions.copy()
+            for col_name in predictions.columns:
                 new_col_name = f"{model_run['name']}_{col_name}"  # Adjust naming convention as needed
-                meta_features_df[new_col_name] = predictions.iloc[:, col_idx]
+                renamed_predictions.rename(columns={col_name: new_col_name}, inplace=True)
 
+            meta_features_df_list.append(renamed_predictions)
+
+    # Concatenate all DataFrames in the list horizontally
+    meta_features_df = pd.concat(meta_features_df_list, axis=1)
 
     print("pred_df:", meta_features_df.shape, meta_features_df.columns)
 
