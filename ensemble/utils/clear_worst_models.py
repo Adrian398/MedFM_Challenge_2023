@@ -243,7 +243,8 @@ def get_worst_performing_model_dirs(task, shot):
                 models_to_print.append(print_str)
 
         # Sort the list by scores in descending order and print
-        for model_info in sorted(models_to_print, key=lambda x: float(x[1].split(":")[1]), reverse=True):
+        for model_info in sorted(models_to_print, key=lambda x: float(x.split("Aggregate: ")[1].split()[0]),
+                                 reverse=True):
             print(model_info)
 
     return bad_performing_models, best_scores_for_each_setting
