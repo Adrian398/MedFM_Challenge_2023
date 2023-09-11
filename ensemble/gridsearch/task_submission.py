@@ -485,8 +485,9 @@ def find_best_model(model_list, num_classes, class_idx=None):
     return best_model[0]
 
 
-def stacking_strategy(model_runs, task, shot, exp, out_path):
-    print(f"Executing Stacking for {os.path.join(task, shot, exp)}")
+def stacking_strategy(model_runs, task, shot, subm_type, out_path):
+    print(f"Executing Stacking for {os.path.join(task, shot)}")
+
     # Step 1: Generate Meta-Features for the Validation Set
     num_classes = TASK_2_CLASS_COUNT[task]
 
@@ -500,7 +501,10 @@ def stacking_strategy(model_runs, task, shot, exp, out_path):
     # Concatenate predictions horizontally to get meta-features
     meta_features_val = pd.concat(meta_features_list, axis=1)
     print(meta_features_val.shape)
-    return None, None
+
+    # for exp in exps:
+    #     out_path = os.path.join(out_path, "result", f"{exp}", f"{task}_{shot}_{subm_type}.csv")
+    #     merged_df.to_csv(out_path, index=False, header=False)
 
 
 def expert_per_class_model_strategy(model_runs, task, out_path):
@@ -632,8 +636,17 @@ def process_top_k(strategy, top_k, task, subm_type):
                                        task=task,
                                        submission_type=subm_type)
 
-    # Perform Ensemble Strategy
+    # Perform Ensemble Strategy Task/Shot Wise
     for shot in shots:
+        model_runs = data[task][shot]
+        if len(model_runs) < 2:
+            print("Not enough runs")
+            continue
+
+        if strategy == "stacking":
+            stacking_strategy(model_runs=model_runs, task=task, shot=shot, subm_type=subm_type, out_path=submission_dir)
+
+        # Perform Ensemble Strategy Task/Shot/Exp Wise
         for exp in exps:
             model_runs = data[task][shot][exp]
             if len(model_runs) < 2:
