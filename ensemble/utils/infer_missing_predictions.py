@@ -130,7 +130,12 @@ def contains_csv_file(task, shot, model_dir):
     expected_filename = f"{task}_{shot}-shot_{csv_suffix_choice}.csv"
 
     try:
-        return os.path.exists(os.path.join(model_dir, expected_filename))
+        file_exists = os.path.exists(os.path.join(model_dir, expected_filename))
+        if file_exists:
+            print(f"File exists, but generate again: {expected_filename}")
+            return False
+        else:
+            return False
     except FileNotFoundError:
         pass
     except PermissionError as permission_error:
