@@ -30,11 +30,14 @@ model = dict(
         pretrained_window_sizes=[12, 12, 12, 6],
         type='SwinTransformerV2',
         window_size=[24, 24, 24, 12]),
+    neck=None,
     head=dict(
-        in_channels=1024,
+        type='CSRAClsHead',
         num_classes=19,
-        type='MultiLabelLinearClsHead'),
-    neck=dict(type='GlobalAveragePooling'),
+        in_channels=1024,
+        num_heads=1,
+        lam=0.1,
+        loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)),
     type='ImageClassifier')
 
 train_dataloader = dict(

@@ -34,10 +34,10 @@ model = dict(
     ),
     neck=dict(type='GlobalAveragePooling'),
     head=dict(
-        type='LinearClsHead',
-        num_classes=2,
-        in_channels=1024,
-        loss=dict(type='LabelSmoothLoss', loss_weight=1.0),
+        type='MultiLabelLinearClsHead',
+        num_classes=19,
+        in_channels=768,
+        loss=dict(type="LabelSmoothLoss", label_smooth_val=0.1, mode="multi_label", use_sigmoid=True)
     )
 )
 
