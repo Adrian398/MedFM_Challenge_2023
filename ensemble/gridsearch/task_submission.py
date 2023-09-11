@@ -616,6 +616,7 @@ def get_gt_df(task):
         cols_2_keep = TASK_2_CLASS_NAMES.get(task, None)
         if not cols_2_keep:
             raise ValueError(f"No matching class names for task {task} found")
+        cols_2_keep.insert(0, 'img_id')
 
         gt_df = pd.read_csv(gt_file_path, usecols=cols_2_keep)
 
