@@ -486,7 +486,7 @@ def find_best_model(model_list, num_classes, class_idx=None):
 
 
 def stacking_strategy(model_runs, task, shot, exp, out_path):
-    print(f"Processing {os.path.join(task, shot, exp)}")
+    print(f"Executing Stacking for {os.path.join(task, shot, exp)}")
     # Step 1: Generate Meta-Features for the Validation Set
     num_classes = TASK_2_CLASS_COUNT[task]
 
@@ -837,7 +837,7 @@ TASKS = ["colon", "endo", "chest"]
 if __name__ == "__main__":
     root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 
-    ENSEMBLE_STRATEGIES = ["weighted"]
+    ENSEMBLE_STRATEGIES = ["weighted", "stacking"]
     TASKS = ["endo"]
     SUBMISSION_TYPES = ["validation"]
 
