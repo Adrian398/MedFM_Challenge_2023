@@ -193,7 +193,7 @@ def get_worst_performing_model_dirs(task, shot):
 
     model_performance = {}
     for model_dir in setting_model_dirs:
-        my_print(f"Checking {task}/{shot}-shot/{model_dir}")
+        #my_print(f"Checking {task}/{shot}-shot/{model_dir}")
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
         # Only consider model directories with a performance.json file
