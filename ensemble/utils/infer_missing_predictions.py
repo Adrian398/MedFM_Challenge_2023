@@ -304,11 +304,12 @@ if __name__ == "__main__":  # Important when using multiprocessing
 
         image_folder_name = "images"
         if "pre_processed" in model_name and task == "endo":
+            print("Considering pre-processed endo images")
             image_folder_name = "pre_processed_images"
 
         if data_suffix == "train-test":
-            print("Considering pre-processed endo images")
             images_path = os.path.join("/scratch/medfm/medfm-challenge/data_anns/MedFMC", task, 'test_WithLabel.txt')
+            print(f"Considering {images_path} as image path")
         else:
             image_base_path = os.path.join("/scratch/medfm/medfm-challenge/data", f"MedFMC_{data_suffix}")
             images_path = os.path.join(image_base_path, task, image_folder_name)
