@@ -499,14 +499,9 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
 
     print(model_runs[list(model_runs.keys())[0]][0]['prediction'])
 
-    # First model run of the first experiment
-    first_pred_df = model_runs[list(model_runs.keys())[0]][0]['prediction']
-
-    # Rename the img_id column
-    first_pred_df.columns.values[0] = 'img_id'
-
     # Extracting the img_id column from the first model run of the first experiment
     meta_features_df = model_runs[list(model_runs.keys())[0]][0]['prediction'][[0]]
+    meta_features_df = meta_features_df.rename({'0': 'img_id'}, axis='columns')
 
     # Create an empty list to store meta-features for each model
     meta_features_df_list = []
