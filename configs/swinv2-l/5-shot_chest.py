@@ -1,17 +1,18 @@
 _base_ = [
     '../datasets/chest.py',
-    '../schedules/adamw_inverted_cosine_lr.py',
+    '../schedules/chest.py',
+    #'mmpretrain::_base_/models/swin_transformer_v2/tiny_256.py',
     'mmpretrain::_base_/default_runtime.py',
-    '../custom_imports.py',
+    '../custom_imports.py'
 ]
 
 lr = 1e-6
-train_bs = 8
-val_bs = 32
+train_bs = 1
+val_bs = 24
 dataset = 'chest'
-model_name = 'swinv2'
+model_name = 'swinv2-l'
 exp_num = 1
-nshot = 1
+nshot = 5
 seed = 2049
 randomness = dict(seed=seed)
 
@@ -21,12 +22,12 @@ work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
 model = dict(
     _scope_='mmpretrain',
     backbone=dict(
-        arch='base',
+        arch='large',
         drop_path_rate=0.2,
         img_size=384,
         init_cfg=dict(
             checkpoint=
-            'https://download.openmmlab.com/mmclassification/v0/swin-v2/swinv2-base-w24_in21k-pre_3rdparty_in1k-384px_20220803-44eb70f8.pth',
+            'https://download.openmmlab.com/mmclassification/v0/swin-v2/swinv2-large-w24_in21k-pre_3rdparty_in1k-384px_20220803-3b36c165.pth',
             prefix='backbone',
             type='Pretrained'),
         pretrained_window_sizes=[12, 12, 12, 6],
@@ -36,25 +37,46 @@ model = dict(
     head=dict(
         type='CSRAClsHead',
         num_classes=19,
-        in_channels=1024,
+        in_channels=1536,
         num_heads=1,
         lam=0.1,
         loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)),
     type='ImageClassifier')
 
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='NumpyToPIL', to_rgb=True),
+    dict(type='torchvision/RandomAffine', degrees=(-15, 15), translate=(0.05, 0.05), fill=128),
+    dict(type='PILToNumpy', to_bgr=True),
+    dict(type='RandomResizedCrop', scale=384, crop_ratio_range=(0.9, 1.0), backend='pillow', interpolation='bicubic'),
+    dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(type='PackInputs'),
+]
+
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='Resize', scale=384, backend='pillow', interpolation='bicubic'),
+    dict(type='PackInputs'),
+]
+
 train_dataloader = dict(
     batch_size=train_bs,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt'),
+    dataset=dict(
+        ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
+        pipeline=train_pipeline
+    )
 )
 
 val_dataloader = dict(
     batch_size=val_bs,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt'),
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_val_exp{exp_num}.txt',
+                 pipeline=test_pipeline)
 )
 
 test_dataloader = dict(
     batch_size=8,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt'),
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/test_WithLabel.txt',
+                 pipeline=test_pipeline),
 )
 
 optimizer = dict(betas=(0.9, 0.999), eps=1e-08, lr=lr, type='AdamW', weight_decay=0.05)
@@ -78,9 +100,7 @@ param_scheduler = [
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
-
-randomness = dict(seed=0)
+train_cfg = dict(by_epoch=True, val_interval=10, max_epochs=125)
 
 default_hooks = dict(
     checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
