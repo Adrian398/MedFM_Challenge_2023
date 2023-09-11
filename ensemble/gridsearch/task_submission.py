@@ -833,6 +833,7 @@ TASKS = ["colon", "endo", "chest"]
 if __name__ == "__main__":
     root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 
+    ENSEMBLE_STRATEGIES = ["stacking"]
     TASKS = ["endo"]
     SUBMISSION_TYPES = ["validation"]
 
