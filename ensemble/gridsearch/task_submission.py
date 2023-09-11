@@ -494,27 +494,28 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
     # Step 1: Generate Meta-Features for the Validation Set
     num_classes = TASK_2_CLASS_COUNT[task]
 
-
-
     gt_df = model_runs[list(model_runs.keys())[0]][0]['gt']
     print("gt_df:", gt_df.shape, gt_df.columns)
 
-    # Drop the 'img_id' column
-    # if 'img_id' in gt_df.columns:
-    #     gt_df = gt_df.drop('img_id', axis=1)
+    meta_features_df = model_runs[0]['prediction'][['img_id']]
 
     # Create an empty list to store meta-features for each model
     meta_features_df_list = []
-
     for exp in model_runs:
         for model_run in model_runs[exp]:
-            predictions = model_run['prediction'].iloc[:, 1 : num_classes + 1]  # Assuming first column is an ID or non-feature column
-            meta_features_df_list.append(predictions)
+            predictions = model_run['prediction'].iloc[:, 1 : num_classes + 1]
 
-    # Concatenate predictions horizontally to get meta-features
-    meta_features_df = pd.concat(meta_features_df_list, axis=1)
+            # Using a unique identifier for each prediction column, e.g. model name or index
+            for col_idx, col_name in enumerate(predictions.columns):
+                new_col_name = f"{model_run['name']}_{col_name}"  # Adjust naming convention as needed
+                meta_features_df[new_col_name] = predictions.iloc[:, col_idx]
+
 
     print("pred_df:", meta_features_df.shape, meta_features_df.columns)
+
+    # Inner merge between meta_features_df and gt_df on the img_id
+    final_df = pd.merge(meta_features_df, gt_df, on='img_id', how='inner')
+    print("final_df:", final_df.shape)
     exit()
 
     # Set up the meta-model based on the task
