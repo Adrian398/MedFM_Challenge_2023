@@ -315,7 +315,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
             images_path = os.path.join(image_base_path, task, image_folder_name)
 
         out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_{csv_suffix_choice}.csv")
-
+        exit()
         command = (f"python tools/infer.py "
                    f"{config_filepath} "
                    f"{checkpoint_filepath} "
