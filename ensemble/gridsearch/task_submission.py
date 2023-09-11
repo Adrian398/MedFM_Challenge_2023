@@ -491,8 +491,8 @@ def find_best_model(model_list, num_classes, class_idx=None):
 def stacking_strategy(model_runs, task, shot, subm_type, out_path):
     print(f"Executing Stacking for {os.path.join(task, shot)}")
 
-    print(model_runs)
-    if len(model_runs) < 1:
+    if all(not v for v in model_runs.values()):
+        print(f"No model runs for {task}/{shot}")
         return
 
     # Step 1: Generate Meta-Features for the Validation Set
