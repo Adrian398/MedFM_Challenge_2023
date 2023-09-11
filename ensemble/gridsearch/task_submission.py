@@ -78,8 +78,6 @@ def weighted_ensemble_strategy(model_runs, task, shot, exp, out_path, top_k=3):
     """
     Merges model runs using a weighted sum approach based on the N best model runs for each class.
     """
-    print("Executing weighted ensemble for ", task, shot, exp, top_k)
-
     num_classes = TASK_2_CLASS_COUNT[task]
 
     merged_df = model_runs[0]['prediction'].iloc[:, 0:1].copy()
