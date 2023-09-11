@@ -494,7 +494,10 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
     # Step 1: Generate Meta-Features for the Validation Set
     num_classes = TASK_2_CLASS_COUNT[task]
 
-    gt_df = model_runs[list(model_runs.keys())[0]][0]['gt']
+    # The ground truth of the test split from the training set
+    gt_df = model_runs[list(model_runs.keys())[0]][0]['train-test_gt']
+    print(gt_df, gt_df.shape, gt_df.columns)
+    exit()
 
     # Extracting the img_id column from the first model run of the first experiment
     meta_features_df = model_runs[list(model_runs.keys())[0]][0]['prediction'][[0]].copy()
@@ -505,7 +508,7 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
 
     for exp in model_runs:
         for model_run in model_runs[exp]:
-            predictions = model_run['prediction'].iloc[:, 1 : num_classes + 1]
+            predictions = model_run['train-test_prediction'].iloc[:, 1 : num_classes + 1]
 
             # Using a unique identifier for each prediction column, e.g. model name or index
             renamed_predictions = predictions.copy()
@@ -517,8 +520,6 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
 
     # Base Data
     meta_features_df = pd.concat(meta_features_df_list, axis=1)
-    print(gt_df.columns)
-    print(meta_features_df.columns)
     gt_df = gt_df[gt_df['img_id'].isin(meta_features_df['img_id'])]
 
     X_train = meta_features_df.drop(columns=['img_id'])
@@ -526,11 +527,13 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
 
     # Set up the meta-model based on the task
     if task == "colon":
-        #y_train = y_train['tumor']
+        y_train = y_train['tumor'].ravel()
         meta_model = LogisticRegression(solver='lbfgs', max_iter=1000)
-    else:  # for 'endo' and 'chest'
+    elif task == "endo" or task == "chest":
         base_classifier = LogisticRegression(solver='lbfgs', max_iter=1000)
         meta_model = OneVsRestClassifier(base_classifier)
+    else:
+        raise f"Invalid task specified."
 
     meta_model.fit(X=X_train, y=y_train)
 
@@ -538,7 +541,7 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
     for exp in model_runs:
         meta_features_test_list = []
         for model_run in model_runs[exp]:
-            predictions = model_run['test_prediction'].iloc[:, 1:num_classes+1]
+            predictions = model_run['prediction'].iloc[:, 1:num_classes+1]
             meta_features_test_list.append(predictions)
 
         meta_features_test = pd.concat(meta_features_test_list, axis=1)
@@ -603,8 +606,8 @@ def extract_data_tuples_from_model_runs(run_list):
     return data_list
 
 
-def get_gt_df(task):
-    gt_file_path = get_file_by_keyword(directory=GT_DIR, keyword=task, file_extension='csv')
+def get_gt_df(gt_dir, task):
+    gt_file_path = get_file_by_keyword(directory=gt_dir, keyword=task, file_extension='csv')
 
     if not gt_file_path:
         raise ValueError(f"Ground truth file for task {task} not found.")
@@ -625,6 +628,14 @@ def get_gt_df(task):
 def check_and_extract_data(model_dir_abs, subm_type, task, shot):
     model_dir_rel = model_dir_abs.split('work_dirs/')[1]
 
+    train_test_pred_df = None
+    if "stacking" in ENSEMBLE_STRATEGIES:
+        train_test_csv = os.path.join(model_dir_abs, f"{task}_{shot}_train-test.csv")
+        train_test_csv_file = glob.glob(train_test_csv)
+
+        if train_test_csv_file:
+            train_test_pred_df = pd.read_csv(train_test_csv_file[0], header=None)
+
     csv_path = os.path.join(model_dir_abs, f"{task}_{shot}_{subm_type}.csv")
     csv_files = glob.glob(csv_path)
     json_files = glob.glob(os.path.join(model_dir_abs, "*.json"))
@@ -634,7 +645,11 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot):
         if exp_num != 0:
             pred_df = pd.read_csv(csv_files[0], header=None)
             metrics = json.load(open(json_files[0], 'r'))
-            return {'prediction': pred_df, 'metrics': metrics, 'name': model_dir_rel}, exp_num
+
+            return {'prediction': pred_df,
+                    'metrics': metrics,
+                    'name': model_dir_rel,
+                    'train-test_prediction': train_test_pred_df}, exp_num
     return None, None
 
 
@@ -666,8 +681,9 @@ def load_data(total_iterations, root_dir, subm_types):
 
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
         for task in TASKS:
-            # Load ground truth once per task
-            gt_df = get_gt_df(task=task)
+            # Load ground truth for test split of training set once per task
+            gt_dir = "/scratch/medfm/medfm-challenge/data/MedFMC_train/"
+            gt_df = get_gt_df(gt_dir=gt_dir, task=task)
 
             for shot in shots:
                 path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
@@ -676,7 +692,7 @@ def load_data(total_iterations, root_dir, subm_types):
                         data, exp_num = check_and_extract_data(model_dir_abs=model_dir, subm_type=subm_type, task=task,
                                                                shot=shot)
                         if data and exp_num:
-                            data['gt'] = gt_df  # Add ground truth data to the dictionary
+                            data['train-test_gt'] = gt_df  # Add ground truth data to the dictionary
                             data_lists[subm_type][task][shot][f"exp{exp_num}"].append(data)
                     pbar.update(1)
     return data_lists
@@ -905,7 +921,6 @@ def main():
 
 
 # ======================================================
-GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "expert-per-class",
                        "stacking",
