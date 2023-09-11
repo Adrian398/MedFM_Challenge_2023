@@ -494,22 +494,28 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
     # Step 1: Generate Meta-Features for the Validation Set
     num_classes = TASK_2_CLASS_COUNT[task]
 
-    # Create an empty list to store meta-features for each model
-    meta_features_list = []
 
-    true_labels_of_validation_set = model_runs[list(model_runs.keys())[0]][0]['gt']
+
+    gt_df = model_runs[list(model_runs.keys())[0]][0]['gt']
+    print("gt_df:", gt_df.shape, gt_df.columns)
 
     # Drop the 'img_id' column
-    if 'img_id' in true_labels_of_validation_set.columns:
-        true_labels_of_validation_set = true_labels_of_validation_set.drop('img_id', axis=1)
+    # if 'img_id' in gt_df.columns:
+    #     gt_df = gt_df.drop('img_id', axis=1)
+
+    # Create an empty list to store meta-features for each model
+    meta_features_df_list = []
 
     for exp in model_runs:
         for model_run in model_runs[exp]:
             predictions = model_run['prediction'].iloc[:, 1 : num_classes + 1]  # Assuming first column is an ID or non-feature column
-            meta_features_list.append(predictions)
+            meta_features_df_list.append(predictions)
 
     # Concatenate predictions horizontally to get meta-features
-    meta_features_val = pd.concat(meta_features_list, axis=1)
+    meta_features_df = pd.concat(meta_features_df_list, axis=1)
+
+    print("pred_df:", meta_features_df.shape, meta_features_df.columns)
+    exit()
 
     # Set up the meta-model based on the task
     if task == "colon":
@@ -518,7 +524,7 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
         base_classifier = LogisticRegression(solver='lbfgs', max_iter=1000)
         meta_model = OneVsRestClassifier(base_classifier)
 
-    meta_model.fit(meta_features_val, true_labels_of_validation_set)
+    meta_model.fit(meta_features_df, gt_df)
 
     # Step 3 & 4: Generate Meta-Features for the Test Set and Make Predictions for Each Experiment
     for exp in model_runs:
