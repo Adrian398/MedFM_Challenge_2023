@@ -518,23 +518,23 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
 
             meta_features_df_list.append(renamed_predictions)
 
-    # Concatenate all DataFrames in the list horizontally
+    # Base Data
     meta_features_df = pd.concat(meta_features_df_list, axis=1)
-
-    print("final pred_df:", meta_features_df.shape, meta_features_df.columns)
-
     gt_df = gt_df[gt_df['img_id'].isin(meta_features_df['img_id'])]
-    print("final gt_df:", gt_df.shape, gt_df.columns)
-    exit()
+
+    X_train = meta_features_df.drop(columns=['img_id'])
+    y_train = gt_df.drop(columns=['img_id'])
 
     # Set up the meta-model based on the task
     if task == "colon":
+        print(y_train)
+        exit()
         meta_model = LogisticRegression(solver='lbfgs', max_iter=1000)
     else:  # for 'endo' and 'chest'
         base_classifier = LogisticRegression(solver='lbfgs', max_iter=1000)
         meta_model = OneVsRestClassifier(base_classifier)
 
-    meta_model.fit(meta_features_df, gt_df)
+    meta_model.fit(X=X_train, y=y_train)
 
     # Step 3 & 4: Generate Meta-Features for the Test Set and Make Predictions for Each Experiment
     for exp in model_runs:
@@ -920,7 +920,7 @@ if __name__ == "__main__":
     root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 
     ENSEMBLE_STRATEGIES = ["stacking"]
-    TASKS = ["endo"]
+    TASKS = ["colon"]
     SUBMISSION_TYPES = ["validation"]
 
     TOTAL_MODELS = defaultdict()
