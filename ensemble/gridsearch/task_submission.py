@@ -520,6 +520,8 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
 
     # Base Data
     meta_features_df = pd.concat(meta_features_df_list, axis=1)
+    print(gt_df.columns)
+    print(meta_features_df.columns)
     gt_df = gt_df[gt_df['img_id'].isin(meta_features_df['img_id'])]
 
     X_train = meta_features_df.drop(columns=['img_id'])
