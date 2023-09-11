@@ -192,6 +192,7 @@ def get_model_dirs_without_prediction(task, shot):
             # if "pre_processed" in model_dir and task == "endo":
             #     print(colored(f"Endo Model {model_dir} with pre-processed data added to models for update.", 'red'))
             # else:
+            print(colored(f"{abs_model_dir} contains {csv_suffix_choice} CSV file", 'blue'))
             continue
 
         model_dirs.append(model_dir)
