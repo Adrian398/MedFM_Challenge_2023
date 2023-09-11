@@ -678,10 +678,11 @@ def process_top_k(strategy, top_k, task, subm_type):
                 print("Invalid ensemble strategy!")
                 exit()
 
-            create_ensemble_report_file(task=task, shot=shot, exp=exp,
-                                        selected_models_for_classes=selected_models,
-                                        model_occurrences=model_occurrences,
-                                        root_report_dir=submission_dir)
+            if model_occurrences and submission_dir:
+                create_ensemble_report_file(task=task, shot=shot, exp=exp,
+                                            selected_models_for_classes=selected_models,
+                                            model_occurrences=model_occurrences,
+                                            root_report_dir=submission_dir)
     if subm_type == "validation":
         create_submission_cfg_dump(top_k=top_k,
                                    strategy=strategy,
