@@ -526,8 +526,7 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
 
     # Set up the meta-model based on the task
     if task == "colon":
-        print(y_train)
-        exit()
+        #y_train = y_train['tumor']
         meta_model = LogisticRegression(solver='lbfgs', max_iter=1000)
     else:  # for 'endo' and 'chest'
         base_classifier = LogisticRegression(solver='lbfgs', max_iter=1000)
