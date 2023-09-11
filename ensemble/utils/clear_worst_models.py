@@ -234,17 +234,18 @@ def get_worst_performing_model_dirs(task, shot):
             m_name = model_dir.split('shot/')[1]
             m_name = f"{m_name:{max_char_length + 2}}"
 
+            print_str = f"| {m_name} Aggregate: {model_score:.2f}  Threshold: {threshold_score:.2f}"
+
             if model_score < threshold_score:
-                models_to_print.append((f"| {colored(m_name, 'red')}", f"Aggregate: {model_score:.2f}",
-                                        f"  Threshold: {threshold_score:.2f}"))
+                models_to_print.append(colored(print_str, 'red'))
                 bad_performing_models.append(model_dir)
             else:
-                models_to_print.append(
-                    (f"| {m_name}", f"Aggregate: {model_score:.2f}", f"  Threshold: {threshold_score:.2f}"))
+                models_to_print.append(print_str)
 
         # Sort the list by scores in descending order and print
         for model_info in sorted(models_to_print, key=lambda x: float(x[1].split(":")[1]), reverse=True):
-            print(*model_info)
+            print(model_info)
+
     return bad_performing_models, best_scores_for_each_setting
 
 
