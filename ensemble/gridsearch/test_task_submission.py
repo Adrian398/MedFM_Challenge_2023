@@ -238,9 +238,6 @@ def compute_task_specific_metrics(pred_path, gt_path, task, pred_is_df=False):
     # Merge predictions and ground truth based on img_id
     merged_df = pd.merge(pred_df, gt_df, on='img_id', how='inner')
 
-    print ("merged_df:", merged_df.shape)
-    exit()
-
     if task == 'colon':
         return compute_colon_metrics(merged_df, score_cols)
     elif task in ['chest', 'endo']:
