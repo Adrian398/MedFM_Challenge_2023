@@ -494,9 +494,10 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
     # Create an empty list to store meta-features for each model
     meta_features_list = []
 
-    for model_run in model_runs:
-        predictions = model_run['prediction'].iloc[:, 1 : num_classes + 1]  # Assuming first column is an ID or non-feature column
-        meta_features_list.append(predictions)
+    for exp in model_runs:
+        for model_run in model_runs[exp]:
+            predictions = model_run['prediction'].iloc[:, 1 : num_classes + 1]  # Assuming first column is an ID or non-feature column
+            meta_features_list.append(predictions)
 
     # Concatenate predictions horizontally to get meta-features
     meta_features_val = pd.concat(meta_features_list, axis=1)
