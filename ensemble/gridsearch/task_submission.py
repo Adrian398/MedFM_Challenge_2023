@@ -483,7 +483,8 @@ def find_best_model(model_list, num_classes, class_idx=None):
     return best_model[0]
 
 
-def stacking_strategy(model_runs, task, out_path):
+def stacking_strategy(model_runs, task, shot, exp, out_path):
+    print(f"Processing {os.path.join(task, shot, exp)}")
     # Step 1: Generate Meta-Features for the Validation Set
     num_classes = TASK_2_CLASS_COUNT[task]
 
@@ -643,7 +644,8 @@ def process_top_k(strategy, top_k, task, subm_type):
                                                                                 task=task, shot=shot, exp=exp,
                                                                                 top_k=top_k, out_path=out_path)
             elif strategy == "stacking":
-                selected_models, model_occurrences = stacking_strategy(model_runs=model_runs, task=task,
+                selected_models, model_occurrences = stacking_strategy(model_runs=model_runs,
+                                                                       task=task, shot=shot, exp=exp,
                                                                        out_path=out_path)
             elif strategy == "expert-per-class":
                 selected_models, model_occurrences = expert_per_class_model_strategy(model_runs=model_runs,
