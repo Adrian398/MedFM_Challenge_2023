@@ -586,9 +586,13 @@ def get_gt_df(task):
     if not gt_file_path:
         raise ValueError(f"Ground truth file for task {task} not found.")
     try:
-        gt_df = pd.read_csv(gt_file_path)
+        columns_to_keep = ['img_id', 'ulcer', 'erosion', 'polyp', 'tumor']
+        gt_df = pd.read_csv(gt_file_path, usecols=columns_to_keep)
     except Exception as e:
         raise ValueError(f"Error reading CSV files: {e}")
+
+    print(gt_df.head())
+    exit()
 
     return gt_df
 
