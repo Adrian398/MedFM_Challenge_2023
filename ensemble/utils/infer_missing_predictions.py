@@ -231,8 +231,8 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
                "aucl": "AUC/AUC_multilabe",
                "map": "multi-label/mAP",
                "agg": "Aggregate"}
-csv_suffix_list = ["submission", "validation"]
-img_suffix_list = ["test", "val"]
+csv_suffix_list = ["submission", "validation", "train-test"]
+img_suffix_list = ["test", "val", "train"]
 csv_suffix_2_img_suffix = dict(zip(csv_suffix_list, img_suffix_list))
 # ========================================================================================
 
