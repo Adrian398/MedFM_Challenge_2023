@@ -308,7 +308,8 @@ if __name__ == "__main__":  # Important when using multiprocessing
             image_folder_name = "pre_processed_images"
 
         if csv_suffix_choice == "train-test":
-            images_path = os.path.join("/scratch/medfm/medfm-challenge/data/MedFMC", task, 'test_WithoutLabel.txt')
+            images_path = os.path.join(f"/scratch/medfm/medfm-challenge/data/MedFMC_{data_suffix}", task,
+                                       image_folder_name, 'test_WithoutLabel.txt')
             print(f"Considering {images_path} as image path")
         else:
             image_base_path = os.path.join("/scratch/medfm/medfm-challenge/data", f"MedFMC_{data_suffix}")
