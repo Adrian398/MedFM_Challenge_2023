@@ -597,8 +597,6 @@ def get_gt_df(task):
 def check_and_extract_data(model_dir_abs, subm_type, task, shot):
     model_dir_rel = model_dir_abs.split('work_dirs/')[1]
 
-    gt_df = get_gt_df(task=task)
-
     csv_path = os.path.join(model_dir_abs, f"{task}_{shot}_{subm_type}.csv")
     csv_files = glob.glob(csv_path)
     json_files = glob.glob(os.path.join(model_dir_abs, "*.json"))
@@ -608,12 +606,26 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot):
         if exp_num != 0:
             pred_df = pd.read_csv(csv_files[0], header=None)
             metrics = json.load(open(json_files[0], 'r'))
-            return {'prediction': pred_df, 'metrics': metrics, 'name': model_dir_rel, 'gt': gt_df}, exp_num
+            return {'prediction': pred_df, 'metrics': metrics, 'name': model_dir_rel}, exp_num
     return None, None
 
 
 def extract_data(root_dir):
     subm_types = ["submission", "validation"]
+
+    # Total iterations: tasks * shots * exps * model_dirs * subm_types
+    total_iterations = 0
+    for task in TASKS:
+        for shot in shots:
+            total_iterations += len(glob.glob(os.path.join(root_dir, task, shot, '*exp[1-5]*')))
+
+    print(f"Checking and extracting data for {colored(str(total_iterations), 'blue')} models:")
+    data = load_data(total_iterations=total_iterations, root_dir=root_dir, subm_types=subm_types)
+
+    return data['submission'], data['validation']
+
+
+def load_data(total_iterations, root_dir, subm_types):
     data_lists = {
         stype: {
             task: {
@@ -624,25 +636,22 @@ def extract_data(root_dir):
         } for stype in subm_types
     }
 
-    # Total iterations: tasks * shots * exps * model_dirs * subm_types
-    total_iterations = 0
-    for task in TASKS:
-        for shot in shots:
-            total_iterations += len(glob.glob(os.path.join(root_dir, task, shot, '*exp[1-5]*')))
-
-    print(f"Checking and extracting data for {colored(str(total_iterations), 'blue')} models:")
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
         for task in TASKS:
+            # Load ground truth once per task
+            gt_df = get_gt_df(task=task)
+
             for shot in shots:
                 path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
                 for model_dir in glob.glob(path_pattern):
                     for subm_type in subm_types:
-                        data, exp_num = check_and_extract_data(model_dir_abs=model_dir, subm_type=subm_type,
-                                                               task=task, shot=shot)
+                        data, exp_num = check_and_extract_data(model_dir_abs=model_dir, subm_type=subm_type, task=task,
+                                                               shot=shot)
                         if data and exp_num:
+                            data['gt'] = gt_df  # Add ground truth data to the dictionary
                             data_lists[subm_type][task][shot][f"exp{exp_num}"].append(data)
                     pbar.update(1)
-    return data_lists["submission"], data_lists["validation"]
+    return data_lists
 
 
 def create_submission_cfg_dump(top_k, total_models, strategy, root_report_dir):
