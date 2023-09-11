@@ -699,10 +699,7 @@ def load_data(total_iterations, root_dir, subm_types):
                             # If stacking strategy is contained
                             if "stacking" in ENSEMBLE_STRATEGIES:
                                 # Ensure that gt and pred files of test split from train set is existent
-                                if train_test_gt_df:
-                                    data['train-test_gt'] = train_test_gt_df  # Add ground truth data to the dictionary
-                                else:
-                                    continue
+                                data['train-test_gt'] = train_test_gt_df
                             data_lists[subm_type][task][shot][f"exp{exp_num}"].append(data)
                     pbar.update(1)
     return data_lists
