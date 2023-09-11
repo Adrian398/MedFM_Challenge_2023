@@ -495,9 +495,6 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
     num_classes = TASK_2_CLASS_COUNT[task]
 
     gt_df = model_runs[list(model_runs.keys())[0]][0]['gt']
-    print("gt_df:", gt_df.shape, gt_df.columns)
-
-    print(model_runs[list(model_runs.keys())[0]][0]['prediction'])
 
     # Extracting the img_id column from the first model run of the first experiment
     meta_features_df = model_runs[list(model_runs.keys())[0]][0]['prediction'][[0]].copy()
@@ -672,8 +669,6 @@ def load_data(total_iterations, root_dir, subm_types):
         for task in TASKS:
             # Load ground truth once per task
             gt_df = get_gt_df(task=task)
-            print(gt_df)
-            exit()
 
             for shot in shots:
                 path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
