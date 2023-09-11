@@ -646,7 +646,7 @@ def process_top_k(strategy, top_k, task, subm_type):
 
         if strategy == "stacking":
             stacking_strategy(model_runs=model_runs, task=task, shot=shot, subm_type=subm_type, out_path=submission_dir)
-            return submission_dir
+            continue
 
         # Perform Ensemble Strategy Task/Shot/Exp Wise
         for exp in exps:
