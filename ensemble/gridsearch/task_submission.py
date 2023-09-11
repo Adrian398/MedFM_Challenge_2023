@@ -510,7 +510,8 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
     for exp in model_runs:
         for model_run in model_runs[exp]:
             predictions = model_run['train-test_prediction'].iloc[:, 1 : num_classes + 1]
-
+            print(predictions.shape)
+            exit()
             # Using a unique identifier for each prediction column, e.g. model name or index
             renamed_predictions = predictions.copy()
             for col_name in predictions.columns:
