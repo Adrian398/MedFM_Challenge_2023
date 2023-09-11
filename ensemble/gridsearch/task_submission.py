@@ -521,11 +521,10 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
     # Concatenate all DataFrames in the list horizontally
     meta_features_df = pd.concat(meta_features_df_list, axis=1)
 
-    print("pred_df:", meta_features_df.shape, meta_features_df.columns)
+    print("final pred_df:", meta_features_df.shape, meta_features_df.columns)
 
-    # Inner merge between meta_features_df and gt_df on the img_id
-    final_df = pd.merge(meta_features_df, gt_df, on='img_id', how='inner')
-    print("final_df:", final_df.shape)
+    gt_df = gt_df[gt_df['img_id'].isin(meta_features_df['img_id'])]
+    print("final gt_df:", gt_df.shape, gt_df.columns)
     exit()
 
     # Set up the meta-model based on the task
