@@ -203,12 +203,14 @@ def get_worst_performing_model_dirs(task, shot):
                 model_performance[abs_model_dir] = aggregate_metric
 
     # Group by exp number
-    exp_grouped_scores = defaultdict()
+    exp_grouped_scores = {}
     invalid_runs = []
     for model_dir, score in model_performance.items():
         exp_num = extract_exp_number(model_dir)
 
         if exp_num:
+            if exp_num not in exp_grouped_scores:
+                exp_grouped_scores[exp_num] = []
             exp_grouped_scores[exp_num].append((model_dir, score))
         else:
             invalid_runs.append((model_dir, score))
