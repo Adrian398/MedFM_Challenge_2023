@@ -682,8 +682,8 @@ def load_data(total_iterations, root_dir, subm_types):
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
         for task in TASKS:
             # Load ground truth for test split of training set once per task
-            gt_dir = "/scratch/medfm/medfm-challenge/data/MedFMC_train/"
-            gt_df = get_gt_df(gt_dir=gt_dir, task=task)
+            train_test_gt_dir = f"/scratch/medfm/medfm-challenge/data/MedFMC_train/{task}"
+            train_test_gt_df = get_gt_df(gt_dir=train_test_gt_dir, task=task)
 
             for shot in shots:
                 path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
@@ -692,7 +692,7 @@ def load_data(total_iterations, root_dir, subm_types):
                         data, exp_num = check_and_extract_data(model_dir_abs=model_dir, subm_type=subm_type, task=task,
                                                                shot=shot)
                         if data and exp_num:
-                            data['train-test_gt'] = gt_df  # Add ground truth data to the dictionary
+                            data['train-test_gt'] = train_test_gt_df  # Add ground truth data to the dictionary
                             data_lists[subm_type][task][shot][f"exp{exp_num}"].append(data)
                     pbar.update(1)
     return data_lists
