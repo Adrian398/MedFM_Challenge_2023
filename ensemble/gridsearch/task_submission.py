@@ -659,10 +659,6 @@ def process_top_k(strategy, top_k, task, subm_type):
                 selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
                                                                                 task=task, shot=shot, exp=exp,
                                                                                 top_k=top_k, out_path=out_path)
-            elif strategy == "stacking":
-                selected_models, model_occurrences = stacking_strategy(model_runs=model_runs,
-                                                                       task=task, shot=shot, exp=exp,
-                                                                       out_path=out_path)
             elif strategy == "expert-per-class":
                 selected_models, model_occurrences = expert_per_class_model_strategy(model_runs=model_runs,
                                                                                      task=task,
