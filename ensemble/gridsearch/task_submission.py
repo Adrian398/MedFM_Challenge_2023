@@ -497,7 +497,8 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
     gt_df = model_runs[list(model_runs.keys())[0]][0]['gt']
     print("gt_df:", gt_df.shape, gt_df.columns)
 
-    meta_features_df = model_runs[0]['prediction'][['img_id']]
+    # Extracting the img_id column from the first model run of the first experiment
+    meta_features_df = model_runs[list(model_runs.keys())[0]][0]['prediction'][['img_id']]
 
     # Create an empty list to store meta-features for each model
     meta_features_df_list = []
