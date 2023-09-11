@@ -58,9 +58,11 @@ model = dict(
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='EfficientNetRandomCrop', scale=train_scales[arch], crop_ratio_range=(0.7, 1.0)),
+    dict(type='NumpyToPIL', to_rgb=True),
+    dict(type='torchvision/RandomAffine', degrees=(-15, 15), translate=(0.05, 0.05), fill=128),
+    dict(type='PILToNumpy', to_bgr=True),
+    dict(type='EfficientNetRandomCrop', scale=train_scales[arch], crop_ratio_range=(0.9, 1.0)),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
-    dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='PackInputs'),
 ]
 
