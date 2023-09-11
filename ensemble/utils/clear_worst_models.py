@@ -227,17 +227,24 @@ def get_worst_performing_model_dirs(task, shot):
 
         threshold_score = SCORE_INTERVAL * best_score_for_exp_group
 
-        # Consider for deletion the models with scores below the threshold for each exp
+        models_to_print = []
+
         for model_dir, model_score in scores:
             max_char_length = max(len(m_dir.split('shot/')[1]) for m_dir, _ in scores)
             m_name = model_dir.split('shot/')[1]
             m_name = f"{m_name:{max_char_length + 2}}"
+
             if model_score < threshold_score:
-                print(f"| {colored(m_name, 'red')}", f"Aggregate: {model_score:.2f}", f"  Threshold: {threshold_score:.2f}")
+                models_to_print.append((f"| {colored(m_name, 'red')}", f"Aggregate: {model_score:.2f}",
+                                        f"  Threshold: {threshold_score:.2f}"))
                 bad_performing_models.append(model_dir)
             else:
-                print(f"| {m_name}", f"Aggregate: {model_score:.2f}", f"  Threshold: {threshold_score:.2f}")
-                pass
+                models_to_print.append(
+                    (f"| {m_name}", f"Aggregate: {model_score:.2f}", f"  Threshold: {threshold_score:.2f}"))
+
+        # Sort the list by scores in descending order and print
+        for model_info in sorted(models_to_print, key=lambda x: float(x[1].split(":")[1]), reverse=True):
+            print(*model_info)
     return bad_performing_models, best_scores_for_each_setting
 
 
