@@ -9,9 +9,11 @@ from functools import lru_cache
 import numpy as np
 import pandas as pd
 from colorama import Fore
+from sklearn.linear_model import LogisticRegression
 from termcolor import colored
 from tqdm import tqdm
 
+from ensemble.gridsearch.test_task_submission import get_file_by_keyword
 from ensemble.utils.constants import shots, exps, TASK_2_CLASS_COUNT
 
 
@@ -494,6 +496,8 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
     # Create an empty list to store meta-features for each model
     meta_features_list = []
 
+    true_labels_of_validation_set = model_runs[list(model_runs.keys())[0]][0]['gt']
+
     for exp in model_runs:
         for model_run in model_runs[exp]:
             predictions = model_run['prediction'].iloc[:, 1 : num_classes + 1]  # Assuming first column is an ID or non-feature column
@@ -503,9 +507,25 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
     meta_features_val = pd.concat(meta_features_list, axis=1)
     print(meta_features_val.shape)
 
-    # for exp in exps:
-    #     out_path = os.path.join(out_path, "result", f"{exp}", f"{task}_{shot}_{subm_type}.csv")
-    #     merged_df.to_csv(out_path, index=False, header=False)
+    # Step 2: Train the Meta-Model
+    meta_model = LogisticRegression(max_iter=1000)
+    meta_model.fit(meta_features_val, true_labels_of_validation_set)
+
+    # Step 3 & 4: Generate Meta-Features for the Test Set and Make Predictions for Each Experiment
+    for exp in model_runs:
+        meta_features_test_list = []
+        for model_run in model_runs[exp]:
+            predictions = model_run['test_prediction'].iloc[:, 1:num_classes+1]
+            meta_features_test_list.append(predictions)
+
+        meta_features_test = pd.concat(meta_features_test_list, axis=1)
+
+        final_predictions = meta_model.predict(meta_features_test)
+
+        # Save the predictions to the specified output path for the current experiment
+        exp_out_path = os.path.join(out_path, "result", f"{exp}", f"{task}_{shot}_{subm_type}.csv")
+        final_predictions_df = pd.DataFrame(final_predictions)
+        final_predictions_df.to_csv(exp_out_path, index=False, header=False)
 
 
 def expert_per_class_model_strategy(model_runs, task, out_path):
@@ -560,8 +580,22 @@ def extract_data_tuples_from_model_runs(run_list):
     return data_list
 
 
+def get_gt_df(task):
+    gt_file_path = get_file_by_keyword(directory=GT_DIR, keyword=task, file_extension='csv')
+    if not gt_file_path:
+        raise ValueError(f"Ground truth file for task {task} not found.")
+    try:
+        gt_df = pd.read_csv(gt_file_path)
+    except Exception as e:
+        raise ValueError(f"Error reading CSV files: {e}")
+
+    return gt_df
+
+
 def check_and_extract_data(model_dir_abs, subm_type, task, shot):
     model_dir_rel = model_dir_abs.split('work_dirs/')[1]
+
+    gt_df = get_gt_df(task=task)
 
     csv_path = os.path.join(model_dir_abs, f"{task}_{shot}_{subm_type}.csv")
     csv_files = glob.glob(csv_path)
@@ -570,9 +604,9 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot):
     if csv_files and json_files:
         exp_num = extract_exp_number(model_dir_rel)
         if exp_num != 0:
-            prediction = pd.read_csv(csv_files[0], header=None)
+            pred_df = pd.read_csv(csv_files[0], header=None)
             metrics = json.load(open(json_files[0], 'r'))
-            return {'prediction': prediction, 'metrics': metrics, 'name': model_dir_rel}, exp_num
+            return {'prediction': pred_df, 'metrics': metrics, 'name': model_dir_rel, 'gt': gt_df}, exp_num
     return None, None
 
 
@@ -832,6 +866,7 @@ def main():
 
 
 # ======================================================
+GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "expert-per-class",
                        "stacking",
