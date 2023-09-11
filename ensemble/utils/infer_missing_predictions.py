@@ -226,7 +226,7 @@ work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs"
 task_choices = ["colon", "endo", "chest"]
 shots = ["1", "5", "10"]
 N_inferences_per_task = 10
-batch_size = 16
+batch_size = 64
 metric_tags = {"auc": "AUC/AUC_multiclass",
                "aucl": "AUC/AUC_multilabe",
                "map": "multi-label/mAP",
@@ -297,20 +297,22 @@ if __name__ == "__main__":  # Important when using multiprocessing
         checkpoint_filepath = get_file_from_directory(model_path, ".pth", "best")
 
         # Image Path
-        img_suffix_choice = csv_suffix_2_img_suffix.get(csv_suffix_choice, None)
-        if img_suffix_choice is None:
-            raise f"No valid data folder existent for the suffix {csv_suffix_choice}"
+        data_suffix = csv_suffix_2_img_suffix.get(csv_suffix_choice, None)
+        if data_suffix is None:
+            raise f"No valid data folder existent for the suffix {data_suffix}"
 
-        image_base_path = os.path.join("/scratch", "medfm", "medfm-challenge", "data", f"MedFMC_{img_suffix_choice}")
-
-        # In case of endo models trained on pre-processed data, use pre-processed images for prediction CSVs
+        image_folder_name = "images"
         if "pre_processed" in model_name and task == "endo":
+            image_folder_name = "pre_processed_images"
+
+        if data_suffix == "train-test":
             print("Considering pre-processed endo images")
-            images_path = os.path.join(image_base_path, task, "pre_processed_images")
-            out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_{csv_suffix_choice}.csv")
+            images_path = os.path.join("/scratch/medfm/medfm-challenge/data_anns/MedFMC", task, 'test_WithLabel.txt')
         else:
-            images_path = os.path.join(image_base_path, task, "images")
-            out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_{csv_suffix_choice}.csv")
+            image_base_path = os.path.join("/scratch/medfm/medfm-challenge/data", f"MedFMC_{data_suffix}")
+            images_path = os.path.join(image_base_path, task, image_folder_name)
+
+        out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_{csv_suffix_choice}.csv")
 
         command = (f"python tools/infer.py "
                    f"{config_filepath} "
