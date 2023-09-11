@@ -671,6 +671,8 @@ def load_data(total_iterations, root_dir, subm_types):
         for task in TASKS:
             # Load ground truth once per task
             gt_df = get_gt_df(task=task)
+            print(gt_df)
+            exit()
 
             for shot in shots:
                 path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
