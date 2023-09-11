@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from colorama import Fore
 from sklearn.linear_model import LogisticRegression
+from sklearn.multiclass import OneVsRestClassifier
 from termcolor import colored
 from tqdm import tqdm
 
@@ -498,6 +499,10 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
 
     true_labels_of_validation_set = model_runs[list(model_runs.keys())[0]][0]['gt']
 
+    # Drop the 'img_id' column
+    if 'img_id' in true_labels_of_validation_set.columns:
+        true_labels_of_validation_set = true_labels_of_validation_set.drop('img_id', axis=1)
+
     for exp in model_runs:
         for model_run in model_runs[exp]:
             predictions = model_run['prediction'].iloc[:, 1 : num_classes + 1]  # Assuming first column is an ID or non-feature column
@@ -505,10 +510,14 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
 
     # Concatenate predictions horizontally to get meta-features
     meta_features_val = pd.concat(meta_features_list, axis=1)
-    print(meta_features_val.shape)
 
-    # Step 2: Train the Meta-Model
-    meta_model = LogisticRegression(max_iter=1000)
+    # Set up the meta-model based on the task
+    if task == "colon":
+        meta_model = LogisticRegression(solver='lbfgs', max_iter=1000)
+    else:  # for 'endo' and 'chest'
+        base_classifier = LogisticRegression(solver='lbfgs', max_iter=1000)
+        meta_model = OneVsRestClassifier(base_classifier)
+
     meta_model.fit(meta_features_val, true_labels_of_validation_set)
 
     # Step 3 & 4: Generate Meta-Features for the Test Set and Make Predictions for Each Experiment
