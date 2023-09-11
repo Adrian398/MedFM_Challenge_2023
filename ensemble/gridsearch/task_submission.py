@@ -582,6 +582,7 @@ def extract_data_tuples_from_model_runs(run_list):
 
 def get_gt_df(task):
     gt_file_path = get_file_by_keyword(directory=GT_DIR, keyword=task, file_extension='csv')
+    print(gt_file_path)
     if not gt_file_path:
         raise ValueError(f"Ground truth file for task {task} not found.")
     try:
