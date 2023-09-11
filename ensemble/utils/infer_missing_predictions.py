@@ -130,12 +130,7 @@ def contains_csv_file(task, shot, model_dir):
     expected_filename = f"{task}_{shot}-shot_{csv_suffix_choice}.csv"
 
     try:
-        file_exists = os.path.exists(os.path.join(model_dir, expected_filename))
-        if file_exists:
-            print(f"File exists, but generate again: {expected_filename}")
-            return False
-        else:
-            return False
+        return os.path.exists(os.path.join(model_dir, expected_filename))
     except FileNotFoundError:
         pass
     except PermissionError as permission_error:
@@ -197,7 +192,7 @@ def get_model_dirs_without_prediction(task, shot):
             # if "pre_processed" in model_dir and task == "endo":
             #     print(colored(f"Endo Model {model_dir} with pre-processed data added to models for update.", 'red'))
             # else:
-            print(colored(f"Model {model_dir} contains {csv_suffix_choice} CSV file", 'blue'))
+            print(colored(f"Model {task}/{shot}-shot/{model_dir} contains {csv_suffix_choice} CSV file", 'blue'))
             continue
 
         model_dirs.append(model_dir)
