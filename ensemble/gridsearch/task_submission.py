@@ -591,9 +591,6 @@ def get_gt_df(task):
     except Exception as e:
         raise ValueError(f"Error reading CSV files: {e}")
 
-    print(gt_df.head())
-    exit()
-
     return gt_df
 
 
