@@ -496,8 +496,7 @@ def stacking_strategy(model_runs, task, shot, subm_type, out_path):
 
     # The ground truth of the test split from the training set
     gt_df = model_runs[list(model_runs.keys())[0]][0]['train-test_gt']
-    print(gt_df, gt_df.shape, gt_df.columns)
-    exit()
+    print(gt_df.shape, gt_df.columns)
 
     # Extracting the img_id column from the first model run of the first experiment
     meta_features_df = model_runs[list(model_runs.keys())[0]][0]['prediction'][[0]].copy()
@@ -635,6 +634,8 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot):
 
         if train_test_csv_file:
             train_test_pred_df = pd.read_csv(train_test_csv_file[0], header=None)
+        else:
+            return None, None
 
     csv_path = os.path.join(model_dir_abs, f"{task}_{shot}_{subm_type}.csv")
     csv_files = glob.glob(csv_path)
@@ -692,7 +693,14 @@ def load_data(total_iterations, root_dir, subm_types):
                         data, exp_num = check_and_extract_data(model_dir_abs=model_dir, subm_type=subm_type, task=task,
                                                                shot=shot)
                         if data and exp_num:
-                            data['train-test_gt'] = train_test_gt_df  # Add ground truth data to the dictionary
+
+                            # If stacking strategy is contained
+                            if "stacking" in ENSEMBLE_STRATEGIES:
+                                # Ensure that gt and pred files of test split from train set is existent
+                                if train_test_gt_df:
+                                    data['train-test_gt'] = train_test_gt_df  # Add ground truth data to the dictionary
+                                else:
+                                    continue
                             data_lists[subm_type][task][shot][f"exp{exp_num}"].append(data)
                     pbar.update(1)
     return data_lists
