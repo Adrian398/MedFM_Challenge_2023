@@ -318,10 +318,7 @@ def generate_test_commands(model_infos):
 
 # ========================================================================================
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
-N_inferences_per_task = 10
-batch_size = 4
-
-
+batch_size = 16
 # ========================================================================================
 
 
