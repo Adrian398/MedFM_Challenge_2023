@@ -15,7 +15,7 @@ from termcolor import colored
 from tqdm import tqdm
 
 from ensemble.gridsearch.test_task_submission import get_file_by_keyword
-from ensemble.utils.constants import shots, exps, TASK_2_CLASS_COUNT
+from ensemble.utils.constants import shots, exps, TASK_2_CLASS_COUNT, TASK_2_CLASS_NAMES
 
 
 def compute_pairwise_diversity(top_k_models):
@@ -611,8 +611,12 @@ def get_gt_df(task):
     if not gt_file_path:
         raise ValueError(f"Ground truth file for task {task} not found.")
     try:
-        columns_to_keep = ['img_id', 'ulcer', 'erosion', 'polyp', 'tumor']
-        gt_df = pd.read_csv(gt_file_path, usecols=columns_to_keep)
+        cols_2_keep = TASK_2_CLASS_NAMES.get(task, None)
+        if not cols_2_keep:
+            raise ValueError(f"No matching class names for task {task} found")
+
+        gt_df = pd.read_csv(gt_file_path, usecols=cols_2_keep)
+
     except Exception as e:
         raise ValueError(f"Error reading CSV files: {e}")
 
