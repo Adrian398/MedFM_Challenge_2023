@@ -496,7 +496,7 @@ def stacking_strategy(model_runs, task, out_path):
 
     # Concatenate predictions horizontally to get meta-features
     meta_features_val = pd.concat(meta_features_list, axis=1)
-    print(meta_features_val)
+    print(meta_features_val.shape)
     return None, None
 
 
