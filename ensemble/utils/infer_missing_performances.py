@@ -318,7 +318,7 @@ def generate_test_commands(model_infos):
 
 # ========================================================================================
 work_dir_path = os.path.join("/scratch", "medfm", "medfm-challenge", "work_dirs")
-batch_size = 16
+batch_size = 8
 # ========================================================================================
 
 
