@@ -221,8 +221,7 @@ def get_worst_performing_model_dirs(task, shot):
         for model_dir, model_score in scores:
             max_char_length = max(len(m_dir.split('shot/')[1]) for m_dir, _ in scores)
             m_name = model_dir.split('shot/')[1]
-            m_name = f"| {m_name:{max_char_length + 2}}"
-            print("----")
+            m_name = f"{m_name:{max_char_length + 2}}"
             if model_score < threshold_score:
                 print(f"| {colored(m_name, 'red')}", f"Aggregate: {model_score:.2f}", f"  Threshold: {threshold_score:.2f}")
                 bad_performing_models.append(model_dir)
