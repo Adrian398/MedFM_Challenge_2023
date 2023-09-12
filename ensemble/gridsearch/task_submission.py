@@ -41,8 +41,8 @@ def compute_pairwise_diversity(top_k_models):
                     print(f"Labels of model {top_k_models[i]['name']} and model {top_k_models[j]['name']} do not match.")
                     print(f"Rows Model 1: {model_i_predictions.shape[0]}\tRows Model 2: {model_j_predictions.shape[0]}")
 
-                    img_id_col1 = df1.columns[0]
-                    img_id_col2 = df2.columns[0]
+                    img_id_col1 = model_i_predictions.columns[0]
+                    img_id_col2 = model_j_predictions.columns[0]
 
                     # Identify unique image IDs not in the other dataframe
                     missing_in_df2 = model_i_predictions.loc[~model_i_predictions[img_id_col1].isin(model_j_predictions[img_id_col2]), img_id_col1]
