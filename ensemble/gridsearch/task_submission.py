@@ -841,9 +841,9 @@ if __name__ == "__main__":
     #SUBM_TYPES = ["validation"]
 
     # 2nd Level Params
-    #TASKS = ["colon"]
-    SHOTS = ["1-shot", "5-shot", "10-shot"]
-    EXPS = ["exp1", "exp2", "exp3", "exp4", "exp5"]
+    TASKS = ["colon"]
+    SHOTS = ["5-shot"]
+    EXPS = ["exp3"]
 
     # 3rd Level Params
     ENSEMBLE_STRATEGIES = ["diversity-weighted"]
