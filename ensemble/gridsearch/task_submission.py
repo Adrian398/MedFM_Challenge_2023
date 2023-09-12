@@ -843,7 +843,7 @@ if __name__ == "__main__":
     # 2nd Level Params
     TASKS = ["colon"]
     SHOTS = ["5-shot"]
-    EXPS = ["exp3"]
+    #EXPS = ["exp3"]
 
     # 3rd Level Params
     ENSEMBLE_STRATEGIES = ["diversity-weighted"]
