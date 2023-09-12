@@ -38,7 +38,8 @@ def compute_pairwise_diversity(top_k_models):
                 # Check for label matching
                 if not model_i_predictions.columns.equals(model_j_predictions.columns) or \
                    not model_i_predictions.index.equals(model_j_predictions.index):
-                    print(f"Labels of model {i} and model {j} do not match.")
+                    print(f"Labels of model {top_k_models[i]['name']} and model {top_k_models[j]['name']} do not match.")
+                    print(model_i_predictions.columns, model_j_predictions.columns)
                     continue
 
                 # Robust comparison
