@@ -38,8 +38,6 @@ def compute_pairwise_diversity(top_k_models):
                 # Check for label matching
                 if not model_i_predictions.columns.equals(model_j_predictions.columns) or \
                    not model_i_predictions.shape[0] == model_j_predictions.shape[0]:
-                    print(f"Labels of model {top_k_models[i]['name']} and model {top_k_models[j]['name']} do not match.")
-                    print(f"Rows Model 1: {model_i_predictions.shape[0]}\tRows Model 2: {model_j_predictions.shape[0]}")
 
                     img_id_col1 = model_i_predictions.columns[0]
                     img_id_col2 = model_j_predictions.columns[0]
@@ -47,12 +45,6 @@ def compute_pairwise_diversity(top_k_models):
                     # Identify unique image IDs not in the other dataframe
                     missing_in_df2 = model_i_predictions.loc[~model_i_predictions[img_id_col1].isin(model_j_predictions[img_id_col2]), img_id_col1]
                     missing_in_df1 = model_j_predictions.loc[~model_j_predictions[img_id_col2].isin(model_i_predictions[img_id_col1]), img_id_col2]
-
-                    # Print the results
-                    print("Image IDs in the first CSV but not in the second CSV:")
-                    print(len(missing_in_df2))
-                    print("\nImage IDs in the second CSV but not in the first CSV:")
-                    print(len(missing_in_df1))
 
                     corr_idx = -1
                     if len(missing_in_df2) > 0:
@@ -64,15 +56,13 @@ def compute_pairwise_diversity(top_k_models):
 
                     if corr_idx != -1:
                         model_name = top_k_models[corr_idx]['name']
-                        print(f"Detected error in {top_k_models[corr_idx]['name']}. Deleting...")
                         model_path = os.path.join("/scratch/medfm/medfm-challenge/work_dirs", model_name)
                         model_split = model_name.split("/")
                         task = model_split[0]
                         shot = model_split[1]
                         corrupted_file = os.path.join(model_path, f"{task}_{shot}_submission.csv")
 
-                        os.remove(corrupted_file)
-                        print(f"File {corrupted_file} deleted successfully!")
+                        print(f"Corrupted File: {corrupted_file}")
                         return None
 
                 # Robust comparison
