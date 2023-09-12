@@ -23,7 +23,7 @@ configs=(
 for config in "${configs[@]}"; do
   for seed in "${seeds[@]}"; do
     for bs in "${batch_size[@]}"; do
-      sbatch -p ls6 --gres=gpu:rtx3090:1 --wrap="python tools/train.py $config --seed=$seed --exp_num=$exp_num --exp_suffix=$exp_suffix --train_bs=$bs" -o $log_output
+      sbatch -p ls6 --gres=gpu:1 --nodelist=gpu1a --wrap="python tools/train.py $config --seed=$seed --exp_num=$exp_num --exp_suffix=$exp_suffix --train_bs=$bs" -o $log_output
     done
   done
 done
