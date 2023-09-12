@@ -91,7 +91,7 @@ def compute_pairwise_diversity(top_k_models):
                         shot = model_split[1]
                         corrupted_file = os.path.join(model_path, f"{task}_{shot}_submission.csv")
 
-                        raise f"Corrupted CSV File: {corrupted_file} (probably a scuffed line)"
+                        raise ValueError(f"Corrupted CSV File: {corrupted_file} (probably a scuffed line)")
 
                 # Robust comparison
                 try:
