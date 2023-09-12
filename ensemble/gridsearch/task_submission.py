@@ -51,7 +51,7 @@ def compute_pairwise_diversity(top_k_models):
 
                     print("\nImage IDs in the second CSV but not in the first CSV:")
                     print(missing_in_df1)
-
+                    exit()
                     continue
 
                 # Robust comparison
