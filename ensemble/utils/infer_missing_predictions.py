@@ -86,17 +86,18 @@ def get_file_from_directory(directory, extension, contains_string=None):
 
 
 def print_report(model_infos):
-    model_dirs = [model["path"].split('work_dirs/')[1] for model in model_infos.values()]
+    model_dirs = [model["path"] for model in model_infos.values()]
     if len(model_dirs) == 0:
         print(colored(f"\nAll valid models have an existing prediction CSV!\n", 'green'))
         exit()
     else:
         sorted_report_entries = sorted([model_dir for model_dir in model_dirs], key=sort_key)
+
         print("\n---------------------------------------------------------------------------------------------------------------")
         print("| Valid Models without an existing prediction CSV file:")
         print("---------------------------------------------------------------------------------------------------------------")
         for entry in sorted_report_entries:
-            print(f"| {entry}")
+            print(f"| {entry.split('work_dirs/')[1]}")
         print("---------------------------------------------------------------------------------------------------------------")
         print(f"| Found {colored(str(len(model_dirs)) + ' model runs', 'blue')} without existing prediction CSV for {colored(csv_suffix_choice, 'blue')}.")
         print("---------------------------------------------------------------------------------------------------------------")
