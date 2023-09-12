@@ -74,7 +74,7 @@ def run_commands_on_cluster(commands, num_commands, gpu='all'):
 
         task_counter[task] += 1
 
-        #subprocess.run(slurm_cmd, shell=True)
+        subprocess.run(slurm_cmd, shell=True)
 
 
 def get_file_from_directory(directory, extension, contains_string=None):
