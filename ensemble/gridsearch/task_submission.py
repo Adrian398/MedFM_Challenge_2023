@@ -29,23 +29,6 @@ def compute_pairwise_diversity(top_k_models):
     num_models = len(top_k_models)
     diversity_matrix = np.zeros((num_models, num_models))
 
-    for idx in range(num_models):
-        if 'ng' in top_k_models[idx]['prediction'].iloc[:, 0].values:
-            print(f"Detected error in {top_k_models[idx]['name']}. Deleting...")
-
-            model_name = top_k_models[idx]['name']
-            model_path = os.path.join("/scratch/medfm/medfm-challenge/work_dirs", model_name)
-
-            model_split = model_name.split("/")
-            task = model_split[0]
-            shot = model_split[1]
-            corrupted_file = os.path.join(model_path, f"{task}_{shot}_submission.csv")
-            os.remove(corrupted_file)
-            print(f"File {corrupted_file} deleted successfully!")
-            return None
-        else:
-            print(f"No errors detected in {top_k_models[idx]['name']}.")
-
     for i in range(num_models):
         for j in range(num_models):
             if i != j:
@@ -68,11 +51,29 @@ def compute_pairwise_diversity(top_k_models):
                     # Print the results
                     print("Image IDs in the first CSV but not in the second CSV:")
                     print(len(missing_in_df2))
-
                     print("\nImage IDs in the second CSV but not in the first CSV:")
                     print(len(missing_in_df1))
-                    exit()
-                    continue
+
+                    corr_idx = -1
+                    if len(missing_in_df2) > 0:
+                        # delete 1
+                        corr_idx = i
+                    elif len(missing_in_df1) > 0:
+                        # delete 2
+                        corr_idx = j
+
+                    if corr_idx != -1:
+                        model_name = top_k_models[corr_idx]['name']
+                        print(f"Detected error in {top_k_models[corr_idx]['name']}. Deleting...")
+                        model_path = os.path.join("/scratch/medfm/medfm-challenge/work_dirs", model_name)
+                        model_split = model_name.split("/")
+                        task = model_split[0]
+                        shot = model_split[1]
+                        corrupted_file = os.path.join(model_path, f"{task}_{shot}_submission.csv")
+
+                        os.remove(corrupted_file)
+                        print(f"File {corrupted_file} deleted successfully!")
+                        return None
 
                 # Robust comparison
                 try:
