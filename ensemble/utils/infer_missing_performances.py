@@ -104,27 +104,6 @@ def run_single_command(command, gpu, gpu_type, task_counter, num_commands):
     subprocess.run(slurm_cmd, shell=True)
 
 
-def execute_command(command):
-    """Executes the given command in the shell after setting up the environment."""
-
-    git_directory = "/home/stud/rothmarcel/Git/medfm-challenge"
-
-    setup_commands = [
-        "cd /scratch/medfm/medfm-challenge",
-        "source venv/bin/activate",
-        "cd ~/Git/medfm-challenge",
-        f"export PYTHONPATH='{git_directory}):$PYTHONPATH'",
-    ]
-
-    full_command = " && ".join(setup_commands + [command])
-    subprocess.run(full_command, shell=True, executable="/bin/bash")
-
-
-def run_commands_on_bash(commands, num_processes=None):
-    with multiprocessing.Pool(processes=num_processes) as pool:
-        pool.map(execute_command, commands)
-
-
 def run_commands_on_cluster(commands, num_commands, gpu_type='all'):
     """
     Runs the provided commands on the cluster using specified GPUs.
@@ -362,7 +341,6 @@ def main(args):
     """
     gpu_type = args.gpu
     selected_tasks = args.task
-    run_type = args.run_type
 
     with Pool() as pool:
         combinations = [(task, shot) for task in selected_tasks for shot in shots]
@@ -406,10 +384,7 @@ def main(args):
         except ValueError:
             print("Invalid input. Please enter a number or 'no' to exit.")
 
-    if run_type == "bash":
-        run_commands_on_bash(commands, num_processes=2)
-    else:
-        run_commands_on_cluster(commands, num_commands, gpu_type=gpu_type)
+    run_commands_on_cluster(commands, num_commands, gpu_type=gpu_type)
 
 
 def parse_args():
@@ -428,9 +403,6 @@ def parse_args():
                         help="Task type: 'colon', 'chest', or 'endo'. "
                              "Multiple tasks can be provided separated with a whitespace. "
                              "Default is all tasks.")
-    parser.add_argument("--run_type", type=str, default='cluster',
-                        choices=['bash', 'cluster'],
-                        help="Run Type: 'bash' or 'cluster'. Default is 'cluster'.")
     return parser.parse_args()
 
 
