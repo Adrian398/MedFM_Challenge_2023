@@ -486,80 +486,6 @@ def find_best_model(model_list, num_classes, class_idx=None):
     return best_model[0]
 
 
-def stacking_strategy(model_runs, task, shot, subm_type, out_path):
-    print(f"Executing Stacking for {os.path.join(task, shot)}")
-
-    if all(not v for v in model_runs.values()):
-        print(f"No model runs for {task}/{shot}")
-        return
-
-    # Step 1: Generate Meta-Features for the Validation Set
-    num_classes = TASK_2_CLASS_COUNT[task]
-
-    # The ground truth of the test split from the training set
-    gt_df = model_runs[list(model_runs.keys())[0]][0]['train-test_gt']
-    print(gt_df.shape, gt_df.columns)
-
-    # Extracting the img_id column from the first model run of the first experiment
-    meta_features_df = model_runs[list(model_runs.keys())[0]][0]['prediction'][[0]].copy()
-    meta_features_df.rename({0: 'img_id'}, axis='columns', inplace=True)
-
-    # Create an empty list to store meta-features for each model
-    meta_features_df_list = [meta_features_df]
-
-    for exp in model_runs:
-        for model_run in model_runs[exp]:
-            predictions = model_run['train-test_prediction'].iloc[:, 1 : num_classes + 1]
-            print(model_run['name'])
-            print(predictions.shape)
-            exit()
-            # Using a unique identifier for each prediction column, e.g. model name or index
-            renamed_predictions = predictions.copy()
-            for col_name in predictions.columns:
-                new_col_name = f"{model_run['name']}_{col_name}"  # Adjust naming convention as needed
-                renamed_predictions.rename(columns={col_name: new_col_name}, inplace=True)
-
-            meta_features_df_list.append(renamed_predictions)
-
-    # Base Data
-    meta_features_df = pd.concat(meta_features_df_list, axis=1)
-    gt_df = gt_df[gt_df['img_id'].isin(meta_features_df['img_id'])]
-
-    print(gt_df.shape, gt_df.columns)
-    print(meta_features_df.shape, meta_features_df.columns)
-    exit()
-    X_train = meta_features_df.drop(columns=['img_id'])
-    y_train = gt_df.drop(columns=['img_id'])
-
-    # Set up the meta-model based on the task
-    if task == "colon":
-        y_train = y_train['tumor'].ravel()
-        meta_model = LogisticRegression(solver='lbfgs', max_iter=1000)
-    elif task == "endo" or task == "chest":
-        base_classifier = LogisticRegression(solver='lbfgs', max_iter=1000)
-        meta_model = OneVsRestClassifier(base_classifier)
-    else:
-        raise f"Invalid task specified."
-
-    meta_model.fit(X=X_train, y=y_train)
-
-    # Step 3 & 4: Generate Meta-Features for the Test Set and Make Predictions for Each Experiment
-    for exp in model_runs:
-        meta_features_test_list = []
-        for model_run in model_runs[exp]:
-            predictions = model_run['prediction'].iloc[:, 1:num_classes+1]
-            meta_features_test_list.append(predictions)
-
-        meta_features_test = pd.concat(meta_features_test_list, axis=1)
-
-        final_predictions = meta_model.predict(meta_features_test)
-
-        # Save the predictions to the specified output path for the current experiment
-        exp_out_path = os.path.join(out_path, "result", f"{exp}", f"{task}_{shot}_{subm_type}.csv")
-        final_predictions_df = pd.DataFrame(final_predictions)
-        final_predictions_df.to_csv(exp_out_path, index=False, header=False)
-
-
 def expert_per_class_model_strategy(model_runs, task, out_path):
     num_classes = TASK_2_CLASS_COUNT[task]
     merged_df = model_runs[0]['prediction'].iloc[:, 0:1]
@@ -634,16 +560,6 @@ def get_gt_df(gt_dir, task):
 def check_and_extract_data(model_dir_abs, subm_type, task, shot):
     model_dir_rel = model_dir_abs.split('work_dirs/')[1]
 
-    train_test_pred_df = None
-    if "stacking" in ENSEMBLE_STRATEGIES:
-        train_test_csv = os.path.join(model_dir_abs, f"{task}_{shot}_train-test.csv")
-        train_test_csv_file = glob.glob(train_test_csv)
-
-        if train_test_csv_file:
-            train_test_pred_df = pd.read_csv(train_test_csv_file[0], header=None)
-        else:
-            return None, None
-
     csv_path = os.path.join(model_dir_abs, f"{task}_{shot}_{subm_type}.csv")
     csv_files = glob.glob(csv_path)
     json_files = glob.glob(os.path.join(model_dir_abs, "*.json"))
@@ -656,8 +572,7 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot):
 
             return {'prediction': pred_df,
                     'metrics': metrics,
-                    'name': model_dir_rel,
-                    'train-test_prediction': train_test_pred_df}, exp_num
+                    'name': model_dir_rel}, exp_num
     return None, None
 
 
@@ -689,22 +604,15 @@ def load_data(total_iterations, root_dir, subm_types):
 
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
         for task in TASKS:
-            # Load ground truth for test split of training set once per task
-            train_test_gt_dir = f"/scratch/medfm/medfm-challenge/data/MedFMC_train/{task}"
-            train_test_gt_df = get_gt_df(gt_dir=train_test_gt_dir, task=task)
-
             for shot in shots:
                 path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
                 for model_dir in glob.glob(path_pattern):
                     for subm_type in subm_types:
-                        data, exp_num = check_and_extract_data(model_dir_abs=model_dir, subm_type=subm_type, task=task,
+                        data, exp_num = check_and_extract_data(model_dir_abs=model_dir,
+                                                               subm_type=subm_type,
+                                                               task=task,
                                                                shot=shot)
                         if data and exp_num:
-
-                            # If stacking strategy is contained
-                            if "stacking" in ENSEMBLE_STRATEGIES:
-                                # Ensure that gt and pred files of test split from train set is existent
-                                data['train-test_gt'] = train_test_gt_df
                             data_lists[subm_type][task][shot][f"exp{exp_num}"].append(data)
                     pbar.update(1)
     return data_lists
@@ -738,18 +646,7 @@ def process_top_k(strategy, top_k, task, subm_type):
                                        task=task,
                                        submission_type=subm_type)
 
-    # Perform Ensemble Strategy Task/Shot Wise
     for shot in shots:
-        model_runs = data[task][shot]
-        if len(model_runs) < 2:
-            print("Not enough runs")
-            continue
-
-        if strategy == "stacking":
-            stacking_strategy(model_runs=model_runs, task=task, shot=shot, subm_type=subm_type, out_path=submission_dir)
-            continue
-
-        # Perform Ensemble Strategy Task/Shot/Exp Wise
         for exp in exps:
             model_runs = data[task][shot][exp]
             if len(model_runs) < 2:
@@ -902,7 +799,7 @@ def select_task():
 
 
 def process_strategy(strategy, task, subm_type):
-    if "expert" in strategy or "stacking" == strategy:
+    if "expert" in strategy:
         process_top_k(strategy=strategy,
                       task=task,
                       top_k=None,
@@ -935,7 +832,6 @@ def main():
 # ======================================================
 ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "expert-per-class",
-                       #"stacking",
                        "weighted",
                        "pd-weighted",
                        "pd-log-weighted",
@@ -949,9 +845,9 @@ TASKS = ["colon", "endo", "chest"]
 if __name__ == "__main__":
     root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 
-    #ENSEMBLE_STRATEGIES = ["stacking"]
-    #TASKS = ["colon"]
-    #SUBMISSION_TYPES = ["validation"]
+    ENSEMBLE_STRATEGIES = ["weighted"]
+    TASKS = ["colon"]
+    SUBMISSION_TYPES = ["validation"]
 
     TOTAL_MODELS = defaultdict()
     TOP_K_MAX = defaultdict()
