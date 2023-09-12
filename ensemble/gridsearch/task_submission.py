@@ -16,7 +16,6 @@ from ensemble.gridsearch.test_task_submission import get_file_by_keyword
 from ensemble.utils.constants import TASK_2_CLASS_COUNT, TASK_2_CLASS_NAMES
 
 
-
 def print_colored(text, submission_type, depth):
     gradient = COLOR_GRADIENTS.get(submission_type, {})
     color = gradient.get(depth, "white")  # Default to white if depth or submission type is not found
