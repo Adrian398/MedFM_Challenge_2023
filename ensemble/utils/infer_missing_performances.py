@@ -31,6 +31,8 @@ def determine_gpu(gpu_type):
     gpu_mappings = {
         'c': ['rtx4090'],
         'ab': ['rtx3090'],
+        'a': ['rtx3090'],
+        'b': ['rtx3090'],
         '8a': ['rtx2080ti'],
         'all': ['rtx4090', 'rtx3090', 'rtx4090', 'rtx3090']
     }
@@ -61,13 +63,14 @@ def extract_exp_number(string):
     return int(match.group(1)) if match else 0
 
 
-def run_single_command(command, gpu, task_counter, num_commands):
+def run_single_command(command, gpu, gpu_type, task_counter, num_commands):
     """
     Runs a single command on the specified GPU.
 
     Args:
         command (str): The command to run.
-        gpu (str): GPU type on which the command will be executed.
+        gpu (str): GPU type on which the command will be executed (e.g., 'rtx2080ti').
+        gpu_type (str): GPU name (e.g., 'a' or 'b').
         task_counter (dict): A counter dict to keep track of tasks processed.
         num_commands (int): Number of commands to run for each task.
     """
@@ -86,11 +89,18 @@ def run_single_command(command, gpu, task_counter, num_commands):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
-    slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
+    if gpu_type == 'a':
+        gpu_str = "--gres=gpu:1 --nodelist=gpu1a"
+    elif gpu_type == 'b':
+        gpu_str = "--gres=gpu:1 --nodelist=gpu1b"
+    else:
+        gpu_str = f"--gres=gpu:{gpu}:1"
+
+    slurm_cmd = f'sbatch -p ls6 {gpu_str} --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
     print(f"{slurm_cmd}\n")
 
     task_counter[task] += 1
-    #subprocess.run(slurm_cmd, shell=True)
+    subprocess.run(slurm_cmd, shell=True)
 
 
 def run_commands_on_cluster(commands, num_commands, gpu_type='all'):
@@ -114,7 +124,7 @@ def run_commands_on_cluster(commands, num_commands, gpu_type='all'):
 
     for command in commands:
         gpu = next(gpu_cycle)
-        run_single_command(command, gpu, task_counter, num_commands)
+        run_single_command(command, gpu, gpu_type, task_counter, num_commands)
 
 
 def find_and_validate_json_files(model_dir, task):
