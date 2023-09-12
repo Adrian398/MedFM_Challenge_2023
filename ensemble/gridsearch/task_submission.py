@@ -590,7 +590,7 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot):
 
             return {'prediction': pred_df,
                     'metrics': metrics,
-                    'name': model_dir_rel}, exp_num
+                    'name': model_dir_rel}, f"exp-{exp_num}"
     return None, None
 
 
@@ -620,12 +620,12 @@ def load_data():
 
                 for model_dir in glob.glob(path_pattern):
                     for subm_type in SUBM_TYPES:
-                        data, exp_num = check_and_extract_data(model_dir_abs=model_dir,
-                                                               subm_type=subm_type,
-                                                               task=task,
-                                                               shot=shot)
-                        if data and exp_num:
-                            data_lists[subm_type][task][shot][f"exp{exp_num}"].append(data)
+                        data, exp = check_and_extract_data(model_dir_abs=model_dir,
+                                                           subm_type=subm_type,
+                                                           task=task,
+                                                           shot=shot)
+                        if data and exp and exp in EXPS:
+                            data_lists[subm_type][task][shot][exp].append(data)
                     pbar.update(1)
     return data_lists
 
