@@ -295,7 +295,7 @@ def diversity_weighted_ensemble_strategy(model_runs, task, out_path, top_k=3):
 
         # Compute diversity scores for the top k models
         top_k_model_data = [model for model, _ in top_n_models]
-        print(top_k_model_data)
+
         diversity_scores = compute_pairwise_diversity(top_k_model_data)
 
         # Ensure diversity scores match the expected length
