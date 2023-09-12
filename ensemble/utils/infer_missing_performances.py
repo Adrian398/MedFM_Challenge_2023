@@ -37,7 +37,10 @@ def determine_gpu(gpu_type):
         '8a': ['rtx2080ti'],
         'all': ['rtx4090', 'rtx3090', 'rtx4090', 'rtx3090']
     }
-    return gpu_mappings.get(gpu_type, [])
+    gpu = gpu_mappings.get(gpu_type, None)
+    if not gpu:
+        raise ValueError(f'Invalid gpu type {gpu_type}.')
+    return gpu
 
 
 def get_file_from_directory(directory, extension=None, contains_string=None):
@@ -397,7 +400,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Infers missing performances from model runs on the test set.')
     parser.add_argument("--gpu", type=str, default='all',
                         help="GPU type: \n- 'c'=rtx4090,\n- '8a'=rtx2070ti\n"
-                             "- 'ab'=rtx3090\n- 'all'=rtx4090, rtx3090 cyclic")
+                             "- 'ab'=rtx3090\n - 'a'=gpu1a\n - 'b'=gpu1b\n- 'all'=rtx4090, rtx3090 cyclic")
     parser.add_argument("--task", type=str, nargs='*', default=["colon", "endo", "chest"],
                         choices=tasks,
                         help="Task type: 'colon', 'chest', or 'endo'. "

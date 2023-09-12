@@ -21,32 +21,20 @@ from functools import lru_cache
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from termcolor import colored
 
+from ensemble.utils.infer_missing_performances import determine_gpu
+
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
-def run_commands_on_cluster(commands, num_commands, gpu='all'):
+def run_commands_on_cluster(commands, num_commands, gpu_type='all'):
     """
     Runs the generated commands on the cluster.
     """
 
-    if gpu == 'c':
-        gpus = ['rtx4090']
-    elif gpu == 'ab':
-        gpus = ['rtx3090']
-    elif gpu == '8a':
-        gpus = ['rtx2080ti']
-    elif gpu == 'all':
-        gpus = ['rtx4090', 'rtx3090', 'rtx4090', 'rtx3090']
-    else:
-        raise ValueError(f'Invalid gpu type {gpu}.')
+    gpus = determine_gpu(gpu_type)
 
     gpu_cycle = itertools.cycle(gpus)
-
-    task_counter = {
-        'colon': 0,
-        'chest': 0,
-        'endo': 0
-    }
+    task_counter = {'colon': 0, 'chest': 0, 'endo': 0}
 
     for command in commands:
         gpu = next(gpu_cycle)
@@ -68,12 +56,17 @@ def run_commands_on_cluster(commands, num_commands, gpu='all'):
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        print("\n")
-        slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
-        print(slurm_cmd)
+        if gpu_type == 'a':
+            gpu_str = "--gres=gpu:1 --nodelist=gpu1a"
+        elif gpu_type == 'b':
+            gpu_str = "--gres=gpu:1 --nodelist=gpu1b"
+        else:
+            gpu_str = f"--gres=gpu:{gpu}:1"
+
+        slurm_cmd = f'sbatch -p ls6 {gpu_str} --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
+        print(f"{slurm_cmd}\n")
 
         task_counter[task] += 1
-
         subprocess.run(slurm_cmd, shell=True)
 
 
@@ -243,7 +236,7 @@ if __name__ == "__main__":  # Important when using multiprocessing
     parser = argparse.ArgumentParser(description='Infers missing predictions from model runs on the test set.')
     parser.add_argument("--gpu", type=str, default='all',
                         help="GPU type: \n- 'c'=rtx4090,\n- '8a'=rtx2070ti\n"
-                             "- 'ab'=rtx3090\n- 'all'=rtx4090, rtx3090 cyclic")
+                             "- 'ab'=rtx3090\n - 'a'=gpu1a\n - 'b'=gpu1b\n- 'all'=rtx4090, rtx3090 cyclic")
     parser.add_argument("--task", type=str, nargs='*', default=["colon", "endo", "chest"],
                         choices=task_choices,
                         help="Task type: 'colon', 'chest', or 'endo'. "
