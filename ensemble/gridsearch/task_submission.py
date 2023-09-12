@@ -357,13 +357,13 @@ def print_report_for_setting(full_model_list, task, shot, exp):
               f"{m1_name}: {m1_val:.4f}  {m2_name}: {m2_val:.4f}")
 
 
-def print_model_reports(tasks):
-    continue_query = input("\nPrint report for the best models? (y/n) ")
-    if continue_query.lower() == "y":
-        for task in tasks:
-            for shot in shots:
-                for exp in exps:
-                    print_report_for_setting(full_model_list=DATA_VALIDATION, task=task, shot=shot, exp=exp)
+# def print_model_reports(tasks):
+#     continue_query = input("\nPrint report for the best models? (y/n) ")
+#     if continue_query.lower() == "y":
+#         for task in tasks:
+#             for shot in shots:
+#                 for exp in exps:
+#                     print_report_for_setting(full_model_list=DATA_VALIDATION, task=task, shot=shot, exp=exp)
 
 
 def get_aggregate(model_metrics, task):
@@ -700,34 +700,34 @@ def extract_least_model_counts(task, subm_type, shot, exp):
     MODEL_COUNTS[subm_type][task][shot][exp] = result_dict
 
 
-def print_overall_model_summary(tasks):
-    """
-    Prints the overall model summary. Once is enough since the count for submission and validation is the same.
-    """
-    total_models = 0
-    least_models = 100000
-    most_models = -1
-    most_setting = ""
-    least_setting = ""
-    print(f"""\n============== Overall Model Summary ==============""")
-    for task in tasks:
-        for shot in shots:
-            for exp in exps:
-                models_for_setting = len(DATA_SUBMISSION[task][shot][exp])
-                print(f"| Setting: {task}/{shot}/{exp}\t>> Models: {models_for_setting}")
-                total_models += models_for_setting
-                if models_for_setting > most_models:
-                    most_models = models_for_setting
-                    most_setting = f"{task} {shot} {exp}"
-                if models_for_setting < least_models:
-                    least_models = models_for_setting
-                    least_setting = f"{task} {shot} {exp}"
-    print("===================================================")
-    print(f"| Total models: {total_models}")
-    print(f"| Most models: {most_models} {most_setting}")
-    print(f"| Least models: {least_models} {least_setting}")
-    print("===================================================")
-    return total_models
+# def print_overall_model_summary(tasks):
+#     """
+#     Prints the overall model summary. Once is enough since the count for submission and validation is the same.
+#     """
+#     total_models = 0
+#     least_models = 100000
+#     most_models = -1
+#     most_setting = ""
+#     least_setting = ""
+#     print(f"""\n============== Overall Model Summary ==============""")
+#     for task in tasks:
+#         for shot in shots:
+#             for exp in exps:
+#                 models_for_setting = len(DATA_SUBMISSION[task][shot][exp])
+#                 print(f"| Setting: {task}/{shot}/{exp}\t>> Models: {models_for_setting}")
+#                 total_models += models_for_setting
+#                 if models_for_setting > most_models:
+#                     most_models = models_for_setting
+#                     most_setting = f"{task} {shot} {exp}"
+#                 if models_for_setting < least_models:
+#                     least_models = models_for_setting
+#                     least_setting = f"{task} {shot} {exp}"
+#     print("===================================================")
+#     print(f"| Total models: {total_models}")
+#     print(f"| Most models: {most_models} {most_setting}")
+#     print(f"| Least models: {least_models} {least_setting}")
+#     print("===================================================")
+#     return total_models
 
 
 def create_output_dir(subm_type, task, shot, exp, top_k, strategy):
@@ -841,4 +841,4 @@ if __name__ == "__main__":
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
     DATA = load_data()
 
-    #main()
+    main()
