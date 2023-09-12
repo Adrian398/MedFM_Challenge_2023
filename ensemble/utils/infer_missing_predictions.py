@@ -337,4 +337,4 @@ if __name__ == "__main__":  # Important when using multiprocessing
         except ValueError:
             print("Invalid input. Please enter a number or 'no' to exit.")
 
-    run_commands_on_cluster(commands, num_commands, gpu=gpu_type)
+    run_commands_on_cluster(commands, num_commands, gpu_type=gpu_type)
