@@ -9,13 +9,28 @@ from functools import lru_cache
 import numpy as np
 import pandas as pd
 from colorama import Fore
-from sklearn.linear_model import LogisticRegression
-from sklearn.multiclass import OneVsRestClassifier
 from termcolor import colored
 from tqdm import tqdm
 
 from ensemble.gridsearch.test_task_submission import get_file_by_keyword
-from ensemble.utils.constants import shots, exps, TASK_2_CLASS_COUNT, TASK_2_CLASS_NAMES
+from ensemble.utils.constants import TASK_2_CLASS_COUNT, TASK_2_CLASS_NAMES
+
+
+class ColorGradient:
+    def __init__(self, text_type):
+        self.colors = {
+            "submission": ["red", "magenta", "light_magenta", "light_red", "light_yellow"],
+            "validation": ["blue", "cyan", "light_cyan", "light_blue", "light_grey"]
+        }
+        self.current_colors = self.colors[text_type]
+        self.index = 0
+
+    def next_color(self):
+        if self.index < len(self.current_colors):
+            color = self.current_colors[self.index]
+            self.index += 1
+            return color
+        return None  # or some default color or behavior
 
 
 def compute_pairwise_diversity(top_k_models):
@@ -703,36 +718,6 @@ def extract_least_model_counts(task, subm_type, shot, exp):
     MODEL_COUNTS[subm_type][task][shot][exp] = result_dict
 
 
-# def print_overall_model_summary(tasks):
-#     """
-#     Prints the overall model summary. Once is enough since the count for submission and validation is the same.
-#     """
-#     total_models = 0
-#     least_models = 100000
-#     most_models = -1
-#     most_setting = ""
-#     least_setting = ""
-#     print(f"""\n============== Overall Model Summary ==============""")
-#     for task in tasks:
-#         for shot in shots:
-#             for exp in exps:
-#                 models_for_setting = len(DATA_SUBMISSION[task][shot][exp])
-#                 print(f"| Setting: {task}/{shot}/{exp}\t>> Models: {models_for_setting}")
-#                 total_models += models_for_setting
-#                 if models_for_setting > most_models:
-#                     most_models = models_for_setting
-#                     most_setting = f"{task} {shot} {exp}"
-#                 if models_for_setting < least_models:
-#                     least_models = models_for_setting
-#                     least_setting = f"{task} {shot} {exp}"
-#     print("===================================================")
-#     print(f"| Total models: {total_models}")
-#     print(f"| Most models: {most_models} {most_setting}")
-#     print(f"| Least models: {least_models} {least_setting}")
-#     print("===================================================")
-#     return total_models
-
-
 def create_output_dir(subm_type, task, shot, exp, top_k, strategy):
     base_path = "ensemble/gridsearch"
     submission_dir = os.path.join(base_path, TIMESTAMP, subm_type, task, shot, exp, strategy)
@@ -747,10 +732,10 @@ def create_output_dir(subm_type, task, shot, exp, top_k, strategy):
     if not os.path.isdir(submission_dir):
         os.makedirs(submission_dir)
 
-    for exp in exps:
+    for exp in EXPS:
         os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
 
-    print(f"Created {colored(task.capitalize(), color)} {subm_type} directory {submission_dir}")
+    #print(f"Created {colored(task.capitalize(), color)} {subm_type} directory {submission_dir}")
 
     return submission_dir
 
@@ -780,8 +765,8 @@ def select_task():
             print("Invalid choice. Please try again.\n")
 
 
-def process_strategy(subm_type, task, shot, exp, strategy):
-    print(MODEL_COUNTS)
+def process_strategy(subm_type, task, shot, exp, strategy, color_picker):
+    print(f"\t\t\t\tProcessing Strategy {colored(strategy, color_picker.next_color())}")
     top_k = MODEL_COUNTS[subm_type][task][shot][exp]['top-k']
 
     top_k_values = [None] if "expert" in strategy else range(2, top_k)
@@ -795,11 +780,16 @@ def process_strategy(subm_type, task, shot, exp, strategy):
 def main():
     # 1st Level Iteration
     for subm_type in SUBM_TYPES:
+        COLOR_PICKER = ColorGradient(subm_type)
+        print(f"Processing Submission Type {colored(subm_type.capitalize(), COLOR_PICKER.next_color())}")
 
         # 2nd Level Iteration
         for task in TASKS:
+            print(f"\tProcessing Task {colored(task.capitalize(), COLOR_PICKER.next_color())}")
             for shot in SHOTS:
+                print(f"\t\tProcessing Shot {colored(shot, COLOR_PICKER.next_color())}")
                 for exp in EXPS:
+                    print(f"\t\t\tProcessing Experiment {colored(exp, COLOR_PICKER.next_color())}")
                     extract_least_model_counts(subm_type=subm_type,
                                                task=task,
                                                shot=shot,
@@ -809,7 +799,8 @@ def main():
                     for strategy in ENSEMBLE_STRATEGIES:
                         process_strategy(subm_type=subm_type,
                                          task=task, shot=shot, exp=exp,
-                                         strategy=strategy)
+                                         strategy=strategy,
+                                         color_picker=COLOR_PICKER)
 
 
 # ===================  DEFAULT PARAMS  =================
@@ -825,6 +816,10 @@ ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "pd-log-weighted",
                        "rank-based-weighted",
                        "diversity-weighted"]
+COLOR_GRADIENTS = {
+    "submission": ["red", "magenta", "light_magenta", "light_red", "light_yellow"],
+    "validation": ["blue", "cyan", "light_cyan", "light_blue", "light_grey"]
+}
 # ======================================================
 
 
@@ -843,6 +838,7 @@ if __name__ == "__main__":
     MODEL_COUNTS = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
 
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
+
     DATA = load_data()
 
     main()

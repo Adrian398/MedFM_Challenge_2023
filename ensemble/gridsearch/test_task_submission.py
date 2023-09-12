@@ -463,9 +463,6 @@ def process_top_k(top_k, strategy_path, task):
         top_k = ensemble_cfg.get('top-k', top_k)
         model_count = ensemble_cfg.get('model-count', model_count)
 
-    # if strategy == "expert":
-    #     strategy = "expert-per-class"
-
     # Save JSON result to the corresponding timestamp folder
     with open(os.path.join(top_k_path, 'results.json'), 'w') as json_file:
         json_file.write(json_result)
