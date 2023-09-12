@@ -824,15 +824,15 @@ COLOR_GRADIENTS = {
 
 if __name__ == "__main__":
     # 1st Level Params
-    SUBM_TYPES = ["validation"]
+    #SUBM_TYPES = ["validation"]
 
     # 2nd Level Params
-    TASKS = ["colon"]
+    #TASKS = ["colon"]
     SHOTS = ["1-shot", "5-shot", "10-shot"]
     EXPS = ["exp1", "exp2", "exp3", "exp4", "exp5"]
 
     # 3rd Level Params
-    ENSEMBLE_STRATEGIES = ["weighted"]
+    #ENSEMBLE_STRATEGIES = ["weighted"]
 
     MODEL_COUNTS = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
 
