@@ -295,6 +295,7 @@ def diversity_weighted_ensemble_strategy(model_runs, task, out_path, top_k=3):
 
         # Compute diversity scores for the top k models
         top_k_model_data = [model for model, _ in top_n_models]
+        print(top_k_model_data)
         diversity_scores = compute_pairwise_diversity(top_k_model_data)
 
         # Ensure diversity scores match the expected length
@@ -792,7 +793,7 @@ def main():
 
 # ===================  DEFAULT PARAMS  =================
 ROOT_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
-SUBM_TYPES = ["submission", "validation"]
+SUBM_TYPES = ["validation", "submission"]
 TASKS = ["colon", "endo", "chest"]
 SHOTS = ["1-shot", "5-shot", "10-shot"]
 EXPS = ["exp1", "exp2", "exp3", "exp4", "exp5"]
@@ -807,16 +808,16 @@ COLOR_GRADIENTS = {
     "submission": {
         0: "red",
         1: "magenta",
-        2: "light_magenta",
-        3: "light_red",
-        4: "light_yellow"
+        2: "cyan",
+        3: "light_blue",
+        4: "light_magenta"
     },
     "validation": {
         0: "blue",
-        1: "cyan",
-        2: "light_cyan",
+        1: "magenta",
+        2: "cyan",
         3: "light_blue",
-        4: "light_grey"
+        4: "light_magenta"
     }
 }
 # ======================================================
