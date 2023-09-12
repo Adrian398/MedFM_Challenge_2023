@@ -86,7 +86,7 @@ def get_file_from_directory(directory, extension, contains_string=None):
 
 
 def print_report(model_infos):
-    model_dirs = [model["path"] for model in model_infos.values()]
+    model_dirs = [model["path"].split('work_dirs/')[1] for model in model_infos.values()]
     if len(model_dirs) == 0:
         print(colored(f"\nAll valid models have an existing prediction CSV!\n", 'green'))
         exit()
