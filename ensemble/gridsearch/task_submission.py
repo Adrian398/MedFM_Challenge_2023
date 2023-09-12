@@ -694,7 +694,8 @@ def extract_least_model_counts(task, subm_type, shot, exp):
     if task in MODEL_COUNTS[subm_type]:
         return
 
-    total_models, least_models = len(DATA[subm_type][task][shot][exp])
+    total_models= len(DATA[subm_type][task][shot][exp])
+    least_models = total_models
 
     result_dict = {'top-k': least_models, 'total': total_models}
     MODEL_COUNTS[subm_type][task][shot][exp] = result_dict
