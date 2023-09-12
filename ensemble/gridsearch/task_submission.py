@@ -576,38 +576,32 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot):
     return None, None
 
 
-def extract_data(root_dir):
-    subm_types = ["submission", "validation"]
-
-    # Total iterations: tasks * shots * exps * model_dirs * subm_types
-    total_iterations = 0
-    for task in TASKS:
-        for shot in shots:
-            total_iterations += len(glob.glob(os.path.join(root_dir, task, shot, '*exp[1-5]*')))
-
-    print(f"Checking and extracting data for {colored(str(total_iterations), 'blue')} models:")
-    data = load_data(total_iterations=total_iterations, root_dir=root_dir, subm_types=subm_types)
-
-    return data['submission'], data['validation']
-
-
-def load_data(total_iterations, root_dir, subm_types):
+def load_data():
     data_lists = {
         stype: {
             task: {
                 shot: {
-                    exp: [] for exp in exps
-                } for shot in shots
+                    exp: [] for exp in EXPS
+                } for shot in SHOTS
             } for task in TASKS
-        } for stype in subm_types
+        } for stype in SUBM_TYPES
     }
+
+    # Total iterations: tasks * shots * exps * model_dirs * subm_types
+    total_iterations = 0
+    for task in TASKS:
+        for shot in SHOTS:
+            total_iterations += len(glob.glob(os.path.join(ROOT_DIR, task, shot, '*exp[1-5]*')))
+
+    print(f"Checking and extracting data for {colored(str(total_iterations), 'blue')} models:")
 
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
         for task in TASKS:
-            for shot in shots:
-                path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
+            for shot in SHOTS:
+                path_pattern = os.path.join(ROOT_DIR, task, shot, '*exp[1-5]*')
+
                 for model_dir in glob.glob(path_pattern):
-                    for subm_type in subm_types:
+                    for subm_type in SUBM_TYPES:
                         data, exp_num = check_and_extract_data(model_dir_abs=model_dir,
                                                                subm_type=subm_type,
                                                                task=task,
@@ -633,90 +627,77 @@ def create_submission_cfg_dump(top_k, total_models, strategy, root_report_dir):
     return cfg_file_path
 
 
-def process_top_k(strategy, top_k, task, subm_type):
-    if subm_type == "submission":
-        data = DATA_SUBMISSION
-    elif subm_type == "validation":
-        data = DATA_VALIDATION
+def process_top_k(subm_type, task, shot, exp, strategy, top_k):
+    submission_dir = create_output_dir(subm_type=subm_type,
+                                       task=task, shot=shot, exp=exp,
+                                       strategy=strategy,
+                                       top_k=top_k)
+
+    model_runs = DATA[subm_type][task][shot][exp]
+    if len(model_runs) < 2:
+        print("Not enough runs")
+        return
+    out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{subm_type}.csv")
+
+    if strategy == "weighted":
+        selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
+                                                                        task=task, shot=shot, exp=exp,
+                                                                        top_k=top_k, out_path=out_path)
+    elif strategy == "expert-per-class":
+        selected_models, model_occurrences = expert_per_class_model_strategy(model_runs=model_runs,
+                                                                             task=task,
+                                                                             out_path=out_path)
+    elif strategy == "expert-per-task":
+        selected_models, model_occurrences = expert_per_task_model_strategy(model_runs=model_runs,
+                                                                            task=task,
+                                                                            out_path=out_path)
+    elif strategy == "pd-weighted":
+        selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                       task=task,
+                                                                                       out_path=out_path,
+                                                                                       top_k=top_k)
+    elif strategy == "pd-log-weighted":
+        selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                       task=task,
+                                                                                       out_path=out_path,
+                                                                                       top_k=top_k,
+                                                                                       log_scale=True)
+    elif strategy == "rank-based-weighted":
+        selected_models, model_occurrences = rank_based_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                 task=task,
+                                                                                 out_path=out_path,
+                                                                                 top_k=top_k)
+    elif strategy == "diversity-weighted":
+        selected_models, model_occurrences = diversity_weighted_ensemble_strategy(model_runs=model_runs,
+                                                                                  task=task,
+                                                                                  out_path=out_path,
+                                                                                  top_k=top_k)
     else:
-        raise f"Unknown submission type {subm_type}!"
+        print("Invalid ensemble strategy!")
+        exit()
 
-    submission_dir = create_output_dir(strategy=strategy,
-                                       top_k=top_k,
-                                       task=task,
-                                       submission_type=subm_type)
-
-    for shot in shots:
-        for exp in exps:
-            model_runs = data[task][shot][exp]
-            if len(model_runs) < 2:
-                print("Not enough runs")
-                continue
-            out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{subm_type}.csv")
-
-            if strategy == "weighted":
-                selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
-                                                                                task=task, shot=shot, exp=exp,
-                                                                                top_k=top_k, out_path=out_path)
-            elif strategy == "expert-per-class":
-                selected_models, model_occurrences = expert_per_class_model_strategy(model_runs=model_runs,
-                                                                                     task=task,
-                                                                                     out_path=out_path)
-            elif strategy == "expert-per-task":
-                selected_models, model_occurrences = expert_per_task_model_strategy(model_runs=model_runs,
-                                                                                    task=task,
-                                                                                    out_path=out_path)
-            elif strategy == "pd-weighted":
-                selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
-                                                                                               task=task,
-                                                                                               out_path=out_path,
-                                                                                               top_k=top_k)
-            elif strategy == "pd-log-weighted":
-                selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
-                                                                                               task=task,
-                                                                                               out_path=out_path,
-                                                                                               top_k=top_k,
-                                                                                               log_scale=True)
-            elif strategy == "rank-based-weighted":
-                selected_models, model_occurrences = rank_based_weight_ensemble_strategy(model_runs=model_runs,
-                                                                                         task=task,
-                                                                                         out_path=out_path,
-                                                                                         top_k=top_k)
-            elif strategy == "diversity-weighted":
-                selected_models, model_occurrences = diversity_weighted_ensemble_strategy(model_runs=model_runs,
-                                                                                          task=task,
-                                                                                          out_path=out_path,
-                                                                                          top_k=top_k)
-            else:
-                print("Invalid ensemble strategy!")
-                exit()
-
-            if model_occurrences and submission_dir:
-                create_ensemble_report_file(task=task, shot=shot, exp=exp,
-                                            selected_models_for_classes=selected_models,
-                                            model_occurrences=model_occurrences,
-                                            root_report_dir=submission_dir)
+    if model_occurrences and submission_dir:
+        create_ensemble_report_file(task=task, shot=shot, exp=exp,
+                                    selected_models_for_classes=selected_models,
+                                    model_occurrences=model_occurrences,
+                                    root_report_dir=submission_dir)
     if subm_type == "validation":
         create_submission_cfg_dump(top_k=top_k,
                                    strategy=strategy,
-                                   total_models=TOTAL_MODELS[task],
+                                   total_models=MODEL_COUNTS[subm_type][task][shot][exp]['total'],
                                    root_report_dir=submission_dir)
 
     return submission_dir
 
 
-def get_least_model_count(task):
-    total_models = 0
-    least_models = 100000
-    least_setting = ""
-    for shot in shots:
-        for exp in exps:
-            models_for_setting = len(DATA_SUBMISSION[task][shot][exp])
-            total_models += models_for_setting
-            if models_for_setting < least_models:
-                least_models = models_for_setting
-                least_setting = f"{task} {shot} {exp}"
-    return total_models, least_models, least_setting
+def extract_least_model_counts(task, subm_type, shot, exp):
+    if task in MODEL_COUNTS[subm_type]:
+        return
+
+    total_models, least_models = len(DATA[subm_type][task][shot][exp])
+
+    result_dict = {'top-k': least_models, 'total': total_models}
+    MODEL_COUNTS[subm_type][task][shot][exp] = result_dict
 
 
 def print_overall_model_summary(tasks):
@@ -749,13 +730,11 @@ def print_overall_model_summary(tasks):
     return total_models
 
 
-def create_output_dir(task, top_k, strategy, submission_type):
-    base_path = os.path.join("ensemble", "gridsearch")
-    submission_dir = os.path.join(base_path, TIMESTAMP, submission_type, task, strategy)
+def create_output_dir(subm_type, task, shot, exp, top_k, strategy):
+    base_path = "ensemble/gridsearch"
+    submission_dir = os.path.join(base_path, TIMESTAMP, subm_type, task, shot, exp, strategy)
 
-    color = 'red'
-    if submission_type == "validation":
-        color = 'blue'
+    color = 'red' if subm_type == "validation" else 'blue'
 
     if top_k:
         submission_dir = os.path.join(submission_dir, f"top-{str(top_k)}")
@@ -768,7 +747,7 @@ def create_output_dir(task, top_k, strategy, submission_type):
     for exp in exps:
         os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
 
-    print(f"Created {colored(task.capitalize(), color)} {submission_type} directory {submission_dir}")
+    print(f"Created {colored(task.capitalize(), color)} {subm_type} directory {submission_dir}")
 
     return submission_dir
 
@@ -798,38 +777,43 @@ def select_task():
             print("Invalid choice. Please try again.\n")
 
 
-def process_strategy(strategy, task, subm_type):
-    if "expert" in strategy:
-        process_top_k(strategy=strategy,
-                      task=task,
-                      top_k=None,
-                      subm_type=subm_type)
-    else:
-        for top_k in range(2, TOP_K_MAX[task]):
-            process_top_k(strategy=strategy,
-                          top_k=top_k,
-                          task=task,
-                          subm_type=subm_type)
+def process_strategy(subm_type, task, shot, exp, strategy):
+    top_k = MODEL_COUNTS[subm_type][task][shot][exp]['top-k']
 
+    top_k_values = [None] if "expert" in strategy else range(2, top_k)
 
-def process_subm_type(task, subm_type):
-    for strategy in ENSEMBLE_STRATEGIES:
-        process_strategy(strategy=strategy, task=task, subm_type=subm_type)
-
-
-def process_task(task):
-    TOTAL_MODELS[task], TOP_K_MAX[task], _ = get_least_model_count(task=task)
-
-    for subm_type in SUBMISSION_TYPES:
-        process_subm_type(task=task, subm_type=subm_type)
+    for top_k in top_k_values:
+        process_top_k(subm_type=subm_type,
+                      task=task, shot=shot, exp=exp,
+                      strategy=strategy, top_k=top_k)
 
 
 def main():
-    for task in TASKS:
-        process_task(task=task)
+    # 1st Level Iteration
+    for subm_type in SUBM_TYPES:
+
+        # 2nd Level Iteration
+        for task in TASKS:
+            for shot in SHOTS:
+                for exp in EXPS:
+                    extract_least_model_counts(subm_type=subm_type,
+                                               task=task,
+                                               shot=shot,
+                                               exp=exp)
+
+                    # 3rd Level Iteration
+                    for strategy in ENSEMBLE_STRATEGIES:
+                        process_strategy(subm_type=subm_type,
+                                         task=task, shot=shot, exp=exp,
+                                         strategy=strategy)
 
 
-# ======================================================
+# ===================  DEFAULT PARAMS  =================
+ROOT_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
+SUBM_TYPES = ["submission", "validation"]
+TASKS = ["colon", "endo", "chest"]
+SHOTS = ["1-shot", "5-shot", "10-shot"]
+EXPS = ["exp1", "exp2", "exp3", "exp4", "exp5"]
 ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "expert-per-class",
                        "weighted",
@@ -837,21 +821,24 @@ ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "pd-log-weighted",
                        "rank-based-weighted",
                        "diversity-weighted"]
-SUBMISSION_TYPES = ["submission", "validation"]
-TASKS = ["colon", "endo", "chest"]
 # ======================================================
 
 
 if __name__ == "__main__":
-    root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
+    # 1st Level Params
+    SUBM_TYPES = ["validation"]
 
-    ENSEMBLE_STRATEGIES = ["weighted"]
+    # 2nd Level Params
     TASKS = ["colon"]
-    SUBMISSION_TYPES = ["validation"]
+    SHOTS = ["1-shot", "5-shot", "10-shot"]
+    EXPS = ["exp1", "exp2", "exp3", "exp4", "exp5"]
 
-    TOTAL_MODELS = defaultdict()
-    TOP_K_MAX = defaultdict()
+    # 3rd Level Params
+    ENSEMBLE_STRATEGIES = ["weighted"]
+
+    MODEL_COUNTS = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
-    DATA_SUBMISSION, DATA_VALIDATION = extract_data(root_dir=root_dir)
+    DATA = load_data()
 
-    main()
+    #main()
