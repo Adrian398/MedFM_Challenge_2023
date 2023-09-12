@@ -700,64 +700,66 @@ def create_submission_cfg_dump(top_k, total_models, strategy, root_report_dir):
     return cfg_file_path
 
 
-def process_top_k(subm_type, task, shot, exp, strategy, top_k):
+def process_top_k(subm_type, task, shot_, exp_, strategy, top_k):
     submission_dir = create_output_dir(subm_type=subm_type,
-                                       task=task, shot=shot, exp=exp,
+                                       task=task, shot=shot_, exp=exp_,
                                        strategy=strategy,
                                        top_k=top_k)
 
-    model_runs = DATA[subm_type][task][shot][exp]
-    if len(model_runs) < 2:
-        print("Not enough runs")
-        return
-    out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{subm_type}.csv")
+    for shot in SHOTS:
+        for exp in EXPS:
+            model_runs = DATA[subm_type][task][shot][exp]
+            if len(model_runs) < 2:
+                print("Not enough runs")
+                return
+            out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{subm_type}.csv")
 
-    if strategy == "weighted":
-        selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
-                                                                        task=task, shot=shot, exp=exp,
-                                                                        top_k=top_k, out_path=out_path)
-    elif strategy == "expert-per-class":
-        selected_models, model_occurrences = expert_per_class_model_strategy(model_runs=model_runs,
-                                                                             task=task,
-                                                                             out_path=out_path)
-    elif strategy == "expert-per-task":
-        selected_models, model_occurrences = expert_per_task_model_strategy(model_runs=model_runs,
-                                                                            task=task,
-                                                                            out_path=out_path)
-    elif strategy == "pd-weighted":
-        selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
-                                                                                       task=task,
-                                                                                       out_path=out_path,
-                                                                                       top_k=top_k)
-    elif strategy == "pd-log-weighted":
-        selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
-                                                                                       task=task,
-                                                                                       out_path=out_path,
-                                                                                       top_k=top_k,
-                                                                                       log_scale=True)
-    elif strategy == "rank-based-weighted":
-        selected_models, model_occurrences = rank_based_weight_ensemble_strategy(model_runs=model_runs,
-                                                                                 task=task,
-                                                                                 out_path=out_path,
-                                                                                 top_k=top_k)
-    elif strategy == "diversity-weighted":
-        selected_models, model_occurrences = diversity_weighted_ensemble_strategy(model_runs=model_runs,
-                                                                                  task=task,
-                                                                                  out_path=out_path,
-                                                                                  top_k=top_k)
-    else:
-        print("Invalid ensemble strategy!")
-        exit()
+            if strategy == "weighted":
+                selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
+                                                                                task=task, shot=shot, exp=exp,
+                                                                                top_k=top_k, out_path=out_path)
+            elif strategy == "expert-per-class":
+                selected_models, model_occurrences = expert_per_class_model_strategy(model_runs=model_runs,
+                                                                                     task=task,
+                                                                                     out_path=out_path)
+            elif strategy == "expert-per-task":
+                selected_models, model_occurrences = expert_per_task_model_strategy(model_runs=model_runs,
+                                                                                    task=task,
+                                                                                    out_path=out_path)
+            elif strategy == "pd-weighted":
+                selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                               task=task,
+                                                                                               out_path=out_path,
+                                                                                               top_k=top_k)
+            elif strategy == "pd-log-weighted":
+                selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                               task=task,
+                                                                                               out_path=out_path,
+                                                                                               top_k=top_k,
+                                                                                               log_scale=True)
+            elif strategy == "rank-based-weighted":
+                selected_models, model_occurrences = rank_based_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                         task=task,
+                                                                                         out_path=out_path,
+                                                                                         top_k=top_k)
+            elif strategy == "diversity-weighted":
+                selected_models, model_occurrences = diversity_weighted_ensemble_strategy(model_runs=model_runs,
+                                                                                          task=task,
+                                                                                          out_path=out_path,
+                                                                                          top_k=top_k)
+            else:
+                print("Invalid ensemble strategy!")
+                exit()
 
-    if model_occurrences and submission_dir:
-        create_ensemble_report_file(task=task, shot=shot, exp=exp,
-                                    selected_models_for_classes=selected_models,
-                                    model_occurrences=model_occurrences,
-                                    root_report_dir=submission_dir)
+            if model_occurrences and submission_dir:
+                create_ensemble_report_file(task=task, shot=shot_, exp=exp_,
+                                            selected_models_for_classes=selected_models,
+                                            model_occurrences=model_occurrences,
+                                            root_report_dir=submission_dir)
     if subm_type == "validation":
         create_submission_cfg_dump(top_k=top_k,
                                    strategy=strategy,
-                                   total_models=MODEL_COUNTS[subm_type][task][shot][exp]['total'],
+                                   total_models=MODEL_COUNTS[subm_type][task][shot_][exp_]['total'],
                                    root_report_dir=submission_dir)
 
     return submission_dir
