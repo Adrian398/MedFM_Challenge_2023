@@ -708,7 +708,7 @@ def process_top_k(subm_type, task, shot_, exp_, strategy, top_k):
 
     for shot in SHOTS:
         for exp in EXPS:
-            model_runs = DATA[subm_type][task][shot][exp]
+            model_runs = DATA[subm_type][task][shot_][exp_]
             if len(model_runs) < 2:
                 print("Not enough runs")
                 return
