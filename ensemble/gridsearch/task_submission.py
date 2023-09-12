@@ -935,7 +935,7 @@ def main():
 # ======================================================
 ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "expert-per-class",
-                       "stacking",
+                       #"stacking",
                        "weighted",
                        "pd-weighted",
                        "pd-log-weighted",
@@ -949,9 +949,9 @@ TASKS = ["colon", "endo", "chest"]
 if __name__ == "__main__":
     root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
 
-    ENSEMBLE_STRATEGIES = ["stacking"]
-    TASKS = ["colon"]
-    SUBMISSION_TYPES = ["validation"]
+    #ENSEMBLE_STRATEGIES = ["stacking"]
+    #TASKS = ["colon"]
+    #SUBMISSION_TYPES = ["validation"]
 
     TOTAL_MODELS = defaultdict()
     TOP_K_MAX = defaultdict()
