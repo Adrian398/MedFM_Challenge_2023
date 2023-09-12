@@ -825,11 +825,11 @@ def process_strategy(subm_type, task, shot, exp, strategy):
     print_colored(f"\t\t\t\tProcessing Strategy {strategy}", subm_type, 4)
     top_k = MODEL_COUNTS[subm_type][task][shot][exp]['top-k']
 
-    top_k_values = [None] if "expert" in strategy else range(2, top_k)
+    top_k_values = [None] if "expert" in strategy else range(2, min(top_k, MAX_TOP_K))
 
     for top_k in top_k_values:
         process_top_k(subm_type=subm_type,
-                      task=task, shot=shot, exp=exp,
+                      task=task, shot_=shot, exp_=exp,
                       strategy=strategy, top_k=top_k)
 
 
@@ -907,7 +907,7 @@ if __name__ == "__main__":
     MODEL_COUNTS = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
 
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
-
+    MAX_TOP_K = 16
     DATA = load_data()
 
     main()
