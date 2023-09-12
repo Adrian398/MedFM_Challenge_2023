@@ -67,10 +67,10 @@ def compute_pairwise_diversity(top_k_models):
 
                     # Print the results
                     print("Image IDs in the first CSV but not in the second CSV:")
-                    print(missing_in_df2)
+                    print(len(missing_in_df2))
 
                     print("\nImage IDs in the second CSV but not in the first CSV:")
-                    print(missing_in_df1)
+                    print(len(missing_in_df1))
                     exit()
                     continue
 
