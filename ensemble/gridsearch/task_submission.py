@@ -301,8 +301,17 @@ def diversity_weighted_ensemble_strategy(model_runs, task, out_path, top_k=3):
         # Get aggregate values
         aggregates = [(run, *get_aggregate(run['metrics'], task)) for run in model_runs]
 
+        aggregates = []
+        for run in model_runs:
+            aggregate_data = get_aggregate(run['metrics'], task)
+            if isinstance(aggregate_data[0], str):
+                print(f"Problematic run: {run}")
+                print(f"Returned aggregate data: {aggregate_data}")
+                continue  # skip this run
+            aggregates.append((run, *aggregate_data))
+
         # Filter out None or negative aggregate values
-        aggregates = [item for item in aggregates if item[1] is not None and item[1] >= 0]
+        #aggregates = [item for item in aggregates if item[1] is not None and item[1] >= 0]
 
         # Sort and get top_k models
         aggregates.sort(key=lambda x: x[1], reverse=True)
