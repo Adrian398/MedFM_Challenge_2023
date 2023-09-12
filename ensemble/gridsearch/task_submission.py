@@ -16,21 +16,11 @@ from ensemble.gridsearch.test_task_submission import get_file_by_keyword
 from ensemble.utils.constants import TASK_2_CLASS_COUNT, TASK_2_CLASS_NAMES
 
 
-class ColorGradient:
-    def __init__(self, text_type):
-        self.colors = {
-            "submission": ["red", "magenta", "light_magenta", "light_red", "light_yellow"],
-            "validation": ["blue", "cyan", "light_cyan", "light_blue", "light_grey"]
-        }
-        self.current_colors = self.colors[text_type]
-        self.index = 0
 
-    def next_color(self):
-        if self.index < len(self.current_colors):
-            color = self.current_colors[self.index]
-            self.index += 1
-            return color
-        return None  # or some default color or behavior
+def print_colored(text, submission_type, depth):
+    gradient = COLOR_GRADIENTS.get(submission_type, {})
+    color = gradient.get(depth, "white")  # Default to white if depth or submission type is not found
+    print(colored(text, color))
 
 
 def compute_pairwise_diversity(top_k_models):
@@ -765,8 +755,8 @@ def select_task():
             print("Invalid choice. Please try again.\n")
 
 
-def process_strategy(subm_type, task, shot, exp, strategy, color_picker):
-    print(f"\t\t\t\tProcessing Strategy {colored(strategy, color_picker.next_color())}")
+def process_strategy(subm_type, task, shot, exp, strategy):
+    print_colored(f"\t\t\t\tProcessing Strategy {strategy}", subm_type, 4)
     top_k = MODEL_COUNTS[subm_type][task][shot][exp]['top-k']
 
     top_k_values = [None] if "expert" in strategy else range(2, top_k)
@@ -780,16 +770,15 @@ def process_strategy(subm_type, task, shot, exp, strategy, color_picker):
 def main():
     # 1st Level Iteration
     for subm_type in SUBM_TYPES:
-        COLOR_PICKER = ColorGradient(subm_type)
-        print(f"Processing Submission Type {colored(subm_type.capitalize(), COLOR_PICKER.next_color())}")
+        print_colored(f"Processing Submission Type {subm_type.capitalize()}", subm_type, 0)
 
         # 2nd Level Iteration
         for task in TASKS:
-            print(f"\tProcessing Task {colored(task.capitalize(), COLOR_PICKER.next_color())}")
+            print_colored(f"\tProcessing Task {task.capitalize()}", subm_type, 1)
             for shot in SHOTS:
-                print(f"\t\tProcessing Shot {colored(shot, COLOR_PICKER.next_color())}")
+                print_colored(f"\t\tProcessing Shot {shot}", subm_type, 2)
                 for exp in EXPS:
-                    print(f"\t\t\tProcessing Experiment {colored(exp, COLOR_PICKER.next_color())}")
+                    print_colored(f"\t\t\tProcessing Experiment {exp}", subm_type, 3)
                     extract_least_model_counts(subm_type=subm_type,
                                                task=task,
                                                shot=shot,
@@ -799,8 +788,7 @@ def main():
                     for strategy in ENSEMBLE_STRATEGIES:
                         process_strategy(subm_type=subm_type,
                                          task=task, shot=shot, exp=exp,
-                                         strategy=strategy,
-                                         color_picker=COLOR_PICKER)
+                                         strategy=strategy)
 
 
 # ===================  DEFAULT PARAMS  =================
@@ -817,8 +805,20 @@ ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "rank-based-weighted",
                        "diversity-weighted"]
 COLOR_GRADIENTS = {
-    "submission": ["red", "magenta", "light_magenta", "light_red", "light_yellow"],
-    "validation": ["blue", "cyan", "light_cyan", "light_blue", "light_grey"]
+    "submission": {
+        0: "red",
+        1: "magenta",
+        2: "light_magenta",
+        3: "light_red",
+        4: "light_yellow"
+    },
+    "validation": {
+        0: "blue",
+        1: "cyan",
+        2: "light_cyan",
+        3: "light_blue",
+        4: "light_grey"
+    }
 }
 # ======================================================
 
