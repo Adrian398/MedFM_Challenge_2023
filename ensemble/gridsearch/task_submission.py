@@ -30,7 +30,7 @@ def compute_pairwise_diversity(top_k_models):
     diversity_matrix = np.zeros((num_models, num_models))
 
     for idx in range(num_models):
-        if 'ng' in top_k_models[idx].iloc[:, 0].values:
+        if 'ng' in top_k_models[idx]['prediction'].iloc[:, 0].values:
             print(f"Detected error in {top_k_models[idx]['name']}. Deleting...")
             # os.remove(filename)
             # print(f"File {filename} deleted successfully!")
