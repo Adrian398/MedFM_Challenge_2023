@@ -780,8 +780,6 @@ def create_output_dir(subm_type, task, shot, exp, top_k, strategy):
     base_path = "ensemble/gridsearch"
     submission_dir = os.path.join(base_path, TIMESTAMP, subm_type, task, shot, exp, strategy)
 
-    color = 'red' if subm_type == "validation" else 'blue'
-
     if top_k:
         submission_dir = os.path.join(submission_dir, f"top-{str(top_k)}")
     else:
@@ -792,8 +790,6 @@ def create_output_dir(subm_type, task, shot, exp, top_k, strategy):
 
     for exp in EXPS:
         os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
-
-    #print(f"Created {colored(task.capitalize(), color)} {subm_type} directory {submission_dir}")
 
     return submission_dir
 
@@ -857,6 +853,9 @@ def main():
                         process_strategy(subm_type=subm_type,
                                          task=task, shot=shot, exp=exp,
                                          strategy=strategy)
+
+        dir_path = os.path.join("ensemble/gridsearch", TIMESTAMP, subm_type)
+        print(f"Created directory {dir_path}")
 
 
 # ===================  DEFAULT PARAMS  =================
