@@ -18,6 +18,6 @@ config="configs/densenet121/1-shot_chest.py"
 
 for seed in "${seeds[@]}"; do
   for bs in "${batch_size[@]}"; do
-    sbatch -p ls6 --gres=gpu:1 --nodelist=gpu8a --wrap="python tools/train.py $config --seed=$seed --exp_num=$exp_num --exp_suffix=$exp_suffix --batch_size=$bs" -o $log_output
+    sbatch -p ls6 --gres=gpu:1 --nodelist=gpu8a --wrap="python tools/train.py $config --seed=$seed --exp_num=$exp_num --exp_suffix=$exp_suffix --train_bs=$bs" -o $log_output
   done
 done
