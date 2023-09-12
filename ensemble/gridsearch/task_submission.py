@@ -624,7 +624,7 @@ def load_data():
                                                                subm_type=subm_type,
                                                                task=task,
                                                                shot=shot)
-                        if data and exp_num and f"exp-{exp_num}" in EXPS:
+                        if data and exp_num and f"exp{exp_num}" in EXPS:
                             print(f"Added model because exp num matches")
                             data_lists[subm_type][task][shot][f"exp{exp_num}"].append(data)
                     pbar.update(1)
