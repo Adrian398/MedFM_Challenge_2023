@@ -20,11 +20,11 @@ from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_mu
 TIMESTAMP_PATTERN = re.compile(r"\d{2}-\d{2}_\d{2}-\d{2}-\d{2}")
 
 
-def get_timestamp(arguments, base_path):
+def get_timestamp(arguments):
     if arguments.ts:
         return arguments.ts
 
-    return get_newest_timestamp(base_path)
+    return get_newest_timestamp(BASE_PATH)
 
 
 def get_newest_timestamp(base_path):
@@ -476,10 +476,10 @@ def process_top_k(top_k, strategy_path, task):
     }
 
 
-def process_strategy(task_path, strategy, task):
+def process_strategy(strategy, task):
     print(colored(f"\t\tProcessing Strategy {strategy}", 'light_red'))
 
-    strategy_path = os.path.join(task_path, strategy)
+    strategy_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, strategy)
 
     # Skip strategy if directory is missing
     if not os.path.isdir(strategy_path):
@@ -499,10 +499,9 @@ def process_strategy(task_path, strategy, task):
     return result_dicts
 
 
-def process_task(timestamp_path, task):
-    print(colored(f"\tProcessing Task {task}", 'cyan'))
+def process_task(task):
 
-    task_path = os.path.join(timestamp_path, task)
+    task_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task)
 
     if os.path.isdir(task_path):
         strategy_dirs = sorted([d for d in os.listdir(task_path) if os.path.isdir(os.path.join(task_path, d))])
@@ -523,21 +522,55 @@ def process_task(timestamp_path, task):
     return task_result_dicts
 
 
-def process_timestamp(base_path, timestamp, tasks):
-    print(colored(f"Processing Timestamp {timestamp}", 'blue'))
-
-    timestamp_path = os.path.join(base_path, timestamp, 'validation')
-
-    timestamp_result_dicts = {timestamp: {}}
-    for task in tasks:
-        task_result_dicts = process_task(timestamp_path=timestamp_path, task=task)
-        timestamp_result_dicts[timestamp][task] = task_result_dicts
-
-    return timestamp_result_dicts
+def recursive_defaultdict():
+    return defaultdict(recursive_defaultdict)
 
 
-def worker_func(base_path, timestamp, tasks):
-    return process_timestamp(base_path=base_path, timestamp=timestamp, tasks=tasks)
+def extract_top_k_from_folder(folder_name):
+    """Extracts the top-k number from the folder name."""
+    prefix = "top-"
+    if folder_name.startswith(prefix):
+        return int(folder_name[len(prefix):])
+    return None  # Return None if the folder doesn't match the expected format
+
+
+def compute_top_k_values(strategy_path, strategy):
+    """Compute the top-k values for the given strategy."""
+    if "expert" in strategy:
+        return [None]
+
+    folder_names = os.listdir(strategy_path)
+    return sorted(extract_top_k_from_folder(folder) for folder in folder_names)
+
+
+def process_timestamp():
+    print(colored(f"Processing Timestamp {TIMESTAMP}", 'blue'))
+
+    result_dicts = recursive_defaultdict()
+
+    for task in TASKS:
+        print(colored(f"\tProcessing Task {task}", 'cyan'))
+
+        for shot in SHOTS:
+            print(colored(f"\t\tProcessing Shot {shot}", 'cyan'))
+
+            for exp in EXPS:
+                print(colored(f"\t\t\tProcessing Experiment {exp}", 'cyan'))
+
+                for strategy in ENSEMBLE_STRATEGIES:
+                    print(colored(f"\t\t\t\tProcessing Strategy {strategy}", 'light_red'))
+
+                    strategy_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp, strategy)
+                    top_k_values = compute_top_k_values(strategy_path, strategy)
+
+                    results = []
+                    for top_k in top_k_values:
+                        result = process_top_k(top_k=top_k, strategy_path=strategy_path, task=task)
+                        results.append(result)
+
+                    result_dicts[task][shot][exp][strategy] = results
+
+    return result_dicts
 
 
 # ==========================================================================================
@@ -549,49 +582,72 @@ BUILD_SUBMISSION = False
 # ==========================================================================================
 
 
-def main(arguments):
-    base_path = "ensemble/gridsearch"
+def main():
+    result = process_timestamp()
 
-    timestamps = [get_timestamp(arguments, base_path)]
+    for task in TASKS:
+        for shot in SHOTS:
+            for exp in EXPS:
+                log_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp, 'log.txt')
 
-    # Number of processes to spawn. You can adjust this value as needed.
-    num_processes = min(cpu_count(), len(timestamps))
+                lines = []
+                for strategy in ENSEMBLE_STRATEGIES:
+                    for top_k in result[task][shot][exp][strategy]:
+                        log_pred_str = build_log_string(top_k, task=task)
+                        lines.append(log_pred_str)
 
-    tasks = ["endo", "colon", "chest"]
-    args = [(base_path, timestamp, tasks) for timestamp in timestamps]
+                lines = sorted(lines, key=lambda x: float(x.split()[-1]))
 
-    with Pool(num_processes) as pool:
-        results_list = pool.starmap(worker_func, args)
+                with open(log_file_path, 'w') as log_file:
+                    log_file.write(
+                        f"{'Model-Count':<15} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
+                    for line in lines:
+                        log_file.write(line)
+                    print(f"Wrote Log file to {TIMESTAMP}/{task}/{shot}/{exp}/log.txt")
 
-    timestamps_dict = {key: value for d in results_list for key, value in d.items()}
+    # for timestamp_key, timestamp_dict in timestamps_dict.items():
+    #     for task_key, task_dict in timestamp_dict.items():
+    #         log_file_path = os.path.join(base_path, timestamp_key, 'validation', task_key, 'log.txt')
+    #
+    #         lines = []
+    #         for strategy_key, strategy_list in task_dict.items():
+    #             for top_k_item in strategy_list:
+    #                 log_pred_str = build_log_string(top_k_item, task_key)
+    #                 lines.append(log_pred_str)
+    #
+    #         lines = sorted(lines, key=lambda x: float(x.split()[-1]))
+    #
+    #         with open(log_file_path, 'w') as log_file:
+    #             log_file.write(
+    #                 f"{'Model-Count':<15} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
+    #             for line in lines:
+    #                 log_file.write(line)
+    #             print(f"Wrote Log file to {timestamp_key}/{task_key}/log.txt")
+    #
+    #     _, strategy_per_task, json_path, ensemble_path = compile_results_to_json(base_path=base_path, timestamp=timestamp_key, tasks=tasks)
+    #
+    #     if BUILD_SUBMISSION:
+    #         build_final_submission(base_path=base_path,
+    #                                timestamp=timestamp_key,
+    #                                strategies=strategy_per_task,
+    #                                json_path=json_path,
+    #                                ensemble_path=ensemble_path)
 
-    for timestamp_key, timestamp_dict in timestamps_dict.items():
-        for task_key, task_dict in timestamp_dict.items():
-            log_file_path = os.path.join(base_path, timestamp_key, 'validation', task_key, 'log.txt')
 
-            lines = []
-            for strategy_key, strategy_list in task_dict.items():
-                for top_k_item in strategy_list:
-                    log_pred_str = build_log_string(top_k_item, task_key)
-                    lines.append(log_pred_str)
 
-            lines = sorted(lines, key=lambda x: float(x.split()[-1]))
-
-            with open(log_file_path, 'w') as log_file:
-                log_file.write(
-                    f"{'Model-Count':<15} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
-                for line in lines:
-                    log_file.write(line)
-                print(f"Wrote Log file to {timestamp_key}/{task_key}/log.txt")
-
-        _, strategy_per_task, json_path, ensemble_path = compile_results_to_json(base_path=base_path, timestamp=timestamp_key, tasks=tasks)
-
-        if BUILD_SUBMISSION:
-            build_final_submission(base_path=base_path,
-                                   timestamp=timestamp_key,
-                                   strategies=strategy_per_task,
-                                   json_path=json_path,
-                                   ensemble_path=ensemble_path)
+# ===================  DEFAULT PARAMS  =================
+BASE_PATH = "ensemble/gridsearch"
+TASKS = ["colon", "endo", "chest"]
+SHOTS = ["1-shot", "5-shot", "10-shot"]
+EXPS = ["exp1", "exp2", "exp3", "exp4", "exp5"]
+ENSEMBLE_STRATEGIES = ["expert-per-task",
+                       "expert-per-class",
+                       "weighted",
+                       "pd-weighted",
+                       "pd-log-weighted",
+                       "rank-based-weighted",
+                       "diversity-weighted"]
+# ======================================================
 
 
 if __name__ == "__main__":
@@ -599,4 +655,6 @@ if __name__ == "__main__":
     parser.add_argument("--ts", help="Timestamp for the directory.")
     args = parser.parse_args()
 
-    main(args)
+    TIMESTAMP = get_timestamp(args)
+
+    main()
