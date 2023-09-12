@@ -560,7 +560,7 @@ def main(arguments):
     # Number of processes to spawn. You can adjust this value as needed.
     num_processes = min(cpu_count(), len(timestamps))
 
-    tasks = ["endo"]
+    tasks = ["endo", "colon", "chest"]
     args = [(base_path, timestamp, tasks) for timestamp in timestamps]
 
     with Pool(num_processes) as pool:
