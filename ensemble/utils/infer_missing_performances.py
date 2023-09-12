@@ -87,8 +87,10 @@ def run_single_command(command, gpu, task_counter, num_commands):
         os.makedirs(log_dir)
 
     slurm_cmd = f'sbatch -p ls6 --gres=gpu:{gpu}:1 --wrap="{command}" -o "{log_dir}/{log_file_name}.out"'
+    print(f"{slurm_cmd}\n")
+
     task_counter[task] += 1
-    subprocess.run(slurm_cmd, shell=True)
+    #subprocess.run(slurm_cmd, shell=True)
 
 
 def run_commands_on_cluster(commands, num_commands, gpu_type='all'):
