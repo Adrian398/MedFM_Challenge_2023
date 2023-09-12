@@ -779,6 +779,7 @@ def select_task():
 
 
 def process_strategy(subm_type, task, shot, exp, strategy):
+    print(MODEL_COUNTS)
     top_k = MODEL_COUNTS[subm_type][task][shot][exp]['top-k']
 
     top_k_values = [None] if "expert" in strategy else range(2, top_k)
