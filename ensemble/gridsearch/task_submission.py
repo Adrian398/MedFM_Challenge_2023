@@ -34,7 +34,20 @@ def compute_pairwise_diversity(top_k_models):
             if i != j:
                 model_i_predictions = top_k_models[i]['prediction']
                 model_j_predictions = top_k_models[j]['prediction']
-                disagreements = (model_i_predictions != model_j_predictions).sum().sum()  # Fixed here
+
+                # Check for label matching
+                if not model_i_predictions.columns.equals(model_j_predictions.columns) or \
+                   not model_i_predictions.index.equals(model_j_predictions.index):
+                    print(f"Labels of model {i} and model {j} do not match.")
+                    continue
+
+                # Robust comparison
+                try:
+                    disagreements = (model_i_predictions != model_j_predictions).sum().sum()
+                except ValueError as e:
+                    print(f"Error comparing model {i} and model {j}: {e}")
+                    continue
+
                 diversity_matrix[i, j] = disagreements / len(model_i_predictions)
 
     # Sum the diversity scores for each model
