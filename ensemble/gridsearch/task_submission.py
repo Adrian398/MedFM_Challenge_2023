@@ -852,7 +852,7 @@ COLOR_GRADIENTS = {
 
 if __name__ == "__main__":
     # 1st Level Params
-    #SUBM_TYPES = ["validation"]
+    SUBM_TYPES = ["submission"]
 
     # 2nd Level Params
     TASKS = ["colon"]
