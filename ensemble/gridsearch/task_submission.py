@@ -32,10 +32,16 @@ def compute_pairwise_diversity(top_k_models):
     for idx in range(num_models):
         if 'ng' in top_k_models[idx]['prediction'].iloc[:, 0].values:
             print(f"Detected error in {top_k_models[idx]['name']}. Deleting...")
-            #model_path = os.path.join("/scratch/medfm/medfm-challenge/work_dirs", top_k_models[idx]['name'])
-           # os.remove(os.path.join(model_path, ))
-            #print(f"File {top_k_models[idx]['name']} deleted successfully!")
 
+            model_name = top_k_models[idx]['name']
+            model_path = os.path.join("/scratch/medfm/medfm-challenge/work_dirs", model_name)
+
+            model_split = model_name.split("/")
+            task = model_split[0]
+            shot = model_split[1]
+            os.remove(os.path.join(model_path, f"{task}_{shot}_submission.csv"))
+            print(f"File {top_k_models[idx]['name']} deleted successfully!")
+            return None
         else:
             print(f"No errors detected in {top_k_models[idx]['name']}.")
 
@@ -336,6 +342,9 @@ def diversity_weighted_ensemble_strategy(model_runs, task, out_path, top_k=3):
         top_k_model_data = [model for model, _ in top_n_models]
 
         diversity_scores = compute_pairwise_diversity(top_k_model_data)
+
+        if diversity_scores is None:
+            return None, None
 
         # Ensure diversity scores match the expected length
         if len(diversity_scores) != len(top_k_model_data):
