@@ -107,11 +107,13 @@ def run_single_command(command, gpu, gpu_type, task_counter, num_commands):
 def execute_command(command):
     """Executes the given command in the shell after setting up the environment."""
 
+    git_directory = "/home/stud/rothmarcel/Git/medfm-challenge"
+
     setup_commands = [
         "cd /scratch/medfm/medfm-challenge",
         "source venv/bin/activate",
         "cd ~/Git/medfm-challenge",
-        "export PYTHONPATH='$PWD:$PYTHONPATH'",
+        f"export PYTHONPATH='{git_directory}):$PYTHONPATH'",
     ]
 
     full_command = " && ".join(setup_commands + [command])
