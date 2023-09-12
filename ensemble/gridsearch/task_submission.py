@@ -23,60 +23,40 @@ def print_colored(text, submission_type, depth):
 
 
 def compute_pairwise_diversity(top_k_models):
-    """
-    Computes the pairwise diversity (disagreement rates) among the top k models.
-    """
     num_models = len(top_k_models)
     diversity_matrix = np.zeros((num_models, num_models))
 
     for i in range(num_models):
-        for j in range(num_models):
-            if i != j:
-                model_i_predictions = top_k_models[i]['prediction']
-                model_j_predictions = top_k_models[j]['prediction']
+        model_i_predictions = top_k_models[i]['prediction']
+        img_id_set1 = set(model_i_predictions.iloc[:, 0])
 
-                # Check for label matching
-                if not model_i_predictions.columns.equals(model_j_predictions.columns) or \
-                   not model_i_predictions.shape[0] == model_j_predictions.shape[0]:
+        for j in range(i + 1, num_models):
+            model_j_predictions = top_k_models[j]['prediction']
+            img_id_set2 = set(model_j_predictions.iloc[:, 0])
 
-                    img_id_col1 = model_i_predictions.columns[0]
-                    img_id_col2 = model_j_predictions.columns[0]
+            # Use sets for faster membership checks
+            missing_in_df2 = img_id_set1 - img_id_set2
+            missing_in_df1 = img_id_set2 - img_id_set1
 
-                    # Identify unique image IDs not in the other dataframe
-                    missing_in_df2 = model_i_predictions.loc[~model_i_predictions[img_id_col1].isin(model_j_predictions[img_id_col2]), img_id_col1]
-                    missing_in_df1 = model_j_predictions.loc[~model_j_predictions[img_id_col2].isin(model_i_predictions[img_id_col1]), img_id_col2]
+            if missing_in_df1 or missing_in_df2:
+                corr_idx = i if missing_in_df2 else j
+                model_name = top_k_models[corr_idx]['name']
+                model_path = os.path.join("/scratch/medfm/medfm-challenge/work_dirs", model_name)
+                model_split = model_name.split("/")
+                task = model_split[0]
+                shot = model_split[1]
+                corrupted_file = os.path.join(model_path, f"{task}_{shot}_submission.csv")
 
-                    corr_idx = -1
-                    if len(missing_in_df2) > 0:
-                        # delete 1
-                        corr_idx = i
-                    elif len(missing_in_df1) > 0:
-                        # delete 2
-                        corr_idx = j
+                raise f"Corrupted CSV File: {corrupted_file} (probably one scuffed line)"
 
-                    if corr_idx != -1:
-                        model_name = top_k_models[corr_idx]['name']
-                        model_path = os.path.join("/scratch/medfm/medfm-challenge/work_dirs", model_name)
-                        model_split = model_name.split("/")
-                        task = model_split[0]
-                        shot = model_split[1]
-                        corrupted_file = os.path.join(model_path, f"{task}_{shot}_submission.csv")
-
-                        print(f"Corrupted File: {corrupted_file}")
-                        return None
-
-                # Robust comparison
-                try:
-                    disagreements = (model_i_predictions != model_j_predictions).sum().sum()
-                except ValueError as e:
-                    print(f"Error comparing model {i} and model {j}: {e}")
-                    continue
-
+            try:
+                disagreements = (model_i_predictions != model_j_predictions).sum().sum()
                 diversity_matrix[i, j] = disagreements / len(model_i_predictions)
+                diversity_matrix[j, i] = diversity_matrix[i, j]  # Use the symmetry of the matrix
+            except ValueError as e:
+                print(f"Error comparing model {i} and model {j}: {e}")
 
-    # Sum the diversity scores for each model
-    diversity_scores = diversity_matrix.sum(axis=1)
-    return diversity_scores
+    return diversity_matrix.sum(axis=1)
 
 
 def create_ensemble_report_file(task, shot, exp, selected_models_for_classes, model_occurrences, root_report_dir):
@@ -306,80 +286,54 @@ def rank_based_weight_ensemble_strategy(model_runs, task, out_path, top_k=3):
 
 
 def diversity_weighted_ensemble_strategy(model_runs, task, out_path, top_k=3):
-    """
-    Merges model runs using a diversity-weighted sum approach based on the N best model runs for each class.
-    """
     num_classes = TASK_2_CLASS_COUNT[task]
+
+    # Initiate DataFrame for results
     merged_df = model_runs[0]['prediction'].iloc[:, 0:1].copy()
 
     # List to store which models were selected for each class
     selected_models_for_classes = []
 
     # Dict to keep track of model occurrences
-    model_occurrences = {}
+    model_occurrences = defaultdict(int)  # Using defaultdict for simplicity
 
-    # For each class, get the N best performing model runs based on the aggregate metric
     for i in range(num_classes):
-        class_models = []
-        for run in model_runs:
-            _, aggregate_value = get_aggregate(run['metrics'], task)
-            if aggregate_value is not None and aggregate_value >= 0:
-                class_models.append((run, aggregate_value))
+        # Get aggregate values
+        aggregates = [(run, *get_aggregate(run['metrics'], task)) for run in model_runs]
 
-        # Sort the models based on aggregate value and take the top N models
-        class_models.sort(key=lambda x: x[1], reverse=True)
-        top_n_models = class_models[:top_k]
+        # Filter out None or negative aggregate values
+        aggregates = [item for item in aggregates if item[1] is not None and item[1] >= 0]
 
-        # Compute diversity scores for the top k models
-        top_k_model_data = [model for model, _ in top_n_models]
+        # Sort and get top_k models
+        aggregates.sort(key=lambda x: x[1], reverse=True)
+        top_n_models = aggregates[:top_k]
 
+        # Compute diversity scores
+        top_k_model_data = [model for model, _, _ in top_n_models]
         diversity_scores = compute_pairwise_diversity(top_k_model_data)
-
         if diversity_scores is None:
             return None, None
 
-        # Ensure diversity scores match the expected length
-        if len(diversity_scores) != len(top_k_model_data):
-            raise ValueError("Mismatch between diversity scores length and top k models.")
+        weights = [value for _, _, value in top_n_models]
+        max_weight = max(weights)
 
-        # Check if k is greater than the available models and print warning
-        if top_k > len(class_models):
-            print(colored(
-                f"Warning: Requested top {top_k} models, but only {len(class_models)} are available for class {i + 1}",
-                'red'))
-
-        # Normalize diversity scores to be within the same range as weights (optional step based on diversity scores)
-        max_weight = max([weight for _, weight in top_n_models])
+        # Normalize diversity scores
         diversity_scores = [score / max(diversity_scores) * max_weight for score in diversity_scores]
 
-        # Record the selected models for the report and update the model_occurrences
-        selected_models_for_class = []
-        for model, weight in top_n_models:
-            model_name = model['name']
-            selected_models_for_class.append(f"Class {i + 1}: {model_name} (Weight: {weight:.4f})")
-
-            if model_name in model_occurrences:
-                model_occurrences[model_name] += 1
-            else:
-                model_occurrences[model_name] = 1
-
-        selected_models_for_classes.extend(selected_models_for_class)
-
-        weights = [value for _, value in top_n_models]
-
-        # Calculate the sum of weights (aggregate values) for normalization
+        # Compute weighted sum
         sum_weights = sum([weight + diversity_score for weight, diversity_score in zip(weights, diversity_scores)])
+        weighted_sums = pd.concat(
+            [model['prediction'].iloc[:, i + 1] * (weight + diversity_score) for model, weight, diversity_score in
+             zip(top_k_model_data, weights, diversity_scores)], axis=1)
+        merged_df.iloc[:, i] = weighted_sums.sum(axis=1) / sum_weights
 
-        # Compute the diversity-weighted sum for this class
-        weighted_sum_column = pd.Series(0, index=merged_df.index)
-        for model, weight, diversity_score in zip(top_k_model_data, weights, diversity_scores):
-            adjusted_weight = weight + diversity_score
-            weighted_sum_column += (model['prediction'].iloc[:, i + 1] * adjusted_weight) / sum_weights
-
-        merged_df.loc[:, i + 1] = weighted_sum_column
+        # Update selected_models_for_classes and model_occurrences
+        for model, _, weight in top_n_models:
+            model_name = model['name']
+            selected_models_for_classes.append(f"Class {i + 1}: {model_name} (Weight: {weight:.4f})")
+            model_occurrences[model_name] += 1
 
     merged_df.to_csv(out_path, index=False, header=False)
-
     return selected_models_for_classes, model_occurrences
 
 
