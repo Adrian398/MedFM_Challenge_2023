@@ -438,9 +438,9 @@ def process_experiment(top_k_path, exp, task, shot):
     return metrics_dict
 
 
-def process_top_k(top_k, strategy_path, task):
-    if top_k:
-        top_k_path = os.path.join(strategy_path, top_k)
+def process_top_k(top_k_num, strategy_path, task):
+    if top_k_num:
+        top_k_path = os.path.join(strategy_path, f"top-{top_k_num}")
     else:
         top_k_path = strategy_path
 
@@ -564,8 +564,8 @@ def process_timestamp():
                     top_k_values = compute_top_k_values(strategy_path, strategy)
 
                     results = []
-                    for top_k in top_k_values:
-                        result = process_top_k(top_k=top_k, strategy_path=strategy_path, task=task)
+                    for top_k_num in top_k_values:
+                        result = process_top_k(top_k_num=top_k_num, strategy_path=strategy_path, task=task)
                         results.append(result)
 
                     result_dicts[task][shot][exp][strategy] = results
