@@ -846,7 +846,7 @@ if __name__ == "__main__":
     EXPS = ["exp1", "exp2", "exp3", "exp4", "exp5"]
 
     # 3rd Level Params
-    #ENSEMBLE_STRATEGIES = ["weighted"]
+    ENSEMBLE_STRATEGIES = ["diversity-weighted"]
 
     MODEL_COUNTS = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
 
