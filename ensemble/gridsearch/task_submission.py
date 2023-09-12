@@ -32,8 +32,9 @@ def compute_pairwise_diversity(top_k_models):
     for idx in range(num_models):
         if 'ng' in top_k_models[idx]['prediction'].iloc[:, 0].values:
             print(f"Detected error in {top_k_models[idx]['name']}. Deleting...")
-            os.remove(os.path.join("/scratch/medfm/medfm-challenge/work_dirs", top_k_models[idx]['name']))
-            print(f"File {top_k_models[idx]['name']} deleted successfully!")
+            #model_path = os.path.join("/scratch/medfm/medfm-challenge/work_dirs", top_k_models[idx]['name'])
+           # os.remove(os.path.join(model_path, ))
+            #print(f"File {top_k_models[idx]['name']} deleted successfully!")
 
         else:
             print(f"No errors detected in {top_k_models[idx]['name']}.")
