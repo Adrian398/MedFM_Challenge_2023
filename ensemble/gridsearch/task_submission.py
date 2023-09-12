@@ -39,8 +39,9 @@ def compute_pairwise_diversity(top_k_models):
             model_split = model_name.split("/")
             task = model_split[0]
             shot = model_split[1]
-            os.remove(os.path.join(model_path, f"{task}_{shot}_submission.csv"))
-            print(f"File {top_k_models[idx]['name']} deleted successfully!")
+            corrupted_file = os.path.join(model_path, f"{task}_{shot}_submission.csv")
+            os.remove(corrupted_file)
+            print(f"File {corrupted_file} deleted successfully!")
             return None
         else:
             print(f"No errors detected in {top_k_models[idx]['name']}.")
