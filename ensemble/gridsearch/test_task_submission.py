@@ -594,7 +594,8 @@ ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "pd-weighted",
                        "pd-log-weighted",
                        "rank-based-weighted",
-                       "diversity-weighted"]
+                       #"diversity-weighted"
+                       ]
 # ==========================================================================================
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 WORK_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
