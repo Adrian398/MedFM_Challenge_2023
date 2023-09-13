@@ -302,7 +302,7 @@ def get_model_dirs_without_performance(task, shot):
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
         if not os.access(abs_model_dir, os.W_OK):
-            print(f"{colored('Missing Write Access.', 'red')} Skipping {abs_model_dir}")
+            print(f"{colored('Missing Write Access:', 'red')} Skipping {abs_model_dir.split('work_dirs/')[1]}")
             continue
 
         if is_valid_model_dir(abs_model_dir, task):
