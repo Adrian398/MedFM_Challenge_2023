@@ -577,7 +577,7 @@ ENSEMBLE_STRATEGIES = ["expert-per-task",
                        #"diversity-weighted"
                        ]
 COLON_SOFTMAX_PRINT = False
-BUILD_SUBMISSION = False
+BUILD_SUBMISSION = True
 # ==========================================================================================
 
 
