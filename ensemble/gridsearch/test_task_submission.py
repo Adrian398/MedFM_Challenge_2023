@@ -530,29 +530,29 @@ def process_timestamp():
 
 
 def main():
-    result = process_timestamp()
+    # result = process_timestamp()
+    #
+    # for task in TASKS:
+    #     for shot in SHOTS:
+    #         for exp in EXPS:
+    #             log_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp, 'log.txt')
+    #
+    #             lines = []
+    #             for strategy in ENSEMBLE_STRATEGIES:
+    #                 for top_k in result[task][shot][exp][strategy]:
+    #                     log_pred_str = build_log_string(top_k, task=task)
+    #                     lines.append(log_pred_str)
+    #
+    #             lines = sorted(lines, key=lambda x: float(x.split()[-1]))
+    #
+    #             with open(log_file_path, 'w') as log_file:
+    #                 log_file.write(
+    #                     f"{'Model-Count':<15} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
+    #                 for line in lines:
+    #                     log_file.write(line)
+    #                 print(f"Wrote Log file to {TIMESTAMP}/{task}/{shot}/{exp}/log.txt")
 
-    for task in TASKS:
-        for shot in SHOTS:
-            for exp in EXPS:
-                log_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp, 'log.txt')
-
-                lines = []
-                for strategy in ENSEMBLE_STRATEGIES:
-                    for top_k in result[task][shot][exp][strategy]:
-                        log_pred_str = build_log_string(top_k, task=task)
-                        lines.append(log_pred_str)
-
-                lines = sorted(lines, key=lambda x: float(x.split()[-1]))
-
-                with open(log_file_path, 'w') as log_file:
-                    log_file.write(
-                        f"{'Model-Count':<15} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
-                    for line in lines:
-                        log_file.write(line)
-                    print(f"Wrote Log file to {TIMESTAMP}/{task}/{shot}/{exp}/log.txt")
-
-        _, strategy_per_task, json_path, ensemble_path = compile_results_to_json()
+    _, strategy_per_task, json_path, ensemble_path = compile_results_to_json()
 
         # if BUILD_SUBMISSION:
         #     build_final_submission(strategies=strategy_per_task,
