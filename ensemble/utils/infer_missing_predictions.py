@@ -168,30 +168,26 @@ def get_model_dirs_without_prediction(task, shot):
         my_print(f"Checking {task}/{shot}-shot/{model_dir}")
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
+        # Skip if missing write access
+        if not os.access(abs_model_dir, os.W_OK):
+            print(f"{colored('Skipping: Missing Write Access', 'red')}")
+            continue
+
         # Skip if no best checkpoint file
         checkpoint_path = get_file_from_directory(abs_model_dir, ".pth", "best")
         if checkpoint_path is None:
-            print("No best checkpoint file found")
+            print(f"{colored(f'Skipping: No best checkpoint file found', 'red')}")
             continue
 
         # Skip/Delete if no event file
         event_file = get_event_file_from_model_dir(abs_model_dir)
         if event_file is None:
-            print("No event file found")
+            print(f"{colored(f'Skipping: No event file found', 'red')}")
             continue
 
         # Skip if prediction csv file is present
         if contains_csv_file(task, shot, abs_model_dir):
-            # # If model was trained with pre-processed data and is endo, update CSVs
-            # if "pre_processed" in model_dir and task == "endo":
-            #     print(colored(f"Endo Model {model_dir} with pre-processed data added to models for update.", 'red'))
-            # else:
             print(f"{colored(f'Skipping: Model already contains {csv_suffix_choice} CSV', 'blue')}")
-            continue
-
-        # Skip if missing write access
-        if not os.access(abs_model_dir, os.W_OK):
-            print(f"{colored('Skipping: Missing Write Access', 'red')}")
             continue
 
         model_dirs.append(model_dir)
