@@ -50,8 +50,7 @@ def my_print(message):
 
 def process_task_shot_combination(args):
     task, shot = args
-    model_dirs, memory_usage = get_non_valid_model_dirs(task=task, shot=shot)
-    return task, shot, model_dirs, memory_usage
+    return task, shot, get_non_valid_model_dirs(task=task, shot=shot)
 
 
 def extract_exp_number(string):
@@ -66,7 +65,6 @@ def get_file_from_directory(directory, ext, keyword):
 
 def get_non_valid_model_dirs(task, shot):
     model_dirs = []
-    total_size_gb = 0
     setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
 
     print(f"\nProcessing Setting {task}/{shot}-shot")
@@ -98,21 +96,15 @@ def get_non_valid_model_dirs(task, shot):
         if len(best_checkpoints) == len(checkpoint_files):
             continue
 
-        # If there are checkpoints other than "best"
-        #print(colored(f"Found non-best checkpoints in {model_dir}", 'cyan'))
-        model_dirs.append(model_dir)
-
         # Calculate the total size of the checkpoint files in this directory
         total_ckpt_gb = 0
         for chkpt_file in checkpoint_files:
             ckpt_in_gb = os.path.getsize(os.path.join(abs_model_dir, chkpt_file)) / (1024 ** 3)
             total_ckpt_gb += ckpt_in_gb  # Convert bytes to GB
 
-        total_size_gb += total_ckpt_gb
-        print(f"Model non-best Checkpoint GBs:", model_dir, f"{total_ckpt_gb:.2f}")
+        model_dirs.append((model_dir, total_ckpt_gb))
 
-    print(f"Setting Checkpoint GBs:", f"{total_size_gb:.2f}")
-    return model_dirs, total_size_gb
+    return model_dirs
 
 
 # ========================================================================================
@@ -135,13 +127,18 @@ if __name__ == "__main__":  # Important when using multiprocessing
 
     invalid_model_dirs = []
     total_gb = 0
-    for task, shot, model_list, total_gb_p_setting in results_invalid:
-        for model_name in model_list:
-            model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
-            total_gb += total_gb_p_setting
-            invalid_model_dirs.append(model_path)
+    for task, shot, model_list in results_invalid:
+        task_gb = 0
 
-    print_report(invalid_model_dirs, total_gb)
+        for model_name, model_gb in model_list:
+            model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
+            task_gb += model_gb
+            invalid_model_dirs.append(model_path)
+        print(f"Task {task} non-best Checkpoint GB:  {task_gb:.2f}")
+
+        total_gb += task_gb
+    print(f"Total non-best Checkpoint GB:  {total_gb:.2f}")
+    #print_report(invalid_model_dirs, total_gb)
 
     # user_input = input(f"\nDo you want to delete those model runs? (yes/no): ")
     # if user_input.strip().lower() == 'yes':
