@@ -68,7 +68,7 @@ def get_non_valid_model_dirs(task, shot):
     model_dirs = []
     setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
 
-    print(f"\nProcessing Setting {task}/{shot}-shot")
+    print(f"Processing Setting {task}/{shot}-shot")
 
     try:
         setting_model_dirs = os.listdir(setting_directory)
@@ -148,7 +148,6 @@ if __name__ == "__main__":  # Important when using multiprocessing
         total_gb += task_gb
 
     print(f"Total non-best Checkpoint GB:  {total_gb:.2f}")
-
 
     #print_report(invalid_model_dirs, total_gb)
 
