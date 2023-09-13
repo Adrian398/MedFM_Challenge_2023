@@ -7,7 +7,7 @@ _base_ = [
 ]
 
 lr = 1e-6
-train_bs = 1
+train_bs = 2
 val_bs = 24
 dataset = 'chest'
 model_name = 'swinv2-l'
