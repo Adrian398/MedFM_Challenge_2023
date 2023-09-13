@@ -7,14 +7,13 @@ import re
 import shutil
 from collections import defaultdict
 from datetime import datetime
-from multiprocessing import cpu_count, Pool
 
 import numpy as np
 import pandas as pd
 from sklearn.metrics import average_precision_score
 from termcolor import colored
 
-from ensemble.utils.constants import shots, exps, TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT, tasks
+from ensemble.utils.constants import TASK_2_CLASS_NAMES, TASK_2_CLASS_COUNT
 from medfmc.evaluation.metrics.auc import cal_metrics_multiclass, cal_metrics_multilabel
 
 TIMESTAMP_PATTERN = re.compile(r"\d{2}-\d{2}_\d{2}-\d{2}-\d{2}")
@@ -42,33 +41,36 @@ def get_newest_timestamp(base_path):
     return max(valid_directories, key=lambda x: x[0])[1]
 
 
-def create_subm_target_dir(timestamp):
-    # Create submission target directory
-    submission_target_path = os.path.join("submissions/evaluation", timestamp)
+def create_subm_target_dir():
+    submission_target_path = os.path.join("submissions/evaluation", TIMESTAMP)
+
     if not os.path.isdir(submission_target_path):
         os.makedirs(submission_target_path)
 
-    for exp in exps:
+    for exp in EXPS:
         os.makedirs(os.path.join(submission_target_path, "result", f"{exp}"), exist_ok=True)
-    print(f"Created {colored(timestamp, 'red')} submission directory {submission_target_path}")
+    print(f"Created {colored(TIMESTAMP, 'red')} submission directory {submission_target_path}")
 
     return submission_target_path
 
 
-def build_final_submission(strategies, ensemble_path, json_path):
-    submission_path = os.path.join(BASE_PATH, TIMESTAMP, 'submission')
-    target_dir = create_subm_target_dir(timestamp=TIMESTAMP)
+def build_final_submission(strategies):
+    if not BUILD_SUBMISSION:
+        return
 
-    for task in tasks:
+    subm_base_path = os.path.join(BASE_PATH, TIMESTAMP, 'submission')
+    target_dir = create_subm_target_dir()
+
+    for task in TASKS:
         strategy = strategies[task]['Strategy']
         top_k = strategies[task]['Top-K']
         csv_file_pattern = f"{task}_*.csv"
 
-        for exp in exps:
+        for exp in EXPS:
             if "expert" in strategy:
-                result_path = os.path.join(submission_path, task, strategy)
+                result_path = os.path.join(subm_base_path, task, strategy)
             else:
-                result_path = os.path.join(submission_path, task, strategy, f"top-{top_k}")
+                result_path = os.path.join(subm_base_path, task, strategy, f"top-{top_k}")
 
             csv_file_dir = os.path.join('result', exp)
             source_csv_file_dir = os.path.join(result_path, csv_file_dir)
@@ -80,9 +82,12 @@ def build_final_submission(strategies, ensemble_path, json_path):
                     shutil.copy(source_csv_file, destination)
                     print(f"Copied {csv_file} from {source_csv_file} to {destination}")
 
+    best_strategies_path = os.path.join(VAL_BASE_PATH, "best_strategies_per_task.json")
+    final_results_path = os.path.join(VAL_BASE_PATH, "results.json")
+
     # Copy results.json
-    shutil.copy(json_path, target_dir)
-    shutil.copy(ensemble_path, target_dir)
+    shutil.copy(best_strategies_path, target_dir)
+    shutil.copy(final_results_path, target_dir)
 
 
 def generate_json(results):
@@ -260,22 +265,6 @@ def find_result_folder(directory):
     return False
 
 
-def get_prediction_timestamp_dirs(base_path):
-    all_dirs = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
-    timestamp_dirs = [d for d in all_dirs if TIMESTAMP_PATTERN.match(d) and d not in TIMESTAMPS_2_IGNORE]
-
-    valid_dirs = [d for d in timestamp_dirs if find_result_folder(os.path.join(base_path, d))]
-
-    # If no valid directories are found, return an empty list
-    if not valid_dirs:
-        print("No valid timestamp directories found.")
-        return []
-
-    sorted_valid_dirs = sorted(valid_dirs, key=sort_key)
-
-    return sorted_valid_dirs
-
-
 def build_log_string(data, task):
     model_cnt = data.get('model_count', "None")
     strategy = data.get('strategy', "None")
@@ -363,8 +352,7 @@ def load_metrics_for_setting(task, shot, exp, strategy_info):
 
 
 def compile_results_to_json():
-
-    best_ensembles_per_setting = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+    best_strategy_per_setting = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
 
     final_results = {
         "task": defaultdict(lambda: defaultdict(dict)),
@@ -380,7 +368,7 @@ def compile_results_to_json():
                 strategy_info = get_best_strategy_for_setting(task=task, shot=shot, exp=exp)
 
                 # Save the best ensemble strategy for the current setting globally
-                best_ensembles_per_setting[task][shot][exp] = strategy_info
+                best_strategy_per_setting[task][shot][exp] = strategy_info
 
                 results_json = load_metrics_for_setting(task=task, shot=shot, exp=exp,
                                                         strategy_info=strategy_info)
@@ -394,30 +382,26 @@ def compile_results_to_json():
                     metrics_sum += float(metric_val)
                     metrics_count += 1
 
+    # Compute the aggregate value
     final_results["aggregates"] = metrics_sum / metrics_count if metrics_count != 0 else 0
 
     print(json.dumps(final_results, indent=4))
 
-    #
-    # # Compute the aggregate value
-    # final_results["aggregates"] = metrics_sum / metrics_count if metrics_count != 0 else 0
-    #
-    # # Save the final results to the timestamp directory
-    # output_json_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', "results.json")
-    # with open(output_json_path, 'w') as file:
-    #     json.dump(final_results, file, indent=4)
-    #
-    # # Save the best ensembles to the timestamp directory
-    # best_ensembles_output_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', "best_ensemble_per_task.json")
-    # with open(best_ensembles_output_path, 'w') as file:
-    #     json.dump(best_ensembles_per_task, file, indent=4)
-    #
-    # print(f"Wrote Final Result JSON file to {output_json_path}")
-    # print(json.dumps(final_results, indent=4))
-    # print(f"\nWrote Best Ensembles JSON file to {best_ensembles_output_path}")
-    # print(json.dumps(best_ensembles_per_task, indent=4))
-    #
-    # return final_results, best_ensembles_per_task, output_json_path, best_ensembles_output_path
+    # Save the final results to the timestamp directory
+    output_json_path = os.path.join(VAL_BASE_PATH, "results.json")
+    with open(output_json_path, 'w') as file:
+        json.dump(final_results, file, indent=4)
+    print(f"Wrote Final Result JSON file to {output_json_path}")
+    print(json.dumps(final_results, indent=4))
+
+    # Save the best ensembles to the timestamp directory
+    best_strategies_out_path = os.path.join(VAL_BASE_PATH, "best_strategies_per_task.json")
+    with open(best_strategies_out_path, 'w') as file:
+        json.dump(best_strategy_per_setting, file, indent=4)
+    print(f"\nWrote Best Ensembles JSON file to {best_strategies_out_path}")
+    print(json.dumps(best_strategy_per_setting, indent=4))
+
+    return best_strategy_per_setting
 
 
 def softmax(values):
@@ -466,9 +450,9 @@ def process_top_k(top_k_num, strategy_path, task):
 
     ensemble_cfg = load_submission_cfg_dump(dir=top_k_path)
 
-    results = {exp: {} for exp in exps}
-    for exp in exps:
-        for shot in shots:
+    results = {exp: {} for exp in EXPS}
+    for exp in EXPS:
+        for shot in SHOTS:
             metrics = process_experiment(top_k_path=top_k_path, exp=exp, task=task, shot=shot)
             if metrics:
                 results[exp][f"{task}_{shot}"] = metrics
@@ -547,7 +531,7 @@ def process_timestamp():
     return result_dicts
 
 
-def create_log_files():
+def create_log_files(data):
     for task in TASKS:
         for shot in SHOTS:
             for exp in EXPS:
@@ -555,7 +539,7 @@ def create_log_files():
 
                 lines = []
                 for strategy in ENSEMBLE_STRATEGIES:
-                    for top_k in result[task][shot][exp][strategy]:
+                    for top_k in data[task][shot][exp][strategy]:
                         log_pred_str = build_log_string(top_k, task=task)
                         lines.append(log_pred_str)
 
@@ -568,49 +552,19 @@ def create_log_files():
                         log_file.write(line)
                     print(f"Wrote Log file to {TIMESTAMP}/{task}/{shot}/{exp}/log.txt")
 
+
 def main():
-    #result = process_timestamp()
+    result = process_timestamp()
+    create_log_files(data=result)
 
-    #create_log_files()
-
-    _, strategy_per_task, json_path, ensemble_path = compile_results_to_json()
-
-        # if BUILD_SUBMISSION:
-        #     build_final_submission(strategies=strategy_per_task,
-        #                            json_path=json_path,
-        #                            ensemble_path=ensemble_path)
-
-    # for timestamp_key, timestamp_dict in timestamps_dict.items():
-    #     for task_key, task_dict in timestamp_dict.items():
-    #         log_file_path = os.path.join(base_path, timestamp_key, 'validation', task_key, 'log.txt')
-    #
-    #         lines = []
-    #         for strategy_key, strategy_list in task_dict.items():
-    #             for top_k_item in strategy_list:
-    #                 log_pred_str = build_log_string(top_k_item, task_key)
-    #                 lines.append(log_pred_str)
-    #
-    #         lines = sorted(lines, key=lambda x: float(x.split()[-1]))
-    #
-    #         with open(log_file_path, 'w') as log_file:
-    #             log_file.write(
-    #                 f"{'Model-Count':<15} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
-    #             for line in lines:
-    #                 log_file.write(line)
-    #             print(f"Wrote Log file to {timestamp_key}/{task_key}/log.txt")
-    #
-    #     _, strategy_per_task, json_path, ensemble_path = compile_results_to_json(base_path=base_path, timestamp=timestamp_key, tasks=tasks)
-    #
-    #     if BUILD_SUBMISSION:
-    #         build_final_submission(base_path=base_path,
-    #                                timestamp=timestamp_key,
-    #                                strategies=strategy_per_task,
-    #                                json_path=json_path,
-    #                                ensemble_path=ensemble_path)
+    best_strategy_per_setting = compile_results_to_json()
+    build_final_submission(strategies=best_strategy_per_setting)
 
 
 # ===================  DEFAULT PARAMS  ====================================================
 BASE_PATH = "ensemble/gridsearch"
+GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
+WORK_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
 TASKS = ["colon", "endo", "chest"]
 SHOTS = ["1-shot", "5-shot", "10-shot"]
 EXPS = ["exp1", "exp2", "exp3", "exp4", "exp5"]
@@ -622,14 +576,9 @@ ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "rank-based-weighted",
                        #"diversity-weighted"
                        ]
-# ==========================================================================================
-GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
-WORK_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
-TIMESTAMPS_2_IGNORE = ["02-09_00-32-41"]
 COLON_SOFTMAX_PRINT = False
 BUILD_SUBMISSION = False
 # ==========================================================================================
-
 
 
 if __name__ == "__main__":
@@ -638,5 +587,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     TIMESTAMP = get_timestamp(args)
+    VAL_BASE_PATH = os.path.join(BASE_PATH, TIMESTAMP, 'validation')
 
     main()
