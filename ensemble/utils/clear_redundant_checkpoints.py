@@ -79,7 +79,7 @@ def get_non_valid_model_dirs(task, shot):
 
         # If no checkpoint files
         if not checkpoint_files:
-            print(colored(f"No checkpoint file found for {abs_model_dir}", 'red'))
+            print(colored(f"No checkpoint file found for {model_dir}", 'red'))
             model_dirs.append(model_dir)
             continue
 
@@ -87,7 +87,7 @@ def get_non_valid_model_dirs(task, shot):
         best_checkpoints = get_file_from_directory(abs_model_dir, ".pth", "best")
 
         if len(best_checkpoints) > 1:
-            print(colored(f"More than one 'best' checkpoint found in {abs_model_dir}", 'yellow'))
+            print(colored(f"More than one 'best' checkpoint found in {model_dir}", 'yellow'))
             model_dirs.append(model_dir)
             continue
 
@@ -95,7 +95,7 @@ def get_non_valid_model_dirs(task, shot):
             continue
 
         # If there are checkpoints other than "best"
-        print(colored(f"Found non-best checkpoints in {abs_model_dir}", 'cyan'))
+        print(colored(f"Found non-best checkpoints in {model_dir}", 'cyan'))
         model_dirs.append(model_dir)
 
     return model_dirs
