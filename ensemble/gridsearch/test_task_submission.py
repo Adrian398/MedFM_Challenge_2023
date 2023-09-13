@@ -394,6 +394,8 @@ def compile_results_to_json():
                     metrics_sum += float(metric_val)
                     metrics_count += 1
 
+    final_results["aggregates"] = metrics_sum / metrics_count if metrics_count != 0 else 0
+
     print(json.dumps(final_results, indent=4))
 
     #
