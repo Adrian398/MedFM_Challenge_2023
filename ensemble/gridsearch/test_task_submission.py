@@ -55,9 +55,9 @@ def create_subm_target_dir(timestamp):
     return submission_target_path
 
 
-def build_final_submission(base_path, timestamp, strategies, ensemble_path, json_path):
-    submission_path = os.path.join(base_path, timestamp, 'submission')
-    target_dir = create_subm_target_dir(timestamp=timestamp)
+def build_final_submission(strategies, ensemble_path, json_path):
+    submission_path = os.path.join(BASE_PATH, TIMESTAMP, 'submission')
+    target_dir = create_subm_target_dir(timestamp=TIMESTAMP)
 
     for task in tasks:
         strategy = strategies[task]['Strategy']
@@ -311,8 +311,8 @@ def extract_number_from_string(s):
     return int(''.join(filter(str.isdigit, s)))
 
 
-def compile_results_to_json(base_path, timestamp, tasks):
-    output_json_path = os.path.join(base_path, timestamp, 'validation', "best_ensembles.json")
+def compile_results_to_json():
+    output_json_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', "best_ensembles.json")
     print(f"Wrote Result JSON file to {output_json_path}")
 
     final_results = {
@@ -325,8 +325,8 @@ def compile_results_to_json(base_path, timestamp, tasks):
     metrics_sum = 0.0
     metrics_count = 0
 
-    for task in tasks:
-        task_log_path = os.path.join(base_path, timestamp, 'validation', task, 'log.txt')
+    for task in TASKS:
+        task_log_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, 'log.txt')
         with open(task_log_path, 'r') as file:
             lines = file.readlines()
 
@@ -355,13 +355,9 @@ def compile_results_to_json(base_path, timestamp, tasks):
         top_k = best_result['Top-K']
 
         if "expert" in strategy:
-            # # Migration
-            # if strategy == "expert-per-class" and timestamp == "09-09_22-54-23":
-            #     strategy = "expert"
-
-            results_file_path = os.path.join(base_path, timestamp, 'validation', task, strategy, "results.json")
+            results_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, strategy, "results.json")
         else:
-            results_file_path = os.path.join(base_path, timestamp, 'validation', task, strategy,
+            results_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, strategy,
                                              f"top-{top_k}", "results.json")
 
         with open(results_file_path, 'r') as results_file:
@@ -383,12 +379,12 @@ def compile_results_to_json(base_path, timestamp, tasks):
     final_results["aggregates"] = metrics_sum / metrics_count if metrics_count != 0 else 0
 
     # Save the final results to the timestamp directory
-    output_json_path = os.path.join(base_path, timestamp, 'validation', "results.json")
+    output_json_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', "results.json")
     with open(output_json_path, 'w') as file:
         json.dump(final_results, file, indent=4)
 
     # Save the best ensembles to the timestamp directory
-    best_ensembles_output_path = os.path.join(base_path, timestamp, 'validation', "best_ensemble_per_task.json")
+    best_ensembles_output_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', "best_ensemble_per_task.json")
     with open(best_ensembles_output_path, 'w') as file:
         json.dump(best_ensembles_per_task, file, indent=4)
 
@@ -440,7 +436,7 @@ def process_experiment(top_k_path, exp, task, shot):
 
 def process_top_k(top_k_num, strategy_path, task):
     if top_k_num:
-        top_k_path = os.path.join(strategy_path, f"top-{top_k_num}")
+        top_k_path = os.path.join(strategy_path, f"top-{str(top_k_num)}")
     else:
         top_k_path = strategy_path
 
@@ -474,52 +470,6 @@ def process_top_k(top_k_num, strategy_path, task):
         'prediction_dir': top_k_path,
         'aggregate_value': aggregates
     }
-
-
-def process_strategy(strategy, task):
-    print(colored(f"\t\tProcessing Strategy {strategy}", 'light_red'))
-
-    strategy_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, strategy)
-
-    # Skip strategy if directory is missing
-    if not os.path.isdir(strategy_path):
-        print(f"\t\tSkipping non-existent strategy directory: {strategy_path}")
-        return None
-
-    result_dicts = []
-
-    if "expert" in strategy:
-        result_dict = process_top_k(top_k=None, strategy_path=strategy_path, task=task)
-        result_dicts.append(result_dict)
-    else:
-        for top_k in sorted(os.listdir(strategy_path), key=extract_number_from_string):
-            result_dict = process_top_k(top_k=top_k, strategy_path=strategy_path, task=task)
-            result_dicts.append(result_dict)
-
-    return result_dicts
-
-
-def process_task(task):
-
-    task_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task)
-
-    if os.path.isdir(task_path):
-        strategy_dirs = sorted([d for d in os.listdir(task_path) if os.path.isdir(os.path.join(task_path, d))])
-        if not strategy_dirs:
-            raise ValueError(f"No strategy directories found in {task_path}")
-    else:
-        raise ValueError(f"{task_path} is not a directory.")
-
-    task_result_dicts = defaultdict()
-    for strategy in strategy_dirs:
-        strategy_result_dicts = process_strategy(task_path=task_path,
-                                                 strategy=strategy,
-                                                 task=task)
-
-        if strategy_result_dicts:
-            task_result_dicts[strategy] = strategy_result_dicts
-
-    return task_result_dicts
 
 
 def recursive_defaultdict():
@@ -573,15 +523,6 @@ def process_timestamp():
     return result_dicts
 
 
-# ==========================================================================================
-GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
-WORK_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
-TIMESTAMPS_2_IGNORE = ["02-09_00-32-41"]
-COLON_SOFTMAX_PRINT = False
-BUILD_SUBMISSION = False
-# ==========================================================================================
-
-
 def main():
     result = process_timestamp()
 
@@ -604,6 +545,14 @@ def main():
                     for line in lines:
                         log_file.write(line)
                     print(f"Wrote Log file to {TIMESTAMP}/{task}/{shot}/{exp}/log.txt")
+
+        # TODO: Refactor to task-shot-exp wise
+        _, strategy_per_task, json_path, ensemble_path = compile_results_to_json()
+
+        if BUILD_SUBMISSION:
+            build_final_submission(strategies=strategy_per_task,
+                                   json_path=json_path,
+                                   ensemble_path=ensemble_path)
 
     # for timestamp_key, timestamp_dict in timestamps_dict.items():
     #     for task_key, task_dict in timestamp_dict.items():
@@ -634,8 +583,7 @@ def main():
     #                                ensemble_path=ensemble_path)
 
 
-
-# ===================  DEFAULT PARAMS  =================
+# ===================  DEFAULT PARAMS  ====================================================
 BASE_PATH = "ensemble/gridsearch"
 TASKS = ["colon", "endo", "chest"]
 SHOTS = ["1-shot", "5-shot", "10-shot"]
@@ -647,7 +595,14 @@ ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "pd-log-weighted",
                        "rank-based-weighted",
                        "diversity-weighted"]
-# ======================================================
+# ==========================================================================================
+GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
+WORK_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
+TIMESTAMPS_2_IGNORE = ["02-09_00-32-41"]
+COLON_SOFTMAX_PRINT = False
+BUILD_SUBMISSION = False
+# ==========================================================================================
+
 
 
 if __name__ == "__main__":
