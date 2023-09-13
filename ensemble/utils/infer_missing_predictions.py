@@ -231,7 +231,7 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
                "aucl": "AUC/AUC_multilabe",
                "map": "multi-label/mAP",
                "agg": "Aggregate"}
-csv_suffix_list = ["submission", "validation", "train-test"]
+csv_suffix_list = ["submission", "validation"]
 img_suffix_list = ["test", "val", "train"]
 csv_suffix_2_img_suffix = dict(zip(csv_suffix_list, img_suffix_list))
 # ========================================================================================
@@ -306,13 +306,9 @@ if __name__ == "__main__":  # Important when using multiprocessing
             print("Considering pre-processed endo images")
             image_folder_name = "pre_processed_images"
 
-        if csv_suffix_choice == "train-test":
-            images_path = os.path.join(f"/scratch/medfm/medfm-challenge/data/MedFMC_{data_suffix}", task,
-                                       image_folder_name, 'test_WithLabel.txt')
-            print(f"Considering {images_path} as image path")
-        else:
-            image_base_path = os.path.join("/scratch/medfm/medfm-challenge/data", f"MedFMC_{data_suffix}")
-            images_path = os.path.join(image_base_path, task, image_folder_name)
+
+        image_base_path = os.path.join("/scratch/medfm/medfm-challenge/data", f"MedFMC_{data_suffix}")
+        images_path = os.path.join(image_base_path, task, image_folder_name)
 
         out_filepath = os.path.join(model_path, f"{task}_{shot}-shot_{csv_suffix_choice}.csv")
 
