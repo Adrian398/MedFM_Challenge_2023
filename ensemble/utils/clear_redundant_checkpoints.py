@@ -133,11 +133,13 @@ if __name__ == "__main__":  # Important when using multiprocessing
         task_gb = 0
         print(model_list)
 
-    #     for model_name, model_gb in model_list:
-    #         model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
-    #         task_gb += model_gb
-    #         invalid_model_dirs.append(model_path)
-    #     print(f"Task {task} non-best Checkpoint GB:  {task_gb:.2f}")
+        for model_name, model_gb in model_list:
+            print(model_name, model_gb)
+
+        #     model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
+        #     task_gb += model_gb
+        #     invalid_model_dirs.append(model_path)
+        # print(f"Task {task} non-best Checkpoint GB:  {task_gb:.2f}")
     #
     #     total_gb += task_gb
     # print(f"Total non-best Checkpoint GB:  {total_gb:.2f}")
