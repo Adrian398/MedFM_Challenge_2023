@@ -546,13 +546,13 @@ def main():
                         log_file.write(line)
                     print(f"Wrote Log file to {TIMESTAMP}/{task}/{shot}/{exp}/log.txt")
 
-        # TODO: Refactor to task-shot-exp wise
-        _, strategy_per_task, json_path, ensemble_path = compile_results_to_json()
-
-        if BUILD_SUBMISSION:
-            build_final_submission(strategies=strategy_per_task,
-                                   json_path=json_path,
-                                   ensemble_path=ensemble_path)
+        # # TODO: Refactor to task-shot-exp wise
+        # _, strategy_per_task, json_path, ensemble_path = compile_results_to_json()
+        #
+        # if BUILD_SUBMISSION:
+        #     build_final_submission(strategies=strategy_per_task,
+        #                            json_path=json_path,
+        #                            ensemble_path=ensemble_path)
 
     # for timestamp_key, timestamp_dict in timestamps_dict.items():
     #     for task_key, task_dict in timestamp_dict.items():
