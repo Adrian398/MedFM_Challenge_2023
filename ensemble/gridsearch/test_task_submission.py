@@ -311,12 +311,63 @@ def extract_number_from_string(s):
     return int(''.join(filter(str.isdigit, s)))
 
 
+def get_best_strategy_for_setting(task, shot, exp):
+    # Read the log.txt file
+    log_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp, 'log.txt')
+    with open(log_path, 'r') as file:
+        lines = file.readlines()
+
+    # Skip the header
+    lines = lines[1:]
+
+    best_aggregate = float('-inf')
+    best_result = None
+
+    # Extract the best ensemble strategy for the given setting
+    for line in lines:
+        model_count, strategy, top_k, _, aggregate = line.split()
+        aggregate_value = float(aggregate)
+
+        if aggregate_value > best_aggregate:
+            best_aggregate = aggregate_value
+            best_result = {
+                "Model-Count": model_count,
+                "Strategy": strategy,
+                "Top-K": top_k,
+                "Aggregate": aggregate
+            }
+
+    return best_result
+
+
+def extract_setting_specific_result(result_file, task, shot, exp):
+    task_shot = f'{task}_{shot}'
+    return result_file['task'][exp][task_shot]
+
+
+def load_metrics_for_setting(task, shot, exp, strategy_info):
+    strategy = strategy_info['Strategy']
+    top_k = strategy_info['Top-K']
+
+    # Load the metric scores for the best ensemble strategy for the current setting
+    if "expert" in strategy:
+        results_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp,
+                                         strategy, "results.json")
+    else:
+        results_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp,
+                                         strategy, f"top-{top_k}", "results.json")
+    with open(results_file_path, 'r') as results_file:
+        results_data = json.load(results_file)
+
+    return results_data
+
+
 def compile_results_to_json():
 
     best_ensembles_per_setting = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
 
     final_results = {
-        "task": {},
+        "task": defaultdict(lambda: defaultdict(dict)),
         "aggregates": 0
     }
 
@@ -326,49 +377,19 @@ def compile_results_to_json():
     for task in TASKS:
         for shot in SHOTS:
             for exp in EXPS:
-
-                # Read the log.txt file
-                log_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp, 'log.txt')
-                with open(log_path, 'r') as file:
-                    lines = file.readlines()
-
-                # Skip the header
-                lines = lines[1:]
-
-                best_aggregate = float('-inf')
-                best_result = None
-
-                # Extract the best ensemble strategy for the given setting
-                for line in lines:
-                    model_count, strategy, top_k, _, aggregate = line.split()
-                    aggregate_value = float(aggregate)
-
-                    if aggregate_value > best_aggregate:
-                        best_aggregate = aggregate_value
-                        best_result = {
-                            "Model-Count": model_count,
-                            "Strategy": strategy,
-                            "Top-K": top_k,
-                            "Aggregate": aggregate
-                        }
+                strategy_info = get_best_strategy_for_setting(task=task, shot=shot, exp=exp)
 
                 # Save the best ensemble strategy for the current setting globally
-                best_ensembles_per_setting[task][shot][exp] = best_result
+                best_ensembles_per_setting[task][shot][exp] = strategy_info
 
-                strategy = best_result['Strategy']
-                top_k = best_result['Top-K']
+                results_json = load_metrics_for_setting(task=task, shot=shot, exp=exp,
+                                                        strategy_info=strategy_info)
 
-                # Load the metric scores for the best ensemble strategy for the current setting
-                if "expert" in strategy:
-                    results_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp,
-                                                     strategy, "results.json")
-                else:
-                    results_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp,
-                                                     strategy, f"top-{top_k}", "results.json")
-                with open(results_file_path, 'r') as results_file:
-                    results_data = json.load(results_file)
+                task_shot = f'{task}_{shot}'
+                result = results_json['task'][exp][task_shot]
+                final_results['task'][exp][task_shot] = result
 
-    print(best_ensembles_per_setting)
+    print(json.dumps(final_results, indent=4))
                 # # Merge the task results into the main results
                 # for exp_key, exp_value in results_data['task'].items():
                 #     if exp_key not in final_results['task']:
@@ -529,28 +550,31 @@ def process_timestamp():
     return result_dicts
 
 
+def create_log_files():
+    for task in TASKS:
+        for shot in SHOTS:
+            for exp in EXPS:
+                log_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp, 'log.txt')
+
+                lines = []
+                for strategy in ENSEMBLE_STRATEGIES:
+                    for top_k in result[task][shot][exp][strategy]:
+                        log_pred_str = build_log_string(top_k, task=task)
+                        lines.append(log_pred_str)
+
+                lines = sorted(lines, key=lambda x: float(x.split()[-1]))
+
+                with open(log_file_path, 'w') as log_file:
+                    log_file.write(
+                        f"{'Model-Count':<15} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
+                    for line in lines:
+                        log_file.write(line)
+                    print(f"Wrote Log file to {TIMESTAMP}/{task}/{shot}/{exp}/log.txt")
+
 def main():
-    # result = process_timestamp()
-    #
-    # for task in TASKS:
-    #     for shot in SHOTS:
-    #         for exp in EXPS:
-    #             log_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp, 'log.txt')
-    #
-    #             lines = []
-    #             for strategy in ENSEMBLE_STRATEGIES:
-    #                 for top_k in result[task][shot][exp][strategy]:
-    #                     log_pred_str = build_log_string(top_k, task=task)
-    #                     lines.append(log_pred_str)
-    #
-    #             lines = sorted(lines, key=lambda x: float(x.split()[-1]))
-    #
-    #             with open(log_file_path, 'w') as log_file:
-    #                 log_file.write(
-    #                     f"{'Model-Count':<15} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
-    #                 for line in lines:
-    #                     log_file.write(line)
-    #                 print(f"Wrote Log file to {TIMESTAMP}/{task}/{shot}/{exp}/log.txt")
+    #result = process_timestamp()
+
+    #create_log_files()
 
     _, strategy_per_task, json_path, ensemble_path = compile_results_to_json()
 
