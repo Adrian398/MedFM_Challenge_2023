@@ -99,7 +99,7 @@ def get_non_valid_model_dirs(task, shot):
             continue
 
         # If there are checkpoints other than "best"
-        print(colored(f"Found non-best checkpoints in {model_dir}", 'cyan'))
+        #print(colored(f"Found non-best checkpoints in {model_dir}", 'cyan'))
         model_dirs.append(model_dir)
 
         # Calculate the total size of the checkpoint files in this directory
@@ -109,7 +109,7 @@ def get_non_valid_model_dirs(task, shot):
             total_ckpt_gb += ckpt_in_gb  # Convert bytes to GB
 
         total_size_gb += total_ckpt_gb
-        print(f"Model Checkpoint GBs:", model_dir, f"{total_ckpt_gb:.2f}")
+        print(f"Model non-best Checkpoint GBs:", model_dir, f"{total_ckpt_gb:.2f}")
 
     print(f"Setting Checkpoint GBs:", f"{total_size_gb:.2f}")
     return model_dirs, total_size_gb
