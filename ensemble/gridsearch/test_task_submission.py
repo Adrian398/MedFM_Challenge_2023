@@ -389,18 +389,13 @@ def compile_results_to_json():
                 result = results_json['task'][exp][task_shot]
                 final_results['task'][exp][task_shot] = result
 
+                # Accumulate setting's metrics for aggregate computation
+                for metric_val in result:
+                    metrics_sum += float(metric_val)
+                    metrics_count += 1
+
     print(json.dumps(final_results, indent=4))
-                # # Merge the task results into the main results
-                # for exp_key, exp_value in results_data['task'].items():
-                #     if exp_key not in final_results['task']:
-                #         final_results['task'][exp_key] = {}
-                #     final_results['task'][exp_key].update(exp_value)
-                #
-                #     # Accumulate metrics for aggregate computation
-                #     for _, metrics in exp_value.items():
-                #         for metric_score in metrics.values():
-                #             metrics_sum += float(metric_score)
-                #             metrics_count += 1
+
     #
     # # Compute the aggregate value
     # final_results["aggregates"] = metrics_sum / metrics_count if metrics_count != 0 else 0
