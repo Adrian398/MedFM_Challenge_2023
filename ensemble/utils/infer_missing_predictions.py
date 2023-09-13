@@ -186,12 +186,12 @@ def get_model_dirs_without_prediction(task, shot):
             # if "pre_processed" in model_dir and task == "endo":
             #     print(colored(f"Endo Model {model_dir} with pre-processed data added to models for update.", 'red'))
             # else:
-            print(colored(f"Model {task}/{shot}-shot/{model_dir} contains {csv_suffix_choice} CSV file", 'blue'))
+            print(f"{colored(f'Skipping: Model already contains {csv_suffix_choice} CSV', 'blue')}")
             continue
 
         # Skip if missing write access
         if not os.access(abs_model_dir, os.W_OK):
-            print(f"{colored('Missing Write Access:', 'red')} Skipping {abs_model_dir.split('work_dirs/')[1]}")
+            print(f"{colored('Skipping: Missing Write Access', 'red')}")
             continue
 
         model_dirs.append(model_dir)
