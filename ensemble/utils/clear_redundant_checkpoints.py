@@ -20,7 +20,7 @@ def remove_non_best_checkpoints(model_dir):
         if filename.endswith(".pth") and "best" not in filename:
             file_path = os.path.join(model_dir, filename)
             try:
-                #os.remove(file_path)
+                os.remove(file_path)
                 print(f"Successfully removed {file_path}")
             except PermissionError:
                 print(f"Permission denied: Unable to delete {file_path}. Please check your permissions.")
