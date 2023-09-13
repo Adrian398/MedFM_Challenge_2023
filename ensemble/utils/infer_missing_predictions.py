@@ -189,6 +189,11 @@ def get_model_dirs_without_prediction(task, shot):
             print(colored(f"Model {task}/{shot}-shot/{model_dir} contains {csv_suffix_choice} CSV file", 'blue'))
             continue
 
+        # Skip if missing write access
+        if not os.access(abs_model_dir, os.W_OK):
+            print(f"{colored('Missing Write Access:', 'red')} Skipping {abs_model_dir.split('work_dirs/')[1]}")
+            continue
+
         model_dirs.append(model_dir)
     return model_dirs
 
