@@ -18,7 +18,7 @@ def remove_model_dir(model_dir):
         print(f"Error: {e}")
 
 
-def print_report(invalid_model_dirs):
+def print_report(invalid_model_dirs, total_gb):
     if len(invalid_model_dirs) == 0:
         print(colored(f"\nAll models have a checkpoint file!\n", 'green'))
         exit()
@@ -32,7 +32,7 @@ def print_report(invalid_model_dirs):
         print("---------------------------------------------------------------------------------------------------------------")
         print(f"| Found {len(invalid_model_dirs)} invalid model runs.")
         print("---------------------------------------------------------------------------------------------------------------")
-
+        print(colored(f"Total size of checkpoint files: {total_gb:.2f} GB", 'green'))
 
 def sort_key(entry):
     # Extract task, shot, and experiment number from the entry
@@ -65,6 +65,7 @@ def get_file_from_directory(directory, ext, keyword):
 
 def get_non_valid_model_dirs(task, shot):
     model_dirs = []
+    total_size_gb = 0
     setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
 
     try:
@@ -98,7 +99,12 @@ def get_non_valid_model_dirs(task, shot):
         print(colored(f"Found non-best checkpoints in {model_dir}", 'cyan'))
         model_dirs.append(model_dir)
 
-    return model_dirs
+        # Calculate the total size of the checkpoint files in this directory
+        for chkpt_file in checkpoint_files:
+            total_size_gb += os.path.getsize(os.path.join(abs_model_dir, chkpt_file)) / (
+                        1024 ** 3)  # Convert bytes to GB
+
+    return model_dirs, total_size_gb
 
 
 # ========================================================================================
@@ -120,12 +126,14 @@ if __name__ == "__main__":  # Important when using multiprocessing
         results_invalid = list(pool.imap_unordered(process_task_shot_combination, combinations))
 
     invalid_model_dirs = []
-    for task, shot, model_list in results_invalid:
+    total_gb = 0
+    for task, shot, model_list, total_gb_p_setting in results_invalid:
         for model_name in model_list:
             model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
+            total_gb += total_gb_p_setting
             invalid_model_dirs.append(model_path)
 
-    print_report(invalid_model_dirs)
+    print_report(invalid_model_dirs, total_gb)
 
     # user_input = input(f"\nDo you want to delete those model runs? (yes/no): ")
     # if user_input.strip().lower() == 'yes':
