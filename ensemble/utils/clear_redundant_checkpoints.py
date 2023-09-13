@@ -104,7 +104,7 @@ def get_non_valid_model_dirs(task, shot):
         for chkpt_file in checkpoint_files:
             model_in_gb = os.path.getsize(os.path.join(abs_model_dir, chkpt_file)) / (1024 ** 3)
             total_size_gb += model_in_gb  # Convert bytes to GB
-        print(f"Setting {task, f'{shot}-shot'}:", model_dir, f"{total_size_gb:.2f}")
+        print(f"Setting {task}/{shot}-shot:", model_dir, f"{total_size_gb:.2f}")
 
     return model_dirs, total_size_gb
 
