@@ -8,14 +8,24 @@ from termcolor import colored
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
-def remove_model_dir(model_dir):
-    try:
-        shutil.rmtree(model_dir)
-        print(f"Successfully removed {model_dir}")
-    except PermissionError:
-        print(f"Permission denied: Unable to delete {model_dir}. Please check your permissions.")
-    except Exception as e:
-        print(f"Error: {e}")
+def remove_non_best_checkpoints(model_dir):
+    # Check if directory exists
+    if not os.path.exists(model_dir):
+        print(f"Error: {model_dir} does not exist.")
+        return
+
+    # Loop through all the files in the directory
+    for filename in os.listdir(model_dir):
+        # Check if the file is a checkpoint and doesn't contain "best"
+        if filename.endswith(".pth") and "best" not in filename:
+            file_path = os.path.join(model_dir, filename)
+            try:
+                os.remove(file_path)
+                print(f"Successfully removed {file_path}")
+            except PermissionError:
+                print(f"Permission denied: Unable to delete {file_path}. Please check your permissions.")
+            except Exception as e:
+                print(f"Error: {e}")
 
 
 def print_report(invalid_model_dirs, total_gb):
@@ -68,7 +78,7 @@ def get_non_valid_model_dirs(task, shot):
     model_dirs = []
     setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
 
-    print(f"\nProcessing Setting {task}/{shot}-shot")
+    print(f"Processing Setting {task}/{shot}-shot")
 
     try:
         setting_model_dirs = os.listdir(setting_directory)
@@ -149,12 +159,11 @@ if __name__ == "__main__":  # Important when using multiprocessing
 
     print(f"Total non-best Checkpoint GB:  {total_gb:.2f}")
 
+    print_report(invalid_model_dirs, total_gb)
 
-    #print_report(invalid_model_dirs, total_gb)
-
-    # user_input = input(f"\nDo you want to delete those model runs? (yes/no): ")
-    # if user_input.strip().lower() == 'yes':
-    #     for model_dir in invalid_model_dirs:
-    #         remove_model_dir(model_dir)
-    # else:
-    #     exit()
+    user_input = input(f"\nDo you want to delete those model runs? (yes/no): ")
+    if user_input.strip().lower() == 'yes':
+        for model_dir in invalid_model_dirs:
+            remove_non_best_checkpoints(model_dir)
+    else:
+        exit()
