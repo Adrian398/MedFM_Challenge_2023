@@ -312,88 +312,94 @@ def extract_number_from_string(s):
 
 
 def compile_results_to_json():
-    output_json_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', "best_ensembles.json")
-    print(f"Wrote Result JSON file to {output_json_path}")
+
+    best_ensembles_per_setting = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
 
     final_results = {
         "task": {},
         "aggregates": 0
     }
 
-    best_ensembles_per_task = {}
-
     metrics_sum = 0.0
     metrics_count = 0
 
     for task in TASKS:
-        task_log_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, 'log.txt')
-        with open(task_log_path, 'r') as file:
-            lines = file.readlines()
+        for shot in SHOTS:
+            for exp in EXPS:
 
-        # Skip the header
-        lines = lines[1:]
+                # Read the log.txt file
+                log_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp, 'log.txt')
+                with open(log_path, 'r') as file:
+                    lines = file.readlines()
 
-        best_aggregate = float('-inf')
-        best_result = None
+                # Skip the header
+                lines = lines[1:]
 
-        for line in lines:
-            model_count, strategy, top_k, _, aggregate = line.split()
-            aggregate_value = float(aggregate)
+                best_aggregate = float('-inf')
+                best_result = None
 
-            if aggregate_value > best_aggregate:
-                best_aggregate = aggregate_value
-                best_result = {
-                    "Model-Count": model_count,
-                    "Strategy": strategy,
-                    "Top-K": top_k,
-                    "Aggregate": aggregate
-                }
+                # Extract the best ensemble strategy for the given setting
+                for line in lines:
+                    model_count, strategy, top_k, _, aggregate = line.split()
+                    aggregate_value = float(aggregate)
 
-        best_ensembles_per_task[task] = best_result
+                    if aggregate_value > best_aggregate:
+                        best_aggregate = aggregate_value
+                        best_result = {
+                            "Model-Count": model_count,
+                            "Strategy": strategy,
+                            "Top-K": top_k,
+                            "Aggregate": aggregate
+                        }
 
-        strategy = best_result['Strategy']
-        top_k = best_result['Top-K']
+                # Save the best ensemble strategy for the current setting globally
+                best_ensembles_per_setting[task][shot][exp] = best_result
 
-        if "expert" in strategy:
-            results_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, strategy, "results.json")
-        else:
-            results_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, strategy,
-                                             f"top-{top_k}", "results.json")
+                strategy = best_result['Strategy']
+                top_k = best_result['Top-K']
 
-        with open(results_file_path, 'r') as results_file:
-            results_data = json.load(results_file)
+                # Load the metric scores for the best ensemble strategy for the current setting
+                if "expert" in strategy:
+                    results_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp,
+                                                     strategy, "results.json")
+                else:
+                    results_file_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp,
+                                                     strategy, f"top-{top_k}", "results.json")
+                with open(results_file_path, 'r') as results_file:
+                    results_data = json.load(results_file)
 
-        # Merge the task results into the main results
-        for exp_key, exp_value in results_data['task'].items():
-            if exp_key not in final_results['task']:
-                final_results['task'][exp_key] = {}
-            final_results['task'][exp_key].update(exp_value)
-
-            # Accumulate metrics for aggregate computation
-            for _, metrics in exp_value.items():
-                for metric_score in metrics.values():
-                    metrics_sum += float(metric_score)
-                    metrics_count += 1
-
-    # Compute the aggregate value
-    final_results["aggregates"] = metrics_sum / metrics_count if metrics_count != 0 else 0
-
-    # Save the final results to the timestamp directory
-    output_json_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', "results.json")
-    with open(output_json_path, 'w') as file:
-        json.dump(final_results, file, indent=4)
-
-    # Save the best ensembles to the timestamp directory
-    best_ensembles_output_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', "best_ensemble_per_task.json")
-    with open(best_ensembles_output_path, 'w') as file:
-        json.dump(best_ensembles_per_task, file, indent=4)
-
-    print(f"Wrote Final Result JSON file to {output_json_path}")
-    print(json.dumps(final_results, indent=4))
-    print(f"\nWrote Best Ensembles JSON file to {best_ensembles_output_path}")
-    print(json.dumps(best_ensembles_per_task, indent=4))
-
-    return final_results, best_ensembles_per_task, output_json_path, best_ensembles_output_path
+    print(best_ensembles_per_setting)
+                # # Merge the task results into the main results
+                # for exp_key, exp_value in results_data['task'].items():
+                #     if exp_key not in final_results['task']:
+                #         final_results['task'][exp_key] = {}
+                #     final_results['task'][exp_key].update(exp_value)
+                #
+                #     # Accumulate metrics for aggregate computation
+                #     for _, metrics in exp_value.items():
+                #         for metric_score in metrics.values():
+                #             metrics_sum += float(metric_score)
+                #             metrics_count += 1
+    #
+    # # Compute the aggregate value
+    # final_results["aggregates"] = metrics_sum / metrics_count if metrics_count != 0 else 0
+    #
+    # # Save the final results to the timestamp directory
+    # output_json_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', "results.json")
+    # with open(output_json_path, 'w') as file:
+    #     json.dump(final_results, file, indent=4)
+    #
+    # # Save the best ensembles to the timestamp directory
+    # best_ensembles_output_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', "best_ensemble_per_task.json")
+    # with open(best_ensembles_output_path, 'w') as file:
+    #     json.dump(best_ensembles_per_task, file, indent=4)
+    #
+    # print(f"Wrote Final Result JSON file to {output_json_path}")
+    # print(json.dumps(final_results, indent=4))
+    # print(f"\nWrote Best Ensembles JSON file to {best_ensembles_output_path}")
+    # print(json.dumps(best_ensembles_per_task, indent=4))
+    #
+    # return final_results, best_ensembles_per_task, output_json_path, best_ensembles_output_path
 
 
 def softmax(values):
@@ -546,9 +552,9 @@ def main():
                         log_file.write(line)
                     print(f"Wrote Log file to {TIMESTAMP}/{task}/{shot}/{exp}/log.txt")
 
-        # # TODO: Refactor to task-shot-exp wise
-        # _, strategy_per_task, json_path, ensemble_path = compile_results_to_json()
-        #
+        # TODO: Refactor to task-shot-exp wise
+        _, strategy_per_task, json_path, ensemble_path = compile_results_to_json()
+
         # if BUILD_SUBMISSION:
         #     build_final_submission(strategies=strategy_per_task,
         #                            json_path=json_path,
