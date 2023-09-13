@@ -76,8 +76,7 @@ def build_final_submission(strategies):
                 csv_file_dir = os.path.join('result', exp)
                 source_csv_file_dir = os.path.join(result_path, csv_file_dir)
 
-                csv_files = os.listdir(source_csv_file_dir)
-                for csv_file in csv_files:
+                for csv_file in os.listdir(source_csv_file_dir):
                     if fnmatch.fnmatch(csv_file, csv_file_pattern):
                         source_csv_file = os.path.join(source_csv_file_dir, csv_file)
                         destination = os.path.join(target_dir, csv_file_dir, csv_file)
