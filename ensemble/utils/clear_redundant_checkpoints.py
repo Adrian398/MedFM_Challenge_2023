@@ -132,8 +132,14 @@ if __name__ == "__main__":  # Important when using multiprocessing
     for task, shot, model_list in results_invalid:
         task_gb = 0
 
-        for model_name, model_gb in model_list:
+        for model_info in model_list:
+            if len(model_info) != 2:
+                print(f"Unexpected data in model_list: {model_info}")
+                continue
+
+            model_name, model_gb = model_info
             print(model_name, model_gb)
+
 
         #     model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
         #     task_gb += model_gb
