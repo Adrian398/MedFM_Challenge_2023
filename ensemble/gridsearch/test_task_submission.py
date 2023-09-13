@@ -71,9 +71,9 @@ def build_final_submission(strategies):
                 print(type(strategy))
 
                 if "expert" in strategy:
-                    result_path = os.path.join(subm_base_path, task, strategy)
+                    result_path = os.path.join(subm_base_path, task, shot, exp, strategy)
                 else:
-                    result_path = os.path.join(subm_base_path, task, strategy, f"top-{top_k}")
+                    result_path = os.path.join(subm_base_path, task, shot, exp, strategy, f"top-{top_k}")
 
                 csv_file_dir = os.path.join('result', exp)
                 source_csv_file_dir = os.path.join(result_path, csv_file_dir)
