@@ -18,7 +18,7 @@ def remove_model_dir(model_dir):
         print(f"Error: {e}")
 
 
-def print_report(invalid_model_dirs):
+def print_report(invalid_model_dirs, total_gb):
     if len(invalid_model_dirs) == 0:
         print(colored(f"\nAll models have a checkpoint file!\n", 'green'))
         exit()
@@ -32,7 +32,7 @@ def print_report(invalid_model_dirs):
         print("---------------------------------------------------------------------------------------------------------------")
         print(f"| Found {len(invalid_model_dirs)} invalid model runs.")
         print("---------------------------------------------------------------------------------------------------------------")
-
+        print(colored(f"Total size of checkpoint files: {total_gb:.2f} GB", 'green'))
 
 def sort_key(entry):
     # Extract task, shot, and experiment number from the entry
@@ -50,7 +50,8 @@ def my_print(message):
 
 def process_task_shot_combination(args):
     task, shot = args
-    return task, shot, get_non_valid_model_dirs(task=task, shot=shot)
+    model = get_non_valid_model_dirs(task=task, shot=shot)
+    return task, shot, model
 
 
 def extract_exp_number(string):
@@ -67,6 +68,8 @@ def get_non_valid_model_dirs(task, shot):
     model_dirs = []
     setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
 
+    print(f"\nProcessing Setting {task}/{shot}-shot")
+
     try:
         setting_model_dirs = os.listdir(setting_directory)
     except Exception:
@@ -79,8 +82,7 @@ def get_non_valid_model_dirs(task, shot):
 
         # If no checkpoint files
         if not checkpoint_files:
-            print(colored(f"No checkpoint file found for {abs_model_dir}", 'red'))
-            model_dirs.append(model_dir)
+            print(colored(f"No checkpoint file found for {model_dir}", 'red'))
             continue
 
         # If only "best" checkpoints
@@ -88,15 +90,18 @@ def get_non_valid_model_dirs(task, shot):
 
         if len(best_checkpoints) > 1:
             print(colored(f"More than one 'best' checkpoint found in {abs_model_dir}", 'yellow'))
-            model_dirs.append(model_dir)
             continue
 
         if len(best_checkpoints) == len(checkpoint_files):
             continue
 
-        # If there are checkpoints other than "best"
-        print(colored(f"Found non-best checkpoints in {abs_model_dir}", 'cyan'))
-        model_dirs.append(model_dir)
+        # Calculate the total size of the checkpoint files in this directory
+        total_ckpt_gb = 0
+        for chkpt_file in checkpoint_files:
+            ckpt_in_gb = os.path.getsize(os.path.join(abs_model_dir, chkpt_file)) / (1024 ** 3)
+            total_ckpt_gb += ckpt_in_gb  # Convert bytes to GB
+
+        model_dirs.append((model_dir, total_ckpt_gb))
 
     return model_dirs
 
@@ -120,12 +125,20 @@ if __name__ == "__main__":  # Important when using multiprocessing
         results_invalid = list(pool.imap_unordered(process_task_shot_combination, combinations))
 
     invalid_model_dirs = []
-    for task, shot, model_list in results_invalid:
-        for model_name in model_list:
-            model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
-            invalid_model_dirs.append(model_path)
+    total_gb = 0
 
-    print_report(invalid_model_dirs)
+    for task, shot, model_list in results_invalid:
+        task_gb = 0
+
+        for model_name, model_gb in model_list:
+            model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
+            task_gb += model_gb
+            invalid_model_dirs.append(model_path)
+        print(f"Task {task} non-best Checkpoint GB:  {task_gb:.2f}")
+
+        total_gb += task_gb
+    print(f"Total non-best Checkpoint GB:  {total_gb:.2f}")
+    #print_report(invalid_model_dirs, total_gb)
 
     # user_input = input(f"\nDo you want to delete those model runs? (yes/no): ")
     # if user_input.strip().lower() == 'yes':
