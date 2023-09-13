@@ -914,7 +914,7 @@ if __name__ == "__main__":
     MODEL_COUNTS = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
 
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
-    MAX_TOP_K = 16
+    MAX_TOP_K = 10
     DATA = load_data()
 
     main()
