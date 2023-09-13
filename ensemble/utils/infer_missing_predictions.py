@@ -176,13 +176,13 @@ def get_model_dirs_without_prediction(task, shot):
         # Skip if no best checkpoint file
         checkpoint_path = get_file_from_directory(abs_model_dir, ".pth", "best")
         if checkpoint_path is None:
-            print(f"{colored(f'Skipping: No best checkpoint file found', 'red')}")
+            print(f"{colored(f'Skipping: No best checkpoint file found', 'magenta')}")
             continue
 
         # Skip/Delete if no event file
         event_file = get_event_file_from_model_dir(abs_model_dir)
         if event_file is None:
-            print(f"{colored(f'Skipping: No event file found', 'red')}")
+            print(f"{colored(f'Skipping: No event file found', 'yellow')}")
             continue
 
         # Skip if prediction csv file is present
