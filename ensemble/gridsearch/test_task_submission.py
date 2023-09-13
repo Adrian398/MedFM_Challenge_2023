@@ -68,8 +68,6 @@ def build_final_submission(strategies):
                 top_k = strategies[task][shot][exp]['Top-K']
                 csv_file_pattern = f"{task}_{shot}.csv"
 
-                print(type(strategy))
-
                 if "expert" in strategy:
                     result_path = os.path.join(subm_base_path, task, shot, exp, strategy)
                 else:
