@@ -552,7 +552,6 @@ def main():
                         log_file.write(line)
                     print(f"Wrote Log file to {TIMESTAMP}/{task}/{shot}/{exp}/log.txt")
 
-        # TODO: Refactor to task-shot-exp wise
         _, strategy_per_task, json_path, ensemble_path = compile_results_to_json()
 
         # if BUILD_SUBMISSION:
