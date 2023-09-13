@@ -554,8 +554,8 @@ def create_log_files(data):
 
 
 def main():
-    result = process_timestamp()
-    create_log_files(data=result)
+    # result = process_timestamp()
+    # create_log_files(data=result)
 
     best_strategy_per_setting = compile_results_to_json()
     build_final_submission(strategies=best_strategy_per_setting)
