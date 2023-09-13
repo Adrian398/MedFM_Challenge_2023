@@ -390,7 +390,7 @@ def compile_results_to_json():
                 final_results['task'][exp][task_shot] = result
 
                 # Accumulate setting's metrics for aggregate computation
-                for metric_val in result:
+                for metric_val in result.values():
                     metrics_sum += float(metric_val)
                     metrics_count += 1
 
