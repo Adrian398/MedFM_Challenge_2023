@@ -50,8 +50,8 @@ def my_print(message):
 
 def process_task_shot_combination(args):
     task, shot = args
-    model_dir, memory_usage = get_non_valid_model_dirs(task=task, shot=shot)
-    return task, shot, model_dir, memory_usage
+    model_dirs, memory_usage = get_non_valid_model_dirs(task=task, shot=shot)
+    return task, shot, model_dirs, memory_usage
 
 
 def extract_exp_number(string):
@@ -68,6 +68,8 @@ def get_non_valid_model_dirs(task, shot):
     model_dirs = []
     total_size_gb = 0
     setting_directory = os.path.join(work_dir_path, task, f"{shot}-shot")
+
+    print(f"\nProcessing Setting {task}/{shot}-shot")
 
     try:
         setting_model_dirs = os.listdir(setting_directory)
@@ -101,11 +103,15 @@ def get_non_valid_model_dirs(task, shot):
         model_dirs.append(model_dir)
 
         # Calculate the total size of the checkpoint files in this directory
+        total_ckpt_gb = 0
         for chkpt_file in checkpoint_files:
-            model_in_gb = os.path.getsize(os.path.join(abs_model_dir, chkpt_file)) / (1024 ** 3)
-            total_size_gb += model_in_gb  # Convert bytes to GB
-        print(f"Setting {task}/{shot}-shot:", model_dir, f"{total_size_gb:.2f}")
+            ckpt_in_gb = os.path.getsize(os.path.join(abs_model_dir, chkpt_file)) / (1024 ** 3)
+            total_ckpt_gb += ckpt_in_gb  # Convert bytes to GB
 
+        total_size_gb += total_ckpt_gb
+        print(f"Model Checkpoint GBs:", model_dir, f"{total_ckpt_gb:.2f}")
+
+    print(f"Setting Checkpoint GBs:", f"{total_size_gb:.2f}")
     return model_dirs, total_size_gb
 
 
