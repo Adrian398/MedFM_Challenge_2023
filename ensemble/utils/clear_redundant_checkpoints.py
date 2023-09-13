@@ -131,7 +131,6 @@ if __name__ == "__main__":  # Important when using multiprocessing
 
     for task, shot, model_list in results_invalid:
         task_gb = 0
-        print(model_list)
 
         for model_name, model_gb in model_list:
             print(model_name, model_gb)
