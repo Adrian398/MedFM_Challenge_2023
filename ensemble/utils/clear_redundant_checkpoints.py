@@ -50,8 +50,8 @@ def my_print(message):
 
 def process_task_shot_combination(args):
     task, shot = args
-    model = get_non_valid_model_dirs(task=task, shot=shot)
-    return task, shot, model
+    models = get_non_valid_model_dirs(task=task, shot=shot)
+    return task, shot, models
 
 
 def extract_exp_number(string):
@@ -120,24 +120,36 @@ metric_tags = {"auc": "AUC/AUC_multiclass",
 
 
 if __name__ == "__main__":  # Important when using multiprocessing
+
     with Pool() as pool:
         combinations = [(task, shot) for task in tasks for shot in shots]
         results_invalid = list(pool.imap_unordered(process_task_shot_combination, combinations))
 
+    result_dict = {}
+
+    for task, shot, models in results_invalid:
+        if task not in result_dict:
+            result_dict[task] = {}
+        result_dict[task][shot] = models
+
     invalid_model_dirs = []
     total_gb = 0
 
-    for task, shot, model_list in results_invalid:
+    for task in tasks:
         task_gb = 0
 
-        for model_name, model_gb in model_list:
-            model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
-            task_gb += model_gb
-            invalid_model_dirs.append(model_path)
-        print(f"Task {task} non-best Checkpoint GB:  {task_gb:.2f}")
+        for shot in shots:
+            for model_name, model_gb in result_dict[task][shot]:
+                model_path = os.path.join(work_dir_path, task, f"{shot}-shot", model_name)
+                task_gb += model_gb
+                invalid_model_dirs.append(model_path)
 
+        print(f"Task {task} non-best Checkpoint GB:  {task_gb:.2f}")
         total_gb += task_gb
+
     print(f"Total non-best Checkpoint GB:  {total_gb:.2f}")
+
+
     #print_report(invalid_model_dirs, total_gb)
 
     # user_input = input(f"\nDo you want to delete those model runs? (yes/no): ")
