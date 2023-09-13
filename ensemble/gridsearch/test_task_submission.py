@@ -62,27 +62,28 @@ def build_final_submission(strategies):
     target_dir = create_subm_target_dir()
 
     for task in TASKS:
-        strategy = strategies[task]['Strategy']
-        top_k = strategies[task]['Top-K']
-        csv_file_pattern = f"{task}_*.csv"
+        for shot in SHOTS:
+            for exp in EXPS:
+                strategy = strategies[task][shot][exp]['Strategy']
+                top_k = strategies[task][shot][exp]['Top-K']
+                csv_file_pattern = f"{task}_{shot}.csv"
 
-        print(type(strategy))
+                print(type(strategy))
 
-        for exp in EXPS:
-            if "expert" in strategy:
-                result_path = os.path.join(subm_base_path, task, strategy)
-            else:
-                result_path = os.path.join(subm_base_path, task, strategy, f"top-{top_k}")
+                if "expert" in strategy:
+                    result_path = os.path.join(subm_base_path, task, strategy)
+                else:
+                    result_path = os.path.join(subm_base_path, task, strategy, f"top-{top_k}")
 
-            csv_file_dir = os.path.join('result', exp)
-            source_csv_file_dir = os.path.join(result_path, csv_file_dir)
+                csv_file_dir = os.path.join('result', exp)
+                source_csv_file_dir = os.path.join(result_path, csv_file_dir)
 
-            for csv_file in os.listdir(source_csv_file_dir):
-                if fnmatch.fnmatch(csv_file, csv_file_pattern):
-                    source_csv_file = os.path.join(source_csv_file_dir, csv_file)
-                    destination = os.path.join(target_dir, csv_file_dir, csv_file)
-                    shutil.copy(source_csv_file, destination)
-                    print(f"Copied {csv_file} from {source_csv_file} to {destination}")
+                for csv_file in os.listdir(source_csv_file_dir):
+                    if fnmatch.fnmatch(csv_file, csv_file_pattern):
+                        source_csv_file = os.path.join(source_csv_file_dir, csv_file)
+                        destination = os.path.join(target_dir, csv_file_dir, csv_file)
+                        shutil.copy(source_csv_file, destination)
+                        print(f"Copied {csv_file} from {source_csv_file} to {destination}")
 
     best_strategies_path = os.path.join(VAL_BASE_PATH, "best_strategies_per_task.json")
     final_results_path = os.path.join(VAL_BASE_PATH, "results.json")
