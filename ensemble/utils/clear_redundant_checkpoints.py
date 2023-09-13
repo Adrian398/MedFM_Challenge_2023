@@ -50,7 +50,8 @@ def my_print(message):
 
 def process_task_shot_combination(args):
     task, shot = args
-    return task, shot, get_non_valid_model_dirs(task=task, shot=shot)
+    model_dir, memory_usage = get_non_valid_model_dirs(task=task, shot=shot)
+    return task, shot, model_dir, memory_usage
 
 
 def extract_exp_number(string):
