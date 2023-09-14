@@ -352,8 +352,13 @@ def load_metrics_for_setting(task, shot, exp, strategy_info):
     return results_data
 
 
-def compile_results_to_json():
-    best_strategy_per_setting = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+def compile_results_to_json(from_file):
+    best_strategy_path = os.path.join(VAL_BASE_PATH, "best_strategies_per_task.json")
+
+    if from_file:
+        best_strategy_per_setting = load_best_strategies_from_json(best_strategy_path)
+    else:
+        best_strategy_per_setting = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
 
     final_results = {
         "task": defaultdict(lambda: defaultdict(dict)),
@@ -366,10 +371,13 @@ def compile_results_to_json():
     for task in TASKS:
         for shot in SHOTS:
             for exp in EXPS:
-                strategy_info = get_best_strategy_for_setting(task=task, shot=shot, exp=exp)
 
-                # Save the best ensemble strategy for the current setting globally
-                best_strategy_per_setting[task][shot][exp] = strategy_info
+                if from_file:
+                    strategy_info = best_strategy_per_setting[task][shot][exp]
+
+                else:
+                    strategy_info = get_best_strategy_for_setting(task=task, shot=shot, exp=exp)
+                    best_strategy_per_setting[task][shot][exp] = strategy_info
 
                 results_json = load_metrics_for_setting(task=task, shot=shot, exp=exp,
                                                         strategy_info=strategy_info)
@@ -395,11 +403,13 @@ def compile_results_to_json():
     print(f"Wrote Final Result JSON file to {output_json_path}")
     print(json.dumps(final_results, indent=4))
 
-    # Save the best ensembles to the timestamp directory
-    best_strategies_out_path = os.path.join(VAL_BASE_PATH, "best_strategies_per_task.json")
-    with open(best_strategies_out_path, 'w') as file:
-        json.dump(best_strategy_per_setting, file, indent=4)
-    print(f"\nWrote Best Ensembles JSON file to {best_strategies_out_path}")
+    if not from_file:
+        # Save the best ensembles to the timestamp directory
+        best_strategies_out_path = os.path.join(VAL_BASE_PATH, "best_strategies_per_task.json")
+        with open(best_strategies_out_path, 'w') as file:
+            json.dump(best_strategy_per_setting, file, indent=4)
+        print(f"\nWrote Best Ensembles JSON file to {best_strategies_out_path}")
+
     print(json.dumps(best_strategy_per_setting, indent=4))
 
     return best_strategy_per_setting
@@ -554,21 +564,18 @@ def create_log_files(data):
                     print(f"Wrote Log file to {TIMESTAMP}/{task}/{shot}/{exp}/log.txt")
 
 
-def load_best_strategies_from_json():
-    best_strategies_path = os.path.join(VAL_BASE_PATH, "best_strategies_per_task.json")
-
-    with open(best_strategies_path, 'r') as file:
+def load_best_strategies_from_json(path):
+    with open(path, 'r') as file:
         best_strategies = json.load(file)
 
     return best_strategies
 
-def main():
+
+def main(build_submission):
     # result = process_timestamp()
     # create_log_files(data=result)
 
-    #best_strategy_per_setting = compile_results_to_json()
-    best_strategy_per_setting = load_best_strategies_from_json()
-
+    best_strategy_per_setting = compile_results_to_json(from_file=True)
     build_final_submission(strategies=best_strategy_per_setting)
 
 
@@ -588,7 +595,7 @@ ENSEMBLE_STRATEGIES = ["expert-per-task",
                        #"diversity-weighted"
                        ]
 COLON_SOFTMAX_PRINT = False
-BUILD_SUBMISSION = True
+BUILD_SUBMISSION = False
 # ==========================================================================================
 
 
