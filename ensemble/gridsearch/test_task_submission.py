@@ -557,7 +557,7 @@ def create_log_files(data):
                         f"{'Model-Count':<15} {'Strategy':<20} {'Top-K':<10} {'PredictionDir':<40} {'Aggregate':<10}\n")
                     for line in lines:
                         log_file.write(line)
-                    print(f"Wrote Log file to {TIMESTAMP}/{task}/{shot}/{exp}/log.txt")
+                    print(f"Wrote Log file to {TIMESTAMP}/validation/{task}/{shot}/{exp}/log.txt")
 
 
 def load_best_strategies_from_json(path):
