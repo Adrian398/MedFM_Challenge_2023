@@ -350,10 +350,10 @@ def load_metrics_for_setting(task, shot, exp, strategy_info):
     return results_data
 
 
-def compile_results_to_json(from_file):
+def compile_results_to_json():
     best_strategy_path = os.path.join(VAL_BASE_PATH, "best_strategies_per_task.json")
 
-    if from_file:
+    if FROM_FILE:
         best_strategy_per_setting = load_best_strategies_from_json(best_strategy_path)
     else:
         best_strategy_per_setting = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
@@ -370,7 +370,7 @@ def compile_results_to_json(from_file):
         for shot in SHOTS:
             for exp in EXPS:
 
-                if from_file:
+                if FROM_FILE:
                     strategy_info = best_strategy_per_setting[task][shot][exp]
 
                 else:
@@ -401,7 +401,7 @@ def compile_results_to_json(from_file):
     print(f"Wrote Final Result JSON file to {output_json_path}")
     print(json.dumps(final_results, indent=4))
 
-    if not from_file:
+    if not FROM_FILE:
         # Save the best ensembles to the timestamp directory
         best_strategies_out_path = os.path.join(VAL_BASE_PATH, "best_strategies_per_task.json")
         with open(best_strategies_out_path, 'w') as file:
@@ -510,6 +510,9 @@ def get_top_k_dirs(strategy_path, strategy):
 def process_timestamp():
     print(colored(f"Processing Timestamp {TIMESTAMP}", 'blue'))
 
+    if FROM_FILE:
+        return
+
     result_dicts = recursive_defaultdict()
 
     for task in TASKS:
@@ -539,6 +542,9 @@ def process_timestamp():
 
 
 def create_log_files(data):
+    if FROM_FILE:
+        return
+
     for task in TASKS:
         for shot in SHOTS:
             for exp in EXPS:
@@ -587,6 +593,7 @@ ENSEMBLE_STRATEGIES = ["expert-per-task",
                        # "diversity-weighted"
                        ]
 COLON_SOFTMAX_PRINT = False
+FROM_FILE = True
 BUILD_SUBMISSION = False
 # ==========================================================================================
 
@@ -603,5 +610,5 @@ if __name__ == "__main__":
     result = process_timestamp()
     create_log_files(data=result)
 
-    best_strategies = compile_results_to_json(from_file=False)
-    #build_final_submission(strategies=best_strategies)
+    best_strategies = compile_results_to_json()
+    build_final_submission(strategies=best_strategies)
