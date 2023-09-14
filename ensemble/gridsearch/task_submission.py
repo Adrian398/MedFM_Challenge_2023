@@ -812,7 +812,7 @@ def process_top_k(subm_type, task, shot, exp, strategy, top_k):
                                                                             task=task,
                                                                             out_path=out_path)
     elif strategy == "weighted-exp-per-class":
-        selected_models, model_occurrences = weighted_exp_per_class_ensemble_strategy(model_runs=model_runs,
+        selected_models, model_occurrences = weighted_exp_per_class_ensemble_strategy(model_runs=model_runs, top_k=top_k,
                                                                                       task=task, out_path=out_path)
     elif strategy == "pd-weighted":
         selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
