@@ -437,6 +437,8 @@ def process_experiment(top_k_path, exp, task, shot):
         print(f"Prediction file for {exp} and task {task} with shot {shot} not found.")
         return None
 
+    print(f"GT Filepath for {top_k_path} = {gt_path}")
+    exit()
     metrics_dict = compute_task_specific_metrics(pred_path=pred_csv_file_path, gt_path=gt_path, task=task)
 
     # Perform Softmax before score calculation
@@ -500,7 +502,7 @@ def extract_top_k_from_folder(folder_name):
     return None  # Return None if the folder doesn't match the expected format
 
 
-def compute_top_k_values(strategy_path, strategy):
+def get_top_k_dirs(strategy_path, strategy):
     """Compute the top-k values for the given strategy."""
     if "expert" in strategy:
         return [None]
@@ -527,13 +529,13 @@ def process_timestamp():
                     print(colored(f"\t\t\t\tProcessing Strategy {strategy}", 'light_red'))
 
                     strategy_path = os.path.join(BASE_PATH, TIMESTAMP, 'validation', task, shot, exp, strategy)
-                    top_k_values = compute_top_k_values(strategy_path, strategy)
+                    top_k_dirs = get_top_k_dirs(strategy_path, strategy)
 
                     results = []
-                    for top_k_num in top_k_values:
-                        top_result = process_top_k(top_k_num=top_k_num, strategy_path=strategy_path,
-                                                   task=task, shot=shot, exp=exp)
-                        results.append(top_result)
+                    for top_k_num in top_k_dirs:
+                        top_k_result = process_top_k(top_k_num=top_k_num, strategy_path=strategy_path,
+                                                     task=task, shot=shot, exp=exp)
+                        results.append(top_k_result)
 
                     result_dicts[task][shot][exp][strategy] = results
 
