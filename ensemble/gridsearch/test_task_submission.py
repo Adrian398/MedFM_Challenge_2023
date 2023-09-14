@@ -467,9 +467,11 @@ def process_top_k(top_k_num, strategy_path, task, shot, exp):
     if metrics:
         results[exp][f"{task}_{shot}"] = metrics
 
-    print(results)
-    exit()
     json_result, aggregates = generate_json(results=results)
+
+    print(json_result)
+    print(aggregates)
+    exit()
 
     strategy = "None"
     top_k = "None"
