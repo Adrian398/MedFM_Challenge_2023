@@ -21,7 +21,7 @@ def check_and_extract_data(model_dir_abs):
         if exp_num != 0:
             metrics = json.load(open(json_files[0], 'r'))
             return {'metrics': metrics, 'name': model_dir_rel}, exp_num
-    print(f"No JSON found for {model_dir_abs}")
+    #print(f"No JSON found for {model_dir_abs}")
     return None, None
 
 
