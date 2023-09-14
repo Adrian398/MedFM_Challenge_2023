@@ -790,8 +790,7 @@ def create_output_dir(subm_type, task, shot, exp, top_k, strategy):
     if not os.path.isdir(submission_dir):
         os.makedirs(submission_dir)
 
-    for exp in EXPS:
-        os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
+    os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
 
     return submission_dir
 
