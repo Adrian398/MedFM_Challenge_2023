@@ -639,6 +639,8 @@ def weighted_exp_per_class_ensemble_strategy(model_runs, task, out_path, top_k=3
         for model, weight in class_models:
             weighted_sum_column += model['prediction'].iloc[:, class_idx + 1] * weight
 
+        weighted_sum_column /= sum(weights)
+
         merged_df.loc[:, class_idx + 1] = weighted_sum_column
 
     merged_df.to_csv(out_path, index=False, header=False)
