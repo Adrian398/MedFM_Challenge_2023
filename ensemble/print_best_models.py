@@ -18,12 +18,12 @@ def check_and_extract_data(model_dir_abs):
     # Skip if no best checkpoint file
     checkpoint_path = get_file_from_directory(model_dir_abs, ".pth", "best")
     if checkpoint_path is None:
-        return None, None, 0
+        return None, None, 1
 
     # Skip if no event file
     event_file = get_event_file_from_model_dir(model_dir_abs)
     if event_file is None:
-        return None, None, 0
+        return None, None, 1
 
     json_files = glob.glob(os.path.join(model_dir_abs, "*.json"))
 
@@ -31,9 +31,9 @@ def check_and_extract_data(model_dir_abs):
         exp_num = extract_exp_number(model_dir_rel)
         if exp_num != 0:
             metrics = json.load(open(json_files[0], 'r'))
-            return {'metrics': metrics, 'name': model_dir_rel}, exp_num, 1
+            return {'metrics': metrics, 'name': model_dir_rel}, exp_num, 0
 
-    return None, None, 1
+    return None, None, 0
 
 
 def extract_data(root_dir):
