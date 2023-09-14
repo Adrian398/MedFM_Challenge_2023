@@ -9,7 +9,7 @@ _base_ = [
 checkpoint = 'https://download.openmmlab.com/mmclassification/v0/resnet/resnet101_8xb32_in1k_20210831-539c63f8.pth'  # noqa
 
 lr = 1e-6
-train_bs = 16
+train_bs = 32
 val_bs = 128
 dataset = 'chest'
 model_name = 'resnet101'
@@ -38,6 +38,15 @@ model = dict(
         lam=0.1,
         loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)))
 
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='NumpyToPIL', to_rgb=True),
+    dict(type='torchvision/RandomAffine', degrees=(-15, 15), translate=(0.05, 0.05), fill=128),
+    dict(type='PILToNumpy', to_bgr=True),
+    dict(type='RandomResizedCrop', scale=448, crop_ratio_range=(0.9, 1.0), backend='pillow', interpolation='bicubic'),
+    dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(type='PackInputs'),
+]
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
@@ -52,7 +61,8 @@ test_pipeline = [
 
 train_dataloader = dict(
     batch_size=train_bs,
-    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt')
+    dataset=dict(ann_file=f'data_anns/MedFMC/{dataset}/{dataset}_{nshot}-shot_train_exp{exp_num}.txt',
+                 pipeline=train_pipeline)
 )
 
 val_dataloader = dict(
@@ -93,6 +103,6 @@ param_scheduler = [
 
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
-train_cfg = dict(by_epoch=True, val_interval=15, max_epochs=250)
+train_cfg = dict(by_epoch=True, val_interval=15, max_epochs=500)
 
 randomness = dict(seed=0)
