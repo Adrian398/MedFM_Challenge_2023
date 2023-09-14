@@ -805,6 +805,18 @@ def process_top_k(subm_type, task, shot, exp, strategy, top_k):
     elif strategy == "weighted-exp-per-class":
         selected_models, model_occurrences = weighted_exp_per_class_ensemble_strategy(model_runs=model_runs, top_k=top_k,
                                                                                       task=task, out_path=out_path)
+    elif strategy == "log-weighted-exp-per-class":
+        selected_models, model_occurrences = weighted_exp_per_class_ensemble_strategy(model_runs=model_runs, top_k=top_k,
+                                                                                      task=task, out_path=out_path,
+                                                                                      scaling_func=log_scaling)
+    elif strategy == "sm-weighted-exp-per-class":
+        selected_models, model_occurrences = weighted_exp_per_class_ensemble_strategy(model_runs=model_runs, top_k=top_k,
+                                                                                      task=task, out_path=out_path,
+                                                                                      scaling_func=softmax)
+    elif strategy == "expo-weighted-exp-per-class":
+        selected_models, model_occurrences = weighted_exp_per_class_ensemble_strategy(model_runs=model_runs, top_k=top_k,
+                                                                                      task=task, out_path=out_path,
+                                                                                      scaling_func=exponential_scaling)
     elif strategy == "pd-weighted":
         selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
                                                                                        task=task,
@@ -948,6 +960,9 @@ ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "expert-per-class",
                        "weighted",
                        "weighted-exp-per-class",
+                       "log-weighted-exp-per-class",
+                       "sm-weighted-exp-per-class",
+                       "expo-weighted-exp-per-class",
                        "pd-weighted",
                        "pd-log-weighted",
                        "rank-based-weighted",
@@ -985,6 +1000,9 @@ if __name__ == "__main__":
                            "expert-per-class",
                            "weighted",
                            "weighted-exp-per-class",
+                           "log-weighted-exp-per-class",
+                           "sm-weighted-exp-per-class",
+                           "expo-weighted-exp-per-class",
                            "pd-weighted",
                            "pd-log-weighted",
                            "rank-based-weighted",

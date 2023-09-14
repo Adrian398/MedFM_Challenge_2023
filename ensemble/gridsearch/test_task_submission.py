@@ -578,10 +578,13 @@ ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "expert-per-class",
                        "weighted",
                        "weighted-exp-per-class",
+                       "log-weighted-exp-per-class",
+                       "sm-weighted-exp-per-class",
+                       "expo-weighted-exp-per-class",
                        "pd-weighted",
                        "pd-log-weighted",
                        "rank-based-weighted",
-                       #"diversity-weighted"
+                       # "diversity-weighted"
                        ]
 COLON_SOFTMAX_PRINT = False
 BUILD_SUBMISSION = False
