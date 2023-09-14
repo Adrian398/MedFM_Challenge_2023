@@ -94,4 +94,4 @@ if __name__ == "__main__":
             for exp in exps:
                 print_report_for_setting(full_model_list=DATA, task=task, shot=shot, exp=exp)
 
-    print(colored(f"| Models without performance.json: {missing_json_count}", 'red'))
+    print(colored(f"\n| Models without performance.json: {missing_json_count}", 'red'))
