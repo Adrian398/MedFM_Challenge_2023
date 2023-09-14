@@ -430,15 +430,6 @@ def print_report_for_setting(full_model_list, task, shot, exp):
               f"{m1_name}: {m1_val:.4f}  {m2_name}: {m2_val:.4f}")
 
 
-# def print_model_reports(tasks):
-#     continue_query = input("\nPrint report for the best models? (y/n) ")
-#     if continue_query.lower() == "y":
-#         for task in tasks:
-#             for shot in shots:
-#                 for exp in exps:
-#                     print_report_for_setting(full_model_list=DATA_VALIDATION, task=task, shot=shot, exp=exp)
-
-
 def get_aggregate(model_metrics, task):
     # Dictionary mapping tasks to lambda functions for aggregate calculation
     aggregate_calculations = {
@@ -537,6 +528,57 @@ def compute_multilabel_aggregate(model_data, class_idx=None):
     return (model_metrics[auc_label] + model_metrics[map_label]) / 2
 
 
+def softmax(x):
+    e_x = np.exp(x - np.max(x))  # subtracting np.max for numerical stability
+    return e_x / e_x.sum(axis=0)
+
+
+def exponential_scaling(x, p=2):
+    return [xi**p for xi in x]
+
+
+def log_scaling(x):
+    return [np.log(xi + 1) for xi in x]
+
+
+def find_top_k_models(model_list, num_classes, class_idx=None, top_k=1):
+    """
+    Find the K best performing model runs according to the 'Aggregate' metric.
+    If class_idx is None, the aggregate is calculated among all classes.
+    If class_idx is not None, the aggregate is calculated for one specific class.
+
+    Args:
+        model_list:
+        num_classes:
+        class_idx:
+        top_k:
+
+    Returns:
+
+    """
+    scores = []
+
+    for model_data in model_list:
+
+        if num_classes == 2:
+            score = compute_binary_classification_aggregate(model_data=model_data)
+        elif num_classes > 2:
+            score = compute_multilabel_aggregate(model_data=model_data, class_idx=class_idx)
+        else:
+            raise ValueError(f"Invalid amount of classes: {num_classes}")
+
+        if score is None:
+            raise ValueError(f"Could not calculate score: {model_data['name']}")
+
+        scores.append((model_data, score))
+
+    # Sort the scores in descending order
+    sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
+
+    # Return the top-k models. If less than k models are available, return all of them.
+    return [(model[0], score) for model, score in sorted_scores[:top_k]]
+
+
 def find_best_model(model_list, num_classes, class_idx=None):
     scores = []
 
@@ -557,6 +599,51 @@ def find_best_model(model_list, num_classes, class_idx=None):
     # Sort the scores in descending order and return the first (highest) tuple
     best_model = sorted(scores, key=lambda x: x[1], reverse=True)[0]
     return best_model[0]
+
+
+def weighted_exp_per_class_ensemble_strategy(model_runs, task, out_path, top_k=3, scaling_func=None):
+    num_classes = TASK_2_CLASS_COUNT[task]
+    merged_df = model_runs[0]['prediction'].iloc[:, 0:1]
+
+    selected_models_for_classes = []
+    model_occurrences = {}
+
+    for class_idx in range(num_classes):
+
+        class_models = find_top_k_models(model_runs, num_classes, class_idx=class_idx + 1, top_k=top_k)
+
+        if top_k > len(class_models):
+            print(colored(
+                f"Warning: Requested top {top_k} models, but only {len(class_models)} are available for class {class_idx + 1}",
+                'red'))
+
+        # Extract weights (aggregate score) and apply scaling if a scaling_func is provided
+        raw_weights = [weight for _, weight in class_models]
+        weights = scaling_func(raw_weights) if scaling_func else raw_weights
+
+        # Record the selected models for the report and update the model_occurrences
+        selected_models_for_class = []
+        for model, weight in class_models:
+            model_name = model['name']
+            selected_models_for_class.append(f"Class {class_idx + 1}: {model_name} (Weight: {weight:.4f})")
+
+            if model_name in model_occurrences:
+                model_occurrences[model_name] += 1
+            else:
+                model_occurrences[model_name] = 1
+
+        selected_models_for_classes.extend(selected_models_for_class)
+
+        # Compute the weighted sum for this class
+        weighted_sum_column = pd.Series(0, index=merged_df.index)
+        for model, weight in class_models:
+            weighted_sum_column += model['prediction'].iloc[:, class_idx + 1] * weight
+
+        merged_df.loc[:, class_idx + 1] = weighted_sum_column
+
+    merged_df.to_csv(out_path, index=False, header=False)
+
+    return selected_models_for_classes, model_occurrences
 
 
 def expert_per_class_model_strategy(model_runs, task, out_path):
@@ -706,8 +793,6 @@ def process_top_k(subm_type, task, shot, exp, strategy, top_k):
                                        strategy=strategy,
                                        top_k=top_k)
 
-    # for shot in SHOTS:
-    #     for exp in EXPS:
     model_runs = DATA[subm_type][task][shot][exp]
     if len(model_runs) < 2:
         print("Not enough runs")
@@ -726,6 +811,9 @@ def process_top_k(subm_type, task, shot, exp, strategy, top_k):
         selected_models, model_occurrences = expert_per_task_model_strategy(model_runs=model_runs,
                                                                             task=task,
                                                                             out_path=out_path)
+    elif strategy == "weighted-exp-per-class":
+        selected_models, model_occurrences = weighted_exp_per_class_ensemble_strategy(model_runs=model_runs,
+                                                                                      task=task, out_path=out_path)
     elif strategy == "pd-weighted":
         selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
                                                                                        task=task,
@@ -868,6 +956,7 @@ EXPS = ["exp1", "exp2", "exp3", "exp4", "exp5"]
 ENSEMBLE_STRATEGIES = ["expert-per-task",
                        "expert-per-class",
                        "weighted",
+                       "weighted-exp-per-class"
                        "pd-weighted",
                        "pd-log-weighted",
                        "rank-based-weighted",
