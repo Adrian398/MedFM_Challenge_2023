@@ -409,7 +409,7 @@ def compile_results_to_json(from_file):
         with open(best_strategies_out_path, 'w') as file:
             json.dump(best_strategy_per_setting, file, indent=4)
         print(f"\nWrote Best Ensembles JSON file to {best_strategies_out_path}")
-        print(json.dumps(best_strategy_per_setting, indent=4))
+    print(json.dumps(best_strategy_per_setting, indent=4))
 
     return best_strategy_per_setting
 
