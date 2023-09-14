@@ -9,10 +9,21 @@ from tqdm import tqdm
 
 from ensemble.submission import print_report_for_setting, extract_exp_number
 from ensemble.utils.constants import tasks, shots, exps
+from ensemble.utils.infer_missing_performances import get_file_from_directory, get_event_file_from_model_dir
 
 
 def check_and_extract_data(model_dir_abs):
     model_dir_rel = model_dir_abs.split('work_dirs/')[1]
+
+    # Skip if no best checkpoint file
+    checkpoint_path = get_file_from_directory(model_dir_abs, ".pth", "best")
+    if checkpoint_path is None:
+        return None, None
+
+    # Skip if no event file
+    event_file = get_event_file_from_model_dir(model_dir_abs)
+    if event_file is None:
+        return False
 
     json_files = glob.glob(os.path.join(model_dir_abs, "*.json"))
 
