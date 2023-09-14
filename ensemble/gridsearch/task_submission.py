@@ -606,14 +606,6 @@ def weighted_exp_per_class_ensemble_strategy(model_runs, task, out_path, top_k=3
                 f"Warning: Requested top {top_k} models, but only {len(class_models)} are available for class {class_idx + 1}",
                 'red'))
 
-        # Extract weights (aggregate score) and apply scaling if a scaling_func is provided
-        raw_weights = [weight for _, weight in class_models]
-
-        weights = scaling_func(raw_weights) if scaling_func else raw_weights
-
-        print("raw weights", raw_weights)
-        print(f"scaled weights with {scaling_func}", weights)
-
         # Record the selected models for the report and update the model_occurrences
         selected_models_for_class = []
         for model, weight in class_models:
@@ -632,7 +624,12 @@ def weighted_exp_per_class_ensemble_strategy(model_runs, task, out_path, top_k=3
         for model, weight in class_models:
             weighted_sum_column += model['prediction'].iloc[:, class_idx + 1] * weight
 
-        weighted_sum_column /= sum(weights)
+        # Scale
+        if scaling_func:
+            weighted_sum_column = pd.Series(scaling_func(weighted_sum_column), index=weighted_sum_column.index)
+
+        # Normalize
+        weighted_sum_column /= weighted_sum_column.sum()
 
         print(weighted_sum_column)
 
