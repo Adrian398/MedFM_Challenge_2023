@@ -241,7 +241,6 @@ def compute_task_specific_metrics(pred_path, gt_path, task, pred_is_df=False):
 
     # Merge predictions and ground truth based on img_id
     merged_df = pd.merge(pred_df, gt_df, on='img_id', how='inner')
-    print(merged_df.shape)
 
     if task == 'colon':
         return compute_colon_metrics(merged_df, score_cols)
@@ -441,7 +440,6 @@ def process_experiment(top_k_path, exp, task, shot):
 
     metrics_dict = compute_task_specific_metrics(pred_path=pred_csv_file_path, gt_path=gt_path, task=task)
     print(metrics_dict)
-    exit()
 
     # Perform Softmax before score calculation
     if COLON_SOFTMAX_PRINT and task == "colon":
@@ -469,6 +467,8 @@ def process_top_k(top_k_num, strategy_path, task, shot, exp):
     if metrics:
         results[exp][f"{task}_{shot}"] = metrics
 
+    print(results)
+    exit()
     json_result, aggregates = generate_json(results=results)
 
     strategy = "None"
