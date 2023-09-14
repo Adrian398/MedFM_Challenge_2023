@@ -598,7 +598,7 @@ if __name__ == "__main__":
     # ===== MAIN LOOP =====
     result = process_timestamp()
 
-    print(result)
+    print(json.dumps(result, indent=4))
     exit()
     create_log_files(data=result)
 
