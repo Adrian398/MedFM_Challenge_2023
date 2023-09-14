@@ -18,11 +18,13 @@ def check_and_extract_data(model_dir_abs):
     # Skip if no best checkpoint file
     checkpoint_path = get_file_from_directory(model_dir_abs, ".pth", "best")
     if checkpoint_path is None:
+        print(f"Checkpoint File missing {model_dir_rel}")
         return None, None, 1
 
     # Skip if no event file
     event_file = get_event_file_from_model_dir(model_dir_abs)
     if event_file is None:
+        print(f"Event File missing {model_dir_rel}")
         return None, None, 1
 
     json_files = glob.glob(os.path.join(model_dir_abs, "*.json"))
