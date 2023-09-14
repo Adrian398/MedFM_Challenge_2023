@@ -597,10 +597,7 @@ if __name__ == "__main__":
 
     # ===== MAIN LOOP =====
     result = process_timestamp()
-
-    print(json.dumps(result, indent=4))
-    exit()
     create_log_files(data=result)
 
-    best_strategies = compile_results_to_json(from_file=False)
-    build_final_submission(strategies=best_strategies)
+    #best_strategies = compile_results_to_json(from_file=False)
+    #build_final_submission(strategies=best_strategies)
