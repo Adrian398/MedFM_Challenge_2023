@@ -23,7 +23,7 @@ def check_and_extract_data(model_dir_abs):
     # Skip if no event file
     event_file = get_event_file_from_model_dir(model_dir_abs)
     if event_file is None:
-        return False
+        return None, None
 
     json_files = glob.glob(os.path.join(model_dir_abs, "*.json"))
 
