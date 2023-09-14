@@ -460,7 +460,7 @@ def process_top_k(top_k_num, strategy_path, task, shot, exp):
 
     ensemble_cfg = load_submission_cfg_dump(dir=top_k_path)
 
-    results = defaultdict()
+    results = defaultdict(lambda: defaultdict(dict))
     metrics = process_experiment(top_k_path=top_k_path, exp=exp, task=task, shot=shot)
     if metrics:
         results[exp][f"{task}_{shot}"] = metrics
