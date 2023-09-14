@@ -469,10 +469,6 @@ def process_top_k(top_k_num, strategy_path, task, shot, exp):
 
     json_result, aggregates = generate_json(results=results)
 
-    print(json_result)
-    print(aggregates)
-    exit()
-
     strategy = "None"
     top_k = "None"
     model_count = "None"
@@ -605,6 +601,9 @@ if __name__ == "__main__":
 
     # ===== MAIN LOOP =====
     result = process_timestamp()
+
+    print(result)
+    exit()
     create_log_files(data=result)
 
     best_strategies = compile_results_to_json(from_file=False)
