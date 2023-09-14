@@ -209,6 +209,8 @@ def compute_colon_metrics(df, score_cols):
     target = df['tumor'].values
     pred_scores = df[score_cols].values
 
+    print(target.head(10), pred_scores.head(10))
+
     # Calculate AUC using multiclass method
     metrics_dict = {'AUC': cal_metrics_multiclass(target, pred_scores)}
 
