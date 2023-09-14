@@ -608,7 +608,11 @@ def weighted_exp_per_class_ensemble_strategy(model_runs, task, out_path, top_k=3
 
         # Extract weights (aggregate score) and apply scaling if a scaling_func is provided
         raw_weights = [weight for _, weight in class_models]
+
         weights = scaling_func(raw_weights) if scaling_func else raw_weights
+
+        print("raw weights", raw_weights)
+        print(f"scaled weights with {scaling_func}", weights)
 
         # Record the selected models for the report and update the model_occurrences
         selected_models_for_class = []
@@ -629,6 +633,9 @@ def weighted_exp_per_class_ensemble_strategy(model_runs, task, out_path, top_k=3
             weighted_sum_column += model['prediction'].iloc[:, class_idx + 1] * weight
 
         weighted_sum_column /= sum(weights)
+
+        print(weighted_sum_column)
+        exit()
 
         merged_df.loc[:, class_idx + 1] = weighted_sum_column
 
