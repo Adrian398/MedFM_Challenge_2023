@@ -554,11 +554,21 @@ def create_log_files(data):
                     print(f"Wrote Log file to {TIMESTAMP}/{task}/{shot}/{exp}/log.txt")
 
 
+def load_best_strategies_from_json():
+    best_strategies_path = os.path.join(VAL_BASE_PATH, "best_strategies_per_task.json")
+
+    with open(best_strategies_path, 'r') as file:
+        best_strategies = json.load(file)
+
+    return best_strategies
+
 def main():
     # result = process_timestamp()
     # create_log_files(data=result)
 
-    best_strategy_per_setting = compile_results_to_json()
+    #best_strategy_per_setting = compile_results_to_json()
+    best_strategy_per_setting = load_best_strategies_from_json()
+
     build_final_submission(strategies=best_strategy_per_setting)
 
 
