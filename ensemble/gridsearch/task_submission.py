@@ -576,7 +576,7 @@ def find_top_k_models(model_list, num_classes, class_idx=None, top_k=1):
     sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
 
     # Return the top-k models. If less than k models are available, return all of them.
-    return [(model[0], score) for model, score in sorted_scores[:top_k]]
+    return sorted_scores[:top_k]
 
 
 def find_best_model(model_list, num_classes, class_idx=None):
