@@ -133,7 +133,7 @@ def generate_json(results):
     return json.dumps(json_results, indent=2), json_results["aggregates"]
 
 
-def get_gt_csv_filepath(task):
+def get_gt_csv_filepath_for_task(task):
     return get_file_by_keyword(directory=GT_DIR, keyword=task, file_extension='csv')
 
 
@@ -426,7 +426,7 @@ def process_csv_to_df(filename):
 
 
 def process_experiment(top_k_path, exp, task, shot):
-    gt_path = get_gt_csv_filepath(task=task)
+    gt_path = get_gt_csv_filepath_for_task(task=task)
     if not gt_path:
         print(f"Ground truth file for task {task} not found.")
         return None
@@ -438,6 +438,7 @@ def process_experiment(top_k_path, exp, task, shot):
         return None
 
     print(f"GT Filepath for {top_k_path} = {gt_path}")
+    print(f"Pred Filepath for {top_k_path} = {pred_csv_file_path}")
     exit()
     metrics_dict = compute_task_specific_metrics(pred_path=pred_csv_file_path, gt_path=gt_path, task=task)
 
