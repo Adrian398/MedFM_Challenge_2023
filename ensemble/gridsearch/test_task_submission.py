@@ -435,11 +435,7 @@ def process_experiment(top_k_path, exp, task, shot):
         print(f"Prediction file for {exp} and task {task} with shot {shot} not found.")
         return None
 
-    print(f"GT Filepath for {top_k_path} = {gt_path}")
-    print(f"Pred Filepath for {top_k_path} = {pred_csv_file_path}")
-
     metrics_dict = compute_task_specific_metrics(pred_path=pred_csv_file_path, gt_path=gt_path, task=task)
-    print(metrics_dict)
 
     # Perform Softmax before score calculation
     if COLON_SOFTMAX_PRINT and task == "colon":
