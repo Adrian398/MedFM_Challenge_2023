@@ -836,7 +836,7 @@ def process_top_k(subm_type, task, shot, exp, strategy, top_k):
                                                                                   out_path=out_path,
                                                                                   top_k=top_k)
     else:
-        print("Invalid ensemble strategy!")
+        print(f"Invalid ensemble strategy {strategy}!")
         exit()
 
     if model_occurrences and submission_dir:
