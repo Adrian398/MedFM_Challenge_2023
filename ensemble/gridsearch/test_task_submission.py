@@ -571,14 +571,6 @@ def load_best_strategies_from_json(path):
     return best_strategies
 
 
-def main(build_submission):
-    # result = process_timestamp()
-    # create_log_files(data=result)
-
-    best_strategy_per_setting = compile_results_to_json(from_file=True)
-    build_final_submission(strategies=best_strategy_per_setting)
-
-
 # ===================  DEFAULT PARAMS  ====================================================
 BASE_PATH = "ensemble/gridsearch"
 GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
@@ -607,4 +599,8 @@ if __name__ == "__main__":
     TIMESTAMP = get_timestamp(args)
     VAL_BASE_PATH = os.path.join(BASE_PATH, TIMESTAMP, 'validation')
 
-    main()
+    # result = process_timestamp()
+    # create_log_files(data=result)
+
+    best_strategy_per_setting = compile_results_to_json(from_file=True)
+    build_final_submission(strategies=best_strategy_per_setting)
