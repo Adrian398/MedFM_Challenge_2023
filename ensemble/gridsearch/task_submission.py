@@ -993,6 +993,7 @@ if __name__ == "__main__":
     ENSEMBLE_STRATEGIES = ["expert-per-task",
                            "expert-per-class",
                            "weighted",
+                           "weighted-exp-per-class"
                            "pd-weighted",
                            "pd-log-weighted",
                            "rank-based-weighted",
