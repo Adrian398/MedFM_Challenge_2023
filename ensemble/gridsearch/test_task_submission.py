@@ -281,7 +281,7 @@ def build_log_string(data, task):
     model_cnt = str(model_cnt) if model_cnt is not None else "None"
     prediction_dir = prediction_dir.split(f"{task}/")[1]
 
-    return f"{model_cnt:<15} {strategy:<25} {top_k_str:<10} {prediction_dir:<45} {value_string}\n"
+    return f"{model_cnt:<15} {strategy:<35} {top_k_str:<10} {prediction_dir:<55} {value_string}\n"
 
 
 def load_submission_cfg_dump(dir):
@@ -554,7 +554,7 @@ def create_log_files(data):
 
                 with open(log_file_path, 'w') as log_file:
                     log_file.write(
-                        f"{'Model-Count':<15} {'Strategy':<25} {'Top-K':<10} {'PredictionDir':<45} {'Aggregate':<10}\n")
+                        f"{'Model-Count':<15} {'Strategy':<35} {'Top-K':<10} {'PredictionDir':<55} {'Aggregate':<10}\n")
                     for line in lines:
                         log_file.write(line)
                     print(f"Wrote Log file to {TIMESTAMP}/validation/{task}/{shot}/{exp}/log.txt")
