@@ -18,12 +18,12 @@ def check_and_extract_data(model_dir_abs):
     # Skip if no best checkpoint file
     checkpoint_path = get_file_from_directory(model_dir_abs, ".pth", "best")
     if checkpoint_path is None:
-        return None, None
+        return None, None, 0
 
     # Skip if no event file
     event_file = get_event_file_from_model_dir(model_dir_abs)
     if event_file is None:
-        return None, None
+        return None, None, 0
 
     json_files = glob.glob(os.path.join(model_dir_abs, "*.json"))
 
@@ -31,9 +31,9 @@ def check_and_extract_data(model_dir_abs):
         exp_num = extract_exp_number(model_dir_rel)
         if exp_num != 0:
             metrics = json.load(open(json_files[0], 'r'))
-            return {'metrics': metrics, 'name': model_dir_rel}, exp_num
+            return {'metrics': metrics, 'name': model_dir_rel}, exp_num, 1
 
-    return None, None
+    return None, None, 1
 
 
 def extract_data(root_dir):
@@ -59,12 +59,13 @@ def extract_data(root_dir):
             for shot in shots:
                 path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
                 for model_dir in glob.glob(path_pattern):
-                    data, exp_num = check_and_extract_data(model_dir_abs=model_dir)
+                    data, exp_num, cnt = check_and_extract_data(model_dir_abs=model_dir)
                     if data and exp_num:
                         data_dict[task][shot][f"exp{exp_num}"].append(data)
-                    else:
-                        missing_json_count += 1
+
+                    missing_json_count += cnt
                     pbar.update(1)
+
     return data_dict, missing_json_count
 
 
