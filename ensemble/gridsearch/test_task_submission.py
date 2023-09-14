@@ -452,7 +452,7 @@ def process_experiment(top_k_path, exp, task, shot):
     return metrics_dict
 
 
-def process_top_k(top_k_num, strategy_path, task):
+def process_top_k(top_k_num, strategy_path, task, shot, exp):
     if top_k_num:
         top_k_path = os.path.join(strategy_path, f"top-{str(top_k_num)}")
     else:
@@ -460,12 +460,10 @@ def process_top_k(top_k_num, strategy_path, task):
 
     ensemble_cfg = load_submission_cfg_dump(dir=top_k_path)
 
-    results = {exp: {} for exp in EXPS}
-    for exp in EXPS:
-        for shot in SHOTS:
-            metrics = process_experiment(top_k_path=top_k_path, exp=exp, task=task, shot=shot)
-            if metrics:
-                results[exp][f"{task}_{shot}"] = metrics
+    results = defaultdict()
+    metrics = process_experiment(top_k_path=top_k_path, exp=exp, task=task, shot=shot)
+    if metrics:
+        results[exp][f"{task}_{shot}"] = metrics
 
     json_result, aggregates = generate_json(results=results)
 
@@ -533,8 +531,9 @@ def process_timestamp():
 
                     results = []
                     for top_k_num in top_k_values:
-                        result = process_top_k(top_k_num=top_k_num, strategy_path=strategy_path, task=task)
-                        results.append(result)
+                        top_result = process_top_k(top_k_num=top_k_num, strategy_path=strategy_path,
+                                                   task=task, shot=shot, exp=exp)
+                        results.append(top_result)
 
                     result_dicts[task][shot][exp][strategy] = results
 
@@ -598,8 +597,8 @@ if __name__ == "__main__":
     TIMESTAMP = get_timestamp(args)
     VAL_BASE_PATH = os.path.join(BASE_PATH, TIMESTAMP, 'validation')
 
-    # result = process_timestamp()
-    # create_log_files(data=result)
+    result = process_timestamp()
+    create_log_files(data=result)
 
     best_strategies = compile_results_to_json(from_file=True)
     build_final_submission(strategies=best_strategies)
