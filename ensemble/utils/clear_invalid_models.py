@@ -5,6 +5,8 @@ import sys
 from multiprocessing import Pool
 from termcolor import colored
 
+from ensemble.utils.infer_missing_performances import get_event_file_from_model_dir
+
 EXP_PATTERN = re.compile(r'exp(\d+)')
 
 
@@ -78,9 +80,15 @@ def get_non_valid_model_dirs(task, shot):
         my_print(f"Checking {task}/{shot}-shot/{model_dir}")
         abs_model_dir = os.path.join(setting_directory, model_dir)
 
+        # Skip if no event file
+        event_file = get_event_file_from_model_dir(abs_model_dir)
+        if event_file is None:
+            print(f"Event File missing {model_dir}")
+            model_dirs.append(model_dir)
+
         checkpoint = get_file_from_directory(abs_model_dir, ".pth", "best")
         if checkpoint is None:
-            print(colored(f"No 'best' checkpoint file found for {abs_model_dir}", 'light_red'))
+            print(colored(f"No 'best' checkpoint file found for {model_dir}", 'light_red'))
             model_dirs.append(model_dir)
     return model_dirs
 
