@@ -597,8 +597,9 @@ if __name__ == "__main__":
     TIMESTAMP = get_timestamp(args)
     VAL_BASE_PATH = os.path.join(BASE_PATH, TIMESTAMP, 'validation')
 
+    # ===== MAIN LOOP =====
     result = process_timestamp()
     create_log_files(data=result)
 
-    best_strategies = compile_results_to_json(from_file=True)
+    best_strategies = compile_results_to_json(from_file=False)
     build_final_submission(strategies=best_strategies)
