@@ -21,7 +21,7 @@ def check_and_extract_data(model_dir_abs):
         if exp_num != 0:
             metrics = json.load(open(json_files[0], 'r'))
             return {'metrics': metrics, 'name': model_dir_rel}, exp_num
-    #print(f"No JSON found for {model_dir_abs}")
+
     return None, None
 
 
@@ -40,6 +40,8 @@ def extract_data(root_dir):
         for shot in shots:
             total_iterations += len(glob.glob(os.path.join(root_dir, task, shot, '*exp[1-5]*')))
 
+    missing_json_count = 0
+
     print(f"Checking {colored(str(total_iterations), 'blue')} models:")
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
         for task in tasks:
@@ -49,8 +51,10 @@ def extract_data(root_dir):
                     data, exp_num = check_and_extract_data(model_dir_abs=model_dir)
                     if data and exp_num:
                         data_dict[task][shot][f"exp{exp_num}"].append(data)
+                    else:
+                        missing_json_count += 1
                     pbar.update(1)
-    return data_dict
+    return data_dict, missing_json_count
 
 
 if __name__ == "__main__":
@@ -59,7 +63,7 @@ if __name__ == "__main__":
     SHOTS = ["1-shot", "5-shot", "10-shot"]
     EXPS = ["exp1", "exp2", "exp3", "exp4", "exp5"]
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
-    DATA = extract_data(root_dir=root_dir)
+    DATA, missing_json_count = extract_data(root_dir=root_dir)
 
     total_models = 0
     least_models = 100000
@@ -90,3 +94,4 @@ if __name__ == "__main__":
             for exp in exps:
                 print_report_for_setting(full_model_list=DATA, task=task, shot=shot, exp=exp)
 
+    print(colored(f"| Models without performance.json: {missing_json_count}", 'red'))
