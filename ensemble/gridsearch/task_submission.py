@@ -982,12 +982,12 @@ COLOR_GRADIENTS = {
 
 if __name__ == "__main__":
     # 1st Level Params
-    SUBM_TYPES = ["validation"]
+    #SUBM_TYPES = ["validation"]
 
     # 2nd Level Params
-    TASKS = ["endo"]
-    SHOTS = ["1-shot"]
-    EXPS = ["exp1"]
+    #TASKS = ["endo"]
+    #SHOTS = ["1-shot"]
+    #EXPS = ["exp1"]
 
     # 3rd Level Params
     ENSEMBLE_STRATEGIES = ["expert-per-task",
