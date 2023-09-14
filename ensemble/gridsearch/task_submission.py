@@ -635,7 +635,9 @@ def weighted_exp_per_class_ensemble_strategy(model_runs, task, out_path, top_k=3
         weighted_sum_column /= sum(weights)
 
         print(weighted_sum_column)
-        exit()
+
+        if scaling_func == softmax:
+            exit()
 
         merged_df.loc[:, class_idx + 1] = weighted_sum_column
 
