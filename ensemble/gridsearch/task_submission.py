@@ -603,7 +603,7 @@ def find_best_model(model_list, num_classes, class_idx=None):
 
 def weighted_exp_per_class_ensemble_strategy(model_runs, task, out_path, top_k=3, scaling_func=None):
     num_classes = TASK_2_CLASS_COUNT[task]
-    merged_df = model_runs[0]['prediction'].iloc[:, 0:1]
+    merged_df = model_runs[0]['prediction'].iloc[:, 0:1].copy()
 
     selected_models_for_classes = []
     model_occurrences = {}
