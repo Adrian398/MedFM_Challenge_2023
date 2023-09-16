@@ -6,14 +6,16 @@ _base_ = [
 ]
 
 lr = 1e-6
-train_bs = 8
+train_bs = 2
 val_bs = 32
 dataset = 'chest'
 model_name = 'swinv2'
 exp_num = 1
 nshot = 1
+seed = 2049
+randomness = dict(seed=seed)
 
-run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}_'
+run_name = f'{model_name}_bs{train_bs}_lr{lr}_exp{exp_num}'
 work_dir = f'work_dirs/{dataset}/{nshot}-shot/{run_name}'
 
 model = dict(
@@ -30,11 +32,14 @@ model = dict(
         pretrained_window_sizes=[12, 12, 12, 6],
         type='SwinTransformerV2',
         window_size=[24, 24, 24, 12]),
+    neck=None,
     head=dict(
-        in_channels=1024,
+        type='CSRAClsHead',
         num_classes=19,
-        type='MultiLabelLinearClsHead'),
-    neck=dict(type='GlobalAveragePooling'),
+        in_channels=1024,
+        num_heads=1,
+        lam=0.1,
+        loss=dict(type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)),
     type='ImageClassifier')
 
 train_dataloader = dict(
@@ -71,7 +76,6 @@ param_scheduler = [
     dict(begin=1, by_epoch=True, eta_min=1e-05, type='CosineAnnealingLR'),
 ]
 
-
 visualizer = dict(type='Visualizer', vis_backends=[dict(type='TensorboardVisBackend')])
 
 train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
@@ -79,6 +83,6 @@ train_cfg = dict(by_epoch=True, val_interval=25, max_epochs=500)
 randomness = dict(seed=0)
 
 default_hooks = dict(
-    checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="AveragePrecision", rule="greater"),
+    checkpoint=dict(interval=250, max_keep_ckpts=1, save_best="Aggregate", rule="greater"),
     logger=dict(interval=10),
 )

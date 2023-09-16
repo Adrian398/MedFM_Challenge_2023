@@ -1,0 +1,296 @@
+{
+    "colon": {
+        "1-shot": {
+            "exp1": {
+                "Model-Count": "29",
+                "Strategy": "rank-based-weighted",
+                "Top-K": "2",
+                "Aggregate": "91.4707"
+            },
+            "exp2": {
+                "Model-Count": "14",
+                "Strategy": "pd-weighted",
+                "Top-K": "6",
+                "Aggregate": "86.0141"
+            },
+            "exp3": {
+                "Model-Count": "19",
+                "Strategy": "weighted",
+                "Top-K": "15",
+                "Aggregate": "87.1875"
+            },
+            "exp4": {
+                "Model-Count": "22",
+                "Strategy": "rank-based-weighted",
+                "Top-K": "5",
+                "Aggregate": "89.5628"
+            },
+            "exp5": {
+                "Model-Count": "20",
+                "Strategy": "rank-based-weighted",
+                "Top-K": "5",
+                "Aggregate": "93.5124"
+            }
+        },
+        "5-shot": {
+            "exp1": {
+                "Model-Count": "26",
+                "Strategy": "weighted",
+                "Top-K": "4",
+                "Aggregate": "96.2372"
+            },
+            "exp2": {
+                "Model-Count": "27",
+                "Strategy": "weighted",
+                "Top-K": "3",
+                "Aggregate": "97.1937"
+            },
+            "exp3": {
+                "Model-Count": "32",
+                "Strategy": "weighted",
+                "Top-K": "3",
+                "Aggregate": "93.5353"
+            },
+            "exp4": {
+                "Model-Count": "29",
+                "Strategy": "pd-weighted",
+                "Top-K": "6",
+                "Aggregate": "96.8123"
+            },
+            "exp5": {
+                "Model-Count": "22",
+                "Strategy": "weighted",
+                "Top-K": "4",
+                "Aggregate": "95.6710"
+            }
+        },
+        "10-shot": {
+            "exp1": {
+                "Model-Count": "19",
+                "Strategy": "weighted",
+                "Top-K": "5",
+                "Aggregate": "98.1979"
+            },
+            "exp2": {
+                "Model-Count": "18",
+                "Strategy": "weighted",
+                "Top-K": "14",
+                "Aggregate": "98.3670"
+            },
+            "exp3": {
+                "Model-Count": "13",
+                "Strategy": "weighted",
+                "Top-K": "12",
+                "Aggregate": "95.3381"
+            },
+            "exp4": {
+                "Model-Count": "16",
+                "Strategy": "weighted",
+                "Top-K": "5",
+                "Aggregate": "97.8554"
+            },
+            "exp5": {
+                "Model-Count": "18",
+                "Strategy": "rank-based-weighted",
+                "Top-K": "14",
+                "Aggregate": "96.9069"
+            }
+        }
+    },
+    "endo": {
+        "1-shot": {
+            "exp1": {
+                "Model-Count": "33",
+                "Strategy": "weighted",
+                "Top-K": "19",
+                "Aggregate": "48.8642"
+            },
+            "exp2": {
+                "Model-Count": "27",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "2",
+                "Aggregate": "49.4904"
+            },
+            "exp3": {
+                "Model-Count": "23",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "2",
+                "Aggregate": "41.5999"
+            },
+            "exp4": {
+                "Model-Count": "21",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "2",
+                "Aggregate": "38.2988"
+            },
+            "exp5": {
+                "Model-Count": "34",
+                "Strategy": "sm-weighted-exp-per-class",
+                "Top-K": "2",
+                "Aggregate": "37.7177"
+            }
+        },
+        "5-shot": {
+            "exp1": {
+                "Model-Count": "20",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "14",
+                "Aggregate": "46.0642"
+            },
+            "exp2": {
+                "Model-Count": "19",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "6",
+                "Aggregate": "54.5069"
+            },
+            "exp3": {
+                "Model-Count": "20",
+                "Strategy": "expert-per-class",
+                "Top-K": "None",
+                "Aggregate": "45.2657"
+            },
+            "exp4": {
+                "Model-Count": "17",
+                "Strategy": "expert-per-class",
+                "Top-K": "None",
+                "Aggregate": "55.0712"
+            },
+            "exp5": {
+                "Model-Count": "19",
+                "Strategy": "expert-per-class",
+                "Top-K": "None",
+                "Aggregate": "52.5168"
+            }
+        },
+        "10-shot": {
+            "exp1": {
+                "Model-Count": "12",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "3",
+                "Aggregate": "61.2381"
+            },
+            "exp2": {
+                "Model-Count": "13",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "8",
+                "Aggregate": "58.2364"
+            },
+            "exp3": {
+                "Model-Count": "12",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "5",
+                "Aggregate": "58.6540"
+            },
+            "exp4": {
+                "Model-Count": "13",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "2",
+                "Aggregate": "60.9137"
+            },
+            "exp5": {
+                "Model-Count": "9",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "2",
+                "Aggregate": "61.3264"
+            }
+        }
+    },
+    "chest": {
+        "1-shot": {
+            "exp1": {
+                "Model-Count": "196",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "2",
+                "Aggregate": "40.7342"
+            },
+            "exp2": {
+                "Model-Count": "56",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "3",
+                "Aggregate": "41.2963"
+            },
+            "exp3": {
+                "Model-Count": "33",
+                "Strategy": "expert-per-class",
+                "Top-K": "None",
+                "Aggregate": "39.3021"
+            },
+            "exp4": {
+                "Model-Count": "27",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "2",
+                "Aggregate": "38.9777"
+            },
+            "exp5": {
+                "Model-Count": "25",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "7",
+                "Aggregate": "40.1551"
+            }
+        },
+        "5-shot": {
+            "exp1": {
+                "Model-Count": "22",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "8",
+                "Aggregate": "46.4659"
+            },
+            "exp2": {
+                "Model-Count": "32",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "7",
+                "Aggregate": "46.3333"
+            },
+            "exp3": {
+                "Model-Count": "29",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "7",
+                "Aggregate": "45.2066"
+            },
+            "exp4": {
+                "Model-Count": "27",
+                "Strategy": "pd-weighted",
+                "Top-K": "7",
+                "Aggregate": "45.7759"
+            },
+            "exp5": {
+                "Model-Count": "26",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "5",
+                "Aggregate": "45.6285"
+            }
+        },
+        "10-shot": {
+            "exp1": {
+                "Model-Count": "40",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "17",
+                "Aggregate": "47.9148"
+            },
+            "exp2": {
+                "Model-Count": "23",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "18",
+                "Aggregate": "47.9533"
+            },
+            "exp3": {
+                "Model-Count": "17",
+                "Strategy": "weighted-exp-per-class",
+                "Top-K": "13",
+                "Aggregate": "47.9640"
+            },
+            "exp4": {
+                "Model-Count": "15",
+                "Strategy": "pd-weighted",
+                "Top-K": "14",
+                "Aggregate": "48.1844"
+            },
+            "exp5": {
+                "Model-Count": "16",
+                "Strategy": "pd-weighted",
+                "Top-K": "15",
+                "Aggregate": "47.9156"
+            }
+        }
+    }
+}

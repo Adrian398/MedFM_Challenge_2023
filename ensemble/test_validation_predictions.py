@@ -194,7 +194,7 @@ def get_prediction_timestamp_dirs(base_path):
     timestamp_dirs = [d for d in all_dirs if TIMESTAMP_PATTERN.match(d)]
 
     # Filter timestamp directories that have a 'result' sub-folder
-    valid_dirs = [d for d in timestamp_dirs if os.path.exists(os.path.join(base_path, d, "result"))]
+    valid_dirs = [d for d in timestamp_dirs if os.path.exists(os.path.join(base_path, d, 'validation', "result"))]
 
     # If no valid directories are found, return an empty list
     if not valid_dirs:
@@ -239,7 +239,7 @@ def load_submission_cfg_dump(dir):
 
 def process_prediction_dir(base_path, timestamp_dir):
     prediction_root_path = os.path.join(base_path, timestamp_dir)
-    prediction_result_path = os.path.join(prediction_root_path, 'result')
+    prediction_result_path = os.path.join(prediction_root_path, 'validation', 'result')
 
     ensemble_cfg = load_submission_cfg_dump(dir=prediction_root_path)
 
@@ -263,7 +263,7 @@ def process_prediction_dir(base_path, timestamp_dir):
         model_count = ensemble_cfg.get('model-count', model_count)
 
     # Save JSON result to the corresponding timestamp folder
-    with open(os.path.join(prediction_root_path, 'results.json'), 'w') as json_file:
+    with open(os.path.join(prediction_root_path, 'validation', 'results.json'), 'w') as json_file:
         json_file.write(json_result)
 
     return {
@@ -278,6 +278,8 @@ def process_prediction_dir(base_path, timestamp_dir):
 
 def worker_func(base_path, timestamp_dir):
     print(colored(f"Processing Timestamp {timestamp_dir}", 'blue'))
+    if timestamp_dir != "02-09_00-32-41":
+        return
     return process_prediction_dir(base_path=base_path, timestamp_dir=timestamp_dir)
 
 
@@ -288,7 +290,7 @@ GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
 
 
 def main():
-    base_path = "ensemble/validation"
+    base_path = "ensemble/gridsearch"
     timestamp_dirs = get_prediction_timestamp_dirs(base_path)
 
     # Number of processes to spawn. You can adjust this value as needed.

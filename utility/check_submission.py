@@ -27,7 +27,7 @@ for d in directories:
 
 newest_directory = max(valid_directories, key=lambda x: x[0])[1]
 print(f"Checking newest submission {newest_directory}")
-predictions_dir = os.path.join(path, newest_directory, "predictions")
+predictions_dir = os.path.join(path, newest_directory, "result")
 
 required_file_names = [f"{task}_{n}-shot_submission.csv" for task in tasks for n in n_shots]
 

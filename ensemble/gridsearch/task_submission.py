@@ -12,7 +12,43 @@ from colorama import Fore
 from termcolor import colored
 from tqdm import tqdm
 
-from ensemble.utils.constants import shots, exps, TASK_2_CLASS_COUNT
+from ensemble.gridsearch.test_task_submission import get_file_by_keyword
+from ensemble.utils.constants import TASK_2_CLASS_COUNT, TASK_2_CLASS_NAMES
+
+
+def print_colored(text, submission_type, depth):
+    gradient = COLOR_GRADIENTS.get(submission_type, {})
+    color = gradient.get(depth, "white")  # Default to white if depth or submission type is not found
+    print(colored(text, color))
+
+    def compute_pairwise_diversity(top_k_models):
+        num_models = len(top_k_models)
+        diversity_matrix = np.zeros((num_models, num_models))
+
+        for i in range(num_models):
+            model_i_predictions = top_k_models[i]['prediction']
+            img_id_set1 = set(model_i_predictions.iloc[:, 0])
+
+            for j in range(i + 1, num_models):
+                model_j_predictions = top_k_models[j]['prediction']
+                img_id_set2 = set(model_j_predictions.iloc[:, 0])
+
+                # Use sets for faster membership checks
+                missing_in_df2 = img_id_set1 - img_id_set2
+                missing_in_df1 = img_id_set2 - img_id_set1
+
+                if missing_in_df1 or missing_in_df2:
+                    corr_idx = i if missing_in_df2 else j
+                    # ... rest of the code for corrupted file ...
+
+                try:
+                    disagreements = (model_i_predictions != model_j_predictions).sum().sum()
+                    diversity_matrix[i, j] = disagreements / len(model_i_predictions)
+                    diversity_matrix[j, i] = diversity_matrix[i, j]  # Use the symmetry of the matrix
+                except ValueError as e:
+                    print(f"Error comparing model {i} and model {j}: {e}")
+
+        return diversity_matrix.sum(axis=1)
 
 
 def compute_pairwise_diversity(top_k_models):
@@ -27,7 +63,43 @@ def compute_pairwise_diversity(top_k_models):
             if i != j:
                 model_i_predictions = top_k_models[i]['prediction']
                 model_j_predictions = top_k_models[j]['prediction']
-                disagreements = (model_i_predictions != model_j_predictions).sum().sum()  # Fixed here
+
+                # Check for label matching
+                if not model_i_predictions.columns.equals(model_j_predictions.columns) or \
+                   not model_i_predictions.shape[0] == model_j_predictions.shape[0]:
+
+                    img_id_col1 = model_i_predictions.columns[0]
+                    img_id_col2 = model_j_predictions.columns[0]
+
+                    # Identify unique image IDs not in the other dataframe
+                    missing_in_df2 = model_i_predictions.loc[~model_i_predictions[img_id_col1].isin(model_j_predictions[img_id_col2]), img_id_col1]
+                    missing_in_df1 = model_j_predictions.loc[~model_j_predictions[img_id_col2].isin(model_i_predictions[img_id_col1]), img_id_col2]
+
+                    corr_idx = -1
+                    if len(missing_in_df2) > 0:
+                        # delete 1
+                        corr_idx = i
+                    elif len(missing_in_df1) > 0:
+                        # delete 2
+                        corr_idx = j
+
+                    if corr_idx != -1:
+                        model_name = top_k_models[corr_idx]['name']
+                        model_path = os.path.join("/scratch/medfm/medfm-challenge/work_dirs", model_name)
+                        model_split = model_name.split("/")
+                        task = model_split[0]
+                        shot = model_split[1]
+                        corrupted_file = os.path.join(model_path, f"{task}_{shot}_submission.csv")
+
+                        raise ValueError(f"Corrupted CSV File: {corrupted_file} (probably a scuffed line)")
+
+                # Robust comparison
+                try:
+                    disagreements = (model_i_predictions != model_j_predictions).sum().sum()
+                except ValueError as e:
+                    print(f"Error comparing model {i} and model {j}: {e}")
+                    continue
+
                 diversity_matrix[i, j] = disagreements / len(model_i_predictions)
 
     # Sum the diversity scores for each model
@@ -165,14 +237,6 @@ def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, top_k=
         else:
             weights = [value - kth_value for _, value in top_n_models]
 
-        # # Debug print #1: Print the top k model names and their weights
-        # print(f"Top {top_k} models for class {i + 1}:")
-        # for (model_run, _), weight in zip(top_n_models, weights):
-        #     print(f"Model: {model_run['name']}, Weight: {weight:.4f}")
-        #
-        # # Debug print #2: Print the sum of weights before normalization
-        # print(f"Sum of weights for class {i + 1}: {sum(weights):.4f}\n")
-
         # Record the selected models for the report and update the model_occurrences
         selected_models_for_class = []
         for (model_run, _), weight in zip(top_n_models, weights):  # Here, we use the difference weights
@@ -193,9 +257,6 @@ def performance_diff_weight_ensemble_strategy(model_runs, task, out_path, top_k=
         weighted_sum_column = pd.Series(0, index=merged_df.index)
         for (model_run, _), weight in zip(top_n_models, weights):  # Use the difference weights
             weighted_sum_column += (model_run['prediction'].iloc[:, i + 1] * weight) / sum_weights
-
-        # # Debug print #3: Print the weighted sum for the first 5 data points
-        # print(f"Weighted sum for the first 5 data points in class {i + 1}: {weighted_sum_column[:5].tolist()}\n")
 
         merged_df.loc[:, i + 1] = weighted_sum_column
 
@@ -288,7 +349,11 @@ def diversity_weighted_ensemble_strategy(model_runs, task, out_path, top_k=3):
 
         # Compute diversity scores for the top k models
         top_k_model_data = [model for model, _ in top_n_models]
+
         diversity_scores = compute_pairwise_diversity(top_k_model_data)
+
+        if diversity_scores is None:
+            return None, None
 
         # Ensure diversity scores match the expected length
         if len(diversity_scores) != len(top_k_model_data):
@@ -354,15 +419,6 @@ def print_report_for_setting(full_model_list, task, shot, exp):
               f"{m1_name}: {m1_val:.4f}  {m2_name}: {m2_val:.4f}")
 
 
-def print_model_reports(tasks):
-    continue_query = input("\nPrint report for the best models? (y/n) ")
-    if continue_query.lower() == "y":
-        for task in tasks:
-            for shot in shots:
-                for exp in exps:
-                    print_report_for_setting(full_model_list=DATA_VALIDATION, task=task, shot=shot, exp=exp)
-
-
 def get_aggregate(model_metrics, task):
     # Dictionary mapping tasks to lambda functions for aggregate calculation
     aggregate_calculations = {
@@ -412,10 +468,13 @@ def get_metrics(model_metrics, task):
     return calculation(model_metrics)
 
 
-def compute_colon_aggregate(model_metrics, model_name):
+def compute_binary_classification_aggregate(model_data):
     """
-    Compute metrics for the 'colon' task.
+    Compute metrics for a binary classification setting (e.g., 'colon').
+    AUC and ACC metrics are considered.
     """
+    model_metrics, model_name = model_data['metrics'], model_data['name']
+
     auc_label = "AUC/AUC_multiclass"
     acc_label = "accuracy/top1"
 
@@ -430,14 +489,26 @@ def compute_colon_aggregate(model_metrics, model_name):
     return (model_metrics[auc_label] + model_metrics[acc_label]) / 2
 
 
-def compute_multilabel_aggregate_p_class(model_metrics, model_name, class_idx):
-    """Compute metrics for multi-label tasks ('chest' and 'endo')."""
-    auc_label = f"AUC/AUC_class{class_idx}"
-    map_label = f"MAP_class{class_idx}"
+def compute_multilabel_aggregate(model_data, class_idx=None):
+    """
+    Compute metrics for multi-label setting (e.g., 'chest' and 'endo').
+    AUC and mAP metrics are considered.
+    """
+    model_metrics, model_name = model_data['metrics'], model_data['name']
+
+    auc_label = "AUC/AUC_multilabe"
+    map_label = "multi-label/mAP"
+
+    if class_idx:
+        auc_label = f"AUC/AUC_class{class_idx}"
+        map_label = f"MAP_class{class_idx}"
 
     if auc_label not in model_metrics:
-        print(f"Metric '{auc_label}' not found in {model_name}")
-        return None
+        auc_label = "AUC/AUC_multiclass"
+
+        if auc_label not in model_metrics:
+            print(f"Metric 'AUC/AUC_multilabe' and '{auc_label}' not found in {model_name}")
+            return None
 
     if map_label not in model_metrics:
         print(f"Metric '{map_label}' not found in {model_name}")
@@ -446,39 +517,136 @@ def compute_multilabel_aggregate_p_class(model_metrics, model_name, class_idx):
     return (model_metrics[auc_label] + model_metrics[map_label]) / 2
 
 
-# Find the run with the best MAP for a given class, within a list of runs
-def find_best_model_for_class(run_list, task, class_idx):
+def softmax(x):
+    e_x = np.exp(x - np.max(x))  # subtracting np.max for numerical stability
+    return e_x / e_x.sum(axis=0)
+
+
+def exponential_scaling(x, p=2):
+    return [xi**p for xi in x]
+
+
+def log_scaling(x):
+    return [np.log(xi + 1) for xi in x]
+
+
+def find_top_k_models(model_list, num_classes, class_idx=None, top_k=1):
+    """
+    Find the K best performing model runs according to the 'Aggregate' metric.
+    If class_idx is None, the aggregate is calculated among all classes.
+    If class_idx is not None, the aggregate is calculated for one specific class.
+
+    Args:
+        model_list:
+        num_classes:
+        class_idx:
+        top_k:
+
+    Returns:
+
+    """
     scores = []
-    for model in run_list:
-        model_metrics, model_name = model['metrics'], model['name']
 
-        if task == 'colon':
-            score = compute_colon_aggregate(model_metrics, model_name)
-        elif task in ['chest', 'endo']:
-            score = compute_multilabel_aggregate_p_class(model_metrics, model_name, class_idx)
+    for model_data in model_list:
+
+        if num_classes == 2:
+            score = compute_binary_classification_aggregate(model_data=model_data)
+        elif num_classes > 2:
+            score = compute_multilabel_aggregate(model_data=model_data, class_idx=class_idx)
         else:
-            raise ValueError(f"Invalid task: {task}")
+            raise ValueError(f"Invalid amount of classes: {num_classes}")
 
-        scores.append((model, score))
+        if score is None:
+            raise ValueError(f"Could not calculate score: {model_data['name']}")
+
+        scores.append((model_data, score))
+
+    # Sort the scores in descending order
+    sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
+
+    # Return the top-k models. If less than k models are available, return all of them.
+    return sorted_scores[:top_k]
+
+
+def find_best_model(model_list, num_classes, class_idx=None):
+    scores = []
+
+    for model_data in model_list:
+
+        if num_classes == 2:
+            score = compute_binary_classification_aggregate(model_data=model_data)
+        elif num_classes > 2:
+            score = compute_multilabel_aggregate(model_data=model_data, class_idx=class_idx)
+        else:
+            raise ValueError(f"Invalid amount of classes: {num_classes}")
+
+        if score is None:
+            raise ValueError(f"Could not calculate score: {model_data['name']}")
+
+        scores.append((model_data, score))
 
     # Sort the scores in descending order and return the first (highest) tuple
     best_model = sorted(scores, key=lambda x: x[1], reverse=True)[0]
     return best_model[0]
 
 
-def expert_model_strategy(model_runs, task, out_path):
+def weighted_exp_per_class_ensemble_strategy(model_runs, task, out_path, top_k=3, scaling_func=None):
+    num_classes = TASK_2_CLASS_COUNT[task]
+    merged_df = model_runs[0]['prediction'].iloc[:, 0:1].copy()
+
+    selected_models_for_classes = []
+    model_occurrences = {}
+
+    for class_idx in range(num_classes):
+
+        class_models = find_top_k_models(model_runs, num_classes, class_idx=class_idx + 1, top_k=top_k)
+
+        if top_k > len(class_models):
+            print(colored(
+                f"Warning: Requested top {top_k} models, but only {len(class_models)} are available for class {class_idx + 1}",
+                'red'))
+
+        # Record the selected models for the report and update the model_occurrences
+        selected_models_for_class = []
+        for model, weight in class_models:
+            model_name = model['name']
+            selected_models_for_class.append(f"Class {class_idx + 1}: {model_name} (Weight: {weight:.4f})")
+
+            if model_name in model_occurrences:
+                model_occurrences[model_name] += 1
+            else:
+                model_occurrences[model_name] = 1
+
+        selected_models_for_classes.extend(selected_models_for_class)
+
+        # Compute the weighted sum for this class
+        weighted_sum_column = pd.Series(0, index=merged_df.index)
+        for model, weight in class_models:
+            weighted_sum_column += model['prediction'].iloc[:, class_idx + 1] * weight
+
+        # Scale
+        if scaling_func:
+            weighted_sum_column = pd.Series(scaling_func(weighted_sum_column), index=weighted_sum_column.index)
+
+        # Normalize
+        weighted_sum_column /= weighted_sum_column.sum()
+
+        merged_df.loc[:, class_idx + 1] = weighted_sum_column
+
+    merged_df.to_csv(out_path, index=False, header=False)
+
+    return selected_models_for_classes, model_occurrences
+
+
+def expert_per_class_model_strategy(model_runs, task, out_path):
     num_classes = TASK_2_CLASS_COUNT[task]
     merged_df = model_runs[0]['prediction'].iloc[:, 0:1]
 
-    # List to store which model was selected for each class
     selected_models_for_classes = []
-
-    # Dict to keep track of model occurrences
     model_occurrences = {}
 
-    # Find run with best Aggregate for each class
     for class_idx in range(num_classes):
-        best_model_run = find_best_model_for_class(model_runs, task=task, class_idx=class_idx + 1)
+        best_model_run = find_best_model(model_runs, num_classes=num_classes, class_idx=class_idx + 1)
 
         merged_df = merged_df.copy()
         merged_df.loc[:, class_idx + 1] = best_model_run["prediction"].loc[:, class_idx + 1]
@@ -497,6 +665,21 @@ def expert_model_strategy(model_runs, task, out_path):
     return selected_models_for_classes, model_occurrences
 
 
+def expert_per_task_model_strategy(model_runs, task, out_path):
+    best_model_run = find_best_model(model_list=model_runs, num_classes=TASK_2_CLASS_COUNT[task])
+
+    merged_df = best_model_run['prediction']
+    merged_df.to_csv(out_path, index=False, header=False)
+
+    # Extract and return the name of the best model
+    best_model_name = best_model_run['name'].split('work_dirs/')[0]
+
+    # Dict to keep track of model occurrences (in this case, just the best model)
+    model_occurrences = {best_model_name: 1}
+
+    return [f"Overall Best Model: {best_model_name}"], model_occurrences
+
+
 @lru_cache(maxsize=None)
 def extract_data_tuples_from_model_runs(run_list):
     data_list = []
@@ -505,6 +688,25 @@ def extract_data_tuples_from_model_runs(run_list):
         metrics = json.load(open(run['json'], 'r'))
         data_list.append({'prediction': prediction, 'metrics': metrics, 'name': run['name']})
     return data_list
+
+
+def get_gt_df(gt_dir, task):
+    gt_file_path = get_file_by_keyword(directory=gt_dir, keyword=task, file_extension='csv')
+
+    if not gt_file_path:
+        raise ValueError(f"Ground truth file for task {task} not found.")
+    try:
+        cols_2_keep = TASK_2_CLASS_NAMES.get(task, None)
+        if not cols_2_keep:
+            raise ValueError(f"No matching class names for task {task} found")
+        cols_2_keep.insert(0, 'img_id')
+
+        gt_df = pd.read_csv(gt_file_path, usecols=cols_2_keep)
+
+    except Exception as e:
+        raise ValueError(f"Error reading CSV files: {e}")
+
+    return gt_df
 
 
 def check_and_extract_data(model_dir_abs, subm_type, task, shot):
@@ -517,47 +719,49 @@ def check_and_extract_data(model_dir_abs, subm_type, task, shot):
     if csv_files and json_files:
         exp_num = extract_exp_number(model_dir_rel)
         if exp_num != 0:
-            prediction = pd.read_csv(csv_files[0], header=None)
+            pred_df = pd.read_csv(csv_files[0], header=None)
             metrics = json.load(open(json_files[0], 'r'))
-            return {'prediction': prediction, 'metrics': metrics, 'name': model_dir_rel}, exp_num
+
+            return {'prediction': pred_df,
+                    'metrics': metrics,
+                    'name': model_dir_rel}, exp_num
     return None, None
 
 
-def extract_data(tasks):
-    #subm_types = ["submission", "validation"]
-    # TODO: For now only validation
-    subm_types = ["validation"]
+def load_data():
     data_lists = {
         stype: {
             task: {
                 shot: {
-                    exp: [] for exp in exps
-                } for shot in shots
-            } for task in tasks
-        } for stype in subm_types
+                    exp: [] for exp in EXPS
+                } for shot in SHOTS
+            } for task in TASKS
+        } for stype in SUBM_TYPES
     }
 
     # Total iterations: tasks * shots * exps * model_dirs * subm_types
     total_iterations = 0
-    for task in tasks:
-        for shot in shots:
-            total_iterations += len(glob.glob(os.path.join(root_dir, task, shot, '*exp[1-5]*')))
+    for task in TASKS:
+        for shot in SHOTS:
+            total_iterations += len(glob.glob(os.path.join(ROOT_DIR, task, shot, '*exp[1-5]*')))
 
     print(f"Checking and extracting data for {colored(str(total_iterations), 'blue')} models:")
+
     with tqdm(total=total_iterations, bar_format="{l_bar}%s{bar}%s{r_bar}" % (Fore.BLUE, Fore.RESET)) as pbar:
-        for task in tasks:
-            for shot in shots:
-                path_pattern = os.path.join(root_dir, task, shot, '*exp[1-5]*')
+        for task in TASKS:
+            for shot in SHOTS:
+                path_pattern = os.path.join(ROOT_DIR, task, shot, '*exp[1-5]*')
+
                 for model_dir in glob.glob(path_pattern):
-                    for subm_type in subm_types:
-                        data, exp_num = check_and_extract_data(model_dir_abs=model_dir, subm_type=subm_type,
-                                                               task=task, shot=shot)
-                        if data and exp_num:
+                    for subm_type in SUBM_TYPES:
+                        data, exp_num = check_and_extract_data(model_dir_abs=model_dir,
+                                                               subm_type=subm_type,
+                                                               task=task,
+                                                               shot=shot)
+                        if data and exp_num and f"exp{exp_num}" in EXPS:
                             data_lists[subm_type][task][shot][f"exp{exp_num}"].append(data)
                     pbar.update(1)
-    # TODO: add submission
-    #return data_lists["submission"], data_lists["validation"]
-    return data_lists["validation"], data_lists["validation"]
+    return data_lists
 
 
 def create_submission_cfg_dump(top_k, total_models, strategy, root_report_dir):
@@ -575,136 +779,111 @@ def create_submission_cfg_dump(top_k, total_models, strategy, root_report_dir):
     return cfg_file_path
 
 
-def process_top_k(strategy, top_k, is_evaluation, task):
-    submission_type = 'submission'
-    if is_evaluation:
-        data = DATA_SUBMISSION
+def process_top_k(subm_type, task, shot, exp, strategy, top_k):
+    submission_dir = create_output_dir(subm_type=subm_type,
+                                       task=task, shot=shot, exp=exp,
+                                       strategy=strategy,
+                                       top_k=top_k)
+
+    model_runs = DATA[subm_type][task][shot][exp]
+    if len(model_runs) < 2:
+        print("Not enough runs")
+        return
+    out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{subm_type}.csv")
+
+    if strategy == "weighted":
+        selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
+                                                                        task=task, shot=shot, exp=exp,
+                                                                        top_k=top_k, out_path=out_path)
+    elif strategy == "expert-per-class":
+        selected_models, model_occurrences = expert_per_class_model_strategy(model_runs=model_runs,
+                                                                             task=task,
+                                                                             out_path=out_path)
+    elif strategy == "expert-per-task":
+        selected_models, model_occurrences = expert_per_task_model_strategy(model_runs=model_runs,
+                                                                            task=task,
+                                                                            out_path=out_path)
+    elif strategy == "weighted-exp-per-class":
+        selected_models, model_occurrences = weighted_exp_per_class_ensemble_strategy(model_runs=model_runs, top_k=top_k,
+                                                                                      task=task, out_path=out_path)
+    elif strategy == "log-weighted-exp-per-class":
+        selected_models, model_occurrences = weighted_exp_per_class_ensemble_strategy(model_runs=model_runs, top_k=top_k,
+                                                                                      task=task, out_path=out_path,
+                                                                                      scaling_func=log_scaling)
+    elif strategy == "sm-weighted-exp-per-class":
+        selected_models, model_occurrences = weighted_exp_per_class_ensemble_strategy(model_runs=model_runs, top_k=top_k,
+                                                                                      task=task, out_path=out_path,
+                                                                                      scaling_func=softmax)
+    elif strategy == "expo-weighted-exp-per-class":
+        selected_models, model_occurrences = weighted_exp_per_class_ensemble_strategy(model_runs=model_runs, top_k=top_k,
+                                                                                      task=task, out_path=out_path,
+                                                                                      scaling_func=exponential_scaling)
+    elif strategy == "pd-weighted":
+        selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                       task=task,
+                                                                                       out_path=out_path,
+                                                                                       top_k=top_k)
+    elif strategy == "pd-log-weighted":
+        selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                       task=task,
+                                                                                       out_path=out_path,
+                                                                                       top_k=top_k,
+                                                                                       log_scale=True)
+    elif strategy == "rank-based-weighted":
+        selected_models, model_occurrences = rank_based_weight_ensemble_strategy(model_runs=model_runs,
+                                                                                 task=task,
+                                                                                 out_path=out_path,
+                                                                                 top_k=top_k)
+    elif strategy == "diversity-weighted":
+        selected_models, model_occurrences = diversity_weighted_ensemble_strategy(model_runs=model_runs,
+                                                                                  task=task,
+                                                                                  out_path=out_path,
+                                                                                  top_k=top_k)
     else:
-        data = DATA_VALIDATION
-        submission_type = 'validation'
+        print(f"Invalid ensemble strategy {strategy}!")
+        exit()
 
-    submission_dir = create_output_dir(strategy=strategy,
-                                       top_k=top_k,
-                                       task=task,
-                                       is_evaluation=is_evaluation,
-                                       submission_type=submission_type)
-
-    # Perform Ensemble Strategy
-    for shot in shots:
-        for exp in exps:
-            model_runs = data[task][shot][exp]
-            if len(model_runs) < 2:
-                print("Not enough runs")
-                continue
-            out_path = os.path.join(submission_dir, "result", f"{exp}", f"{task}_{shot}_{submission_type}.csv")
-
-            if strategy == "weighted":
-                selected_models, model_occurrences = weighted_ensemble_strategy(model_runs=model_runs,
-                                                                                task=task, shot=shot, exp=exp,
-                                                                                top_k=top_k, out_path=out_path)
-            elif strategy == "expert":
-                selected_models, model_occurrences = expert_model_strategy(model_runs=model_runs,
-                                                                           task=task,
-                                                                           out_path=out_path)
-            elif strategy == "pd-weighted":
-                selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
-                                                                                               task=task,
-                                                                                               out_path=out_path,
-                                                                                               top_k=top_k)
-            elif strategy == "pd-log-weighted":
-                selected_models, model_occurrences = performance_diff_weight_ensemble_strategy(model_runs=model_runs,
-                                                                                               task=task,
-                                                                                               out_path=out_path,
-                                                                                               top_k=top_k,
-                                                                                               log_scale=True)
-            elif strategy == "rank-based-weighted":
-                selected_models, model_occurrences = rank_based_weight_ensemble_strategy(model_runs=model_runs,
-                                                                                         task=task,
-                                                                                         out_path=out_path,
-                                                                                         top_k=top_k)
-            elif strategy == "diversity-weighted":
-                selected_models, model_occurrences = diversity_weighted_ensemble_strategy(model_runs=model_runs,
-                                                                                          task=task,
-                                                                                          out_path=out_path,
-                                                                                          top_k=top_k)
-            else:
-                print("Invalid ensemble strategy!")
-                exit()
-
-            create_ensemble_report_file(task=task, shot=shot, exp=exp,
-                                        selected_models_for_classes=selected_models,
-                                        model_occurrences=model_occurrences,
-                                        root_report_dir=submission_dir)
-    if not is_evaluation:
+    if model_occurrences and submission_dir:
+        create_ensemble_report_file(task=task, shot=shot, exp=exp,
+                                    selected_models_for_classes=selected_models,
+                                    model_occurrences=model_occurrences,
+                                    root_report_dir=submission_dir)
+    if subm_type == "validation":
         create_submission_cfg_dump(top_k=top_k,
                                    strategy=strategy,
-                                   total_models=TOTAL_MODELS[task],
+                                   total_models=MODEL_COUNTS[subm_type][task][shot][exp]['total'],
                                    root_report_dir=submission_dir)
 
     return submission_dir
 
 
-def get_least_model_count(task):
-    total_models = 0
-    least_models = 100000
-    least_setting = ""
-    for shot in shots:
-        for exp in exps:
-            models_for_setting = len(DATA_SUBMISSION[task][shot][exp])
-            total_models += models_for_setting
-            if models_for_setting < least_models:
-                least_models = models_for_setting
-                least_setting = f"{task} {shot} {exp}"
-    return total_models, least_models, least_setting
+def extract_least_model_counts(task, subm_type, shot, exp):
+    if (task in MODEL_COUNTS[subm_type]
+            and shot in MODEL_COUNTS[subm_type][task]
+            and exp in MODEL_COUNTS[subm_type][task][shot]):
+        return
+
+    total_models = len(DATA[subm_type][task][shot][exp])
+    least_models = total_models
+
+    result_dict = {'top-k': least_models, 'total': total_models}
+    MODEL_COUNTS[subm_type][task][shot][exp] = result_dict
 
 
-def print_overall_model_summary(tasks):
-    """
-    Prints the overall model summary. Once is enough since the count for submission and validation is the same.
-    """
-    total_models = 0
-    least_models = 100000
-    most_models = -1
-    most_setting = ""
-    least_setting = ""
-    print(f"""\n============== Overall Model Summary ==============""")
-    for task in tasks:
-        for shot in shots:
-            for exp in exps:
-                models_for_setting = len(DATA_SUBMISSION[task][shot][exp])
-                print(f"| Setting: {task}/{shot}/{exp}\t>> Models: {models_for_setting}")
-                total_models += models_for_setting
-                if models_for_setting > most_models:
-                    most_models = models_for_setting
-                    most_setting = f"{task} {shot} {exp}"
-                if models_for_setting < least_models:
-                    least_models = models_for_setting
-                    least_setting = f"{task} {shot} {exp}"
-    print("===================================================")
-    print(f"| Total models: {total_models}")
-    print(f"| Most models: {most_models} {most_setting}")
-    print(f"| Least models: {least_models} {least_setting}")
-    print("===================================================")
-    return total_models
+def create_output_dir(subm_type, task, shot, exp, top_k, strategy):
+    base_path = "ensemble/gridsearch"
+    submission_dir = os.path.join(base_path, TIMESTAMP, subm_type, task, shot, exp, strategy)
 
-
-def create_output_dir(task, top_k, strategy, is_evaluation, submission_type):
-    # Create Output Directory
-    submission_dir = os.path.join("submissions", "evaluation", TIMESTAMP, task)
-
-    if is_evaluation:
-        success = f"Created {colored('Evaluation', 'red')} directory {submission_dir}"
+    if top_k:
+        submission_dir = os.path.join(submission_dir, f"top-{str(top_k)}")
     else:
-        if top_k:
-            submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, task, strategy, f"top-{str(top_k)}")
-        else:
-            submission_dir = os.path.join("ensemble", "gridsearch", TIMESTAMP, task, strategy)
-        success = f"Created {colored(task.capitalize(), 'blue')} {submission_type} directory at {submission_dir}"
+        submission_dir = os.path.join(submission_dir)
 
-    os.makedirs(submission_dir)
-    for exp in exps:
-        os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
-    print(success)
+    if not os.path.isdir(submission_dir):
+        os.makedirs(submission_dir)
+
+    os.makedirs(os.path.join(submission_dir, "result", f"{exp}"), exist_ok=True)
+
     return submission_dir
 
 
@@ -733,50 +912,108 @@ def select_task():
             print("Invalid choice. Please try again.\n")
 
 
-# def process_top_k(strategy, task, top_k=None):
-#     create_submission(strategy=strategy, top_k=top_k, is_evaluation=False, task=task)
+def process_strategy(subm_type, task, shot, exp, strategy):
+    print_colored(f"\t\t\t\tProcessing Strategy {strategy}", subm_type, 4)
+    top_k = MODEL_COUNTS[subm_type][task][shot][exp]['top-k']
+
+    top_k_values = [None] if "expert" in strategy else range(2, min(top_k, MAX_TOP_K))
+
+    for top_k in top_k_values:
+        process_top_k(subm_type=subm_type,
+                      task=task, shot=shot, exp=exp,
+                      strategy=strategy, top_k=top_k)
 
 
-def process_strategy(strategy, task, top_k_max):
-    if strategy != "expert":
-        for top_k in range(2, top_k_max):
-            process_top_k(strategy=strategy,
-                          top_k=top_k,
-                          task=task,
-                          is_evaluation=False)
-    else:
-        process_top_k(strategy=strategy,
-                      task=task,
-                      top_k=None,
-                      is_evaluation=False)
+def main():
+    # 1st Level Iteration
+    for subm_type in SUBM_TYPES:
+        print_colored(f"Processing Submission Type {subm_type.capitalize()}", subm_type, 0)
+
+        # 2nd Level Iteration
+        for task in TASKS:
+            print_colored(f"\tProcessing Task {task.capitalize()}", subm_type, 1)
+            for shot in SHOTS:
+                print_colored(f"\t\tProcessing Shot {shot}", subm_type, 2)
+                for exp in EXPS:
+                    print_colored(f"\t\t\tProcessing Experiment {exp}", subm_type, 3)
+                    extract_least_model_counts(subm_type=subm_type,
+                                               task=task,
+                                               shot=shot,
+                                               exp=exp)
+
+                    # 3rd Level Iteration
+                    for strategy in ENSEMBLE_STRATEGIES:
+                        process_strategy(subm_type=subm_type,
+                                         task=task, shot=shot, exp=exp,
+                                         strategy=strategy)
+
+        dir_path = os.path.join("ensemble/gridsearch", TIMESTAMP, subm_type)
+        print(f"Created directory {dir_path}")
 
 
-def process_task(task):
-    TOTAL_MODELS[task], top_k_max, top_k_max_setting = get_least_model_count(task=task)
-    for strategy in ENSEMBLE_STRATEGIES:
-        process_strategy(strategy=strategy, top_k_max=top_k_max, task=task)
-
-
-def main(tasks):
-    for task in tasks:
-        process_task(task)
-
-
-ENSEMBLE_STRATEGIES = ["expert",
+# ===================  DEFAULT PARAMS  =================
+ROOT_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
+SUBM_TYPES = ["validation", "submission"]
+TASKS = ["colon", "endo", "chest"]
+SHOTS = ["1-shot", "5-shot", "10-shot"]
+EXPS = ["exp1", "exp2", "exp3", "exp4", "exp5"]
+ENSEMBLE_STRATEGIES = ["expert-per-task",
+                       "expert-per-class",
                        "weighted",
+                       "weighted-exp-per-class",
+                       "log-weighted-exp-per-class",
+                       "sm-weighted-exp-per-class",
+                       "expo-weighted-exp-per-class",
                        "pd-weighted",
                        "pd-log-weighted",
                        "rank-based-weighted",
                        "diversity-weighted"]
+COLOR_GRADIENTS = {
+    "submission": {
+        0: "red",
+        1: "magenta",
+        2: "cyan",
+        3: "light_blue",
+        4: "light_magenta"
+    },
+    "validation": {
+        0: "blue",
+        1: "magenta",
+        2: "cyan",
+        3: "light_blue",
+        4: "light_magenta"
+    }
+}
+# ======================================================
 
 
 if __name__ == "__main__":
-    #selected_task = select_task()
-    task_list = ["colon", "endo", "chest"]
-    root_dir = "/scratch/medfm/medfm-challenge/work_dirs"
+    # 1st Level Params
+    #SUBM_TYPES = ["validation"]
 
-    TOTAL_MODELS = defaultdict()
+    # 2nd Level Params
+    #TASKS = ["endo"]
+    #SHOTS = ["1-shot"]
+    #EXPS = ["exp1"]
+
+    # 3rd Level Params
+    ENSEMBLE_STRATEGIES = ["expert-per-task",
+                           "expert-per-class",
+                           "weighted",
+                           "weighted-exp-per-class",
+                           "log-weighted-exp-per-class",
+                           "sm-weighted-exp-per-class",
+                           "expo-weighted-exp-per-class",
+                           "pd-weighted",
+                           "pd-log-weighted",
+                           "rank-based-weighted",
+                           #"diversity-weighted"
+                           ]
+
+    MODEL_COUNTS = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
-    DATA_SUBMISSION, DATA_VALIDATION = extract_data(tasks=task_list)
+    MAX_TOP_K = 10
+    DATA = load_data()
 
-    main(task_list)
+    main()

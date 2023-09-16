@@ -1,17 +1,16 @@
-For colon:
-When training new models:
-    1 log ACCURACY
-    2 save best ACCURACY
+[X] For colon:
+    When training new models:
+        1 log ACCURACY
+        2 save best ACCURACY
 
-For chest / endo:
-When training new models:
-    1 log mAP
-    2 Save best MAP
+[X] For chest / endo:
+    When training new models:
+        1 log mAP
+        2 Save best MAP
 
 In general:
-0 Softmax probabilities for colon in ensemble/submission
-1 Add copying of used configs to some directory in the submission directory (or add a report summarizing used models)
-2 Local validation:
+[X] Add copying of used configs to some directory in the submission directory (or add a report summarizing used models)
+[X] Local validation:
     - download annotations for validation data
     - make inferences on validation data => 2 csvs per run script
     - make sure infer_missing_predictions is adjusted, so it checks for the correct csv (not just any)
@@ -22,7 +21,25 @@ In general:
 
 [X] 1) Adjust submission.py so that the user can choose between "evaluation" and "validation" submission -> save results in a different folder
 [X] 2) Adjust submission.py so that a report is written for all the models used in the ensemble -> output to validation folder
-[ ] 3) Write a script that takes the submission csvs and compares them with the downloaded labelled validation data to compare scores (per exp, setting and overall)
+[X] 3) Write a script that takes the submission csvs and compares them with the downloaded labelled validation data to compare scores (per exp, setting and overall)
     - Input is path to the validation submission dir and path to the annotation file
     - We have prediction probabilities and labels -> calculate mAP and AUC (metrics)
-[ ] 4) In submission.py implement different "ensemble strategies" and assess those with the previously written script
+[X] 4) In submission.py implement different "ensemble strategies" and assess those with the previously written script
+
+
+[X] Recreate all Endo Submission and Validation prediction CSVs with pre-processed images
+[X] Check and align submission csv files
+[X] Softmax probabilities for colon in ensemble/submission -> almost no effect on validation set
+
+
+[-] Add Multiprocessing to task_submission to improve performance
+[ ] Add "expert-per-setting" ensemble strategy
+[ ] Extend ensemble gridsearch to search the best ensemble strategy among "tasks" & "n-shot" instead of only "tasks"
+[ ] Train more specific densenet configs on chest since they outperform all other architectures
+
+
+Meta-Classifier:
+[ ] Generate Train-Test Prediction CSV for all Models
+[ ] Generate Submission + Validation Prediction CSV for all Models
+[ ] Generate Performance JSON for all Models
+[ ] Test Training of Meta-Classifier for one specific Setting (endo/1-shot) or something similar
