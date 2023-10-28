@@ -27,7 +27,7 @@ def copy_specific_files(src_root, dst_root):
 
             # Copy specific files
             for model_dir in os.listdir(src_dir):
-                for filename in os.listdir(model_dir):
+                for filename in os.listdir(os.path.join(src_dir, model_dir)):
                     if (filename.endswith(".py") or
                             filename.endswith("submission.csv") or
                             filename.endswith("validation.csv") or
