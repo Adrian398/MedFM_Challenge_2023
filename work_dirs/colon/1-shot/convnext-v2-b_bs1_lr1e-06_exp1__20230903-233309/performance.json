@@ -1,0 +1,12 @@
+{
+    "multi-label/mAP": 88.19486999511719,
+    "accuracy/top1": 82.37257385253906,
+    "single-label/precision": 79.35346984863281,
+    "single-label/recall": 82.7472152709961,
+    "MAP_class1": 0.9161597231174385,
+    "MAP_class2": 0.8477377230808225,
+    "Aggregate": 88.62894747899833,
+    "AUC/AUC_multiclass": 89.06302264808362,
+    "AUC/AUC_class1": 89.06302264808362,
+    "AUC/AUC_class2": 89.06302264808362
+}

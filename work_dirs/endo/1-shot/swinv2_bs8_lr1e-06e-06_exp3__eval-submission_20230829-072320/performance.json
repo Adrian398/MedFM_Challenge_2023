@@ -1,0 +1,19 @@
+{
+    "multi-label/mAP": 16.115703582763672,
+    "multi-label/precision": 17.688152313232422,
+    "multi-label/recall": 21.156282424926758,
+    "multi-label/f1-score": 18.764995574951172,
+    "multi-label/precision_micro": 15.721392631530762,
+    "multi-label/recall_micro": 32.44353103637695,
+    "multi-label/f1-score_micro": 21.179624557495117,
+    "AUC/AUC_multilabe": 53.591065253765095,
+    "AUC/AUC_class1": 62.130939967227775,
+    "AUC/AUC_class2": 47.082325117226475,
+    "AUC/AUC_class3": 52.575497965303065,
+    "AUC/AUC_class4": 52.575497965303065,
+    "MAP_class1": 0.33179211404929587,
+    "MAP_class2": 0.22302591680384887,
+    "MAP_class3": 0.08981526511542116,
+    "MAP_class4": -0.0,
+    "Aggregate": 34.853448826489625
+}
