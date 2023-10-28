@@ -37,8 +37,9 @@ def copy_specific_files(src_root, dst_root):
 
                         os.makedirs(os.path.join(dst_dir, model_dir), exist_ok=True)
                         try:
-                            shutil.copy2(src_file, dst_file)
+                            result = shutil.copy2(src_file, dst_file)
                             print(f"Copied: {src_file} to {dst_file}")
+                            print(result)
                         except Exception as e:
                             print(f"Error copying {src_file} to {dst_file}. Error: {e}")
 
