@@ -23,6 +23,7 @@ def copy_specific_files(src_root, dst_root):
 
             # Create the destination directory if it doesn't exist
             os.makedirs(dst_dir, exist_ok=True)
+            print(dst_dir)
 
             # Copy specific files
             for filename in os.listdir(src_dir):
