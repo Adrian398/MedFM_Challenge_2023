@@ -607,8 +607,12 @@ if __name__ == "__main__":
     VAL_BASE_PATH = os.path.join(BASE_PATH, TIMESTAMP, 'validation')
 
     # ===== MAIN LOOP =====
+    # Creates results.json for each setting * strategy * top-k directory
     result = process_timestamp()
+
+    # Creates log.txt for each setting directory
     create_log_files(data=result)
 
+    # Creates ONE best_strategies_per_setting.json & ONE results.json in validation root dir
     best_strategies = compile_results_to_json()
     build_final_submission(strategies=best_strategies)
