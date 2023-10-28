@@ -24,6 +24,10 @@ def copy_specific_files(src_root, dst_root):
             # Create the destination directory if it doesn't exist
             os.makedirs(dst_dir, exist_ok=True)
 
+            if not os.path.isdir(dst_dir):
+                print(f"No dir like: {dst_dir}")
+                return
+
             # Copy specific files
             for model_dir in os.listdir(src_dir):
                 for filename in os.listdir(os.path.join(src_dir, model_dir)):
