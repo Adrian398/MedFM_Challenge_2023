@@ -33,8 +33,8 @@ def copy_specific_files(src_root, dst_root):
                             filename.endswith("validation.csv") or
                             filename == "performance.json"):
 
-                        src_file = os.path.join(src_dir, filename)
-                        dst_file = os.path.join(dst_dir, filename)
+                        src_file = os.path.join(src_dir, model_dir, filename)
+                        dst_file = os.path.join(dst_dir, model_dir, filename)
 
                         try:
                             shutil.copy2(src_file, dst_file)
