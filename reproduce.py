@@ -1,7 +1,7 @@
 import os
 import shutil
 
-WORK_DIR_SOURCE = "~/scratch/medfm/medfm-challenge/work_dirs"
+WORK_DIR_SOURCE = "/scratch/medfm/medfm-challenge/work_dirs"
 WORK_DIR_TARGET = "~/Git/medfm-challenge/work_dirs"
 
 
