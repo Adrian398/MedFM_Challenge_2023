@@ -23,7 +23,6 @@ def copy_specific_files(src_root, dst_root):
 
             # Create the destination directory if it doesn't exist
             os.makedirs(dst_dir, exist_ok=True)
-            print(dst_dir)
 
             # Copy specific files
             for model_dir in os.listdir(src_dir):
@@ -36,6 +35,7 @@ def copy_specific_files(src_root, dst_root):
                         src_file = os.path.join(src_dir, model_dir, filename)
                         dst_file = os.path.join(dst_dir, model_dir, filename)
 
+                        os.makedirs(os.path.join(dst_dir, model_dir), exist_ok=True)
                         try:
                             shutil.copy2(src_file, dst_file)
                             print(f"Copied: {src_file} to {dst_file}")
