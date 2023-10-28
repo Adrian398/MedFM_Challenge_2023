@@ -26,20 +26,21 @@ def copy_specific_files(src_root, dst_root):
             print(dst_dir)
 
             # Copy specific files
-            for filename in os.listdir(src_dir):
-                if (filename.endswith(".py") or
-                        filename.endswith("submission.csv") or
-                        filename.endswith("validation.csv") or
-                        filename == "performance.json"):
+            for model_dir in os.listdir(src_dir):
+                for filename in os.listdir(model_dir):
+                    if (filename.endswith(".py") or
+                            filename.endswith("submission.csv") or
+                            filename.endswith("validation.csv") or
+                            filename == "performance.json"):
 
-                    src_file = os.path.join(src_dir, filename)
-                    dst_file = os.path.join(dst_dir, filename)
+                        src_file = os.path.join(src_dir, filename)
+                        dst_file = os.path.join(dst_dir, filename)
 
-                    try:
-                        shutil.copy2(src_file, dst_file)
-                        print(f"Copied: {src_file} to {dst_file}")
-                    except Exception as e:
-                        print(f"Error copying {src_file} to {dst_file}. Error: {e}")
+                        try:
+                            shutil.copy2(src_file, dst_file)
+                            print(f"Copied: {src_file} to {dst_file}")
+                        except Exception as e:
+                            print(f"Error copying {src_file} to {dst_file}. Error: {e}")
 
 
 if __name__ == "__main__":
