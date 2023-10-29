@@ -85,8 +85,8 @@ def compute_pairwise_diversity(top_k_models):
 
                     if corr_idx != -1:
                         model_name = top_k_models[corr_idx]['name']
-                        model_path = os.path.join("/scratch/medfm/medfm-challenge/work_dirs", model_name)
-                        model_split = model_name.split("/")
+                        model_path = os.path.join("scratch","medfm","medfm-challenge","work_dirs", model_name)
+                        model_split = model_name.split(os.sep)
                         task = model_split[0]
                         shot = model_split[1]
                         corrupted_file = os.path.join(model_path, f"{task}_{shot}_submission.csv")
@@ -710,7 +710,7 @@ def get_gt_df(gt_dir, task):
 
 
 def check_and_extract_data(model_dir_abs, subm_type, task, shot):
-    model_dir_rel = model_dir_abs.split('work_dirs/')[1]
+    model_dir_rel = model_dir_abs.split('work_dirs')[1][1:]
 
     csv_path = os.path.join(model_dir_abs, f"{task}_{shot}_{subm_type}.csv")
     csv_files = glob.glob(csv_path)
@@ -871,7 +871,7 @@ def extract_least_model_counts(task, subm_type, shot, exp):
 
 
 def create_output_dir(subm_type, task, shot, exp, top_k, strategy):
-    base_path = "ensemble/gridsearch"
+    base_path = os.path.join("ensemble", "gridsearch")
     submission_dir = os.path.join(base_path, TIMESTAMP, subm_type, task, shot, exp, strategy)
 
     if top_k:
@@ -947,12 +947,14 @@ def main():
                                          task=task, shot=shot, exp=exp,
                                          strategy=strategy)
 
-        dir_path = os.path.join("ensemble/gridsearch", TIMESTAMP, subm_type)
+        dir_path = os.path.join("ensemble","gridsearch", TIMESTAMP, subm_type)
         print(f"Created directory {dir_path}")
 
 
 # ===================  DEFAULT PARAMS  =================
-ROOT_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
+#ROOT_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
+ROOT_DIR = "work_dirs"
+
 SUBM_TYPES = ["validation", "submission"]
 TASKS = ["colon", "endo", "chest"]
 SHOTS = ["1-shot", "5-shot", "10-shot"]
@@ -1013,7 +1015,7 @@ if __name__ == "__main__":
     MODEL_COUNTS = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
 
     TIMESTAMP = datetime.now().strftime("%d-%m_%H-%M-%S")
-    MAX_TOP_K = 10
+    MAX_TOP_K = 20
     DATA = load_data()
 
     main()

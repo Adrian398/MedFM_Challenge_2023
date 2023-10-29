@@ -42,7 +42,7 @@ def get_newest_timestamp(base_path):
 
 
 def create_subm_target_dir():
-    submission_target_path = os.path.join("submissions/evaluation", TIMESTAMP)
+    submission_target_path = os.path.join("submissions", "evaluation", TIMESTAMP)
 
     if not os.path.isdir(submission_target_path):
         os.makedirs(submission_target_path)
@@ -154,7 +154,6 @@ def get_file_by_keyword(directory, keyword, file_extension=None):
     Returns:
     - str/None: The path of the unique file, or None if there's no such file or if multiple such files exist.
     """
-
     # Search pattern only based on the file extension (if present)
     search_pattern = os.path.join(directory, f"*.{file_extension}" if file_extension else "*")
 
@@ -279,7 +278,7 @@ def build_log_string(data, task):
 
     top_k_str = str(top_k) if top_k is not None else "None"
     model_cnt = str(model_cnt) if model_cnt is not None else "None"
-    prediction_dir = prediction_dir.split(f"{task}/")[1]
+    prediction_dir = prediction_dir.split(f"{task}{os.sep}")[1]
 
     return f"{model_cnt:<15} {strategy:<35} {top_k_str:<10} {prediction_dir:<55} {value_string}\n"
 
@@ -574,9 +573,11 @@ def load_best_strategies_from_json(path):
 
 
 # ===================  DEFAULT PARAMS  ====================================================
-BASE_PATH = "ensemble/gridsearch"
-GT_DIR = "/scratch/medfm/medfm-challenge/data/MedFMC_trainval_annotation/"
-WORK_DIR = "/scratch/medfm/medfm-challenge/work_dirs"
+BASE_PATH = os.path.join("ensemble", "gridsearch")
+GT_DIR = os.path.join("data", "MedFMC_trainval_annotation")
+#GT_DIR = f"{os.sep}scratch{os.sep}medfm{os.sep}medfm-challenge{os.sep}data{os.sep}MedFMC_trainval_annotation{os.sep}"
+WORK_DIR = "work_dirs"
+#WORK_DIR = f"{os.sep}scratch{os.sep}medfm{os.sep}medfm-challenge{os.sep}work_dirs"
 TASKS = ["colon", "endo", "chest"]
 SHOTS = ["1-shot", "5-shot", "10-shot"]
 EXPS = ["exp1", "exp2", "exp3", "exp4", "exp5"]
