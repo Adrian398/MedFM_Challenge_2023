@@ -103,8 +103,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-data/
-data
 .vscode
 .idea
 .DS_Store
@@ -113,7 +111,6 @@ data
 *.pkl
 *.pkl.json
 *.log.json
-work_dir/
 
 # Pytorch
 *.pth
@@ -125,4 +122,3 @@ vis/
 analysis/*
 pretrain/*
 *.dist_test
-work_dirs/
