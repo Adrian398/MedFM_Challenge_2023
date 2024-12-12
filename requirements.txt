@@ -1,4 +1,4 @@
---extra-index-url https://download.pytorch.org/whl/cu117
+--extra-index-url https://download.pytorch.org/whl/cu121
 torch
 torchvision
 torchaudio
@@ -14,3 +14,6 @@ PyYAML
 pandas
 Pillow
 openmim
+
+colorama
+termcolor
