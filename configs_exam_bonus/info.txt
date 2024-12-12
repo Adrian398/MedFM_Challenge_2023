@@ -1,0 +1,26 @@
+Report for: Colon\1-shot\exp1
+Model: resnet101_bs8_lr1e-06e-06_exp1__bs_test_20230905-222850        AUC-Acc: 89.1039  AUC: 91.3450  Acc: 86.8629
+
+Report for: Colon\5-shot\exp1
+Model: resnet101_bs2_lr1e-06e-06_exp1__bs_test_no_jitter20230906-102337   AUC-Acc: 94.6714  AUC: 97.0794  Acc: 92.2634
+
+Report for: Colon\10-shot\exp1
+Model: swinv2_bs8_lr1e-06e-06_exp1__eval-submission_20230828-223206   AUC-Acc: 97.0523  AUC: 99.2624  Acc: 94.8422
+
+Report for: Endo\1-shot\exp1
+Model: swinv2_bs8_lr1e-06e-06_exp1__exp+seed_test_20230901-052642     AUC-mAP: 43.7929  AUC: 63.7195  mAP: 23.8663
+
+Report for: Endo\5-shot\exp1
+Model: swinv2_bs8_lr1e-06e-06_exp1__eval-submission_20230829-080718   AUC-mAP: 43.8200  AUC: 64.3946  mAP: 23.2454
+
+Report for: Endo\10-shot\exp1
+Model: swinv2_bs8_lr1e-06e-06_exp1__eval-submission_20230829-032935   AUC-mAP: 50.5188  AUC: 70.3814  mAP: 30.6562
+
+Report for: Chest\1-shot\exp1
+Model: densenet121_bs4_lr0.0001_exp1_densenet_tests20230912-100937   AUC-mAP: 42.4915  AUC: 63.0588  mAP: 21.9241
+
+Report for: Chest\5-shot\exp1
+Model: clip-b_1_bs1_lr0.001_5-shot_chest_exp1_ensemble_soup_test20230904-164156   AUC-mAP: 51.0260  AUC: 68.7545  mAP: 33.2974
+
+Report for: Chest\10-shot\exp1
+Model: swinv2_bs2_lr1e-06_exp1_seed_search20230914-025639               AUC-mAP: 46.5914  AUC: 67.7406  mAP: 25.4423
